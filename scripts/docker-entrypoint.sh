@@ -50,6 +50,12 @@ shift
 # recreate working directories
 /app/ecs/scripts/create-dirs.sh /app
 
+# Import GPG keys into /app/gpg
+if [ -z "$(ls -A /app/ecs-gpg)" ]; then
+    echo "$ECS_VAULT_ENCRYPT" | gpg --homedir /app/ecs-gpg --batch --yes --import --
+    echo "$ECS_VAULT_SIGN" | gpg --homedir /app/ecs-gpg --batch --yes --import --
+fi
+
 if [[ "$cmd" =~ ^(worker|beat|smtpd|migrate|run|_prepare)$ ]]; then
     # needs running as app user
     exec gosu app $0 _user $cmd "$@"
