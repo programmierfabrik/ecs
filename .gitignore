@@ -7,4 +7,5 @@ static/CACHE/
 static/help/
 celerybeat-schedule
 celerybeat.pid
-seed.iso
+
+/venv

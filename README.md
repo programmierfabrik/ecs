@@ -10,23 +10,23 @@ The ethic commission system (ECS) is an open-source webservice supporting clinic
 
 The devserver requires at least 10GB Harddisk Space and 1,5GB RAM.
 
-### using Vagrant
-
-If you use vagrant, clone this repository to your local machine, add [vagrant-password-growroot.iso](https://raw.githubusercontent.com/ecs-org/cidata-seed/master/vagrant-password-growroot.iso) as `seed.iso` inside the root directory of the repository and execute `vagrant up`.
-
-### Installing the devserver to an empty xenial vm
-
-+ install an empty ubuntu xenial server/cloud image from: [Ubunu Xenial Cloud Images](http://cloud-images.ubuntu.com/xenial/current/)
-
-+ configure ssh access to the cloud image by copying [vagrant-password-growroot.iso](https://raw.githubusercontent.com/ecs-org/cidata-seed/master/vagrant-password-growroot.iso) as `seed.iso`
-
-    + to use your own ssh key, build a new cidata iso by using: [github.com/ecs-org/cidata-seed](https://github.com/ecs-org/cidata-seed/)
-
-+ login via ssh and execute
+Needed packages
 
 ```
-curl https://raw.githubusercontent.com/ecs-org/ecs/master/scripts/bootstrap-devserver.sh > /tmp/bootstrap.sh
-chmod +x /tmp/bootstrap.sh; /tmp/bootstrap.sh --yes
+python3
+python3-dev
+python3-venv
+python3-pip
+libxml2-dev
+libxslt1-dev
+libpq-dev
+libmemcached-dev
+```
+
+```bash
+python3 -m venv ./venv
+source ./venv/bin/activate
+pip install cffi==1.13.2
 ```
 
 ## Using the devserver

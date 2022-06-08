@@ -19,7 +19,7 @@ if os.getenv('DATABASE_URL'):
     url = urlparse(os.getenv('DATABASE_URL'))
     DATABASES['default'] = {
         'NAME': url.path[1:] or '',
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'USER': url.username,
         'PASSWORD': url.password,
         'HOST': url.hostname or '',
@@ -28,7 +28,7 @@ if os.getenv('DATABASE_URL'):
     }
 else:
     DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'ecs',
         'ATOMIC_REQUESTS': True,
     }
