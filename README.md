@@ -13,20 +13,21 @@ The devserver requires at least 10GB Harddisk Space and 1,5GB RAM.
 Needed packages
 
 ```
-python3
-python3-dev
-python3-venv
-python3-pip
-libxml2-dev
-libxslt1-dev
-libpq-dev
-libmemcached-dev
+apt-get install python3 \
+    python3-venv \
+    python3-pip \
+    libxml2-dev \
+    libxslt1-dev \
+    libpq-dev \
+    libmemcached-dev
 ```
 
 ```bash
 python3 -m venv ./venv
-source ./venv/bin/activate
+. ./venv/bin/activate
+python -m pip install pip==20.3.4
 pip install cffi==1.13.2
+pip install -r requirements/all.freeze
 ```
 
 ## Using the devserver
