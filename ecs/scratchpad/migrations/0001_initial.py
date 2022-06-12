@@ -19,8 +19,8 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('modified_at', models.DateTimeField(auto_now=True)),
                 ('text', models.TextField(null=True, blank=True)),
-                ('owner', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
-                ('submission', models.ForeignKey(to='core.Submission', null=True)),
+                ('owner', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.PROTECT)),
+                ('submission', models.ForeignKey(to='core.Submission', null=True, on_delete=models.PROTECT)),
             ],
             options={
             },

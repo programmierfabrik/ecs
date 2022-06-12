@@ -17,19 +17,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='checklist',
             name='pdf_document',
-            field=models.OneToOneField(related_name='checklist', null=True, to='documents.Document'),
+            field=models.OneToOneField(related_name='checklist', null=True, to='documents.Document', on_delete=models.PROTECT),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='checklist',
             name='submission',
-            field=models.ForeignKey(related_name='checklists', to='core.Submission', null=True),
+            field=models.ForeignKey(related_name='checklists', to='core.Submission', null=True, on_delete=models.PROTECT),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='checklist',
             name='user',
-            field=models.ForeignKey(to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.PROTECT),
             preserve_default=True,
         ),
         migrations.AlterUniqueTogether(

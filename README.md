@@ -25,9 +25,8 @@ apt-get install python3 \
 ```bash
 python3 -m venv ./venv
 . ./venv/bin/activate
-python -m pip install pip==20.3.4
 pip install cffi==1.13.2
-pip install -r requirements/all.freeze
+pip install -r requirements/django2.all
 ```
 
 ## Using the devserver

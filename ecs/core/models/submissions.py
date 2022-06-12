@@ -48,13 +48,13 @@ class Submission(models.Model):
     is_finished = models.BooleanField(default=False)
     is_expired = models.BooleanField(default=False)
 
-    presenter = models.ForeignKey(User, related_name='presented_submissions')
-    susar_presenter = models.ForeignKey(User, related_name='susar_presented_submissions')
+    presenter = models.ForeignKey(User, related_name='presented_submissions', on_delete=models.PROTECT)
+    susar_presenter = models.ForeignKey(User, related_name='susar_presented_submissions', on_delete=models.PROTECT)
 
     # denormalization
-    current_submission_form = models.OneToOneField('core.SubmissionForm', null=True, related_name='current_for_submission')
-    current_published_vote = models.OneToOneField('votes.Vote', null=True, related_name='_currently_published_for')
-    current_pending_vote = models.OneToOneField('votes.Vote', null=True, related_name='_currently_pending_for')
+    current_submission_form = models.OneToOneField('core.SubmissionForm', null=True, related_name='current_for_submission', on_delete=models.PROTECT)
+    current_published_vote = models.OneToOneField('votes.Vote', null=True, related_name='_currently_published_for', on_delete=models.PROTECT)
+    current_pending_vote = models.OneToOneField('votes.Vote', null=True, related_name='_currently_pending_for', on_delete=models.PROTECT)
 
     objects = SubmissionManager()
     unfiltered = SubmissionQuerySet.as_manager()
@@ -245,9 +245,9 @@ class MySubmission(models.Model):
 
 
 class SubmissionForm(models.Model):
-    submission = models.ForeignKey('core.Submission', related_name="forms")
+    submission = models.ForeignKey('core.Submission', related_name="forms", on_delete=models.PROTECT)
     ethics_commissions = models.ManyToManyField('core.EthicsCommission', related_name='submission_forms', through='Investigator')
-    pdf_document = models.OneToOneField(Document, related_name="submission_form", null=True)
+    pdf_document = models.OneToOneField(Document, related_name="submission_form", null=True, on_delete=models.PROTECT)
     documents = models.ManyToManyField('documents.Document', related_name='submission_forms')
     is_notification_update = models.BooleanField(default=False)
     is_transient = models.BooleanField(default=False)
@@ -256,11 +256,11 @@ class SubmissionForm(models.Model):
     project_title = models.TextField()
     eudract_number = models.CharField(max_length=60, null=True, blank=True)
     submission_type = models.SmallIntegerField(null=True, blank=True, choices=SUBMISSION_TYPE_CHOICES, default=SUBMISSION_TYPE_MONOCENTRIC)
-    presenter = models.ForeignKey(User, related_name='presented_submission_forms')
+    presenter = models.ForeignKey(User, related_name='presented_submission_forms', on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
     
     # denormalization
-    primary_investigator = models.OneToOneField('core.Investigator', null=True)
+    primary_investigator = models.OneToOneField('core.Investigator', null=True, on_delete=models.PROTECT)
 
     objects = AuthorizationManager()
     unfiltered = models.Manager()
@@ -268,7 +268,7 @@ class SubmissionForm(models.Model):
     # 1.4 (via self.documents)
 
     # 1.5
-    sponsor = models.ForeignKey(User, null=True, related_name="sponsored_submission_forms")
+    sponsor = models.ForeignKey(User, null=True, related_name="sponsored_submission_forms", on_delete=models.PROTECT)
     sponsor_name = models.CharField(max_length=100, null=True)
     sponsor_contact = NameField(required=('gender', 'first_name', 'last_name',))
     sponsor_address = models.CharField(max_length=60, null=True)
@@ -460,7 +460,7 @@ class SubmissionForm(models.Model):
     study_plan_dataprotection_anonalgoritm = models.TextField(null=True, blank=True)
     
     # 9.x
-    submitter = models.ForeignKey(User, null=True, related_name='submitted_submission_forms')
+    submitter = models.ForeignKey(User, null=True, related_name='submitted_submission_forms', on_delete=models.PROTECT)
     submitter_contact = NameField(required=('gender', 'first_name', 'last_name',))
     submitter_email = models.EmailField(blank=False, null=True)
     submitter_organisation = models.CharField(max_length=180)
@@ -748,11 +748,11 @@ def _post_submission_form_save(**kwargs):
 
 
 class Investigator(models.Model):
-    submission_form = models.ForeignKey(SubmissionForm, related_name='investigators')
-    ethics_commission = models.ForeignKey('core.EthicsCommission', related_name='investigators')
+    submission_form = models.ForeignKey(SubmissionForm, related_name='investigators', on_delete=models.PROTECT)
+    ethics_commission = models.ForeignKey('core.EthicsCommission', related_name='investigators', on_delete=models.PROTECT)
     main = models.BooleanField(default=True, blank=True)
 
-    user = models.ForeignKey(User, null=True, related_name='investigations')
+    user = models.ForeignKey(User, null=True, related_name='investigations', on_delete=models.PROTECT)
     contact = NameField(required=('gender', 'first_name', 'last_name',))
     organisation = models.CharField(max_length=80)
     phone = models.CharField(max_length=30, blank=True)
@@ -797,7 +797,7 @@ def _post_investigator_save(sender, **kwargs):
     
 
 class InvestigatorEmployee(models.Model):
-    investigator = models.ForeignKey(Investigator, related_name='employees')
+    investigator = models.ForeignKey(Investigator, related_name='employees', on_delete=models.PROTECT)
 
     sex = models.CharField(max_length=1, choices=[("m", ugettext_lazy("Mr")), ("f", ugettext_lazy("Ms"))])
     title = models.CharField(max_length=40, blank=True)
@@ -821,7 +821,7 @@ class InvestigatorEmployee(models.Model):
 
 # 6.1 + 6.2
 class Measure(models.Model):
-    submission_form = models.ForeignKey(SubmissionForm, related_name='measures')
+    submission_form = models.ForeignKey(SubmissionForm, related_name='measures', on_delete=models.PROTECT)
     
     category = models.CharField(max_length=3, choices=[('6.1', ugettext_lazy("only study-related")), ('6.2', ugettext_lazy("for routine purposes"))])
     type = models.CharField(max_length=150)
@@ -835,7 +835,7 @@ class Measure(models.Model):
 
 # 3b
 class NonTestedUsedDrug(models.Model):
-    submission_form = models.ForeignKey(SubmissionForm)
+    submission_form = models.ForeignKey(SubmissionForm, on_delete=models.PROTECT)
 
     generic_name = models.CharField(max_length=40)
     preparation_form = models.CharField(max_length=40)
@@ -846,9 +846,9 @@ class NonTestedUsedDrug(models.Model):
 
 
 class ParticipatingCenterNonSubject(models.Model):
-    submission_form = models.ForeignKey(SubmissionForm)
+    submission_form = models.ForeignKey(SubmissionForm, on_delete=models.PROTECT)
     name = models.CharField(max_length=60)
-    ethics_commission = models.ForeignKey('core.EthicsCommission')
+    ethics_commission = models.ForeignKey('core.EthicsCommission', on_delete=models.PROTECT)
     investigator_name = models.CharField(max_length=60, blank=True)
 
     class Meta:
@@ -857,7 +857,7 @@ class ParticipatingCenterNonSubject(models.Model):
 
 # 2.6.2 + 2.7
 class ForeignParticipatingCenter(models.Model):
-    submission_form = models.ForeignKey(SubmissionForm)
+    submission_form = models.ForeignKey(SubmissionForm, on_delete=models.PROTECT)
     name = models.CharField(max_length=60)
     investigator_name = models.CharField(max_length=60, blank=True)
 
@@ -866,8 +866,8 @@ class ForeignParticipatingCenter(models.Model):
 
 
 class TemporaryAuthorization(models.Model):
-    submission = models.ForeignKey(Submission, related_name='temp_auth')
-    user = models.ForeignKey(User, related_name='temp_submission_auth')
+    submission = models.ForeignKey(Submission, related_name='temp_auth', on_delete=models.PROTECT)
+    user = models.ForeignKey(User, related_name='temp_submission_auth', on_delete=models.PROTECT)
     start = models.DateTimeField()
     end = models.DateTimeField()
 

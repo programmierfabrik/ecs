@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='message',
             name='in_reply_to',
-            field=models.ForeignKey(related_name='is_replied_in', null=True, default=None, to='communication.Message'),
+            field=models.ForeignKey(related_name='is_replied_in', null=True, default=None, to='communication.Message', on_delete=models.PROTECT),
         ),
         migrations.AddField(
             model_name='message',

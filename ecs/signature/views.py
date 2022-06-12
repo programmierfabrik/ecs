@@ -10,7 +10,7 @@ from tempfile import TemporaryFile
 
 from django.conf import settings
 from django.http import HttpResponse
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from django.shortcuts import render, redirect

@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='participation',
             name='task',
-            field=models.ForeignKey(to='tasks.Task', null=True),
+            field=models.ForeignKey(to='tasks.Task', null=True, on_delete=models.PROTECT),
         ),
     ]

@@ -129,7 +129,7 @@ TEMPLATES = [
     },
 ]
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -147,6 +147,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 INSTALLED_APPS = (
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -165,25 +166,25 @@ INSTALLED_APPS = (
     'ecs.core',
     'ecs.checklists',
     'ecs.votes',
-    'ecs.utils',
+    # 'ecs.utils',
     'ecs.docstash',
-    'ecs.userswitcher',
+    # 'ecs.userswitcher',
     'ecs.workflow',
     'ecs.tasks',
     'ecs.communication',
-    'ecs.dashboard',
-    'ecs.bootstrap',
+    # 'ecs.dashboard',
+    # 'ecs.bootstrap',
     'ecs.billing',
     'ecs.users',
     'ecs.documents',
     'ecs.meetings',
     'ecs.notifications',
-    'ecs.authorization',
-    'ecs.integration',
+    # 'ecs.authorization',
+    # 'ecs.integration',
     'ecs.boilerplate',
     'ecs.scratchpad',
     'ecs.pki',
-    'ecs.statistics',
+    # 'ecs.statistics',
     'ecs.tags',
 )
 
@@ -397,7 +398,7 @@ if 'ECS_USERSWITCHER_ENABLED' not in locals():
     ECS_USERSWITCHER_ENABLED = True
 
 if not ECS_USERSWITCHER_ENABLED:
-    MIDDLEWARE_CLASSES = tuple(item for item in MIDDLEWARE_CLASSES if item != 'ecs.userswitcher.middleware.UserSwitcherMiddleware')
+    MIDDLEWARE = tuple(item for item in MIDDLEWARE if item != 'ecs.userswitcher.middleware.UserSwitcherMiddleware')
 
 # django rosetta activation
 if 'ECS_WORDING' in locals() and ECS_WORDING:

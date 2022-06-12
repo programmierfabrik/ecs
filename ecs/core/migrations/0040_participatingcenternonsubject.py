@@ -17,8 +17,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(serialize=False, auto_created=True, verbose_name='ID', primary_key=True)),
                 ('name', models.CharField(max_length=60)),
                 ('investigator_name', models.CharField(blank=True, max_length=60)),
-                ('ethics_commission', models.ForeignKey(to='core.EthicsCommission')),
-                ('submission_form', models.ForeignKey(to='core.SubmissionForm')),
+                ('ethics_commission', models.ForeignKey(to='core.EthicsCommission', on_delete=models.PROTECT)),
+                ('submission_form', models.ForeignKey(to='core.SubmissionForm', on_delete=models.PROTECT)),
             ],
             options={
                 'ordering': ['id'],

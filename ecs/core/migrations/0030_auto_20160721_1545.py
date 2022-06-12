@@ -23,12 +23,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='submission',
             name='current_pending_vote',
-            field=models.OneToOneField(null=True, to='votes.Vote', related_name='_currently_pending_for'),
+            field=models.OneToOneField(null=True, to='votes.Vote', related_name='_currently_pending_for', on_delete=models.PROTECT),
         ),
         migrations.AddField(
             model_name='submission',
             name='current_published_vote',
-            field=models.OneToOneField(null=True, to='votes.Vote', related_name='_currently_published_for'),
+            field=models.OneToOneField(null=True, to='votes.Vote', related_name='_currently_published_for', on_delete=models.PROTECT),
         ),
         migrations.RunSQL('''
             set constraints all immediate;

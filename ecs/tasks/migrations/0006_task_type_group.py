@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='tasktype',
             name='group',
-            field=models.ForeignKey(null=True, related_name='task_types', to='auth.Group'),
+            field=models.ForeignKey(null=True, related_name='task_types', to='auth.Group', on_delete=models.PROTECT),
         ),
         migrations.RunSQL('''
             update tasks_tasktype

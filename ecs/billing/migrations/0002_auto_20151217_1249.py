@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='invoice',
             name='document',
-            field=models.OneToOneField(related_name='invoice', null=True, to='documents.Document'),
+            field=models.OneToOneField(related_name='invoice', null=True, to='documents.Document', on_delete=models.PROTECT),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -34,13 +34,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='checklistpayment',
             name='document',
-            field=models.OneToOneField(related_name='checklist_payment', null=True, to='documents.Document'),
+            field=models.OneToOneField(related_name='checklist_payment', null=True, to='documents.Document', on_delete=models.PROTECT),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='checklistbillingstate',
             name='checklist',
-            field=models.OneToOneField(related_name='billing_state', null=True, to='checklists.Checklist'),
+            field=models.OneToOneField(related_name='billing_state', null=True, to='checklists.Checklist', on_delete=models.PROTECT),
             preserve_default=True,
         ),
     ]

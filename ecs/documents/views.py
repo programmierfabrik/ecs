@@ -4,7 +4,7 @@ from uuid import uuid4
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import FileResponse, Http404
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone

@@ -6,7 +6,7 @@ import urllib.request, urllib.parse, urllib.error
 from django.conf import settings
 from django.core.cache import cache
 from django.http import Http404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 def _total_seconds(td): # work around python < 2.7
     return float(td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6

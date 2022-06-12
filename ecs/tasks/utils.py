@@ -3,7 +3,7 @@ from functools import wraps
 from django.shortcuts import redirect
 from django.http import QueryDict
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.exceptions import PermissionDenied
 
 from ecs.tasks.models import Task

@@ -358,8 +358,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('start', models.DateTimeField()),
                 ('end', models.DateTimeField()),
-                ('submission', models.ForeignKey(related_name='temp_auth', to='core.Submission')),
-                ('user', models.ForeignKey(related_name='temp_submission_auth', to=settings.AUTH_USER_MODEL)),
+                ('submission', models.ForeignKey(related_name='temp_auth', to='core.Submission', on_delete=models.PROTECT)),
+                ('user', models.ForeignKey(related_name='temp_submission_auth', to=settings.AUTH_USER_MODEL, on_delete=models.PROTECT)),
             ],
             options={
             },

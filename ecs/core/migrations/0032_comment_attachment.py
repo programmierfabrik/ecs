@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='comment',
             name='attachment',
-            field=models.ForeignKey(null=True, to='documents.Document'),
+            field=models.ForeignKey(null=True, to='documents.Document', on_delete=models.PROTECT),
         ),
     ]

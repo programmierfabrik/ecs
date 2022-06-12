@@ -1,8 +1,9 @@
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.translation import ugettext as _
 from django.dispatch import receiver
 
-from ecs.workflow import Activity, guard, register
+from ecs.workflow import register
+from ecs.workflow.controllers import Activity, guard
 from ecs.workflow.patterns import Generic
 from ecs.meetings.signals import on_meeting_start, on_meeting_end
 from ecs.notifications.models import (

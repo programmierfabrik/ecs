@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q, Prefetch
 from django.db.models.expressions import RawSQL
 from django.core.paginator import Paginator, EmptyPage

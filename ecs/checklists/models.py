@@ -22,7 +22,7 @@ class ChecklistBlueprint(models.Model):
         return _(self.name)
 
 class ChecklistQuestion(models.Model):
-    blueprint = models.ForeignKey(ChecklistBlueprint, related_name='questions')
+    blueprint = models.ForeignKey(ChecklistBlueprint, related_name='questions', on_delete=models.PROTECT)
     number = models.CharField(max_length=5, db_index=True)
     index = models.IntegerField(db_index=True)
     text = models.CharField(max_length=200)
@@ -48,12 +48,12 @@ CHECKLIST_STATUS_CHOICES = (
 )
 
 class Checklist(models.Model):
-    blueprint = models.ForeignKey(ChecklistBlueprint, related_name='checklists')
-    submission = models.ForeignKey('core.Submission', related_name='checklists', null=True)
-    user = models.ForeignKey('auth.user')
+    blueprint = models.ForeignKey(ChecklistBlueprint, related_name='checklists', on_delete=models.PROTECT)
+    submission = models.ForeignKey('core.Submission', related_name='checklists', null=True, on_delete=models.PROTECT)
+    user = models.ForeignKey('auth.user', on_delete=models.PROTECT)
     status = models.CharField(max_length=15, default='new', choices=CHECKLIST_STATUS_CHOICES)
-    pdf_document = models.OneToOneField(Document, related_name="checklist", null=True)
-    last_edited_by = models.ForeignKey('auth.user', related_name='edited_checklists')
+    pdf_document = models.OneToOneField(Document, related_name="checklist", null=True, on_delete=models.PROTECT)
+    last_edited_by = models.ForeignKey('auth.user', related_name='edited_checklists', on_delete=models.PROTECT)
 
     objects = AuthorizationManager()
     unfiltered = models.Manager()
@@ -144,8 +144,8 @@ class Checklist(models.Model):
 
 @reversion.register(fields=('answer', 'comment'))
 class ChecklistAnswer(models.Model):
-    checklist = models.ForeignKey(Checklist, related_name='answers')
-    question = models.ForeignKey(ChecklistQuestion)
+    checklist = models.ForeignKey(Checklist, related_name='answers', on_delete=models.PROTECT)
+    question = models.ForeignKey(ChecklistQuestion, on_delete=models.PROTECT)
     answer = models.NullBooleanField(null=True)
     comment = models.TextField(null=True, blank=True)
 

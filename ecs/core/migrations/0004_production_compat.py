@@ -192,7 +192,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0003_auto_20151217_1249'),
-        ('reversion', '0001_initial'),
         ('sessions', '0001_initial'),
         ('documents', '0002_production_compat'),
         ('boilerplate', '0002_production_compat'),

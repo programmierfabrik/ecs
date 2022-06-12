@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, Http404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.contenttypes.models import ContentType
 
 from ecs.votes.models import Vote

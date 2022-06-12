@@ -122,9 +122,9 @@ class TimetableMetrics(object):
         
 
 class AssignedMedicalCategory(models.Model):
-    category = models.ForeignKey('core.MedicalCategory')
-    specialist = models.ForeignKey(User, null=True, blank=True, related_name='assigned_medical_categories')
-    meeting = models.ForeignKey('meetings.Meeting', related_name='medical_categories')
+    category = models.ForeignKey('core.MedicalCategory', on_delete=models.PROTECT)
+    specialist = models.ForeignKey(User, null=True, blank=True, related_name='assigned_medical_categories', on_delete=models.PROTECT)
+    meeting = models.ForeignKey('meetings.Meeting', related_name='medical_categories', on_delete=models.PROTECT)
 
     class Meta:
         unique_together = (('category', 'meeting'),)
@@ -204,7 +204,7 @@ class Meeting(models.Model):
     documents_zip = models.ForeignKey(Document, related_name='zip_for_meeting',
         null=True, on_delete=models.SET_NULL)
     expedited_reviewer_invitation_sent_at = models.DateTimeField(null=True)
-    expert_assignment_user = models.ForeignKey('auth.User', null=True)
+    expert_assignment_user = models.ForeignKey('auth.User', null=True, on_delete=models.PROTECT)
 
     objects = MeetingManager()
     unfiltered = models.Manager()
@@ -584,12 +584,12 @@ class Meeting(models.Model):
 
 @reversion.register(fields=('text',))
 class TimetableEntry(models.Model):
-    meeting = models.ForeignKey(Meeting, related_name='timetable_entries')
+    meeting = models.ForeignKey(Meeting, related_name='timetable_entries', on_delete=models.PROTECT)
     title = models.CharField(max_length=200, blank=True)
     timetable_index = models.IntegerField(null=True)
     duration = models.DurationField()
     is_break = models.BooleanField(default=False)
-    submission = models.ForeignKey('core.Submission', null=True, related_name='timetable_entries')
+    submission = models.ForeignKey('core.Submission', null=True, related_name='timetable_entries', on_delete=models.PROTECT)
     optimal_start = models.TimeField(null=True)
     is_open = models.BooleanField(default=True)
     text = models.TextField(null=True, blank=True)
@@ -786,10 +786,10 @@ def _timetable_entry_post_save(sender, **kwargs):
 
 
 class Participation(models.Model):
-    entry = models.ForeignKey(TimetableEntry, related_name='participations')
-    user = models.ForeignKey(User, related_name='meeting_participations')
-    medical_category = models.ForeignKey(MedicalCategory, related_name='meeting_participations', null=True, blank=True)
-    task = models.ForeignKey('tasks.Task', null=True)
+    entry = models.ForeignKey(TimetableEntry, related_name='participations', on_delete=models.PROTECT)
+    user = models.ForeignKey(User, related_name='meeting_participations', on_delete=models.PROTECT)
+    medical_category = models.ForeignKey(MedicalCategory, related_name='meeting_participations', null=True, blank=True, on_delete=models.PROTECT)
+    task = models.ForeignKey('tasks.Task', null=True, on_delete=models.PROTECT)
     ignored_for_optimization = models.BooleanField(default=False)
 
 
@@ -799,8 +799,8 @@ WEIGHT_CHOICES = (
 )
 
 class Constraint(models.Model):
-    meeting = models.ForeignKey(Meeting, related_name='constraints')
-    user = models.ForeignKey(User, related_name='meeting_constraints')
+    meeting = models.ForeignKey(Meeting, related_name='constraints', on_delete=models.PROTECT)
+    user = models.ForeignKey(User, related_name='meeting_constraints', on_delete=models.PROTECT)
     start_time = models.TimeField(null=True, blank=True)
     end_time = models.TimeField(null=True, blank=True)
     weight = models.FloatField(default=0.5, choices=WEIGHT_CHOICES)

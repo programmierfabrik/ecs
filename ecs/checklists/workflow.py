@@ -1,10 +1,11 @@
 from django.conf import settings
 from django.dispatch import receiver
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models.signals import post_save
 from django.utils.translation import ugettext as _
 
-from ecs.workflow import Activity, guard, register
+from ecs.workflow import register
+from ecs.workflow.controllers import Activity, guard
 from ecs.checklists.models import Checklist
 from ecs.communication.utils import send_system_message_template
 from ecs.tasks.signals import task_declined

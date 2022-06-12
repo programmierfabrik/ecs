@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='medical_category',
-            field=models.ForeignKey(null=True, to='core.MedicalCategory'),
+            field=models.ForeignKey(null=True, to='core.MedicalCategory', on_delete=models.PROTECT),
         ),
         migrations.RunSQL('''
             update tasks_task

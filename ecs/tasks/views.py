@@ -2,7 +2,7 @@ import random
 from functools import reduce
 from collections import defaultdict
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q, Prefetch
 from django.http import Http404, QueryDict
 from django.shortcuts import render, redirect, get_object_or_404

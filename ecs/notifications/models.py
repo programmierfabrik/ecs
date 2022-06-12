@@ -45,8 +45,8 @@ class NotificationType(models.Model):
 
 
 class DiffNotification(models.Model):
-    old_submission_form = models.ForeignKey('core.SubmissionForm', related_name="old_for_notification")
-    new_submission_form = models.ForeignKey('core.SubmissionForm', related_name="new_for_notification")
+    old_submission_form = models.ForeignKey('core.SubmissionForm', related_name="old_for_notification", on_delete=models.PROTECT)
+    new_submission_form = models.ForeignKey('core.SubmissionForm', related_name="new_for_notification", on_delete=models.PROTECT)
     
     class Meta:
         abstract = True
@@ -72,14 +72,14 @@ class DiffNotification(models.Model):
 
 
 class Notification(models.Model):
-    type = models.ForeignKey(NotificationType, null=True, related_name='notifications')
+    type = models.ForeignKey(NotificationType, null=True, related_name='notifications', on_delete=models.PROTECT)
     submission_forms = models.ManyToManyField('core.SubmissionForm', related_name='notifications')
     documents = models.ManyToManyField('documents.Document', related_name='notifications')
-    pdf_document = models.OneToOneField(Document, related_name='_notification', null=True)
+    pdf_document = models.OneToOneField(Document, related_name='_notification', null=True, on_delete=models.PROTECT)
 
     comments = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey('auth.User', null=True)
+    user = models.ForeignKey('auth.User', null=True, on_delete=models.PROTECT)
     
     objects = NotificationManager()
     unfiltered = models.Manager()
@@ -169,7 +169,7 @@ class ProgressReportNotification(ReportNotification):
 class AmendmentNotification(DiffNotification, Notification):
     is_substantial = models.BooleanField(default=False)
     meeting = models.ForeignKey('meetings.Meeting', null=True,
-        related_name='amendments')
+        related_name='amendments', on_delete=models.PROTECT)
     needs_signature = models.BooleanField(default=False)
 
     def schedule_to_meeting(self):
@@ -184,18 +184,18 @@ class SafetyNotification(Notification):
 
 
 class CenterCloseNotification(Notification):
-    investigator = models.ForeignKey('core.Investigator', related_name="closed_by_notification")
+    investigator = models.ForeignKey('core.Investigator', related_name="closed_by_notification", on_delete=models.PROTECT)
     close_date = models.DateField()
 
 
 @reversion.register(fields=('text',))
 class NotificationAnswer(models.Model):
-    notification = models.OneToOneField(Notification, related_name="answer")
+    notification = models.OneToOneField(Notification, related_name="answer", on_delete=models.PROTECT)
     text = models.TextField()
     is_valid = models.BooleanField(default=True)
     is_final_version = models.BooleanField(default=False, verbose_name=_('Proofread'))
     is_rejected = models.BooleanField(default=False, verbose_name=_('rate negative'))
-    pdf_document = models.OneToOneField(Document, related_name='_notification_answer', null=True)
+    pdf_document = models.OneToOneField(Document, related_name='_notification_answer', null=True, on_delete=models.PROTECT)
     signed_at = models.DateTimeField(null=True)
     published_at = models.DateTimeField(null=True)
     

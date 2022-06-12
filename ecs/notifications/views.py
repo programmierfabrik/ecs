@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 from django.http import HttpResponse
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.template import loader
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.translation import ugettext as _

@@ -1,6 +1,7 @@
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
-from ecs.workflow import Activity, guard, register
+from ecs.workflow import register
+from ecs.workflow.controllers import Activity, guard
 from ecs.votes.models import Vote
 from ecs.core.models import AdvancedSettings
 
