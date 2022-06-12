@@ -1,9 +1,9 @@
-from django.conf.urls import url
+from django.urls import path, re_path
 
 from ecs.scratchpad import views
 
 
 urlpatterns = (
-    url(r'^popup/(?:(?P<scratchpad_pk>\d+)/)?$', views.popup),
-    url(r'^popup/list/$', views.popup_list),
+    re_path(r'^popup/(?:(?P<scratchpad_pk>\d+)/)?$', views.popup),
+    path('popup/list/', views.popup_list),
 )

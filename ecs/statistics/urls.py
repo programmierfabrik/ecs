@@ -1,8 +1,8 @@
-from django.conf.urls import url
+from django.urls import re_path
 
 from ecs.statistics import views
 
 
 urlpatterns = (
-    url(r'^(?:(?P<year>\d{4})/)?$', views.stats),
+    re_path(r'^(?:(?P<year>\d{4})/)?$', views.stats),
 )

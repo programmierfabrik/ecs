@@ -1,15 +1,15 @@
 from django.conf import settings
-from django.conf.urls import url
+from django.urls import path
 
 from ecs.votes import views
 
 
 urlpatterns = (
-    url(r'^(?P<vote_pk>\d+)/download/$', views.download_vote),
-    url(r'^(?P<vote_pk>\d+)/sign$', views.vote_sign),
+    path('<int:vote_pk>/download/', views.download_vote),
+    path('<int:vote_pk>/sign', views.vote_sign),
 )
 
 if settings.DEBUG:
     urlpatterns += (
-        url(r'^(?P<vote_pk>\d+)/pdf/debug/$', views.vote_pdf_debug),
+        path('<int:vote_pk>/pdf/debug/', views.vote_pdf_debug),
     )
