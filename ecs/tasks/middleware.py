@@ -3,8 +3,9 @@ from django.conf import settings
 from ecs.tasks.models import Task
 from ecs.utils.lazy import LazyList
 
+from django.utils.deprecation import MiddlewareMixin
 
-class RelatedTasksMiddleware(object):
+class RelatedTasksMiddleware(MiddlewareMixin):
     def _get_related_tasks(self, request):
         user_tasks = Task.objects.for_user(request.user).filter(closed_at=None).select_related('task_type')
         assigned_tasks = user_tasks.filter(assigned_to=request.user, deleted_at=None)

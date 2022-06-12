@@ -1,8 +1,8 @@
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.utils.deprecation import MiddlewareMixin
 
-
-class ClientCertMiddleware(object):
+class ClientCertMiddleware(MiddlewareMixin):
     def process_request(self, request):
         if not getattr(settings, 'ECS_REQUIRE_CLIENT_CERTS', False):
             return

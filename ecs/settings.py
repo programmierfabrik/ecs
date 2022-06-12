@@ -135,13 +135,11 @@ MIDDLEWARE = (
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'ecs.utils.forceauth.ForceAuth',
     'ecs.userswitcher.middleware.UserSwitcherMiddleware',
     'ecs.pki.middleware.ClientCertMiddleware',
     #'ecs.TestMiddleware',
     'ecs.users.middleware.GlobalUserMiddleware',
-    'reversion.middleware.RevisionMiddleware',
     'ecs.tasks.middleware.RelatedTasksMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 )

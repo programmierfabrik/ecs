@@ -1,9 +1,9 @@
 import threading
-
+from django.utils.deprecation import MiddlewareMixin
 
 current_user_store = threading.local()
 
-class GlobalUserMiddleware(object):
+class GlobalUserMiddleware(MiddlewareMixin):
     def process_request(self, request):
         if request.user:
             current_user_store.user = request.user
