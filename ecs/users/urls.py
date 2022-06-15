@@ -12,7 +12,7 @@ urlpatterns = (
     path('profile/', views.profile),
     path('profile/edit/', views.edit_profile),
     path('profile/change-password/', views.change_password),
-    path('request-password-reset/', views.request_password_reset),
+    path('request-password-reset/', views.request_password_reset, name='users.request_password_reset'),
     path('password-reset/<str:token>', views.do_password_reset),
     path('users/<int:user_pk>/indisposition/', views.indisposition),
     path('users/notify_return/', views.notify_return),

@@ -65,7 +65,7 @@ class PasswordChangeTest(MailTestCase):
         user = create_user('new.user@example.org')
         user.set_password('password')
         user.save()
-        response = self.client.post(reverse('ecs.users.views.request_password_reset'), {
+        response = self.client.post(reverse('users.request_password_reset'), {
             'email': 'new.user@example.org',
         })
         self.assertEqual(response.status_code, 200)
