@@ -7,7 +7,7 @@ from ecs.core.views.autocomplete import autocomplete
 
 
 urlpatterns = (
-    path('logo/', logo),
+    path('logo/', logo, name='core.logo'),
     path('fieldhistory/<str:model_name>/<int:pk>/', field_history),
     path('advanced_settings/', advanced_settings),
     path('autocomplete/(<str:queryset_name>/', autocomplete),
