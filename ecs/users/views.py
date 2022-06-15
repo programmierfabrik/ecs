@@ -170,7 +170,7 @@ def request_password_reset(request):
             try:
                 user = get_user(email)
             except User.DoesNotExist:
-                register_url = request.build_absolute_uri(reverse('ecs.users.views.register'))
+                register_url = request.build_absolute_uri(reverse('users.register'))
                 htmlmail = str(render_html(request, 'users/password_reset/register_email.html', {
                     'register_url': register_url,
                     'email': email,

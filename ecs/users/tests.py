@@ -24,7 +24,7 @@ class RegistrationTest(MailTestCase, WorkflowTestCase):
         # create user workflow
         auth_groups()
 
-        response = self.client.post(reverse('ecs.users.views.register'), {
+        response = self.client.post(reverse('users.register'), {
             'gender': 'm',
             'first_name': 'New',
             'last_name': 'User',

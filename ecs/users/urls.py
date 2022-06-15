@@ -6,7 +6,7 @@ from ecs.users import views
 urlpatterns = (
     path('accounts/login/', views.login, name='users.login'),
     path('accounts/logout/', views.logout),
-    path('accounts/register/', views.register),
+    path('accounts/register/', views.register, name='users.register'),
 
     path('activate/<str:token>', views.activate),
     path('profile/', views.profile),
