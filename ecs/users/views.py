@@ -54,7 +54,7 @@ _registration_token_factory = TimestampedTokenFactory(
 @ratelimit_post(minutes=5, requests=15, key_field='username')
 def login(request, *args, **kwargs):
     if request.is_ajax():
-        return HttpResponse('<script type="text/javascript">window.location.href="%s";</script>' % reverse('ecs.users.views.login'))
+        return HttpResponse('<script type="text/javascript">window.location.href="%s";</script>' % reverse('users.login'))
 
     ua_str = request.META.get('HTTP_USER_AGENT')
     if ua_str:
@@ -65,7 +65,7 @@ def login(request, *args, **kwargs):
     kwargs.setdefault('template_name', 'users/login.html')
     kwargs['authentication_form'] = EmailLoginForm
     response = auth_views.login(request, *args, **kwargs)
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         LoginHistory.objects.create(type='login', user=request.user,
             ip=request.META['REMOTE_ADDR'])
 
@@ -87,7 +87,7 @@ def logout(request, *args, **kwargs):
     kwargs.setdefault('next_page', '/')
     user_id = getattr(request, 'original_user', request.user).id
     response = auth_views.logout(request, *args, **kwargs)
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated:
         LoginHistory.objects.create(type='logout', user_id=user_id,
             ip=request.META['REMOTE_ADDR'])
     return response

@@ -54,7 +54,7 @@ class QFactory(object):
     def __call__(self, user):
         if not user or user.is_superuser:
             return Q()
-        elif user.is_anonymous():
+        elif user.is_anonymous:
             return self.make_deny_q() # exclude all
         if not self.lookup:
             return self.get_q(user)

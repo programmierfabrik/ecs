@@ -122,7 +122,7 @@ class BreadcrumbsNode(Node):
 
     def render(self, context):
         user = context['request'].user
-        if not user.is_anonymous():
+        if not user.is_anonymous:
             crumbs_cache_key = 'submission_breadcrumbs-user_{0}'.format(user.pk)
             crumb_pks = cache.get(crumbs_cache_key, [])
             crumbs = list(Submission.objects.filter(pk__in=crumb_pks).only('ec_number'))

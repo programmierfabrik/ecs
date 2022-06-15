@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.contrib.auth.models import ContentType
 from django.utils import timezone
 
-from ecs.authorization import AuthorizationManager
+from ecs.authorization.managers import AuthorizationManager
 from ecs.core.models.constants import (
     SUBMISSION_LANE_EXPEDITED, SUBMISSION_LANE_LOCALEC,
     SUBMISSION_LANE_RETROSPECTIVE_THESIS, SUBMISSION_LANE_BOARD

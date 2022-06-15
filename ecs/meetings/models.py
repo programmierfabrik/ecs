@@ -14,7 +14,7 @@ from django.utils import timezone
 
 from reversion import revisions as reversion
 
-from ecs.authorization import AuthorizationManager
+from ecs.authorization.managers import AuthorizationManager
 from ecs.core.models.core import MedicalCategory
 from ecs.core.models.constants import (
     SUBMISSION_LANE_BOARD, SUBMISSION_LANE_RETROSPECTIVE_THESIS,

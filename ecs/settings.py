@@ -177,7 +177,7 @@ INSTALLED_APPS = (
     'ecs.documents',
     'ecs.meetings',
     'ecs.notifications',
-    # 'ecs.authorization',
+    'ecs.authorization',
     'ecs.integration',
     'ecs.boilerplate',
     'ecs.scratchpad',
@@ -217,7 +217,7 @@ LOGGING = {
 ##############
 
 # used by ecs.pki
-ECS_CA_ROOT = os.path.join(PROJECT_DIR, '..', 'ecs-ca')
+ECS_CA_ROOT = os.path.join(PROJECT_DIR, 'ca')
 # if set to true:  users of internal groups need a client certificate to logon
 # ECS_REQUIRE_CLIENT_CERTS = false  # default
 
@@ -256,7 +256,7 @@ ECS_DOWNLOAD_CACHE_MAX_AGE = 30 * 24 * 60 * 60  # 30 days
 # Storage Vault settings
 STORAGE_VAULT = {
     'dir': os.path.join(PROJECT_DIR, '..', 'ecs-storage-vault'),
-    'gpghome' : os.path.join(PROJECT_DIR, '..', 'ecs-gpg'),
+    'gpghome' : os.path.join(PROJECT_DIR, 'gpg'),
     'encryption_uid': 'ecs_mediaserver',
     'signature_uid': 'ecs_authority',
 }

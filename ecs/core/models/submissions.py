@@ -11,7 +11,7 @@ from django.utils import timezone
 from django_countries import countries
 from django_countries.fields import CountryField
 
-from ecs.authorization import AuthorizationManager
+from ecs.authorization.managers import AuthorizationManager
 from ecs.core.models.names import NameField
 from ecs.core.models.constants import (
     MIN_EC_NUMBER, SUBMISSION_INFORMATION_PRIVACY_CHOICES, SUBMISSION_LANE_CHOICES, SUBMISSION_LANE_EXPEDITED,

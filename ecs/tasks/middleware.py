@@ -14,7 +14,7 @@ class RelatedTasksMiddleware(MiddlewareMixin):
                 yield t
 
     def process_request(self, request):
-        if not request.user.is_authenticated() or request.is_ajax() or \
+        if not request.user.is_authenticated or request.is_ajax() or \
             request.path.startswith(settings.STATIC_URL):
             return
 

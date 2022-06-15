@@ -72,7 +72,8 @@ def _workdir():
 
         yield workdir
     finally:
-        shutil.rmtree(workdir)
+        print(123)
+        # shutil.rmtree(workdir)
 
 
 def _exec(cmd):
@@ -108,7 +109,7 @@ def setup(subject):
     if p.returncode != 0:
         raise subprocess.CalledProcessError(p.returncode, 'openssl')
 
-    CertificateAuthority.objects.create(key=key, cert=cert)
+    CertificateAuthority.objects.create(key=key.decode('utf-8') , cert=cert.decode('utf-8'))
 
 
 def make_cert(subject, pkcs12_file, days=None, passphrase=''):

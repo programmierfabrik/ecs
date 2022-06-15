@@ -136,7 +136,7 @@ class MiddlewareTest(EcsTestCase):
         c1 = Client()
         c2 = Client()
 
-        login_url = reverse('ecs.users.views.login')
+        login_url = reverse('users.login')
         dashboard_url = reverse('ecs.dashboard.views.view_dashboard')
 
         response = c1.post(login_url, {'username': 'testuser@example.com', 'password': '4223'})

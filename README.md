@@ -23,6 +23,12 @@ apt-get install python3 \
 ```
 
 ```bash
+docker run --rm -p 5432:5432 -e POSTGRES_USER=app -e POSTGRES_PASSWORD=app -e POSTGRES_DB=app postgres:12-alpine
+docker run --rm --network host -v $PWD/:/app/ test-ecs
+
+```
+
+```bash
 python3 -m venv ./venv
 . ./venv/bin/activate
 pip install cffi==1.13.2
