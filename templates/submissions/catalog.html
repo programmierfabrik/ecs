@@ -29,7 +29,7 @@
         <div class="mx-auto"><h1>{% trans "Catalog of Approved Studies" %}</h1></div>
         <div class="btn-group mx-auto" role="group" aria-label="{% trans 'Years' %}">
             {% for date in years %}
-                <a class="px-4 btn btn-primary{% if date.year == year %} active{% endif %}" href="{% url 'ecs.core.views.submissions.catalog' year=date.year %}">{{ date.year }}</a>
+                <a class="px-4 btn btn-primary{% if date.year == year %} active{% endif %}" href="{% url 'core.catalog' year=date.year %}">{{ date.year }}</a>
             {% endfor %}
         </div>
     </div>
@@ -89,7 +89,7 @@
         </div>
         <div class="btn-group mx-auto" role="group" aria-label="Years">
             {% for date in years %}
-                <a class="px-4 btn btn-primary{% if date.year == year %} active{% endif %}" href="{% url 'ecs.core.views.submissions.catalog' year=date.year %}">{{ date.year }}</a>
+                <a class="px-4 btn btn-primary{% if date.year == year %} active{% endif %}" href="{% url 'core.catalog' year=date.year %}">{{ date.year }}</a>
             {% endfor %}
         </div>
     </div>

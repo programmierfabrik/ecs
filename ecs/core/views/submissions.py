@@ -1213,7 +1213,7 @@ def catalog(request, year=None):
                 year = timezone.now().year
                 years = [year]
 
-            return redirect('ecs.core.views.submissions.catalog', year=year)
+            return redirect('core.catalog', year=year)
         else:
             year = int(year)
         votes = votes.filter(published_at__year=int(year))
