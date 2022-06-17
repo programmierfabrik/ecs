@@ -18,8 +18,8 @@ urlpatterns = (
     path('<int:notification_pk>/doc/<int:document_pk>/', views.download_document, name='notifications.download_document'),
     path('<int:notification_pk>/doc/<int:document_pk>/view/', views.view_document, name='notifications.view_document'),
     path('<int:notification_pk>/answer/pdf/', views.notification_answer_pdf, name='notifications.notification_answer_pdf'),
-    path('<int:notification_pk>/answer/edit/', views.edit_notification_answer),
-    path('<int:notification_pk>/answer/sign/', views.notification_answer_sign),
+    path('<int:notification_pk>/answer/edit/', views.edit_notification_answer, name='notifications.edit_notification_answer'),
+    path('<int:notification_pk>/answer/sign/', views.notification_answer_sign, name='notifications.notification_answer_sign'),
     path('list/open/', views.open_notifications, name='notifications.open_notifications'),
 )
 

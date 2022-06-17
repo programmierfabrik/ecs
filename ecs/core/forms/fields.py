@@ -56,7 +56,7 @@ class AutocompleteWidgetMixin(object):
 
     def render(self, name, value, attrs=None, choices=()):
         attrs['data-ajax--url'] = reverse(
-            'ecs.core.views.autocomplete.autocomplete',
+            'core.autocomplete',
             kwargs={'queryset_name': self.field.queryset_name}
         )
         return super().render(name, value, attrs=attrs)

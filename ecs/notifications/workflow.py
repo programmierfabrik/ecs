@@ -57,7 +57,7 @@ def needs_distribution(wf):
 
 class BaseNotificationReview(Activity):
     def get_url(self):
-        return reverse('ecs.notifications.views.edit_notification_answer',
+        return reverse('notifications.edit_notification_answer',
             kwargs={'notification_pk': self.workflow.data.pk})
 
     def receive_token(self, source, trail=(), repeated=False):
@@ -170,7 +170,7 @@ class SignNotificationAnswer(Activity):
         )
 
     def get_url(self):
-        return reverse('ecs.notifications.views.notification_answer_sign', kwargs={'notification_pk': self.workflow.data.pk})
+        return reverse('notifications.notification_answer_sign', kwargs={'notification_pk': self.workflow.data.pk})
 
     def pre_perform(self, choice):
         answer = self.workflow.data.answer

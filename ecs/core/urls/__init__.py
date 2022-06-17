@@ -10,7 +10,7 @@ urlpatterns = (
     path('logo/', logo, name='core.logo'),
     path('fieldhistory/<str:model_name>/<int:pk>/', field_history, name='core.field_history'),
     path('advanced_settings/', advanced_settings, name='core.advanced_settings'),
-    path('autocomplete/(<str:queryset_name>/', autocomplete),
+    path('autocomplete/(<str:queryset_name>/', autocomplete, name='core.autocomplete'),
 
     path('submission/', include('ecs.core.urls.submission')),
     path('comments/', include('ecs.core.urls.comments')),

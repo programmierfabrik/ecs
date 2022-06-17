@@ -52,7 +52,7 @@ def sign_success(request, document=None):
     vote = document.parent_object
     vote.signed_at = document.date
     vote.save()
-    return reverse('ecs.core.views.submissions.readonly_submission_form', kwargs={'submission_form_pk': vote.submission_form.pk}) + '#vote_review_tab'
+    return reverse('readonly_submission_form', kwargs={'submission_form_pk': vote.submission_form.pk}) + '#vote_review_tab'
 
 
 def vote_pdf_debug(request, vote_pk=None):

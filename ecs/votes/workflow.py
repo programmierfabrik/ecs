@@ -36,7 +36,7 @@ class VoteReview(Activity):
         return True
 
     def get_url(self):
-        return reverse('ecs.core.views.submissions.vote_review', kwargs={'submission_form_pk': self.workflow.data.submission_form_id})
+        return reverse('core.submission.vote_review', kwargs={'submission_form_pk': self.workflow.data.submission_form_id})
 
     def receive_token(self, source, trail=(), repeated=False):
         token = super().receive_token(source, trail=trail, repeated=repeated)
@@ -67,7 +67,7 @@ class VoteSigning(Activity):
             vote.publish()
 
     def get_url(self):
-        return reverse('ecs.votes.views.vote_sign', kwargs={'vote_pk': self.workflow.data_id})
+        return reverse('votes.vote_sign', kwargs={'vote_pk': self.workflow.data_id})
 
     def receive_token(self, source, trail=(), repeated=False):
         vote = trail[0].workflow.data

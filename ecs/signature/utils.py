@@ -64,13 +64,13 @@ def with_sign_data(data=True, session=False):
 def get_pdfas_url(request, sign_data):
     values = {
         'connector': request.user.profile.signing_connector,
-        'invoke-app-url': request.build_absolute_uri(reverse('ecs.signature.views.sign_receive', kwargs={'pdf_id': sign_data.id})),
+        'invoke-app-url': request.build_absolute_uri(reverse('signature.sign_receive', kwargs={'pdf_id': sign_data.id})),
         'invoke-app-url-target': '_top',
-        'invoke-app-error-url': request.build_absolute_uri(reverse('ecs.signature.views.sign_error', kwargs={'pdf_id': sign_data.id})),
+        'invoke-app-error-url': request.build_absolute_uri(reverse('signature.sign_error', kwargs={'pdf_id': sign_data.id})),
         'locale': 'DE',
         'num-bytes': str(len(sign_data['pdf_data'])),
         'sig_type': 'SIGNATURBLOCK_DE',
-        'pdf-url': request.build_absolute_uri(reverse('ecs.signature.views.sign_send', kwargs={'pdf_id': sign_data.id})),
+        'pdf-url': request.build_absolute_uri(reverse('signature.sign_send', kwargs={'pdf_id': sign_data.id})),
 
         'verify-level': 'intOnly', # Dies bedeutet, dass eine Signaturprüfung durchgeführt wird, allerdings ohne Zertifikatsprüfung.
         'filename': sign_data['document_filename'],

@@ -119,7 +119,7 @@ def create_phantom_user(email, role=None):
         subject = 'Erstellung eines Zugangs zum ECS'
         link = '{0}{1}'.format(
             settings.ABSOLUTE_URL_PREFIX,
-            reverse('ecs.users.views.accept_invitation',
+            reverse('users.accept_invitation',
                 kwargs={'invitation_uuid': invitation.uuid.hex})
         )
         htmlmail = str(render_html(HttpRequest(), 'users/invitation/invitation_email.html', {

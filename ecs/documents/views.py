@@ -72,7 +72,7 @@ def handle_view(request, doc):
 
     params = urlencode({
         'file': reverse(
-            'ecs.documents.views.download_once',
+            'documents.download_once',
             kwargs={'ref_key': ref_key}
         ),
         'title': ' - '.join(title_bits),

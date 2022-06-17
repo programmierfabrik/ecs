@@ -6,7 +6,7 @@ from ecs.votes import views
 
 urlpatterns = (
     path('<int:vote_pk>/download/', views.download_vote, name='votes.download_vote'),
-    path('<int:vote_pk>/sign', views.vote_sign),
+    path('<int:vote_pk>/sign', views.vote_sign, name='votes.vote_sign'),
 )
 
 if settings.DEBUG:

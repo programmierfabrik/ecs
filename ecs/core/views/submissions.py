@@ -479,7 +479,7 @@ def paper_submission_review(request, submission_pk=None):
     task = submission.paper_submission_review_task
     if not task.assigned_to == request.user:
         task.accept(request.user)
-        return redirect('ecs.core.views.submissions.paper_submission_review', submission_pk=submission_pk)
+        return redirect('core.submission.paper_submission_review', submission_pk=submission_pk)
     return readonly_submission_form(request, submission_form=submission.current_submission_form)
 
 
@@ -552,7 +552,7 @@ def drop_checklist_review(request, submission_form_pk=None, checklist_pk=None):
 def checklist_review(request, submission_form_pk=None, blueprint_pk=None):
     submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
     if request.method == 'GET' and not submission_form.is_current:
-        return redirect('ecs.core.views.submissions.checklist_review', submission_form_pk=submission_form.submission.current_submission_form.pk, blueprint_pk=blueprint_pk)
+        return redirect('', submission_form_pk=submission_form.submission.current_submission_form.pk, blueprint_pk=blueprint_pk)
     blueprint = get_object_or_404(ChecklistBlueprint, pk=blueprint_pk)
 
     user = request.user if blueprint.multiple else get_user('root@system.local')

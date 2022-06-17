@@ -179,7 +179,7 @@ def request_password_reset(request):
             else:
                 timestamp = (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()
                 token = _password_reset_token_factory.generate_token([email, timestamp])
-                reset_url = request.build_absolute_uri(reverse('ecs.users.views.do_password_reset', kwargs={'token': token}))
+                reset_url = request.build_absolute_uri(reverse('users.do_password_reset', kwargs={'token': token}))
                 htmlmail = str(render_html(request, 'users/password_reset/reset_email.html', {
                     'reset_url': reset_url,
                 }))
@@ -408,7 +408,7 @@ def invite(request):
         invitation = Invitation.objects.create(user=user)
         subject = 'Erstellung eines Zugangs zum ECS'
         link = request.build_absolute_uri(
-            reverse('ecs.users.views.accept_invitation',
+            reverse('users.accept_invitation',
                 kwargs={'invitation_uuid': invitation.uuid.hex})
         )
         htmlmail = str(render_html(request, 'users/invitation/invitation_email.html', {
