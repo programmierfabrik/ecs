@@ -23,7 +23,7 @@
                 {% endif %}
                 <td>
                     {% if party.user %}
-                        <a href="{% url 'ecs.communication.views.new_thread' submission_pk=submission_form.submission.pk to_user_pk=party.user.pk %}" target="_blank">
+                        <a href="{% url 'communication.new_thread' submission_pk=submission_form.submission.pk to_user_pk=party.user.pk %}" target="_blank">
                             <span class="fa fa-envelope-o"></span>
                             {% trans "Send Message" %}
                         </a>
@@ -59,7 +59,7 @@
                         <td>{{ ta.user.email|default:'' }}</td>
                     {% endif %}
                     <td>
-                        <a href="{% url 'ecs.communication.views.new_thread' submission_pk=submission_form.submission.pk to_user_pk=ta.user.pk %}" target="_blank">
+                        <a href="{% url 'communication.new_thread' submission_pk=submission_form.submission.pk to_user_pk=ta.user.pk %}" target="_blank">
                             <span class="fa fa-envelope-o"></span>
                             {% trans "Send Message" %}
                         </a>

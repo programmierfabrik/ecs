@@ -19,11 +19,11 @@ class CommunicationTest(CommunicationTestCase):
         
         self.client.login(email='alice@example.com', password='password')
 
-        response = self.client.get(reverse('ecs.communication.views.new_thread'))
+        response = self.client.get(reverse('communication.new_thread'))
         self.assertEqual(response.status_code, 200)
         
         message_count = Message.objects.count()
-        response = self.client.post(reverse('ecs.communication.views.new_thread'), {
+        response = self.client.post(reverse('communication.new_thread'), {
             'subject': 'SUBJECT',
             'text': 'TEXT',
             'receiver_type': 'person',
@@ -64,7 +64,7 @@ class CommunicationTest(CommunicationTestCase):
             non_existing_pk = Submission.objects.all().order_by('-pk')[0].pk+1
         except IndexError:
             non_existing_pk = 42
-        response = self.client.post(reverse('ecs.communication.views.new_thread', kwargs={'submission_pk': non_existing_pk}), {
+        response = self.client.post(reverse('communication.new_thread', kwargs={'submission_pk': non_existing_pk}), {
             'subject': 'SUBJECT',
             'text': 'TEXT',
             'receiver': self.bob.pk,
@@ -78,7 +78,7 @@ class CommunicationTest(CommunicationTestCase):
         message = self.last_message
         self.client.login(email='bob@example.com', password='password')
 
-        response = self.client.post(reverse('ecs.communication.views.read_thread',
+        response = self.client.post(reverse('communication.read_thread',
             kwargs={'thread_pk': self.thread.pk}), {'text': 'REPLY TEXT'})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Message.objects.count(), 2)
@@ -91,11 +91,11 @@ class CommunicationTest(CommunicationTestCase):
         '''
         
         self.client.login(email='alice@example.com', password='password')
-        response = self.client.get(reverse('ecs.communication.views.read_thread', kwargs={'thread_pk': self.thread.pk}))
+        response = self.client.get(reverse('communication.read_thread', kwargs={'thread_pk': self.thread.pk}))
         self.assertEqual(response.status_code, 200)
         
         self.client.login(email='bob@example.com', password='password')
-        response = self.client.get(reverse('ecs.communication.views.read_thread', kwargs={'thread_pk': self.thread.pk}))
+        response = self.client.get(reverse('communication.read_thread', kwargs={'thread_pk': self.thread.pk}))
         self.assertEqual(response.status_code, 200)
         
     def test_bump_message(self):
@@ -104,7 +104,7 @@ class CommunicationTest(CommunicationTestCase):
         message = self.last_message
         self.client.login(email='alice@example.com', password='password')
 
-        response = self.client.post(reverse('ecs.communication.views.read_thread',
+        response = self.client.post(reverse('communication.read_thread',
             kwargs={'thread_pk': self.thread.pk}), {'text': 'BUMP TEXT'})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Message.objects.count(), 2)

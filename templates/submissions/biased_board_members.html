@@ -25,7 +25,7 @@
                     </ul>
                 </td>
                 <td>
-                    <a href="{% url 'ecs.communication.views.new_thread' submission_pk=submission.pk to_user_pk=user.pk %}" target="_blank">
+                    <a href="{% url 'communication.new_thread' submission_pk=submission.pk to_user_pk=user.pk %}" target="_blank">
                         <span class="fa fa-envelope-o"></span>
                         {% trans "Send Message" %}
                     </a>

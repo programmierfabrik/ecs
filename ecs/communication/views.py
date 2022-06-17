@@ -30,7 +30,7 @@ def new_thread(request, submission_pk=None, to_user_pk=None):
 
     if request.method == 'POST' and form.is_valid():
         thread = send_message(request.user, form.cleaned_data['receiver'], form.cleaned_data['subject'], form.cleaned_data['text'], submission=submission)
-        return redirect_to_next_url(request, reverse('ecs.communication.views.read_thread', kwargs={'thread_pk': thread.pk}))
+        return redirect_to_next_url(request, reverse('communication.read_thread', kwargs={'thread_pk': thread.pk}))
 
     return render(request, 'communication/send.html', {
         'submission': submission,

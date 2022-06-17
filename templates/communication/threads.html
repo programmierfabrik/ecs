@@ -74,10 +74,10 @@
             <tr {% if thread.last_message.unread and thread.last_message.receiver_id == user.id %}class="font-weight-bold"{% endif %}>
                 <td class="pr-3">
                     {% if thread|starred_by:user %}
-                        {% url 'ecs.communication.views.unstar' thread_pk=thread.pk as unstar_url %}
+                        {% url 'communication.unstar' thread_pk=thread.pk as unstar_url %}
                         <a class="open-in-widget fa fa-2x fa-star text-warning" title="{% trans "Remove star" %}" href="{{ unstar_url }}?next={{ request.path|urlencode }}"></a>
                     {% else %}
-                        {% url 'ecs.communication.views.star' thread_pk=thread.pk as star_url %}
+                        {% url 'communication.star' thread_pk=thread.pk as star_url %}
                         <a class="open-in-widget fa fa-2x fa-star-o text-muted" title="{% trans "Add star" %}" href="{{ star_url }}?next={{ request.path|urlencode }}"></a>
                     {% endif %}
                 </td>
@@ -100,7 +100,7 @@
                     </td>
                 {% endif %}
                 <td class="align-middle">
-                    {% url 'ecs.communication.views.read_thread' thread_pk=thread.pk as read_url%}
+                    {% url 'communication.read_thread' thread_pk=thread.pk as read_url%}
                     <a href="{{ read_url }}" title="{{ thread.last_message|preview:1000 }}">
                         {{ thread.subject|truncatewords:10 }}
                     </a>
@@ -111,7 +111,7 @@
                 </td>
                 <td class="pl-3 align-middle">
                 {% if thread.last_message.unread and thread.last_message.receiver_id == user.id %}
-                    {% url 'ecs.communication.views.mark_read' thread_pk=thread.pk as mark_read_url %}
+                    {% url 'communication.mark_read' thread_pk=thread.pk as mark_read_url %}
                     <a class="open-in-widget" href="{{ mark_read_url }}?next={{ request.path|urlencode }}">
                         <span class="fa fa-2x fa-check text-primary" title="{% trans "Mark as read" %}"></span>
                     </a>

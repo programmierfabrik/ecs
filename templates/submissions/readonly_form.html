@@ -149,7 +149,7 @@
             {% endif %}
             {% if categorization_task %}
                 <p>
-                    <a href="{% url 'ecs.communication.views.new_thread' submission_pk=submission.pk to_user_pk=categorization_task.assigned_to_id %}" target="_blank">
+                    <a href="{% url 'communication.new_thread' submission_pk=submission.pk to_user_pk=categorization_task.assigned_to_id %}" target="_blank">
                         <span class="fa fa-envelope-o"></span>
                         {% blocktrans with user=categorization_task.assigned_to|full_name trimmed %}
                             Send Message to {{ user }}
@@ -337,11 +337,11 @@
     
     <div id="communication_tab" class="container collapse">
         <div data-widget-url="{% url 'communication.list_threads' submission_pk=submission.pk %}"></div>
-        <a class="btn btn-outline-primary" href="{% url 'ecs.communication.views.new_thread' submission_pk=submission.pk %}" target="_blank">{% trans "Write a new message" %}</a>
+        <a class="btn btn-outline-primary" href="{% url 'communication.new_thread' submission_pk=submission.pk %}" target="_blank">{% trans "Write a new message" %}</a>
     </div>
     {% if user.profile.is_internal %}
         <div id="communication_overview_tab" class="container collapse">
-            <div data-widget-url="{% url 'ecs.communication.views.communication_overview_widget' submission_pk=submission.pk %}"></div>
+            <div data-widget-url="{% url 'communication.communication_overview_widget' submission_pk=submission.pk %}"></div>
         </div>
     {% endif %}
     {% if user.profile.show_task_widget %}
