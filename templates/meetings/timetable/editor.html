@@ -11,9 +11,9 @@
 <div id="meeting_editor">
     {% if not readonly %}
         <ol class="options">
-            <li><a class="open-in-widget" href="{% url 'ecs.meetings.views.add_free_timetable_entry' meeting_pk=meeting.pk %}">Termin hinzufügen</a></li>
-            <li><a class="open-in-widget" href="{% url 'ecs.meetings.views.optimize_timetable' meeting_pk=meeting.pk algorithm='ga' %}">Optimieren</a></li>
-            <li><a class="open-in-widget" href="{% url 'ecs.meetings.views.optimize_timetable_long' meeting_pk=meeting.pk algorithm='ga' %}">Lange optimieren</a></li>
+            <li><a class="open-in-widget" href="{% url 'meetings.add_free_timetable_entry' meeting_pk=meeting.pk %}">Termin hinzufügen</a></li>
+            <li><a class="open-in-widget" href="{% url 'meetings.optimize_timetable' meeting_pk=meeting.pk algorithm='ga' %}">Optimieren</a></li>
+            <li><a class="open-in-widget" href="{% url 'meetings.optimize_timetable_long' meeting_pk=meeting.pk algorithm='ga' %}">Lange optimieren</a></li>
         </ol>
     {% endif %}
     <div class="my-2">
@@ -55,9 +55,9 @@
                 {% endwith %}
                 {% if not readonly %}
                     {% if not entry.submission %}
-                        <a class="open-in-widget remove fa fa-times text-danger" href="{% url 'ecs.meetings.views.remove_timetable_entry' meeting_pk=meeting.pk entry_pk=entry.pk %}"></a>
+                        <a class="open-in-widget remove fa fa-times text-danger" href="{% url 'meetings.remove_timetable_entry' meeting_pk=meeting.pk entry_pk=entry.pk %}"></a>
                     {% endif %}
-                    <form action="{% url 'ecs.meetings.views.update_timetable_entry' meeting_pk=meeting.pk entry_pk=entry.pk %}" method="post" class="open-in-widget">
+                    <form action="{% url 'meetings.update_timetable_entry' meeting_pk=meeting.pk entry_pk=entry.pk %}" method="post" class="open-in-widget">
                         {% csrf_token %}
                         <input type="text" value="{{ entry.duration }}" name="duration" class="duration" />
                         <input type="text" value="{{ entry.optimal_start|default:'' }}" name="optimal_start" class="optimal_start" />
@@ -73,7 +73,7 @@
                             {% endwith %}
                         {% endif %}
                         {% for user, ignored in entry.users %}
-                            <a href="{% url 'ecs.meetings.views.toggle_participation' meeting_pk=meeting.pk user_pk=user.pk entry_pk=entry.pk %}" class="open-in-widget{% if ignored %} ignored{% endif %}">{{ user }}</a>{% if not forloop.last %}, {% endif %}
+                            <a href="{% url 'meetings.toggle_participation' meeting_pk=meeting.pk user_pk=user.pk entry_pk=entry.pk %}" class="open-in-widget{% if ignored %} ignored{% endif %}">{{ user }}</a>{% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     </span>
                     {% endif %}
@@ -108,7 +108,7 @@
                         </ul>
                     {% endif %}
                     {% if not readonly %}
-                        <div><a href="{% url 'ecs.meetings.views.edit_user_constraints' meeting_pk=meeting.pk user_pk=user.pk %}">Einschränkungen bearbeiten</a></div>
+                        <div><a href="{% url 'meetings.edit_user_constraints' meeting_pk=meeting.pk user_pk=user.pk %}">Einschränkungen bearbeiten</a></div>
                     {% endif %}
                     </div>
                 </li>
@@ -142,7 +142,7 @@
                     var toIndex = ui.item.index();
                     var widget = $('#timetable_tab .ecs-Widget').data('widget');
                     widget.load(
-                        '{% url 'ecs.meetings.views.move_timetable_entry' meeting_pk=meeting.pk %}?from_index=' + fromIndex + '&to_index=' + toIndex
+                        '{% url 'meetings.move_timetable_entry' meeting_pk=meeting.pk %}?from_index=' + fromIndex + '&to_index=' + toIndex
                     );
                 }
             });

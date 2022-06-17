@@ -131,7 +131,7 @@ class NotificationFormTest(LoginTestCase):
         self.assertEqual(doc.version, '3.1415')
         
         response = self.client.get(
-            reverse('ecs.docstash.views.download_document', kwargs={
+            reverse('docstash.download_document', kwargs={
                 'docstash_key': response.context['request'].docstash.key,
                 'document_pk': doc.pk
             })

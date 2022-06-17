@@ -8,7 +8,7 @@
                 Alle TOPs wurden geschlossen. <b>Achtung: Weitere TOPs überprüfen.</b> Sie können die Sitzung jetzt beenden.
             </div>
         {% endif %}
-    <form id="meeting_assistant_form" action="{% url 'ecs.meetings.views.meeting_assistant_top' meeting_pk=meeting.pk top_pk=top.pk %}" method="post" class="open-in-widget">
+    <form id="meeting_assistant_form" action="{% url 'meetings.meeting_assistant_top' meeting_pk=meeting.pk top_pk=top.pk %}" method="post" class="open-in-widget">
         {% csrf_token %}
         <h3>{{ top }}, {{ submission|ec_number|default:top.title }}{% if submission %} {% with top|last_recessed_vote as vote %}{% if vote %}({% trans "Recessed" %}, {% if vote.result == '3a' %}{% trans "not examined" %}{% else %}{% trans "examined" %}{% endif %}) {% endif %}{% endwith %}<a class="fa fa-search text-info" href="{% url 'view_submission' submission_pk=submission.pk %}" target="_blank"></a>{% endif %}</h3>
         {% if not top.is_break %}
@@ -71,12 +71,12 @@
 {% block meeting_assistant_navigation %}
     <div class="btn-group-vertical btn-block">
     {% if top.previous_open %}
-        <a class="btn btn-secondary open-in-widget" href="{% url 'ecs.meetings.views.meeting_assistant_top' meeting_pk=meeting.pk top_pk=top.previous_open.pk %}">
+        <a class="btn btn-secondary open-in-widget" href="{% url 'meetings.meeting_assistant_top' meeting_pk=meeting.pk top_pk=top.previous_open.pk %}">
             Vorheriges offenes TOP ({{ top.previous_open }})
         </a>
     {% endif %}
     {% if top.next_open %}
-        <a class="btn btn-secondary open-in-widget" href="{% url 'ecs.meetings.views.meeting_assistant_top' meeting_pk=meeting.pk top_pk=top.next_open.pk %}">
+        <a class="btn btn-secondary open-in-widget" href="{% url 'meetings.meeting_assistant_top' meeting_pk=meeting.pk top_pk=top.next_open.pk %}">
             Nächstes offenes TOP ({{ top.next_open }})
         </a>
     {% endif %}
@@ -84,12 +84,12 @@
 
     <div class="btn-group-vertical btn-block">
     {% if top.previous %}
-        <a class="btn btn-secondary open-in-widget" href="{% url 'ecs.meetings.views.meeting_assistant_top' meeting_pk=meeting.pk top_pk=top.previous.pk %}">
+        <a class="btn btn-secondary open-in-widget" href="{% url 'meetings.meeting_assistant_top' meeting_pk=meeting.pk top_pk=top.previous.pk %}">
             Vorheriges TOP ({{ top.previous }})
         </a>
     {% endif %}
     {% if top.next %}
-        <a class="btn btn-secondary open-in-widget" href="{% url 'ecs.meetings.views.meeting_assistant_top' meeting_pk=meeting.pk top_pk=top.next.pk %}">
+        <a class="btn btn-secondary open-in-widget" href="{% url 'meetings.meeting_assistant_top' meeting_pk=meeting.pk top_pk=top.next.pk %}">
             Nächstes TOP ({{ top.next }})
         </a>
     {% endif %}

@@ -2,7 +2,7 @@
 {% load core i18n %}
 
 {% block meeting_assistant_body %}
-    <form action="{% url 'ecs.meetings.views.meeting_assistant_other_tops' meeting_pk=meeting.pk %}" method="post" class="open-in-widget">
+    <form action="{% url 'meetings.meeting_assistant_other_tops' meeting_pk=meeting.pk %}" method="post" class="open-in-widget">
         {% csrf_token %}
 
         {{ thesis_vote_formset.management_form }}

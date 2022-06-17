@@ -232,7 +232,7 @@
             {% for meeting in submission.meetings.all %}
                 <div>
                     {% if user.profile.is_internal %}
-                        <a href="{% url 'ecs.meetings.views.meeting_details' meeting_pk=meeting.pk %}">{{ meeting.start|date:'d.m.Y' }} {{ meeting.title }}</a>
+                        <a href="{% url 'meetings.meeting_details' meeting_pk=meeting.pk %}">{{ meeting.start|date:'d.m.Y' }} {{ meeting.title }}</a>
                     {% else %}
                         {{ meeting.start|date:'d.m.Y' }} {{ meeting.title }}{% if not forloop.last %}, {% endif %}
                     {% endif %}
@@ -240,7 +240,7 @@
             {% endfor %}
             {% endsudo %}
             {% if user.profile.is_executive and submission.is_reschedulable %}
-                <a href="{% url 'ecs.meetings.views.reschedule_submission' submission_pk=submission.pk %}">{% trans 'Reschedule' %}</a>
+                <a href="{% url 'meetings.reschedule_submission' submission_pk=submission.pk %}">{% trans 'Reschedule' %}</a>
             {% endif %}
         </td>
     </tr>
