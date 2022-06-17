@@ -422,7 +422,7 @@ def invite(request):
         if user.groups.filter(name='EC-Signing').exists():
             for u in User.objects.filter(groups__name='EC-Signing'):
                 send_system_message_template(u, _('New Signing User'), 'users/new_signing_user.txt', {'user': user})
-        return redirect('ecs.users.views.details', user_pk=user.pk)
+        return redirect('users.details', user_pk=user.pk)
 
     return render(request, 'users/invitation/invite_user.html', {
         'form': form,
@@ -455,7 +455,7 @@ def accept_invitation(request, invitation_uuid=None):
         invitation.save()
         user = auth.authenticate(email=invitation.user.email, password=form.cleaned_data['new_password1'])
         auth.login(request, user)
-        return redirect('ecs.users.views.edit_profile')
+        return redirect('users.edit_profile')
 
     return render(request, 'users/invitation/set_password_form.html', {
         'form': form,

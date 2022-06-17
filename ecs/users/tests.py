@@ -101,7 +101,7 @@ class PasswordChangeTest(MailTestCase):
         user.save()
         self.client.login(email='foobar@example.com', password='test')
 
-        url = reverse('ecs.users.views.change_password')
+        url = reverse('users.change_password')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
