@@ -336,7 +336,7 @@
     {% endfor %}
     
     <div id="communication_tab" class="container collapse">
-        <div data-widget-url="{% url 'ecs.communication.views.list_threads' submission_pk=submission.pk %}"></div>
+        <div data-widget-url="{% url 'communication.list_threads' submission_pk=submission.pk %}"></div>
         <a class="btn btn-outline-primary" href="{% url 'ecs.communication.views.new_thread' submission_pk=submission.pk %}" target="_blank">{% trans "Write a new message" %}</a>
     </div>
     {% if user.profile.is_internal %}

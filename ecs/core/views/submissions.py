@@ -160,7 +160,7 @@ def copy_submission_form(request, submission_form_pk=None, notification_type_pk=
     if delete:
         submission_form.submission.delete()
 
-    return redirect('ecs.core.views.submissions.create_submission_form',
+    return redirect('core.submission.create_submission_form',
         docstash_key=docstash.key)
 
 
@@ -840,7 +840,7 @@ def change_submission_presenter(request, submission_pk=None):
             user=request.user,
         )
         if request.user == previous_presenter:
-            return redirect('ecs.dashboard.views.view_dashboard')
+            return redirect('dashboard')
         else:
             return redirect('view_submission', submission_pk=submission.pk)
 
@@ -868,7 +868,7 @@ def change_submission_susar_presenter(request, submission_pk=None):
             user=request.user,
         )
         if request.user == previous_susar_presenter:
-            return redirect('ecs.dashboard.views.view_dashboard')
+            return redirect('dashboard')
         else:
             return redirect('view_submission', submission_pk=submission.pk)
 
@@ -878,7 +878,7 @@ def change_submission_susar_presenter(request, submission_pk=None):
 @with_docstash(group='ecs.core.views.submissions.create_submission_form')
 def delete_docstash_entry(request):
     request.docstash.delete()
-    return redirect_to_next_url(request, reverse('ecs.dashboard.views.view_dashboard'))
+    return redirect_to_next_url(request, reverse('dashboard'))
 
 
 def export_submission(request, submission_pk):

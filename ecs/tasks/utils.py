@@ -122,6 +122,6 @@ class TaskManagementData(object):
                     if self.request.user.profile.show_task_widget:
                         url = reverse('ecs.tasks.views.task_list')
                     else:
-                        url = reverse('ecs.dashboard.views.view_dashboard')
+                        url = reverse('dashboard')
             return redirect(url)
         return response

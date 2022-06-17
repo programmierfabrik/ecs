@@ -25,7 +25,12 @@ apt-get install python3 \
 ```bash
 docker run --rm -p 5432:5432 -e POSTGRES_USER=app -e POSTGRES_PASSWORD=app -e POSTGRES_DB=app postgres:12-alpine
 docker run --rm --network host -v $PWD/:/app/ test-ecs
+```
 
+```
+ecs.core.views.submissions.categorization
+ecs.core.views.submissions.create_submission_form
+ecs.notifications.views.create_notification
 ```
 
 ```bash

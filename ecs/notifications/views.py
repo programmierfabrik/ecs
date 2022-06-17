@@ -169,7 +169,7 @@ def delete_docstash_entry(request):
         if sf.is_notification_update:
             sf.delete()
     request.docstash.delete()
-    return redirect_to_next_url(request, reverse('ecs.dashboard.views.view_dashboard'))
+    return redirect_to_next_url(request, reverse('dashboard'))
 
 @with_docstash(group='ecs.notifications.views.create_notification')
 def upload_document_for_notification(request):

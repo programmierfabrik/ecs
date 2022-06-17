@@ -937,7 +937,7 @@ def next(request):
     try:
         meeting = Meeting.objects.next()
     except Meeting.DoesNotExist:
-        return redirect('ecs.dashboard.views.view_dashboard')
+        return redirect('dashboard')
     else:
         return redirect('ecs.meetings.views.meeting_details', meeting_pk=meeting.pk)
 

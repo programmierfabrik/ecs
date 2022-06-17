@@ -99,7 +99,7 @@ class SubmissionViewsTestCase(LoginTestCase):
         profile.save()
 
     def get_docstash_url(self):
-        url = reverse('ecs.core.views.submissions.create_submission_form')
+        url = reverse('core.submission.create_submission_form')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
         url = response['Location']

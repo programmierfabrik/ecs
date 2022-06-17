@@ -9,4 +9,4 @@ def switch(request):
     if form.is_valid():
         request.session[SESSION_KEY] = getattr(form.cleaned_data.get('user'), 'pk', None)
     # request.GET.get('url', '/')
-    return redirect('ecs.dashboard.views.view_dashboard')
+    return redirect('dashboard')

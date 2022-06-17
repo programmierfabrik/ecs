@@ -29,7 +29,7 @@
                     </a>
                     <h5 class="font-weight-normal">
                         <span class="fa fa-wrench text-info"></span>
-                        <a href="{% url 'ecs.core.views.submissions.create_submission_form' docstash_key=docstash.key %}">
+                        <a href="{% url 'core.submission.create_submission_form' docstash_key=docstash.key %}">
                             {% if docstash.value.notification_type %}
                                 <strong>{{ docstash.value.notification_type }}</strong> für
                             {% endif %}

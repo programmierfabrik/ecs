@@ -65,7 +65,7 @@ def init_batch_sign(request, task, data_func):
 def batch_sign(request):
     tasks = request.sign_session['tasks']
     if not tasks:
-        return redirect('ecs.dashboard.views.view_dashboard')
+        return redirect('dashboard')
 
     task = _get_tasks(request.user).get(pk=tasks[0])
     data = request.sign_session['data_func'](request, task)
@@ -99,7 +99,7 @@ def batch_action(request, action=None):
     elif action == 'cancel':
         request.sign_session.delete()
 
-    url = reverse('ecs.dashboard.views.view_dashboard')
+    url = reverse('dashboard')
     if action in ['retry', 'skip', 'pushback']:
         url = reverse('ecs.signature.views.batch_sign', kwargs={'sign_session_id': request.sign_session.id})
     return redirect(url)
