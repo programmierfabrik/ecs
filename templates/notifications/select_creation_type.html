@@ -12,7 +12,7 @@
     <div class="m-3 row">
         {% for notification_type in notification_types %}
             <div class="col-lg-6">
-                <a class="btn btn-block btn-primary mb-3" href="{% url 'ecs.notifications.views.create_notification' notification_type_pk=notification_type.pk %}">
+                <a class="btn btn-block btn-primary mb-3" href="{% url 'notifications.create_notification' notification_type_pk=notification_type.pk %}">
                     {{ notification_type.name }}
                 </a>
             </div>

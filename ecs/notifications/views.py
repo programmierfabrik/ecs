@@ -159,7 +159,7 @@ def create_diff_notification(request, submission_form_pk=None, notification_type
         }
     )
 
-    return redirect('ecs.notifications.views.create_notification',
+    return redirect('notifications.create_notification',
         docstash_key=docstash.key, notification_type_pk=notification_type.pk)
 
 
@@ -178,7 +178,7 @@ def upload_document_for_notification(request):
 @with_docstash(group='ecs.notifications.views.create_notification')
 def delete_document_from_notification(request):
     delete_document(request, int(request.GET['document_pk']))
-    return redirect('ecs.notifications.views.upload_document_for_notification',
+    return redirect('notifications.upload_document_for_notification',
         docstash_key=request.docstash.key)
 
 @with_docstash()
@@ -217,7 +217,7 @@ def create_notification(request, notification_type_pk=None):
             request.docstash.delete()
             
             notification.render_pdf_document()
-            return redirect('ecs.notifications.views.view_notification',
+            return redirect('notifications.view_notification',
                 notification_pk=notification.pk)
 
     return render(request, 'notifications/form.html', {
@@ -308,4 +308,4 @@ def sign_success(request, document=None):
     answer.signed_at = document.date
     answer.pdf_document = document
     answer.save()
-    return reverse('ecs.notifications.views.view_notification', kwargs={'notification_pk': answer.notification.pk})
+    return reverse('notifications.view_notification', kwargs={'notification_pk': answer.notification.pk})

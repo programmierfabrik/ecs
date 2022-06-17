@@ -145,7 +145,7 @@ class Task(models.Model):
         from ecs.notifications.models import Notification
 
         if isinstance(self.data, Notification):
-            return reverse('ecs.notifications.views.view_notification',
+            return reverse('notifications.view_notification',
                 kwargs={'notification_pk': self.data.pk})
 
         submission = self.data.get_submission()

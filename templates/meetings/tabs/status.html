@@ -292,7 +292,7 @@
         {% for amendment in substantial_amendments %}
             {% with submission=amendment.get_submission %}
                 {% if user.profile.is_internal %}
-                    <a href="{% url 'ecs.notifications.views.view_notification' notification_pk=amendment.pk %}" target="_blank">
+                    <a href="{% url 'notifications.view_notification' notification_pk=amendment.pk %}" target="_blank">
                         {{ submission.get_ec_number_display }}
                     </a>{% if not forloop.last %}, {% endif %}
                 {% else %}

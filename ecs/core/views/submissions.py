@@ -130,7 +130,7 @@ def copy_submission_form(request, submission_form_pk=None, notification_type_pk=
             if sf_id and docstash['type_id'] == notification_type_pk:
                 sf = SubmissionForm.objects.get(id=sf_id)
                 if sf.submission == submission_form.submission:
-                    return redirect('ecs.notifications.views.create_notification',
+                    return redirect('notifications.create_notification',
                         docstash_key=docstash.key,
                         notification_type_pk=notification_type_pk)
 

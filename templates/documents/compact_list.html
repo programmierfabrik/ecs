@@ -7,8 +7,8 @@
         {% url 'ecs.core.views.submissions.download_document' submission_form_pk=submission_form.pk document_pk=doc.pk as download_url %}
         {% url 'ecs.core.views.submissions.view_document' submission_form_pk=submission_form.pk document_pk=doc.pk as view_url %}
     {% elif notification %}
-        {% url 'ecs.notifications.views.download_document' notification_pk=notification.pk document_pk=doc.pk as download_url %}
-        {% url 'ecs.notifications.views.view_document' notification_pk=notification.pk document_pk=doc.pk as view_url %}
+        {% url 'notifications.download_document' notification_pk=notification.pk document_pk=doc.pk as download_url %}
+        {% url 'notifications.view_document' notification_pk=notification.pk document_pk=doc.pk as view_url %}
     {% endif %}
 
     {% ifchanged doc.doctype.identifier %}
