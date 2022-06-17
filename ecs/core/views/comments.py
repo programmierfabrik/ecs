@@ -51,7 +51,7 @@ def edit(request, submission_pk=None, pk=None):
             comment.attachment = attachment
             comment.save()
 
-        return redirect('ecs.core.views.comments.index',
+        return redirect('core.comments.index',
             submission_pk=comment.submission.pk)
     return render(request, 'comments/form.html', {'form': form})
 
@@ -60,7 +60,7 @@ def edit(request, submission_pk=None, pk=None):
 def delete(request, pk=None):
     comment = get_object_or_404(Comment, pk=pk)
     comment.delete()
-    return redirect('ecs.core.views.comments.index',
+    return redirect('core.comments.index',
         submission_pk=comment.submission.pk)
 
 

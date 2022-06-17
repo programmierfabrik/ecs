@@ -23,7 +23,7 @@
             </li>
             {% if allow_export %}
                 <li class="justify-content-start">
-                    {% url 'ecs.core.views.submissions.xls_export' as export_url %}
+                    {% url 'core.submission.xls_export' as export_url %}
                     <a class="btn btn-block btn-primary mt-3" href="{{ export_url }}">
                         {% trans 'Export' %} <i class="fa fa-file-excel-o"></i>
                     </a>

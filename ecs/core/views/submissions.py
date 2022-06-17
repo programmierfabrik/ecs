@@ -509,7 +509,7 @@ def biased_board_members(request, submission_pk=None):
 
     if request.method == 'POST' and form.is_valid():
         submission.biased_board_members.add(form.cleaned_data['biased_board_member'])
-        return redirect('ecs.core.views.submissions.biased_board_members',
+        return redirect('core.submission.biased_board_members',
             submission_pk=submission_pk)
     return render(request, 'submissions/biased_board_members.html', {
         'submission': submission,
@@ -522,7 +522,7 @@ def biased_board_members(request, submission_pk=None):
 def remove_biased_board_member(request, submission_pk=None, user_pk=None):
     submission = get_object_or_404(Submission, pk=submission_pk)
     submission.biased_board_members.remove(user_pk)
-    return redirect('ecs.core.views.submissions.biased_board_members',
+    return redirect('core.submission.biased_board_members',
         submission_pk=submission_pk)
 
 
@@ -686,7 +686,7 @@ def upload_document_for_submission(request):
 @with_docstash(group='ecs.core.views.submissions.create_submission_form')
 def delete_document_from_submission(request):
     delete_document(request, int(request.GET['document_pk']))
-    return redirect('ecs.core.views.submissions.upload_document_for_submission',
+    return redirect('core.submission.upload_document_for_submission',
         docstash_key=request.docstash.key)
 
 @with_docstash()
@@ -1291,7 +1291,7 @@ def grant_temporary_access(request, submission_pk=None):
         temp_auth = form.save(commit=False)
         temp_auth.submission = submission
         temp_auth.save()
-    return redirect(reverse('ecs.core.views.submissions.view_submission', kwargs={'submission_pk': submission_pk}) + '#involved_parties_tab')
+    return redirect(reverse('view_submission', kwargs={'submission_pk': submission_pk}) + '#involved_parties_tab')
 
 
 @user_flag_required('is_executive')
@@ -1299,4 +1299,4 @@ def revoke_temporary_access(request, submission_pk=None, temp_auth_pk=None):
     temp_auth = get_object_or_404(TemporaryAuthorization, pk=temp_auth_pk)
     temp_auth.end = timezone.now()
     temp_auth.save()
-    return redirect(reverse('ecs.core.views.submissions.view_submission', kwargs={'submission_pk': submission_pk}) + '#involved_parties_tab')
+    return redirect(reverse('view_submission', kwargs={'submission_pk': submission_pk}) + '#involved_parties_tab')

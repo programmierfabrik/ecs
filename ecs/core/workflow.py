@@ -145,7 +145,7 @@ class Resubmission(Activity):
         model = Submission
 
     def get_url(self):
-        return reverse('ecs.core.views.submissions.copy_latest_submission_form', kwargs={'submission_pk': self.workflow.data_id})
+        return reverse('core.submission.copy_latest_submission_form', kwargs={'submission_pk': self.workflow.data_id})
 
     def get_final_urls(self):
         return super().get_final_urls() + [

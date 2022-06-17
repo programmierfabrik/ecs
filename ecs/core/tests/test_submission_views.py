@@ -176,7 +176,7 @@ class SubmissionViewsTestCase(LoginTestCase):
         '''
 
         submission_form = create_submission_form()
-        response = self.client.get(reverse('ecs.core.views.submissions.submission_form_pdf', kwargs={'submission_form_pk': submission_form.pk}))
+        response = self.client.get(reverse('core.submission.submission_form_pdf', kwargs={'submission_form_pk': submission_form.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertEqual(next(response.streaming_content)[:5], b'%PDF-')
@@ -184,7 +184,7 @@ class SubmissionViewsTestCase(LoginTestCase):
     def test_document_download(self):
         submission_form = create_submission_form()
         document_pk = submission_form.documents.get().pk
-        response = self.client.get(reverse('ecs.core.views.submissions.download_document', kwargs={'submission_form_pk': submission_form.pk, 'document_pk': document_pk}))
+        response = self.client.get(reverse('core.submission.download_document', kwargs={'submission_form_pk': submission_form.pk, 'document_pk': document_pk}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertEqual(next(response.streaming_content)[:5], b'%PDF-')
@@ -200,7 +200,7 @@ class SubmissionViewsTestCase(LoginTestCase):
         self.client.logout()
         self.client.login(email='someone@example.org', password='password')
 
-        response = self.client.get(reverse('ecs.core.views.submissions.download_document', kwargs={'submission_form_pk': submission_form.pk, 'document_pk': document_pk}))
+        response = self.client.get(reverse('core.submission.download_document', kwargs={'submission_form_pk': submission_form.pk, 'document_pk': document_pk}))
         self.assertEqual(response.status_code, 404)
 
     def test_submission_form_search(self):
@@ -230,7 +230,7 @@ class SubmissionViewsTestCase(LoginTestCase):
         '''
         
         submission_form = create_submission_form(presenter=self.user)
-        response = self.client.get(reverse('ecs.core.views.submissions.copy_latest_submission_form', kwargs={'submission_pk': submission_form.submission.pk}))
+        response = self.client.get(reverse('core.submission.copy_latest_submission_form', kwargs={'submission_pk': submission_form.submission.pk}))
         self.assertEqual(response.status_code, 302)
         url = reverse('ecs.core.views.submissions.copy_submission_form', kwargs={'submission_form_pk': submission_form.pk})
         self.assertEqual(url, urlsplit(response['Location']).path)

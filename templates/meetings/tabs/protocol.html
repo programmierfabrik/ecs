@@ -25,7 +25,7 @@
             new ecs.textarea.TextArea('#{{ form.text.id_for_label }}', [
                 ecs.textarea.toolbarItems.versionHistory(
                     "{{ _('History')|escapejs }} ({{ answer_version }})",
-                    "{% url 'ecs.core.views.fieldhistory.field_history' model_name='timetable_entry' pk=form.instance.pk %}"
+                    "{% url 'core.field_history' model_name='timetable_entry' pk=form.instance.pk %}"
                 ),
                 ecs.textarea.toolbarItems.boilerplate(
                     "{{ _('Insert Boilerplate')|escapejs }}",

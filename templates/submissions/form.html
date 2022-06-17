@@ -224,7 +224,7 @@
             });
 
             $('.upload_container').load(
-                '{% url 'ecs.core.views.submissions.upload_document_for_submission' docstash_key=request.docstash.key %}');
+                '{% url 'core.submission.upload_document_for_submission' docstash_key=request.docstash.key %}');
             
             {% if valid %}
                 ecs.confirm({

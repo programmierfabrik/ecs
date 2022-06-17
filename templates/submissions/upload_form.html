@@ -1,5 +1,5 @@
 {% extends 'documents/upload_form.html' %}
-{% block delete_url %}{% url 'ecs.core.views.submissions.delete_document_from_submission' docstash_key=request.docstash.key %}{% endblock %}
+{% block delete_url %}{% url 'core.submission.delete_document_from_submission' docstash_key=request.docstash.key %}{% endblock %}
 {% block extra_hint %}
     <div class="hint mb-3">
         <span class="fa fa-info text-info"></span>

@@ -24,7 +24,7 @@
         <li class="list-group-item d-block">
             {% if submission|is_docstash %}
                 {% with submission as docstash %}
-                    <a class="delete_docstash btn btn-outline-danger float-right" href="{% url 'ecs.core.views.submissions.delete_docstash_entry' docstash_key=docstash.key %}?next={{ request.path|urlencode }}">
+                    <a class="delete_docstash btn btn-outline-danger float-right" href="{% url 'core.submission.delete_docstash_entry' docstash_key=docstash.key %}?next={{ request.path|urlencode }}">
                         {% trans 'Delete' %}
                     </a>
                     <h5 class="font-weight-normal">
@@ -115,7 +115,7 @@
                 {% if matched_document.parent_object == submission or matched_document.parent_object.submission == submission %}
                     <div class="matched_document">
                         {% trans 'Document' %}:
-                        <a href="{% url 'ecs.core.views.submissions.submission_form_pdf_view' submission_form_pk=matched_document.submission_form.pk %}" target="_blank">
+                        <a href="{% url 'core.submission.submission_form_pdf_view' submission_form_pk=matched_document.submission_form.pk %}" target="_blank">
                             {{ matched_document }}
                         </a>
                     </div>

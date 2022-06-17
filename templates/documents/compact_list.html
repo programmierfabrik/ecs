@@ -4,8 +4,8 @@
 <div class="doclist">
 {% for doc in documents %}
     {% if submission_form %}
-        {% url 'ecs.core.views.submissions.download_document' submission_form_pk=submission_form.pk document_pk=doc.pk as download_url %}
-        {% url 'ecs.core.views.submissions.view_document' submission_form_pk=submission_form.pk document_pk=doc.pk as view_url %}
+        {% url 'core.submission.download_document' submission_form_pk=submission_form.pk document_pk=doc.pk as download_url %}
+        {% url 'core.submission.view_document' submission_form_pk=submission_form.pk document_pk=doc.pk as view_url %}
     {% elif notification %}
         {% url 'notifications.download_document' notification_pk=notification.pk document_pk=doc.pk as download_url %}
         {% url 'notifications.view_document' notification_pk=notification.pk document_pk=doc.pk as view_url %}

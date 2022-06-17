@@ -73,7 +73,7 @@
                 <h2 class="card-header mb-0">
                     Antwort
                     {% if user.profile.is_internal %}
-                        {% url 'ecs.core.views.fieldhistory.field_history' model_name='notification_answer' pk=answer.pk as history_url %}
+                        {% url 'core.field_history' model_name='notification_answer' pk=answer.pk as history_url %}
                         <a class="fa fa-history text-primary float-right" href="javascript:void(ecs.fieldhistory.show('{{ history_url }}'))"></a>
                     {% endif %}
                 </h2>

@@ -66,7 +66,7 @@
                     </td>
                         {% if ta.is_active and user.profile.is_executive %}
                             <td>
-                                <a href="{% url 'ecs.core.views.submissions.revoke_temporary_access' submission_pk=submission.pk temp_auth_pk=ta.pk %}">
+                                <a href="{% url 'core.submission.revoke_temporary_access' submission_pk=submission.pk temp_auth_pk=ta.pk %}">
                                     <span class="fa fa-ban text-danger"></span>
                                 </a>
                             </td>
@@ -84,7 +84,7 @@
     </table>
 {% endif %}
 {% if user.profile.is_executive %}
-    <form class="container" action="{% url 'ecs.core.views.submissions.grant_temporary_access' submission_pk=submission.pk %}" method="post">
+    <form class="container" action="{% url 'core.submission.grant_temporary_access' submission_pk=submission.pk %}" method="post">
         {% csrf_token %}
         {% for field in temporary_auth_form %}
             {% include 'bootstrap/form_field.html' with inline=True %}
@@ -95,5 +95,5 @@
 
 {% if user.profile.is_internal %}
     <h3 class="mt-4">{% trans "Biased Parties" %}</h3>
-    <div data-widget-url="{% url 'ecs.core.views.submissions.biased_board_members' submission_pk=submission.pk %}"></div>
+    <div data-widget-url="{% url 'core.submission.biased_board_members' submission_pk=submission.pk %}"></div>
 {% endif %}
