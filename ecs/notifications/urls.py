@@ -20,7 +20,7 @@ urlpatterns = (
     path('<int:notification_pk>/answer/pdf/', views.notification_answer_pdf),
     path('<int:notification_pk>/answer/edit/', views.edit_notification_answer),
     path('<int:notification_pk>/answer/sign/', views.notification_answer_sign),
-    path('list/open/', views.open_notifications),
+    path('list/open/', views.open_notifications, name='notifications.open_notifications'),
 )
 
 if settings.DEBUG:
