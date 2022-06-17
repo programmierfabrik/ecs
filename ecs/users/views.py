@@ -29,6 +29,7 @@ from ecs.users.forms import EmailLoginForm, IndispositionForm, SetPasswordForm, 
 from ecs.users.utils import get_user, create_user, user_flag_required, user_group_required
 from ecs.communication.utils import send_system_message_template
 from ecs.utils.browserutils import UA
+from django.template.loader import render_to_string
 
 
 class TimestampedTokenFactory(object):
@@ -110,11 +111,11 @@ def register(request):
     form = RegistrationForm(request.POST or None)
     if form.is_valid():
         token = _registration_token_factory.generate_token(form.cleaned_data)
-        activation_url = request.build_absolute_uri(reverse('ecs.users.views.activate', kwargs={'token': token}))
-        htmlmail = str(render_html(request, 'users/registration/activation_email.html', {
+        activation_url = request.build_absolute_uri(reverse('users.activate', kwargs={'token': token}))
+        htmlmail = render_to_string('users/registration/activation_email.html', {
             'activation_url': activation_url,
             'form': form,
-        }))
+        })
         deliver(form.cleaned_data['email'], subject=_('ECS - Registration'), message=None, message_html=htmlmail,
             from_email= settings.DEFAULT_FROM_EMAIL, nofilter=True)
         return render(request, 'users/registration/registration_complete.html', {})
