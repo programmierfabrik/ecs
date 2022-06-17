@@ -5,10 +5,10 @@ from ecs.checklists import views
 
 
 urlpatterns = (
-    re_path(r'^(?P<checklist_pk>\d+)/comments/(?P<flavour>positive|negative)/', views.checklist_comments),
-    path('(<int:checklist_pk>)/pdf/', views.checklist_pdf),
-    path('create_task/submission/(<int:submission_pk>/', views.create_task),
-    path('categorization_tasks/submissions/<int:submission_pk>/', views.categorization_tasks),
+    re_path(r'^(?P<checklist_pk>\d+)/comments/(?P<flavour>positive|negative)/', views.checklist_comments, name='checklists.checklist_comments'),
+    path('(<int:checklist_pk>)/pdf/', views.checklist_pdf, name='checklists.checklist_pdf'),
+    path('create_task/submission/(<int:submission_pk>/', views.create_task, name='checklists.create_task'),
+    path('categorization_tasks/submissions/<int:submission_pk>/', views.categorization_tasks, name='checklists.categorization_tasks'),
 )
 
 if settings.DEBUG:

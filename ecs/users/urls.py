@@ -19,7 +19,7 @@ urlpatterns = (
     path('users/(<int:user_pk>/toggle_active/', views.toggle_active),
     path('users/(<int:user_pk>/details/', views.details),
     path('users/administration/', views.administration, name='users.administration'),
-    path('users/invite/', views.invite),
-    path('users/login_history/', views.login_history),
+    path('users/invite/', views.invite, name='users.invite'),
+    path('users/login_history/', views.login_history, name='users.login_history'),
     re_path(r'^accept_invitation/(?P<invitation_uuid>[\da-zA-Z]{32})/$', views.accept_invitation),
 )

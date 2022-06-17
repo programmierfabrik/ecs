@@ -158,7 +158,7 @@
                 </p>
             {% endif %}
             {% if user.profile.is_internal %}
-                <div data-widget-url="{% url 'ecs.checklists.views.categorization_tasks' submission_pk=submission.pk %}"></div>
+                <div data-widget-url="{% url 'checklists.categorization_tasks' submission_pk=submission.pk %}"></div>
             {% endif %}
         </div>
     {% endif %}
@@ -301,7 +301,7 @@
     {% for checklist, formset in checklist_reviews %}
     <div id="checklist_{{ checklist.pk }}_review_form" class="container collapse">
         {% if formset.readonly and checklist.pdf_document and not checklist.status == 'new' %}
-            {% url 'ecs.checklists.views.checklist_pdf' checklist_pk=checklist.pk as pdf_url %}
+            {% url 'checklists.checklist_pdf' checklist_pk=checklist.pk as pdf_url %}
             <p>
                 <a class="btn btn-outline-primary" href="{{ pdf_url }}">
                     <span class="fa fa-file-pdf-o"></span>
@@ -315,7 +315,7 @@
                 </a>
 
                 {% if debug %}
-                    {% url 'ecs.checklists.views.checklist_pdf_debug' checklist_pk=checklist.pk as pdf_url %}
+                    {% url 'checklists.checklist_pdf_debug' checklist_pk=checklist.pk as pdf_url %}
                     <a class="btn btn-outline-primary" href="{{ pdf_url }}">
                         <span class="fa fa-file-pdf-o"></span>
                         PDF Debug
@@ -352,7 +352,7 @@
             <div id="workflow_log" class="collapse">
                 <div data-widget-url="{% url 'ecs.tasks.views.task_backlog' submission_pk=submission.pk %}"></div>
                 {% if submission.allows_dynamic_task_creation %}
-                    <div class="container mt-4" data-widget-url="{% url 'ecs.checklists.views.create_task' submission_pk=submission.pk %}"></div>
+                    <div class="container mt-4" data-widget-url="{% url 'checklists.create_task' submission_pk=submission.pk %}"></div>
                 {% endif %}
             </div>
         {% endif %}
@@ -393,7 +393,7 @@
                         {% if user.profile.is_internal and not formset.readonly %}
                             ecs.textarea.toolbarItems.boilerplate(
                                 "{% trans 'Insert Boilerplate' %}",
-                                "{% url 'ecs.boilerplate.views.select_boilerplate' %}"
+                                "{% url 'boilerplate.select_boilerplate' %}"
                             )
                         {% endif %}
                     ]);
@@ -415,7 +415,7 @@
                     {% if user.profile.is_internal and not vote_review_form.readonly %}
                         ecs.textarea.toolbarItems.boilerplate(
                             "{% trans 'Insert Boilerplate' %}",
-                            "{% url 'ecs.boilerplate.views.select_boilerplate' %}"
+                            "{% url 'boilerplate.select_boilerplate' %}"
                         )
                     {% endif %}
                 ]);

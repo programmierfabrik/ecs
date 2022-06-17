@@ -153,7 +153,7 @@ def submission_billing(request):
         invoice = Invoice.objects.create(document=doc)
         invoice.submissions = selected_fee + selected_remission
         
-        return redirect('ecs.billing.views.view_invoice', invoice_pk=invoice.pk)
+        return redirect('billing.view_invoice', invoice_pk=invoice.pk)
 
     return render(request, 'billing/submissions.html', {
         'submissions': unbilled_submissions,
@@ -228,7 +228,7 @@ def external_review_payment(request):
         payment = ChecklistPayment.objects.create(document=doc)
         payment.checklists = selected_for_payment
 
-        return redirect('ecs.billing.views.view_checklist_payment', payment_pk=payment.pk)
+        return redirect('billing.view_checklist_payment', payment_pk=payment.pk)
 
     return render(request, 'billing/external_review.html', {
         'checklists': checklists,

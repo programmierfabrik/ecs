@@ -9,11 +9,11 @@
             <a class="nav-link {% if active == 'user_administration' %}active{% endif %}" href="{% url 'users.administration' %}">{% trans "User Administration" %}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link {% if active == 'user_invite' %}active{% endif %}" href="{% url 'ecs.users.views.invite' %}">{% trans "Invite User" %}</a>
+            <a class="nav-link {% if active == 'user_invite' %}active{% endif %}" href="{% url 'users.invite' %}">{% trans "Invite User" %}</a>
         </li>
         {% if user.profile.is_executive %}
             <li class="nav-item">
-                <a class="nav-link {% if active == 'login_history' %}active{% endif %}" href="{% url 'ecs.users.views.login_history' %}">{% trans 'Login History' %}</a>
+                <a class="nav-link {% if active == 'login_history' %}active{% endif %}" href="{% url 'users.login_history' %}">{% trans 'Login History' %}</a>
             </li>
         {% endif %}
     </ul>

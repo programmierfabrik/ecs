@@ -113,13 +113,13 @@
                 {% if checklist and task.closed_at %}
                   <div class="btn-group-vertical btn-block">
                   {% if checklist.has_positive_comments %}
-                    {% url 'ecs.checklists.views.checklist_comments' flavour='positive' checklist_pk=checklist.pk as copy_url %}
+                    {% url 'checklists.checklist_comments' flavour='positive' checklist_pk=checklist.pk as copy_url %}
                     <a class="textblock btn btn-sm btn-secondary" href="{{ copy_url }}">
                         {% trans 'copy positive' %}
                     </a>
                   {% endif %}
                   {% if checklist.has_negative_comments %}
-                    {% url 'ecs.checklists.views.checklist_comments' flavour='negative' checklist_pk=checklist.pk as copy_url %}
+                    {% url 'checklists.checklist_comments' flavour='negative' checklist_pk=checklist.pk as copy_url %}
                     <a class="textblock btn btn-sm btn-secondary" href="{{ copy_url }}">
                         {% trans 'copy negative' %}
                     </a>
@@ -155,7 +155,7 @@
                 new ecs.textarea.TextArea('#id_text', [
                     ecs.textarea.toolbarItems.boilerplate(
                         "{{ _('Insert Boilerplate')|escapejs }}",
-                        "{% url 'ecs.boilerplate.views.select_boilerplate' %}"
+                        "{% url 'boilerplate.select_boilerplate' %}"
                     )
                 ]);
             {% elif not top.is_break %}
@@ -166,7 +166,7 @@
                     ),
                     ecs.textarea.toolbarItems.boilerplate(
                         "{{ _('Insert Boilerplate')|escapejs }}",
-                        "{% url 'ecs.boilerplate.views.select_boilerplate' %}"
+                        "{% url 'boilerplate.select_boilerplate' %}"
                     )
                 ]);
             {% endif %}
