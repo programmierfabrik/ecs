@@ -17,11 +17,11 @@
                         </span>
                     </h4>
                     <ul class="list-inline"> {% for task in task_type.list %} <li class="list-inline-item">
-                        <a href="{% url 'ecs.tasks.views.do_task' task_pk=task.pk %}">{{ task.data }}</a>
+                        <a href="{% url 'tasks.do_task' task_pk=task.pk %}">{{ task.data }}</a>
                         {% if not task.accepted %}
                             <span class="fa fa-exclamation text-info" title="{% trans 'assigned' %}"></span>
                             {% if task.task_type.is_delegatable %}
-                                <form class="open-in-widget d-inline-block" method="post" action="{% url 'ecs.tasks.views.decline_task' task_pk=task.pk %}{% if submission %}?submission={{ submission.pk }}{% endif %}">
+                                <form class="open-in-widget d-inline-block" method="post" action="{% url 'tasks.decline_task' task_pk=task.pk %}{% if submission %}?submission={{ submission.pk }}{% endif %}">
                                     {% csrf_token %}
                                     <a class="submit-in-widget" href="">{% trans "Decline" %}</a>
                                 </form>
@@ -53,7 +53,7 @@
                                 {{ task_type.list|length }}
                             </span>
                             {% if task_type.list|length > 1 %}
-                                <form class="float-right mr-3 open-in-widget" method="post" action="{% url 'ecs.tasks.views.accept_tasks' %}{% if submission %}?submission={{ submission.pk }}{% endif %}">
+                                <form class="float-right mr-3 open-in-widget" method="post" action="{% url 'tasks.accept_tasks' %}{% if submission %}?submission={{ submission.pk }}{% endif %}">
                                     {% csrf_token %}
                                     {% for task in task_type.list %}
                                         <input type="hidden" name="task_id" value="{{ task.id }}" />
@@ -65,11 +65,11 @@
                             {% endif %}
                         </h4>
                         <ul class="list-inline"> {% for task in task_type.list %} <li class="list-inline-item">
-                            <form class="open-in-widget d-inline-block" method="post" action="{% url 'ecs.tasks.views.accept_task' task_pk=task.pk %}{% if submission %}?submission={{ submission.pk }}{% endif %}">
+                            <form class="open-in-widget d-inline-block" method="post" action="{% url 'tasks.accept_task' task_pk=task.pk %}{% if submission %}?submission={{ submission.pk }}{% endif %}">
                                 {% csrf_token %}
                                 <a class="submit-in-widget" href="">{{ task.data }}</a>
                             </form>
-                            {% url 'ecs.tasks.views.preview_task' task_pk=task.pk as preview_url %}
+                            {% url 'tasks.preview_task' task_pk=task.pk as preview_url %}
                             <a class="fa fa-search text-info" title="{% trans "Preview" %}" href="{{ preview_url }}"></a>
                         </li> {% endfor %} </ul>
                     </li>
@@ -195,7 +195,7 @@
                                     {{ task_type.list|length }}
                                 </span>
                                 {% if task_type.list|length > 1 %}
-                                    <form class="float-right mr-3 open-in-widget" method="post" action="{% url 'ecs.tasks.views.accept_tasks' %}{% if submission %}?submission={{ submission.pk }}{% endif %}">
+                                    <form class="float-right mr-3 open-in-widget" method="post" action="{% url 'tasks.accept_tasks' %}{% if submission %}?submission={{ submission.pk }}{% endif %}">
                                         {% csrf_token %}
                                         {% for task in task_type.list %}
                                             <input type="hidden" name="task_id" value="{{ task.id }}" />
@@ -207,11 +207,11 @@
                                 {% endif %}
                             </h4>
                             <ul class="list-inline"> {% for task in task_type.list %} <li class="list-inline-item">
-                                <form class="open-in-widget d-inline-block" method="post" action="{% url 'ecs.tasks.views.accept_task' task_pk=task.pk %}{% if submission %}?submission={{ submission.pk }}{% endif %}">
+                                <form class="open-in-widget d-inline-block" method="post" action="{% url 'tasks.accept_task' task_pk=task.pk %}{% if submission %}?submission={{ submission.pk }}{% endif %}">
                                     {% csrf_token %}
                                     <a class="submit-in-widget" href="">{{ task.data }}</a>
                                 </form>
-                                {% url 'ecs.tasks.views.preview_task' task_pk=task.pk as preview_url %}
+                                {% url 'tasks.preview_task' task_pk=task.pk as preview_url %}
                                 <a class="fa fa-search text-info" title="{% trans "Preview" %}" href="{{ preview_url }}"></a>
                             </li> {% endfor %} </ul>
                         </li>

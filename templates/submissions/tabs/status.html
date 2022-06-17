@@ -8,7 +8,7 @@
         <tr>
             <th class="text-nowrap">{% trans 'Tags' %}</th>
             <td>
-                <div data-widget-url="{% url 'ecs.tags.views.assign' submission_pk=submission.pk %}"></div>
+                <div data-widget-url="{% url 'tags.assign' submission_pk=submission.pk %}"></div>
             </td>
         </tr>
     {% endif %}

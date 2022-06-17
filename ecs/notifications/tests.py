@@ -207,7 +207,7 @@ class NotificationFormTest(LoginTestCase):
             notification = self.client.get(response['Location']).context['notification']
         
         def do_review(user, action='complete'):
-            response = self.client.get(reverse('ecs.tasks.views.my_tasks', kwargs={'submission_pk': sf.submission.pk}))
+            response = self.client.get(reverse('tasks.my_tasks', kwargs={'submission_pk': sf.submission.pk}))
             task = response.context['open_tasks'].get(
                 data_id=notification.pk, 
                 content_type=ContentType.objects.get_for_model(ProgressReportNotification),

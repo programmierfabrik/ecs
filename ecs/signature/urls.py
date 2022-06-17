@@ -9,8 +9,8 @@ urlpatterns = (
     path('batch/<int:sign_session_id>/', views.batch_sign),
     path('send/<int:pdf_id>/', views.sign_send),
     path('error/<int:pdf_id>/', views.sign_error),
-    path('preview/<int:pdf_id>/', views.sign_preview),
-    re_path(r'^action/(?P<pdf_id>\d+)/(?P<action>[^/]+)/$', views.batch_action),
+    path('preview/<int:pdf_id>/', views.sign_preview, name='signature.sign_preview'),
+    re_path(r'^action/(?P<pdf_id>\d+)/(?P<action>[^/]+)/$', views.batch_action, name='signature.batch_action'),
     path('receive/<int:pdf_id>/', views.sign_receive),
 )
 

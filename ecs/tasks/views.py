@@ -56,7 +56,7 @@ def delete_task(request, submission_pk=None, task_pk=None):
     if task.task_type.is_dynamic and task.created_by and \
         task.created_by != request.user:
         send_delete_message(task, request.user)
-    return redirect('ecs.tasks.views.task_backlog', submission_pk=submission_pk)
+    return redirect('tasks.task_backlog', submission_pk=submission_pk)
 
 
 def my_tasks(request, template='tasks/compact_list.html', submission_pk=None, ignore_task_types=True):
@@ -358,7 +358,7 @@ def accept_task(request, task_pk=None, full=False):
     task.accept(request.user)
 
     submission_pk = request.GET.get('submission')
-    view = 'tasks.task_list' if full else 'ecs.tasks.views.my_tasks'
+    view = 'tasks.task_list' if full else 'tasks.my_tasks'
     return redirect_to_next_url(request, reverse(view, kwargs={'submission_pk': submission_pk} if submission_pk else None))
 
 @require_POST
@@ -374,7 +374,7 @@ def accept_tasks(request, full=False):
     for task in tasks:
         task.accept(request.user)
 
-    view = 'tasks.task_list' if full else 'ecs.tasks.views.my_tasks'
+    view = 'tasks.task_list' if full else 'tasks.my_tasks'
     return redirect_to_next_url(request, reverse(view, kwargs={'submission_pk': submission_pk} if submission_pk else None))
 
 @require_POST
@@ -389,7 +389,7 @@ def decline_task(request, task_pk=None, full=False):
     task_declined.send(type(task.node_controller), task=task)
 
     submission_pk = request.GET.get('submission')
-    view = 'tasks.task_list' if full else 'ecs.tasks.views.my_tasks'
+    view = 'tasks.task_list' if full else 'tasks.my_tasks'
     return redirect_to_next_url(request, reverse(view, kwargs={'submission_pk': submission_pk} if submission_pk else None))
 
 @require_POST

@@ -36,7 +36,7 @@ def assign(request, submission_pk=None):
     form.fields['tags'].initial = submission.tags.all()
     if request.method == 'POST' and form.is_valid():
         submission.tags = form.cleaned_data['tags']
-        return redirect('ecs.tags.views.assign', submission_pk=submission_pk)
+        return redirect('tags.assign', submission_pk=submission_pk)
     return render(request, 'tags/assign.html', {
         'submission': submission,
         'form': form,
@@ -49,6 +49,6 @@ def delete(request, pk=None):
     if tag.submissions.exists():
         messages.error(request,
             _('This tag is still used and can\'t be deleted.'))
-        return redirect('ecs.tags.views.edit', pk=pk)
+        return redirect('tags.edit', pk=pk)
     tag.delete()
     return redirect('tags.index')

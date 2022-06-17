@@ -70,7 +70,7 @@ class ExternalReview(Activity):
                     timetable_entries__submission=c.submission, started=None
                 ).order_by('start').first()
             price = Price.objects.get_review_price()
-            url = reverse('ecs.tasks.views.do_task', kwargs={'task_pk': token.task.pk})
+            url = reverse('tasks.do_task', kwargs={'task_pk': token.task.pk})
             send_system_message_template(c.user, _('Request for review'), 'checklists/external_reviewer_invitation.txt', {'task': token.task, 'meeting': meeting, 'price': price, 'ABSOLUTE_URL_PREFIX': settings.ABSOLUTE_URL_PREFIX, 'url': url}, submission=c.submission)
         return token
 
