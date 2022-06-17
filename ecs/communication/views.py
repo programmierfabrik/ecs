@@ -76,19 +76,19 @@ def mark_read(request, thread_pk=None):
     thread = get_object_or_404(Thread.objects.by_user(request.user), pk=thread_pk)
     thread.messages.filter(receiver=request.user).update(unread=False)
     return redirect_to_next_url(request,
-        reverse('ecs.communication.views.dashboard_widget'))
+        reverse('communication.dashboard_widget'))
 
 
 def star(request, thread_pk=None):
     thread = get_object_or_404(Thread.objects.by_user(request.user), pk=thread_pk)
     thread.star(request.user)
-    return redirect_to_next_url(request, reverse('ecs.communication.views.dashboard_widget'))
+    return redirect_to_next_url(request, reverse('communication.dashboard_widget'))
 
 
 def unstar(request, thread_pk=None):
     thread = get_object_or_404(Thread.objects.by_user(request.user), pk=thread_pk)
     thread.unstar(request.user)
-    return redirect_to_next_url(request, reverse('ecs.communication.views.dashboard_widget'))
+    return redirect_to_next_url(request, reverse('communication.dashboard_widget'))
 
 
 def dashboard_widget(request):

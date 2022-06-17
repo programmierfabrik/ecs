@@ -1,7 +1,7 @@
 {% load i18n core widget_tweaks %}
 
 <div class="p-3 text-center">
-    {% url 'ecs.scratchpad.views.popup_list' as list_url %}
+    {% url 'scratchpad.popup_list' as list_url %}
     <a class="btn btn-secondary float-right" href="{{ list_url }}" title="{% trans "Show all my scratchpads" %}">
         <span class="fa fa-exchange"></span>
     </a>
@@ -23,7 +23,7 @@
     </div>
 </div>
 
-{% url 'ecs.scratchpad.views.popup' scratchpad_pk=scratchpad.pk as url %}
+{% url 'scratchpad.popup' scratchpad_pk=scratchpad.pk as url %}
 <form class="px-3" action="{{ url }}{% if submission %}?submission={{ submission.pk }}{% endif %}" method="post">
     {% csrf_token %}
     {% render_field form.text class+='form-control' rows=1 %}

@@ -25,7 +25,7 @@ def edit_boilerplate(request, text_pk=None):
         text = form.save(commit=False)
         text.author = request.user
         text.save()
-        return redirect('ecs.boilerplate.views.list_boilerplate')
+        return redirect('boilerplate.list_boilerplate')
     
     return render(request, 'boilerplate/form.html', {
         'text': text,
@@ -37,7 +37,7 @@ def edit_boilerplate(request, text_pk=None):
 def delete_boilerplate(request, text_pk=None):
     text = get_object_or_404(Text, pk=text_pk)
     text.delete()
-    return redirect('ecs.boilerplate.views.list_boilerplate')
+    return redirect('boilerplate.list_boilerplate')
     
 
 @user_flag_required('is_internal')

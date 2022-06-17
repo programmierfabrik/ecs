@@ -44,7 +44,7 @@
                 </a>
 
                 {% if top.submission.is_accessible %}
-                    {% url 'ecs.scratchpad.views.popup' as scratchpad_url %}
+                    {% url 'scratchpad.popup' as scratchpad_url %}
                     <a class="ml-3 scratchpad" href="{{ scratchpad_url }}?submission={{ top.submission.pk }}" title="{% trans 'Scratchpad' %}">
                         <span class="fa fa-sticky-note"></span>
                     </a>

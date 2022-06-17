@@ -4,7 +4,7 @@ from ecs.tags import views
 
 
 urlpatterns = (
-    path('', views.index),
+    path('', views.index, name='tags.index'),
     path('new/', views.edit),
     path('<int:pk>/edit/', views.edit),
     path('<int:pk>/delete/', views.delete),

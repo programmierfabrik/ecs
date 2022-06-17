@@ -4,5 +4,5 @@ from ecs.userswitcher import views
 
 
 urlpatterns = (
-    path('switch/', views.switch),
+    path('switch/', views.switch, name='userswitcher.switch'),
 )

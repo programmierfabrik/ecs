@@ -6,10 +6,10 @@ from ecs.meetings import views
 urlpatterns = (
     path('reschedule/submission/<int:submission_pk>/', views.reschedule_submission),
 
-    path('new/', views.create_meeting),
-    path('next/', views.next),
-    path('list/upcoming/', views.upcoming_meetings),
-    path('list/past/', views.past_meetings),
+    path('new/', views.create_meeting, name='meetings.create_meeting'),
+    path('next/', views.next, name='meetings.next'),
+    path('list/upcoming/', views.upcoming_meetings, name='meetings.upcoming_meetings'),
+    path('list/past/', views.past_meetings, name='meetings.past_meetings'),
     path('<int:meeting_pk>/', views.meeting_details),
     path('<int:meeting_pk>/constraints_for_user/<int:user_pk>/', views.edit_user_constraints),
     path('<int:meeting_pk>/edit/', views.edit_meeting),

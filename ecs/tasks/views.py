@@ -358,7 +358,7 @@ def accept_task(request, task_pk=None, full=False):
     task.accept(request.user)
 
     submission_pk = request.GET.get('submission')
-    view = 'ecs.tasks.views.task_list' if full else 'ecs.tasks.views.my_tasks'
+    view = 'tasks.task_list' if full else 'ecs.tasks.views.my_tasks'
     return redirect_to_next_url(request, reverse(view, kwargs={'submission_pk': submission_pk} if submission_pk else None))
 
 @require_POST
@@ -374,7 +374,7 @@ def accept_tasks(request, full=False):
     for task in tasks:
         task.accept(request.user)
 
-    view = 'ecs.tasks.views.task_list' if full else 'ecs.tasks.views.my_tasks'
+    view = 'tasks.task_list' if full else 'ecs.tasks.views.my_tasks'
     return redirect_to_next_url(request, reverse(view, kwargs={'submission_pk': submission_pk} if submission_pk else None))
 
 @require_POST
@@ -389,7 +389,7 @@ def decline_task(request, task_pk=None, full=False):
     task_declined.send(type(task.node_controller), task=task)
 
     submission_pk = request.GET.get('submission')
-    view = 'ecs.tasks.views.task_list' if full else 'ecs.tasks.views.my_tasks'
+    view = 'tasks.task_list' if full else 'ecs.tasks.views.my_tasks'
     return redirect_to_next_url(request, reverse(view, kwargs={'submission_pk': submission_pk} if submission_pk else None))
 
 @require_POST

@@ -6,7 +6,7 @@
 
 <div class="list-group px-3">
     {% for scratchpad in scratchpads %}
-        {% url 'ecs.scratchpad.views.popup' scratchpad_pk=scratchpad.pk as url %}
+        {% url 'scratchpad.popup' scratchpad_pk=scratchpad.pk as url %}
         <a class="list-group-item list-group-item-action d-block" href="{{ url }}">
             <h6 class="list-group-item-heading">
                 {% if scratchpad.submission %}

@@ -192,7 +192,7 @@
             {% include 'notifications/stashed_notification_list.html' %}
         {% endif %}
         {% if submission.presenter == user or submission.susar_presenter == user %}
-            {% url 'ecs.notifications.views.select_notification_creation_type' as create_url %}
+            {% url 'notification.select_notification_creation_type' as create_url %}
             <a class="btn btn-outline-primary mt-3" href="{{ create_url }}">
                 {% trans "Create a new notification" %}
             </a>
@@ -227,7 +227,7 @@
             {% endfor %}
         </ul>
         {% if submission.presenter == user %}
-            {% url 'ecs.notifications.views.select_notification_creation_type' as create_url %}
+            {% url 'notification.select_notification_creation_type' as create_url %}
             <a class="btn btn-outline-primary mt-3" href="{{ create_url }}">
                 {% trans "Create a new notification" %}
             </a>

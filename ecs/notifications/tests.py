@@ -24,7 +24,7 @@ class NotificationFormTest(LoginTestCase):
         '''
         
         NotificationType.objects.create(name='foo notif')
-        response = self.client.get(reverse('ecs.notifications.views.select_notification_creation_type'))
+        response = self.client.get(reverse('notification.select_notification_creation_type'))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(b'foo notif' in response.content)
         

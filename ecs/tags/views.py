@@ -23,7 +23,7 @@ def edit(request, pk=None):
     form = TagForm(request.POST or None, instance=instance)
     if request.method == 'POST' and form.is_valid():
         form.save()
-        return redirect('ecs.tags.views.index')
+        return redirect('tags.index')
     return render(request, 'tags/edit.html', {
         'form': form,
     })
@@ -51,4 +51,4 @@ def delete(request, pk=None):
             _('This tag is still used and can\'t be deleted.'))
         return redirect('ecs.tags.views.edit', pk=pk)
     tag.delete()
-    return redirect('ecs.tags.views.index')
+    return redirect('tags.index')

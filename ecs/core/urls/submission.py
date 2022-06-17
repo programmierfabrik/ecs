@@ -12,11 +12,11 @@ urlpatterns = (
 
     path('<int:submission_pk>/messages/new/', new_thread),
 
-    path('list/all/', views.all_submissions),
+    path('list/all/', views.all_submissions, name='core.submission.all_submissions'),
     path('list/xls/', views.xls_export),
     re_path(r'^list/xls/(?P<shasum>[0-9a-f]{40})/$', views.xls_export_download),
-    path('list/assigned/', views.assigned_submissions),
-    path('list/mine/', views.my_submissions),
+    path('list/assigned/', views.assigned_submissions, name='core.submission.assigned_submissions'),
+    path('list/mine/', views.my_submissions, name='core.submission.my_submissions'),
 
     path('import/', views.import_submission_form, name='core.submission.import_submission_form'),
     re_path(r'^new/(?:(?P<docstash_key>.+)/)?$', views.create_submission_form, name='core.submission.create_submission_form'),

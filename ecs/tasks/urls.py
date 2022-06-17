@@ -4,7 +4,7 @@ from ecs.tasks import views
 
 
 urlpatterns = (
-    re_path(r'^list/(?:submission/(?P<submission_pk>\d+)/)?$', views.task_list),
+    re_path(r'^list/(?:submission/(?P<submission_pk>\d+)/)?$', views.task_list, name='tasks.task_list'),
     re_path(r'^list/mine/(?:submission/(?P<submission_pk>\d+)/)?$', views.my_tasks),
     path('<int:task_pk>/accept/', views.accept_task),
     path('<int:task_pk>/accept/full/', views.accept_task_full),

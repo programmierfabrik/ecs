@@ -41,7 +41,7 @@ class ViewTestCase(EcsTestCase):
         and if meeting entries are correctly stored in the timetable.
         '''
         
-        create_meeting_url = reverse('ecs.meetings.views.create_meeting')
+        create_meeting_url = reverse('meetings.create_meeting')
         response = self.client.get(create_meeting_url)
         self.assertEqual(response.status_code, 200)
 

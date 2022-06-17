@@ -1018,7 +1018,7 @@ def xls_export(request):
     messages.info(request,
         _('The XLS export has been started. You will get a message when the file is ready.'))
 
-    return redirect('ecs.core.views.submissions.all_submissions')
+    return redirect('core.submission.all_submissions')
 
 
 @user_flag_required('is_internal')

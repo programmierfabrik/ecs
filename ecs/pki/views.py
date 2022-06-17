@@ -65,4 +65,4 @@ def create_cert(request):
 def revoke_cert(request, cert_pk=None):
     cert = get_object_or_404(Certificate, pk=cert_pk)
     cert.revoke()
-    return redirect('ecs.pki.views.cert_list')
+    return redirect('pki.cert_list')

@@ -231,7 +231,7 @@ def edit_profile(request):
     
     if form.is_valid():
         form.save()
-        return redirect('ecs.users.views.profile')
+        return redirect('users.profile')
         
     return render(request, 'users/profile_form.html', {
         'form': form,
@@ -246,7 +246,7 @@ def notify_return(request):
     profile = request.user.profile
     profile.is_indisposed = False
     profile.save()
-    return redirect('ecs.users.views.profile')
+    return redirect('users.profile')
 
 
 @user_group_required('EC-Office', 'EC-Executive')
@@ -259,7 +259,7 @@ def indisposition(request, user_pk=None):
         profile = user.profile
         if profile.is_indisposed:
             send_system_message_template(profile.communication_proxy, _('{user} indisposed').format(user=user), 'users/indisposed_proxy.txt', {'user': user})
-        return redirect('ecs.users.views.administration')
+        return redirect('users.administration')
 
     return render(request, 'users/indisposition.html', {
         'profile_user': user,
@@ -277,7 +277,7 @@ def toggle_active(request, user_pk=None):
         user.is_active = True
 
     user.save()
-    return redirect('ecs.users.views.administration')
+    return redirect('users.administration')
 
 
 @user_group_required('EC-Office', 'EC-Executive')

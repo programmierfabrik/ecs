@@ -9,7 +9,7 @@ urlpatterns = (
     path('accounts/register/', views.register, name='users.register'),
 
     path('activate/<str:token>', views.activate, name='users.activate'),
-    path('profile/', views.profile),
+    path('profile/', views.profile, name='users.profile'),
     path('profile/edit/', views.edit_profile),
     path('profile/change-password/', views.change_password),
     path('request-password-reset/', views.request_password_reset, name='users.request_password_reset'),
@@ -18,7 +18,7 @@ urlpatterns = (
     path('users/notify_return/', views.notify_return),
     path('users/(<int:user_pk>/toggle_active/', views.toggle_active),
     path('users/(<int:user_pk>/details/', views.details),
-    path('users/administration/', views.administration),
+    path('users/administration/', views.administration, name='users.administration'),
     path('users/invite/', views.invite),
     path('users/login_history/', views.login_history),
     re_path(r'^accept_invitation/(?P<invitation_uuid>[\da-zA-Z]{32})/$', views.accept_invitation),

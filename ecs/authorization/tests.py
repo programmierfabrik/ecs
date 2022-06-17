@@ -117,7 +117,7 @@ class SubmissionAuthTestCase(EcsTestCase):
         and is denied for unauthorized users depending on the role of the users.
         '''
         
-        self._check_view(False, 'ecs.core.views.submissions.all_submissions')
+        self._check_view(False, 'core.submission.all_submissions')
         self._check_view(False, 'readonly_submission_form', submission_form_pk=self.sf.pk)
         self._check_view(False, 'ecs.core.views.submissions.diff', self.sf.pk, self.sf.pk)
 

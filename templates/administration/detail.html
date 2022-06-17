@@ -6,7 +6,7 @@
 {% block content %}
     <ul class="nav nav-tabs flex-wrap mb-3 tab_headers">
         <li class="nav-item">
-            <a class="nav-link {% if active == 'user_administration' %}active{% endif %}" href="{% url 'ecs.users.views.administration' %}">{% trans "User Administration" %}</a>
+            <a class="nav-link {% if active == 'user_administration' %}active{% endif %}" href="{% url 'users.administration' %}">{% trans "User Administration" %}</a>
         </li>
         <li class="nav-item">
             <a class="nav-link {% if active == 'user_invite' %}active{% endif %}" href="{% url 'ecs.users.views.invite' %}">{% trans "Invite User" %}</a>
