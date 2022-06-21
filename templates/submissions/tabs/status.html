@@ -38,7 +38,7 @@
                         </td>
                         <td>
                             {% if submission_form|allows_edits_by:user or submission_form|allows_amendments_by:user %}
-                                <a href="{% url 'core.submission.create_submission_form' docstash_key=current_docstash.key %}">
+                                <a href="{% url 'core.submission.create_submission_form_by_docstash_key' docstash_key=current_docstash.key %}">
                                     <span class="fa fa-pencil"></span>
                                     {% trans 'Edit' %}
                                 </a><br>

@@ -19,7 +19,8 @@ urlpatterns = (
     path('list/mine/', views.my_submissions, name='core.submission.my_submissions'),
 
     path('import/', views.import_submission_form, name='core.submission.import_submission_form'),
-    re_path(r'^new/(?:(?P<docstash_key>.+)/)?$', views.create_submission_form, name='core.submission.create_submission_form'),
+    path('new/', views.create_submission_form, name='core.submission.create_submission_form'),
+    path('new/<str:docstash_key>/', views.create_submission_form, name='core.submission.create_submission_form_by_docstash_key'),
     path('delete/<str:docstash_key>/', views.delete_docstash_entry, name='core.submission.delete_docstash_entry'),
     path('doc/upload/<str:docstash_key>/', views.upload_document_for_submission, name='core.submission.upload_document_for_submission'),
     path('doc/delete/<str:docstash_key>/', views.delete_document_from_submission, name='core.submission.delete_document_from_submission'),

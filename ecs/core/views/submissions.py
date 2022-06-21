@@ -160,7 +160,7 @@ def copy_submission_form(request, submission_form_pk=None, notification_type_pk=
     if delete:
         submission_form.submission.delete()
 
-    return redirect('core.submission.create_submission_form',
+    return redirect('core.submission.create_submission_form_by_docstash_key',
         docstash_key=docstash.key)
 
 
