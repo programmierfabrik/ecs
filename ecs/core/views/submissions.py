@@ -799,7 +799,7 @@ def create_submission_form(request):
             on_study_submit.send(Submission, submission=submission, form=submission_form, user=request.user)
 
             if notification_type:
-                return redirect('ecs.notifications.views.create_diff_notification',
+                return redirect('notifications.create_diff_notification',
                     submission_form_pk=submission_form.pk,
                     notification_type_pk=notification_type.pk)
 

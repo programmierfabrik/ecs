@@ -6,7 +6,7 @@ from ecs.notifications import views
 
 urlpatterns = (
     path('new/', views.select_notification_creation_type, name='notification.select_notification_creation_type'),
-    path('new/<int:notification_type_pk>/diff/<int:submission_form_pk>/', views.create_diff_notification),
+    path('new/<int:notification_type_pk>/diff/<int:submission_form_pk>/', views.create_diff_notification, name='notifications.create_diff_notification'),
     re_path(r'^new/(?P<notification_type_pk>\d+)/(?:(?P<docstash_key>.+)/)?$', views.create_notification, name='notifications.create_notification'),
     path('delete/<str:docstash_key>/', views.delete_docstash_entry, name='notifications.delete_docstash_entry'),
     path('doc/upload/<str:docstash_key>/', views.upload_document_for_notification, name='notifications.upload_document_for_notification'),
