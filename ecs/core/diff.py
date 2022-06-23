@@ -274,7 +274,7 @@ class ModelDiffer(object):
             field = None
         
         if isinstance(field, models.ForeignKey):
-            return diff_model_instances(old_val, new_val, model=field.rel.to, **kwargs)
+            return diff_model_instances(old_val, new_val, model=field.related_model, **kwargs)
         elif isinstance(new_val, (Manager, QuerySet)) or isinstance(old_val, (Manager, QuerySet)):
             old_val = list(old_val.all()) if old else []
             new_val = list(new_val.all()) if new else []

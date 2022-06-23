@@ -29,7 +29,7 @@ class QFactoryRegistry(object):
         if lookup:
             for bit in lookup.split('__'):
                 try:
-                    target_model = target_model._meta.get_field(bit).rel.to
+                    target_model = target_model._meta.get_field(bit).related_model
                 except AttributeError:
                     raise Exception("cannot lookup %s.%s for authoriation" % (target_model, bit))
         q_factory = self.q_factories.get(target_model, None)
