@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='review_for',
-            field=models.ForeignKey(to='tasks.Task', null=True, on_delete=models.PROTECT),
+            field=models.ForeignKey(to='tasks.Task', null=True, on_delete=models.CASCADE),
         ),
         migrations.RunSQL('''
             update tasks_task t

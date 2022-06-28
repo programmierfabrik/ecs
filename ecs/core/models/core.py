@@ -25,7 +25,7 @@ class MedicalCategory(models.Model):
         return '%s (%s)' % (self.name, self.abbrev)
 
 class AdvancedSettings(models.Model):
-    default_contact = models.ForeignKey(User, on_delete=models.PROTECT)
+    default_contact = models.ForeignKey(User, on_delete=models.CASCADE)
     display_notifications_in_protocol = models.BooleanField(default=False)
     display_biased_in_amendment_answer_pdf = models.BooleanField(default=True)
     require_internal_vote_review = models.BooleanField(default=False)

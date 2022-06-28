@@ -10,11 +10,11 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, related_name='profile', on_delete=models.PROTECT)
+    user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
     last_password_change = models.DateTimeField(auto_now_add=True)
     is_phantom = models.BooleanField(default=False)
     is_indisposed = models.BooleanField(default=False)
-    communication_proxy = models.ForeignKey(User, null=True, on_delete=models.PROTECT)
+    communication_proxy = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
 
     # denormalized from user groups for faster lookup
     is_board_member = models.BooleanField(default=False)
@@ -95,7 +95,7 @@ class UserProfile(models.Model):
 
 
 class UserSettings(models.Model):
-    user = models.OneToOneField(User, related_name='ecs_settings', on_delete=models.PROTECT)
+    user = models.OneToOneField(User, related_name='ecs_settings', on_delete=models.CASCADE)
     submission_filter_search = JSONField()
     submission_filter_all = JSONField()
     submission_filter_widget = JSONField()
@@ -124,7 +124,7 @@ class InvitationManager(models.Manager.from_queryset(InvitationQuerySet)):
         return InvitationQuerySet(self.model).distinct()
 
 class Invitation(models.Model):
-    user = models.ForeignKey(User, related_name='ecs_invitations', on_delete=models.PROTECT)
+    user = models.ForeignKey(User, related_name='ecs_invitations', on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, db_index=True)
     is_used = models.BooleanField(default=False, db_index=True)
     created_at = models.DateTimeField(default=timezone.now, db_index=True)
@@ -140,5 +140,5 @@ LOGIN_HISTORY_TYPES = (
 class LoginHistory(models.Model):
     type = models.CharField(max_length=32, choices=LOGIN_HISTORY_TYPES)
     timestamp = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     ip = models.GenericIPAddressField(protocol='ipv4')

@@ -207,6 +207,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='amendmentnotification',
             name='meeting',
-            field=models.ForeignKey(to='meetings.Meeting', null=True, related_name='amendments', on_delete=models.PROTECT),
+            field=models.ForeignKey(to='meetings.Meeting', null=True, related_name='amendments', on_delete=models.CASCADE),
         ),
     ]

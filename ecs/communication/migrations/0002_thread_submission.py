@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='thread',
             name='submission',
-            field=models.ForeignKey(to='core.Submission', null=True, on_delete=models.PROTECT),
+            field=models.ForeignKey(to='core.Submission', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='vote',
             name='submission_form',
-            field=models.ForeignKey(related_name='votes', to='core.SubmissionForm', on_delete=models.PROTECT),
+            field=models.ForeignKey(related_name='votes', to='core.SubmissionForm', on_delete=models.CASCADE),
         ),
     ]

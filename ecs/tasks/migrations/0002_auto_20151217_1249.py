@@ -18,25 +18,25 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='tasktype',
             name='workflow_node',
-            field=models.OneToOneField(null=True, to='workflow.Node', on_delete=models.PROTECT),
+            field=models.OneToOneField(null=True, to='workflow.Node', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='task',
             name='assigned_to',
-            field=models.ForeignKey(related_name='tasks', to=settings.AUTH_USER_MODEL, null=True, on_delete=models.PROTECT),
+            field=models.ForeignKey(related_name='tasks', to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='task',
             name='content_type',
-            field=models.ForeignKey(to='contenttypes.ContentType', null=True, on_delete=models.PROTECT),
+            field=models.ForeignKey(to='contenttypes.ContentType', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='task',
             name='created_by',
-            field=models.ForeignKey(related_name='created_tasks', to=settings.AUTH_USER_MODEL, null=True, on_delete=models.PROTECT),
+            field=models.ForeignKey(related_name='created_tasks', to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -48,13 +48,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='task_type',
-            field=models.ForeignKey(related_name='tasks', to='tasks.TaskType', on_delete=models.PROTECT),
+            field=models.ForeignKey(related_name='tasks', to='tasks.TaskType', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='task',
             name='workflow_token',
-            field=models.OneToOneField(related_name='task', null=True, to='workflow.Token', on_delete=models.PROTECT),
+            field=models.OneToOneField(related_name='task', null=True, to='workflow.Token', on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

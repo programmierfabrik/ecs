@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='docstashdata',
             name='stash',
-            field=models.ForeignKey(related_name='data', to='docstash.DocStash', on_delete=models.PROTECT),
+            field=models.ForeignKey(related_name='data', to='docstash.DocStash', on_delete=models.CASCADE),
         ),
         migrations.AlterUniqueTogether(
             name='docstashdata',

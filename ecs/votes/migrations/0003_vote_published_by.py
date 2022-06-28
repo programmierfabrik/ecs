@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='vote',
             name='published_by',
-            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=models.PROTECT),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
         ),
     ]

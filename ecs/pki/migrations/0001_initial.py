@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('expires_at', models.DateTimeField()),
                 ('revoked_at', models.DateTimeField(null=True)),
-                ('user', models.ForeignKey(related_name='certificates', to=settings.AUTH_USER_MODEL, on_delete=models.PROTECT)),
+                ('user', models.ForeignKey(related_name='certificates', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },

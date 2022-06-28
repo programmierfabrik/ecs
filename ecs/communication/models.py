@@ -48,13 +48,13 @@ class ThreadQuerySet(models.QuerySet):
 
 class Thread(models.Model):
     subject = models.CharField(max_length=100)
-    submission = models.ForeignKey('core.Submission', null=True, on_delete=models.PROTECT)
+    submission = models.ForeignKey('core.Submission', null=True, on_delete=models.CASCADE)
     # sender, receiver and timestamp are denormalized intentionally
-    sender = models.ForeignKey(User, related_name='outgoing_threads', on_delete=models.PROTECT)
-    receiver = models.ForeignKey(User, related_name='incoming_threads', on_delete=models.PROTECT)
+    sender = models.ForeignKey(User, related_name='outgoing_threads', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name='incoming_threads', on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
-    last_message = models.OneToOneField('Message', null=True, related_name='head', on_delete=models.PROTECT)
-    related_thread = models.ForeignKey('self', null=True, on_delete=models.PROTECT)
+    last_message = models.OneToOneField('Message', null=True, related_name='head', on_delete=models.CASCADE)
+    related_thread = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
 
     starred_by_sender = models.BooleanField(default=False, db_index=True)
     starred_by_receiver = models.BooleanField(default=False, db_index=True)
@@ -137,11 +137,11 @@ class Thread(models.Model):
 
 class Message(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, db_index=True)
-    thread = models.ForeignKey(Thread, related_name='messages', on_delete=models.PROTECT)
-    sender = models.ForeignKey(User, related_name='outgoing_messages', on_delete=models.PROTECT)
-    receiver = models.ForeignKey(User, related_name='incoming_messages', on_delete=models.PROTECT)
+    thread = models.ForeignKey(Thread, related_name='messages', on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, related_name='outgoing_messages', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name='incoming_messages', on_delete=models.CASCADE)
     reply_receiver = models.ForeignKey(User, null=True,
-        related_name='reply_receiver_for_messages', on_delete=models.PROTECT)
+        related_name='reply_receiver_for_messages', on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
     unread = models.BooleanField(default=True, db_index=True)
     text = models.TextField()
@@ -153,7 +153,7 @@ class Message(models.Model):
     smtp_delivery_state = models.CharField(max_length=7,
         choices=DELIVERY_STATES, default='new', db_index=True)
     in_reply_to = models.ForeignKey('self', related_name='is_replied_in',
-        null=True, default=None, on_delete=models.PROTECT)
+        null=True, default=None, on_delete=models.CASCADE)
     creator = models.CharField(max_length=14,
         choices=CREATOR_CHOICES, default='human')
 

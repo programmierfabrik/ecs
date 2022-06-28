@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=100)),
                 ('implementation', models.CharField(max_length=200)),
-                ('content_type', models.ForeignKey(to='contenttypes.ContentType', on_delete=models.PROTECT)),
+                ('content_type', models.ForeignKey(to='contenttypes.ContentType', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
                 ('is_start_node', models.BooleanField(default=False)),
                 ('is_end_node', models.BooleanField(default=False)),
                 ('uid', models.CharField(max_length=100, null=True)),
-                ('data_ct', models.ForeignKey(to='contenttypes.ContentType', null=True, on_delete=models.PROTECT)),
+                ('data_ct', models.ForeignKey(to='contenttypes.ContentType', null=True, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Graph',
             fields=[
-                ('nodetype_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='workflow.NodeType', on_delete=models.PROTECT)),
+                ('nodetype_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='workflow.NodeType', on_delete=models.CASCADE)),
                 ('auto_start', models.BooleanField(default=False)),
             ],
             options={
@@ -82,9 +82,9 @@ class Migration(migrations.Migration):
                 ('repeated', models.BooleanField(default=False)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('consumed_at', models.DateTimeField(default=None, null=True, blank=True)),
-                ('consumed_by', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.PROTECT)),
-                ('node', models.ForeignKey(related_name='tokens', to='workflow.Node', on_delete=models.PROTECT)),
-                ('source', models.ForeignKey(related_name='sent_tokens', to='workflow.Node', null=True, on_delete=models.PROTECT)),
+                ('consumed_by', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
+                ('node', models.ForeignKey(related_name='tokens', to='workflow.Node', on_delete=models.CASCADE)),
+                ('source', models.ForeignKey(related_name='sent_tokens', to='workflow.Node', null=True, on_delete=models.CASCADE)),
                 ('trail', models.ManyToManyField(related_name='future', to='workflow.Token')),
             ],
             options={
@@ -97,9 +97,9 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('data_id', models.PositiveIntegerField()),
                 ('is_finished', models.BooleanField(default=False)),
-                ('content_type', models.ForeignKey(to='contenttypes.ContentType', on_delete=models.PROTECT)),
-                ('graph', models.ForeignKey(related_name='workflows', to='workflow.Graph', on_delete=models.PROTECT)),
-                ('parent', models.ForeignKey(related_name='parent_workflow', to='workflow.Token', null=True, on_delete=models.PROTECT)),
+                ('content_type', models.ForeignKey(to='contenttypes.ContentType', on_delete=models.CASCADE)),
+                ('graph', models.ForeignKey(related_name='workflows', to='workflow.Graph', on_delete=models.CASCADE)),
+                ('parent', models.ForeignKey(related_name='parent_workflow', to='workflow.Token', null=True, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -108,31 +108,31 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='token',
             name='workflow',
-            field=models.ForeignKey(related_name='tokens', to='workflow.Workflow', on_delete=models.PROTECT),
+            field=models.ForeignKey(related_name='tokens', to='workflow.Workflow', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='nodetype',
             name='content_type',
-            field=models.ForeignKey(related_name='workflow_node_types', to='contenttypes.ContentType', null=True, on_delete=models.PROTECT),
+            field=models.ForeignKey(related_name='workflow_node_types', to='contenttypes.ContentType', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='nodetype',
             name='data_type',
-            field=models.ForeignKey(to='contenttypes.ContentType', null=True, on_delete=models.PROTECT),
+            field=models.ForeignKey(to='contenttypes.ContentType', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='node',
             name='graph',
-            field=models.ForeignKey(related_name='nodes', to='workflow.Graph', on_delete=models.PROTECT),
+            field=models.ForeignKey(related_name='nodes', to='workflow.Graph', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='node',
             name='node_type',
-            field=models.ForeignKey(to='workflow.NodeType', on_delete=models.PROTECT),
+            field=models.ForeignKey(to='workflow.NodeType', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -148,19 +148,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='edge',
             name='from_node',
-            field=models.ForeignKey(related_name='edges', to='workflow.Node', null=True, on_delete=models.PROTECT),
+            field=models.ForeignKey(related_name='edges', to='workflow.Node', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='edge',
             name='guard',
-            field=models.ForeignKey(related_name='nodes', to='workflow.Guard', null=True, on_delete=models.PROTECT),
+            field=models.ForeignKey(related_name='nodes', to='workflow.Guard', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='edge',
             name='to_node',
-            field=models.ForeignKey(related_name='incoming_edges', to='workflow.Node', null=True, on_delete=models.PROTECT),
+            field=models.ForeignKey(related_name='incoming_edges', to='workflow.Node', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

@@ -16,37 +16,37 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='thread',
             name='task',
-            field=models.ForeignKey(to='tasks.Task', null=True, on_delete=models.PROTECT),
+            field=models.ForeignKey(to='tasks.Task', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='message',
             name='receiver',
-            field=models.ForeignKey(related_name='incoming_messages', to=settings.AUTH_USER_MODEL, on_delete=models.PROTECT),
+            field=models.ForeignKey(related_name='incoming_messages', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='message',
             name='reply_receiver',
-            field=models.ForeignKey(related_name='reply_receiver_for_messages', to=settings.AUTH_USER_MODEL, null=True, on_delete=models.PROTECT),
+            field=models.ForeignKey(related_name='reply_receiver_for_messages', to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='message',
             name='reply_to',
-            field=models.ForeignKey(related_name='replies', to='communication.Message', null=True, on_delete=models.PROTECT),
+            field=models.ForeignKey(related_name='replies', to='communication.Message', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='message',
             name='sender',
-            field=models.ForeignKey(related_name='outgoing_messages', to=settings.AUTH_USER_MODEL, on_delete=models.PROTECT),
+            field=models.ForeignKey(related_name='outgoing_messages', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='message',
             name='thread',
-            field=models.ForeignKey(related_name='messages', to='communication.Thread', on_delete=models.PROTECT),
+            field=models.ForeignKey(related_name='messages', to='communication.Thread', on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

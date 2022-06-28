@@ -57,13 +57,13 @@ class Document(models.Model):
 
     # user supplied data
     name = models.CharField(max_length=250)
-    doctype = models.ForeignKey(DocumentType, on_delete=models.PROTECT)
+    doctype = models.ForeignKey(DocumentType, on_delete=models.CASCADE)
     version = models.CharField(max_length=250)
     date = models.DateTimeField()
-    replaces_document = models.ForeignKey('Document', null=True, blank=True, on_delete=models.PROTECT)
+    replaces_document = models.ForeignKey('Document', null=True, blank=True, on_delete=models.CASCADE)
     
     # relation to a object
-    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.PROTECT)
+    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(null=True)
     parent_object = GenericForeignKey('content_type', 'object_id')
     
@@ -118,8 +118,8 @@ def on_document_delete(sender, **kwargs):
 
 
 class DownloadHistory(models.Model):
-    document = models.ForeignKey(Document, db_index=True, on_delete=models.PROTECT)
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    document = models.ForeignKey(Document, db_index=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     downloaded_at = models.DateTimeField(auto_now_add=True)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, db_index=True)
     context = models.CharField(max_length=15)

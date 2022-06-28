@@ -21,9 +21,9 @@ from ecs.tasks.models import Task
 
 @reversion.register(fields=('result', 'text'))
 class Vote(models.Model):
-    submission_form = models.ForeignKey('core.SubmissionForm', related_name='votes', on_delete=models.PROTECT)
-    top = models.OneToOneField('meetings.TimetableEntry', related_name='vote', null=True, on_delete=models.PROTECT)
-    upgrade_for = models.OneToOneField('self', null=True, related_name='previous', on_delete=models.PROTECT)
+    submission_form = models.ForeignKey('core.SubmissionForm', related_name='votes', on_delete=models.CASCADE)
+    top = models.OneToOneField('meetings.TimetableEntry', related_name='vote', null=True, on_delete=models.CASCADE)
+    upgrade_for = models.OneToOneField('self', null=True, related_name='previous', on_delete=models.CASCADE)
     result = models.CharField(max_length=2, choices=VOTE_RESULT_CHOICES, null=True, verbose_name=_('vote'))
     executive_review_required = models.NullBooleanField(blank=True)
     text = models.TextField(blank=True, verbose_name=_('comment'))
@@ -32,7 +32,7 @@ class Vote(models.Model):
     is_expired = models.BooleanField(default=False)
     signed_at = models.DateTimeField(null=True)
     published_at = models.DateTimeField(null=True)
-    published_by = models.ForeignKey('auth.User', null=True, on_delete=models.PROTECT)
+    published_by = models.ForeignKey('auth.User', null=True, on_delete=models.CASCADE)
     valid_until = models.DateTimeField(null=True)
     changed_after_voting = models.BooleanField(default=False)
     

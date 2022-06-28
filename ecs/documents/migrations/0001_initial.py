@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('version', models.CharField(max_length=250)),
                 ('date', models.DateTimeField()),
                 ('object_id', models.PositiveIntegerField(null=True)),
-                ('content_type', models.ForeignKey(to='contenttypes.ContentType', null=True, on_delete=models.PROTECT)),
+                ('content_type', models.ForeignKey(to='contenttypes.ContentType', null=True, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -51,8 +51,8 @@ class Migration(migrations.Migration):
                 ('downloaded_at', models.DateTimeField(auto_now_add=True)),
                 ('uuid', models.SlugField(max_length=36)),
                 ('context', models.CharField(max_length=15)),
-                ('document', models.ForeignKey(to='documents.Document', on_delete=models.PROTECT)),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.PROTECT)),
+                ('document', models.ForeignKey(to='documents.Document', on_delete=models.CASCADE)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['downloaded_at'],
@@ -62,13 +62,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='document',
             name='doctype',
-            field=models.ForeignKey(to='documents.DocumentType', on_delete=models.PROTECT),
+            field=models.ForeignKey(to='documents.DocumentType', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='document',
             name='replaces_document',
-            field=models.ForeignKey(blank=True, to='documents.Document', null=True, on_delete=models.PROTECT),
+            field=models.ForeignKey(blank=True, to='documents.Document', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

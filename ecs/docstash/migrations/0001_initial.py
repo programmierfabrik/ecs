@@ -20,8 +20,8 @@ class Migration(migrations.Migration):
                 ('group', models.CharField(max_length=120, null=True, db_index=True)),
                 ('current_version', models.IntegerField(default=-1)),
                 ('object_id', models.PositiveIntegerField(null=True)),
-                ('content_type', models.ForeignKey(to='contenttypes.ContentType', null=True, on_delete=models.PROTECT)),
-                ('owner', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.PROTECT)),
+                ('content_type', models.ForeignKey(to='contenttypes.ContentType', null=True, on_delete=models.CASCADE)),
+                ('owner', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
                 ('value', picklefield.fields.PickledObjectField(editable=False)),
                 ('modtime', models.DateTimeField(auto_now_add=True)),
                 ('name', models.TextField(blank=True)),
-                ('stash', models.ForeignKey(related_name='data', to='docstash.DocStash', on_delete=models.PROTECT)),
+                ('stash', models.ForeignKey(related_name='data', to='docstash.DocStash', on_delete=models.CASCADE)),
             ],
             options={
             },

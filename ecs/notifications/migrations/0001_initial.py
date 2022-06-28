@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='CompletionReportNotification',
             fields=[
-                ('notification_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='notifications.Notification', on_delete=models.PROTECT)),
+                ('notification_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='notifications.Notification', on_delete=models.CASCADE)),
                 ('study_started', models.BooleanField(default=True)),
                 ('reason_for_not_started', models.TextField(null=True, blank=True)),
                 ('recruited_subjects', models.IntegerField(null=True)),
@@ -48,9 +48,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AmendmentNotification',
             fields=[
-                ('notification_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='notifications.Notification', on_delete=models.PROTECT)),
-                ('new_submission_form', models.ForeignKey(related_name='new_for_notification', to='core.SubmissionForm', on_delete=models.PROTECT)),
-                ('old_submission_form', models.ForeignKey(related_name='old_for_notification', to='core.SubmissionForm', on_delete=models.PROTECT)),
+                ('notification_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='notifications.Notification', on_delete=models.CASCADE)),
+                ('new_submission_form', models.ForeignKey(related_name='new_for_notification', to='core.SubmissionForm', on_delete=models.CASCADE)),
+                ('old_submission_form', models.ForeignKey(related_name='old_for_notification', to='core.SubmissionForm', on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,
@@ -92,7 +92,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ProgressReportNotification',
             fields=[
-                ('notification_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='notifications.Notification', on_delete=models.PROTECT)),
+                ('notification_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='notifications.Notification', on_delete=models.CASCADE)),
                 ('study_started', models.BooleanField(default=True)),
                 ('reason_for_not_started', models.TextField(null=True, blank=True)),
                 ('recruited_subjects', models.IntegerField(null=True)),
@@ -110,10 +110,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SafetyNotification',
             fields=[
-                ('notification_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='notifications.Notification', on_delete=models.PROTECT)),
+                ('notification_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='notifications.Notification', on_delete=models.CASCADE)),
                 ('safety_type', models.CharField(db_index=True, max_length=6, verbose_name='Type', choices=[('susar', 'SUSAR'), ('sae', 'SAE'), ('asr', 'Annual Safety Report'), ('other', 'Other Safety Report')])),
                 ('is_acknowledged', models.BooleanField(default=False)),
-                ('reviewer', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=models.PROTECT)),
+                ('reviewer', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -122,13 +122,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='notificationanswer',
             name='notification',
-            field=models.OneToOneField(related_name='answer', to='notifications.Notification', on_delete=models.PROTECT),
+            field=models.OneToOneField(related_name='answer', to='notifications.Notification', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='notificationanswer',
             name='pdf_document',
-            field=models.OneToOneField(related_name='_notification_answer', null=True, to='documents.Document', on_delete=models.PROTECT),
+            field=models.OneToOneField(related_name='_notification_answer', null=True, to='documents.Document', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -140,7 +140,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='notification',
             name='pdf_document',
-            field=models.OneToOneField(related_name='_notification', null=True, to='documents.Document', on_delete=models.PROTECT),
+            field=models.OneToOneField(related_name='_notification', null=True, to='documents.Document', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -152,13 +152,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='notification',
             name='type',
-            field=models.ForeignKey(related_name='notifications', to='notifications.NotificationType', null=True, on_delete=models.PROTECT),
+            field=models.ForeignKey(related_name='notifications', to='notifications.NotificationType', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='notification',
             name='user',
-            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=models.PROTECT),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]
