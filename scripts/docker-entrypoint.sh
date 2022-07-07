@@ -54,6 +54,7 @@ shift
 if [ -z "$(ls -A /app/ecs-gpg)" ]; then
     echo "$ECS_VAULT_ENCRYPT" | gpg --homedir /app/ecs-gpg --batch --yes --import --
     echo "$ECS_VAULT_SIGN" | gpg --homedir /app/ecs-gpg --batch --yes --import --
+    chown 1000:1000 /app/ecs-gpg/*
 fi
 
 if [[ "$cmd" =~ ^(worker|beat|smtpd|migrate|run|_prepare)$ ]]; then
