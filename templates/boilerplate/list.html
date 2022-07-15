@@ -24,7 +24,7 @@
         </div>
         <div class="card-block mt-0">
             <p class="card-text">{{ text.text|linebreaksbr }}</p>
-            <a href="{% url 'boilerplate.edit_boilerplate' text_pk=text.pk %}" class="card-link">
+            <a href="{% url 'boilerplate.edit_boilerplate_by_pk' text_pk=text.pk %}" class="card-link">
                 {% trans "edit" %}
             </a>
             <a href="{% url 'boilerplate.delete_boilerplate' text_pk=text.pk %}" class="card-link">
