@@ -133,7 +133,7 @@ class NodeController(object, metaclass=NodeControllerBase):
             repeated=repeated,
         )
         if trail:
-            token.trail = trail
+            token.trail.set(trail)
         token_received.send(token)
         return token
         

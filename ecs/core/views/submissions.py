@@ -773,10 +773,10 @@ def create_submission_form(request):
             submission_form.save()
             form.save_m2m()
 
-            submission_form.documents = documents
             for doc in documents:
                 doc.parent_object = submission_form
                 doc.save()
+            submission_form.documents.set(documents)
         
             investigators = formsets.pop('investigator').save(commit=False)
             employees = formsets.pop('investigatoremployee').save(commit=False)
