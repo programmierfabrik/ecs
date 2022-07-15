@@ -234,7 +234,7 @@ class UserDetailsForm(forms.ModelForm):
 
     def save(self):
         user = super().save()
-        user.medical_categories = self.cleaned_data.get('medical_categories', ())
+        user.medical_categories.set(self.cleaned_data.get('medical_categories', ()))
         profile = user.profile
         profile.gender = self.cleaned_data['gender']
         profile.title = self.cleaned_data['title']
