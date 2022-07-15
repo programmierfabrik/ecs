@@ -9,5 +9,4 @@ celerybeat-schedule
 celerybeat.pid
 
 /venv
-/ca
-/gpg
+/data
