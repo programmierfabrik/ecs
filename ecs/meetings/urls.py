@@ -32,12 +32,12 @@ urlpatterns = (
     path('<int:meeting_pk>/timetable/entry/<int:entry_pk>/users/<int:user_pk>/toggle/', views.toggle_participation, name='meetings.toggle_participation'),
 
     path('<int:meeting_pk>/assistant/', views.meeting_assistant, name='meetings.meeting_assistant'),
-    path('<int:meeting_pk>/assistant/start/', views.meeting_assistant_start),
-    path('<int:meeting_pk>/assistant/stop/', views.meeting_assistant_stop),
-    path('<int:meeting_pk>/assistant/<int:top_pk>/', views.meeting_assistant_top),
-    path('<int:meeting_pk>/assistant/quickjump/', views.meeting_assistant_quickjump),
-    path('<int:meeting_pk>/assistant/comments/', views.meeting_assistant_comments),
-    path('<int:meeting_pk>/assistant/other_tops/', views.meeting_assistant_other_tops),
+    path('<int:meeting_pk>/assistant/start/', views.meeting_assistant_start, name='meetings.meeting_assistant_start'),
+    path('<int:meeting_pk>/assistant/stop/', views.meeting_assistant_stop, name='meetings.meeting_assistant_stop'),
+    path('<int:meeting_pk>/assistant/<int:top_pk>/', views.meeting_assistant_top, name='meetings.meeting_assistant_top'),
+    path('<int:meeting_pk>/assistant/quickjump/', views.meeting_assistant_quickjump, name='meetings.meeting_assistant_quickjump'),
+    path('<int:meeting_pk>/assistant/comments/', views.meeting_assistant_comments, name='meetings.meeting_assistant_comments'),
+    path('<int:meeting_pk>/assistant/other_tops/', views.meeting_assistant_other_tops, name='meetings.meeting_assistant_other_tops'),
 
     path('<int:meeting_pk>/agenda/pdf/', views.agenda_pdf, name='meetings.agenda_pdf'),
     path('<int:meeting_pk>/agenda/send/', views.send_agenda_to_board, name='meetings.send_agenda_to_board'),

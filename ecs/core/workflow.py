@@ -312,7 +312,7 @@ class ChecklistReview(Activity):
     def get_url(self):
         blueprint_id = self.node.data_id
         submission_form_id = self.workflow.data.current_submission_form_id
-        return reverse('', kwargs={'submission_form_pk': submission_form_id, 'blueprint_pk': blueprint_id})
+        return reverse('core.submission.checklist_review', kwargs={'submission_form_pk': submission_form_id, 'blueprint_pk': blueprint_id})
 
     def pre_perform(self, choice):
         blueprint = self.node.data

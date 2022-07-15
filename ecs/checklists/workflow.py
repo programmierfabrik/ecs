@@ -41,7 +41,7 @@ class ExternalReview(Activity):
         checklist = self.workflow.data
         blueprint_id = checklist.blueprint_id
         submission_form_id = checklist.submission.current_submission_form_id
-        return reverse('', kwargs={'submission_form_pk': submission_form_id, 'blueprint_pk': blueprint_id})
+        return reverse('core.submission.checklist_review', kwargs={'submission_form_pk': submission_form_id, 'blueprint_pk': blueprint_id})
 
     def get_choices(self):
         return (
@@ -52,7 +52,7 @@ class ExternalReview(Activity):
         checklist = self.workflow.data
         blueprint_id = checklist.blueprint_id
         return super().get_final_urls() + [
-            reverse('', kwargs={'submission_form_pk': sf, 'blueprint_pk': blueprint_id})
+            reverse('core.submission.checklist_review', kwargs={'submission_form_pk': sf, 'blueprint_pk': blueprint_id})
             for sf in self.workflow.data.submission.forms.values_list('pk', flat=True)
         ]
 
