@@ -69,7 +69,7 @@ class EcsMailReceiver(smtpd.SMTPServer):
         self.store_exceptions = settings.SMTPD_CONFIG.get('store_exceptions', True)
         if self.store_exceptions:
             self.undeliverable_maildir = mailbox.Maildir(
-                os.path.join(settings.PROJECT_DIR, '..', 'ecs-undeliverable'))
+                os.path.join(settings.PROJECT_DIR, 'data', 'ecs-undeliverable'))
 
     def _find_msg(self, recipient):
         msg_uuid, domain = recipient.split('@')
