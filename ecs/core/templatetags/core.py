@@ -42,7 +42,9 @@ def get_field_info(formfield):
 @register.filter
 def form_value(form, fieldname):
     if form.data:
-        return form._raw_value(fieldname)
+        field = form.fields[fieldname]
+        prefix = form.add_prefix(fieldname)
+        return field.widget.value_from_datadict(form.data, form.files, prefix)
     try:
         return form.initial[fieldname]
     except KeyError:
