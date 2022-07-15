@@ -56,6 +56,8 @@ def import_keys():
     if os.path.exists(secring):
         return
 
+    os.makedirs(settings.STORAGE_VAULT['gpghome'], exist_ok=True)
+
     print('creating ecs-gpg using default STORAGE_VAULT keys')
     enc_key = open(os.path.join(settings.PROJECT_DIR, 'conf',
         'storagevault_encrypt.sec')).read()
