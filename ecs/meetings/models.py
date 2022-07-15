@@ -548,7 +548,7 @@ class Meeting(models.Model):
             old_assignments[amc.category_id] = amc
 
         new_mc = MedicalCategory.objects.filter(
-            submissions=self.submissions.for_board_lane().values('pk'))
+            submissions__id__in=self.submissions.for_board_lane().values('pk'))
 
         for cat in new_mc:
             if cat.pk in old_assignments:
