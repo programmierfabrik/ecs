@@ -5,8 +5,8 @@ from ecs.tags import views
 
 urlpatterns = (
     path('', views.index, name='tags.index'),
-    path('new/', views.edit),
-    path('<int:pk>/edit/', views.edit, name='tags.edit'),
+    path('new/', views.edit, name='tags.edit'),
+    path('<int:pk>/edit/', views.edit, name='tags.edit_by_pk'),
     path('<int:pk>/delete/', views.delete, name='tags.delete'),
     path('assign/submission/<int:submission_pk>', views.assign, name='tags.assign'),
 )

@@ -9,7 +9,7 @@
     <p>
         {% for tag in tags %}
             <div class="tag" style="{{ tag.css }}">
-                <a href="{% url 'tags.edit' pk=tag.pk %}">
+                <a href="{% url 'tags.edit_by_pk' pk=tag.pk %}">
                     {{ tag.name }}
                 </a>
             </div>
