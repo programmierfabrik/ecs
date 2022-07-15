@@ -19,7 +19,16 @@ apt-get install python3 \
     libxml2-dev \
     libxslt1-dev \
     libpq-dev \
-    libmemcached-dev
+    libmemcached-dev \
+    gettext \
+    libpango1.0-0 \
+    libcairo2 \
+    libgdk-pixbuf2.0-0 \
+    libxml2-dev \
+    libxslt1-dev \
+    libffi-dev \
+    ghostscript \
+    pdftk
 ```
 
 ```bash

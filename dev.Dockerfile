@@ -9,7 +9,15 @@ RUN apt-get install -y python3 \
     libxslt1-dev \
     libpq-dev \
     libmemcached-dev \
-    gettext
+    gettext \
+    libpango1.0-0 \
+    libcairo2 \
+    libgdk-pixbuf2.0-0 \
+    libxml2-dev \
+    libxslt1-dev \
+    libffi-dev \
+    ghostscript \
+    pdftk
 
 COPY ./requirements/django2.all /django2.all
 
@@ -29,7 +37,11 @@ EXPOSE 8000
 
 ENV DATABASE_URL=postgres://app:app@localhost:5432/app
 
+RUN ln -s /usr/bin/python3 /usr/bin/python || true
+
 ENV LANG='en_US.UTF-8'
 ENV LC_ALL='en_US.UTF-8'
+
+USER 1000
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
