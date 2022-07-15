@@ -151,7 +151,7 @@ def submission_billing(request):
             mimetype='application/vnd.ms-excel', doctype='invoice')
 
         invoice = Invoice.objects.create(document=doc)
-        invoice.submissions = selected_fee + selected_remission
+        invoice.submissions.set(selected_fee + selected_remission)
         
         return redirect('billing.view_invoice', invoice_pk=invoice.pk)
 
@@ -226,7 +226,7 @@ def external_review_payment(request):
                 checklist=checklist, defaults={'billed_at': doc.date})
 
         payment = ChecklistPayment.objects.create(document=doc)
-        payment.checklists = selected_for_payment
+        payment.checklists.set(selected_for_payment)
 
         return redirect('billing.view_checklist_payment', payment_pk=payment.pk)
 
