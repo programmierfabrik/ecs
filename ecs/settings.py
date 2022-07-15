@@ -250,7 +250,7 @@ LOGIN_REDIRECT_URL = '/dashboard/'
 PDFAS_SERVICE = 'mock:'
 
 # directory where to store zipped submission patientinformation and submission form pdfs
-ECS_DOWNLOAD_CACHE_DIR = os.path.realpath(os.path.join(PROJECT_DIR, "..", "ecs-cache"))
+ECS_DOWNLOAD_CACHE_DIR = os.path.realpath(os.path.join(PROJECT_DIR, 'data', 'ecs-cache'))
 ECS_DOWNLOAD_CACHE_MAX_AGE = 30 * 24 * 60 * 60  # 30 days
 
 # Storage Vault settings
