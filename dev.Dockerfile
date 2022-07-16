@@ -17,7 +17,8 @@ RUN apt-get install -y python3 \
     libxslt1-dev \
     libffi-dev \
     ghostscript \
-    pdftk
+    pdftk \
+    qpdf
 
 COPY ./requirements/django2.all /django2.all
 

@@ -28,7 +28,8 @@ apt-get install python3 \
     libxslt1-dev \
     libffi-dev \
     ghostscript \
-    pdftk
+    pdftk \
+    qpdf
 ```
 
 ```bash
