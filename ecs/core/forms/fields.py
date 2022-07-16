@@ -10,7 +10,6 @@ from ecs.users.utils import get_user
 
 DATE_INPUT_FORMATS = ("%d.%m.%Y", "%Y-%m-%d")
 TIME_INPUT_FORMATS = ("%H:%M", "%H:%M:%S")
-DATE_TIME_INPUT_FORMATS = tuple("%s %s" % (date_format, time_format) for time_format in TIME_INPUT_FORMATS for date_format in DATE_INPUT_FORMATS)
 
 
 class LooseTimeWidget(forms.TextInput):
@@ -25,9 +24,10 @@ class DateField(forms.DateField):
         kwargs.setdefault('error_messages', {'invalid': _('Please enter a date in the format dd.mm.yyyy.')})
         super().__init__(*args, **kwargs)
 
-class DateTimeField(forms.DateTimeField):
+class DateTimeField(forms.SplitDateTimeField):
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault('input_formats', DATE_TIME_INPUT_FORMATS)
+        kwargs.setdefault('input_date_formats', DATE_INPUT_FORMATS)
+        kwargs.setdefault('input_time_formats', TIME_INPUT_FORMATS)
         kwargs.setdefault('widget', forms.SplitDateTimeWidget(date_format=DATE_INPUT_FORMATS[0]))
         kwargs.setdefault('error_messages', {'invalid': _('Please enter a date in dd.mm.yyyy format and time in format HH:MM.')})
         super().__init__(*args, **kwargs)
