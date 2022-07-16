@@ -98,10 +98,10 @@ class SingleStudyNotificationForm(NotificationForm):
             obj.submission_forms = [self.get_submission_form()]
         else:
             old_save_m2m = self.save_m2m
-            def _save_m2m():
+            def _save_m2m(self):
                 old_save_m2m()
                 obj.submission_forms.set([self.get_submission_form()])
-            self.save_m2m = types.MethodType(_save_m2m)
+            self.save_m2m = types.MethodType(_save_m2m, self)
         return obj
 
 
