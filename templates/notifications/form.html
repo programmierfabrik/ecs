@@ -17,9 +17,9 @@
 {% block content %}
     <div id="tabs_notification" class="collapse">
         <ul class="nav nav-tabs flex-wrap mb-3 tab_headers">
-            {% for tab, fieldsets in tabs %}
+            {% for tab in tabs %}
                 <li class="nav-item">
-                    <a class="nav-link" href="#tabs-{{ forloop.counter }}">{{ tab }}</a>
+                    <a class="nav-link" href="#tabs-{{ forloop.counter }}">{{ tab.label }}</a>
                 </li>
             {% endfor %}
             <li class="nav-item ml-auto">
