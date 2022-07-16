@@ -10,7 +10,7 @@ from ecs.notifications.models import (
     AmendmentNotification, SafetyNotification, CenterCloseNotification,
 )
 from ecs.core.forms.fields import DateField
-
+import types
 
 class NotificationAnswerForm(forms.ModelForm):
     class Meta:
@@ -100,8 +100,8 @@ class SingleStudyNotificationForm(NotificationForm):
             old_save_m2m = self.save_m2m
             def _save_m2m():
                 old_save_m2m()
-                obj.submission_forms = [self.get_submission_form()]
-            self.save_m2m = _save_m2m
+                obj.submission_forms.set([self.get_submission_form()])
+            self.save_m2m = types.MethodType(_save_m2m)
         return obj
 
 
