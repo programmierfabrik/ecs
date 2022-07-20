@@ -72,8 +72,7 @@ def _workdir():
 
         yield workdir
     finally:
-        print(123)
-        # shutil.rmtree(workdir)
+        shutil.rmtree(workdir)
 
 
 def _exec(cmd):
