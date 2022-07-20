@@ -40,7 +40,7 @@ class TimeField(forms.TimeField):
         
 class NullBooleanWidget(forms.widgets.NullBooleanSelect):
     def __init__(self, attrs=None):
-        choices = (('1', '-'), ('2', _('Yes')), ('3', _('No')))
+        choices = (('unknown', '-'), ('true', _('Yes')), ('false', _('No')))
         forms.widgets.Select.__init__(self, attrs, choices)
 
 class NullBooleanField(forms.NullBooleanField):
