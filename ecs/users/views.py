@@ -65,7 +65,7 @@ def login(request, *args, **kwargs):
 
     kwargs.setdefault('template_name', 'users/login.html')
     kwargs['authentication_form'] = EmailLoginForm
-    response = auth_views.login(request, *args, **kwargs)
+    response = auth_views.LoginView.as_view(**kwargs)(request)
     if request.user.is_authenticated:
         LoginHistory.objects.create(type='login', user=request.user,
             ip=request.META['REMOTE_ADDR'])
@@ -87,7 +87,7 @@ def login(request, *args, **kwargs):
 def logout(request, *args, **kwargs):
     kwargs.setdefault('next_page', '/')
     user_id = getattr(request, 'original_user', request.user).id
-    response = auth_views.logout(request, *args, **kwargs)
+    response = auth_views.LogoutView.as_view(**kwargs)(request)
     if not request.user.is_authenticated:
         LoginHistory.objects.create(type='logout', user_id=user_id,
             ip=request.META['REMOTE_ADDR'])
