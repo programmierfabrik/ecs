@@ -209,6 +209,9 @@ LOGGING = {
             # the root logger.
             'level': 'INFO',
         },
+        'django.template': {
+            'level': 'ERROR'
+        }
     },
 }
 
