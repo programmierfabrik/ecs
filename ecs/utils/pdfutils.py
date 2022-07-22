@@ -27,53 +27,55 @@ def pdf_barcodestamp(source, barcode, text=None):
 
     :raise IOError: if something goes wrong (including exit errorcode and stderr output attached)
     '''
-    barcode_ps = loader.render_to_string('pdf/barcode.ps') + """
-        gsave
-        20 100 moveto 0.5 0.5 scale 0 rotate
-        ({}) () /qrcode /uk.co.terryburton.bwipp findresource exec
-        grestore
-    """.format(barcode)
+    # TODO: Replace pdftk and possibly gs
+    return source
+    # barcode_ps = loader.render_to_string('pdf/barcode.ps') + """
+    #     gsave
+    #     20 100 moveto 0.5 0.5 scale 0 rotate
+    #     ({}) () /qrcode /uk.co.terryburton.bwipp findresource exec
+    #     grestore
+    # """.format(barcode)
 
-    if text:
-        barcode_ps += '''
-            gsave
+    # if text:
+    #     barcode_ps += '''
+    #         gsave
 
-            % Define the HelveticaLatin1 font, which is like Helvetica, but
-            % using the ISOLatin1Encoding encoding vector.
-            /Helvetica findfont
-            dup length dict
-            begin
-                {{def}} forall
-                /Encoding ISOLatin1Encoding def
-                currentdict
-            end
-            /HelveticaLatin1 exch definefont
+    #         % Define the HelveticaLatin1 font, which is like Helvetica, but
+    #         % using the ISOLatin1Encoding encoding vector.
+    #         /Helvetica findfont
+    #         dup length dict
+    #         begin
+    #             {{def}} forall
+    #             /Encoding ISOLatin1Encoding def
+    #             currentdict
+    #         end
+    #         /HelveticaLatin1 exch definefont
 
-            /HelveticaLatin1 6 selectfont
-            <{}> dup stringwidth pop 132 add 32 exch moveto
-            270 rotate show
-            grestore
-        '''.format(hexlify(text.encode('latin-1', 'replace')).decode('ascii'))
+    #         /HelveticaLatin1 6 selectfont
+    #         <{}> dup stringwidth pop 132 add 32 exch moveto
+    #         270 rotate show
+    #         grestore
+    #     '''.format(hexlify(text.encode('latin-1', 'replace')).decode('ascii'))
 
-    with NamedTemporaryFile() as pdf:
-        p = subprocess.Popen([
-            'gs', '-q', '-dNOPAUSE', '-dBATCH', '-sDEVICE=pdfwrite',
-            '-sPAPERSIZE=a4', '-dAutoRotatePages=/None', '-sOutputFile=-', '-c',
-            '<</Orientation 0>> setpagedevice', '-'
-        ], stdin=subprocess.PIPE, stdout=pdf, stderr=subprocess.PIPE)
-        p.stdin.write(barcode_ps.encode('ascii'))
-        p.stdin.close()
-        if p.wait():
-            raise subprocess.CalledProcessError(p.returncode, 'ghostscript')
+    # with NamedTemporaryFile() as pdf:
+    #     p = subprocess.Popen([
+    #         'gs', '-q', '-dNOPAUSE', '-dBATCH', '-sDEVICE=pdfwrite',
+    #         '-sPAPERSIZE=a4', '-dAutoRotatePages=/None', '-sOutputFile=-', '-c',
+    #         '<</Orientation 0>> setpagedevice', '-'
+    #     ], stdin=subprocess.PIPE, stdout=pdf, stderr=subprocess.PIPE)
+    #     p.stdin.write(barcode_ps.encode('ascii'))
+    #     p.stdin.close()
+    #     if p.wait():
+    #         raise subprocess.CalledProcessError(p.returncode, 'ghostscript')
 
-        stamped = TemporaryFile()
-        p = subprocess.check_call(
-            ['pdftk', '-', 'stamp', pdf.name, 'output', '-', 'dont_ask'],
-            stdin=source, stdout=stamped
-        )
+    #     stamped = TemporaryFile()
+    #     p = subprocess.check_call(
+    #         ['pdftk', '-', 'stamp', pdf.name, 'output', '-', 'dont_ask'],
+    #         stdin=source, stdout=stamped
+    #     )
 
-    stamped.seek(0)
-    return stamped
+    # stamped.seek(0)
+    # return stamped
 
 
 def decrypt_pdf(src):
