@@ -58,7 +58,7 @@ LOCALE_PATHS = (os.path.join(PROJECT_DIR, "locale"),)
 # in the settings
 LANGUAGES = (
     #('en', gettext('English')),
-    ('de', gettext('German')),
+    ('de-AT', gettext('German')),
 )
 
 # default site id, some thirdparty libraries expect it to be set
@@ -211,6 +211,9 @@ LOGGING = {
         },
         'django.template': {
             'level': 'ERROR'
+        },
+        'django.utils.autoreload': {
+            'level': 'INFO'
         }
     },
 }
