@@ -59,7 +59,9 @@ def delete_task(request, submission_pk=None, task_pk=None):
     return redirect('tasks.task_backlog', submission_pk=submission_pk)
 
 
-def my_tasks(request, template='tasks/compact_list.html', submission_pk=None, ignore_task_types=True):
+def my_tasks(request, template=None, submission_pk=None, ignore_task_types=True):
+    if template is None:
+        template = 'tasks/compact_list.html'
     submission = None
     all_tasks = (Task.objects.for_user(request.user).for_widget().open()
         .select_related('task_type__workflow_node')
