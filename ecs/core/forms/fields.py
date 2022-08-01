@@ -54,7 +54,7 @@ class AutocompleteWidgetMixin(object):
         self.field = field
         return super().__init__()
 
-    def render(self, name, value, attrs=None, choices=()):
+    def render(self, name, value, attrs=None, renderer=None, choices=()):
         attrs['data-ajax--url'] = reverse(
             'core.autocomplete',
             kwargs={'queryset_name': self.field.queryset_name}
@@ -97,7 +97,7 @@ class StrippedTextInput(forms.TextInput):
 
 
 class EmailUserSelectWidget(forms.TextInput):
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         if value is None:
             value = ''
         else:
