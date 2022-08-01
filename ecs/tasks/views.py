@@ -346,7 +346,7 @@ def my_tasks(request, template='tasks/compact_list.html', submission_pk=None, ig
     return render(request, template, data)
 
 
-def task_list(request, **kwargs):
+def task_list(request, *args, **kwargs):
     kwargs.setdefault('template', 'tasks/list.html')
     kwargs.setdefault('ignore_task_types', False)
     return my_tasks(request, **kwargs)
