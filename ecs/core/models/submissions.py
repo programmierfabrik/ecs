@@ -4,7 +4,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from django.dispatch import receiver
-from django.utils.translation import ugettext as _, ugettext_lazy
+from django.utils.translation import gettext as _, gettext_lazy
 from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
 
@@ -84,7 +84,7 @@ class Submission(models.Model):
             return str(num)
         return "%s%s%s" % (num, separator, year)
         
-    get_ec_number_display.short_description = ugettext_lazy('EC-Number')
+    get_ec_number_display.short_description = gettext_lazy('EC-Number')
 
     @property
     def paper_submission_review_task(self):
@@ -352,23 +352,23 @@ class SubmissionForm(models.Model):
 
     # 3a
     substance_registered_in_countries = ArrayField(CountryField(), default=list)
-    substance_preexisting_clinical_tries = models.NullBooleanField(blank=True, db_column='existing_tries')
+    substance_preexisting_clinical_tries = models.BooleanField(blank=True, db_column='existing_tries', null=True)
     substance_p_c_t_countries = ArrayField(CountryField(), default=list)
     substance_p_c_t_phase = models.CharField(max_length=80, null=True, blank=True)
     substance_p_c_t_period = models.TextField(null=True, blank=True)
     substance_p_c_t_application_type = models.CharField(max_length=145, null=True, blank=True)
-    substance_p_c_t_gcp_rules = models.NullBooleanField(blank=True)
-    substance_p_c_t_final_report = models.NullBooleanField(blank=True)
+    substance_p_c_t_gcp_rules = models.BooleanField(blank=True, null=True)
+    substance_p_c_t_final_report = models.BooleanField(blank=True, null=True)
     
     # 3b (via NonTestedUsedDrugs)
     
     # 4.x
     medtech_product_name = models.CharField(max_length=210, null=True, blank=True)
     medtech_manufacturer = models.CharField(max_length=80, null=True, blank=True)
-    medtech_certified_for_exact_indications = models.NullBooleanField(blank=True)
-    medtech_certified_for_other_indications = models.NullBooleanField(blank=True)
-    medtech_ce_symbol = models.NullBooleanField(blank=True)
-    medtech_manual_included = models.NullBooleanField(blank=True)
+    medtech_certified_for_exact_indications = models.BooleanField(blank=True, null=True)
+    medtech_certified_for_other_indications = models.BooleanField(blank=True, null=True)
+    medtech_ce_symbol = models.BooleanField(blank=True, null=True)
+    medtech_manual_included = models.BooleanField(blank=True, null=True)
     medtech_technical_safety_regulations = models.TextField(null=True, blank=True)
     medtech_departure_from_regulations = models.TextField(null=True, blank=True)
     
@@ -410,7 +410,7 @@ class SubmissionForm(models.Model):
     german_additional_info = models.TextField(null=True, blank=True)
     
     # 8.1
-    study_plan_blind = models.SmallIntegerField(choices=[(0, ugettext_lazy('open')), (1, ugettext_lazy('blind')), (2, ugettext_lazy('double-blind')), (3, ugettext_lazy('not applicable'))])
+    study_plan_blind = models.SmallIntegerField(choices=[(0, gettext_lazy('open')), (1, gettext_lazy('blind')), (2, gettext_lazy('double-blind')), (3, gettext_lazy('not applicable'))])
     study_plan_observer_blinded = models.BooleanField(default=False)
     study_plan_randomized = models.BooleanField(default=False)
     study_plan_parallelgroups = models.BooleanField(default=False)
@@ -431,7 +431,7 @@ class SubmissionForm(models.Model):
 
     # 8.2
     study_plan_alpha = models.CharField(max_length=80)
-    study_plan_alpha_sided = models.SmallIntegerField(choices=[(0, ugettext_lazy('single-sided')), (1, ugettext_lazy('double-sided'))], null=True, blank=True)
+    study_plan_alpha_sided = models.SmallIntegerField(choices=[(0, gettext_lazy('single-sided')), (1, gettext_lazy('double-sided'))], null=True, blank=True)
     study_plan_power = models.CharField(max_length=80)
     study_plan_statalgorithm = models.CharField(max_length=80)
     study_plan_multiple_test = models.BooleanField(default=False)
@@ -802,7 +802,7 @@ def _post_investigator_save(sender, **kwargs):
 class InvestigatorEmployee(models.Model):
     investigator = models.ForeignKey(Investigator, related_name='employees', on_delete=models.CASCADE)
 
-    sex = models.CharField(max_length=1, choices=[("m", ugettext_lazy("Mr")), ("f", ugettext_lazy("Ms"))])
+    sex = models.CharField(max_length=1, choices=[("m", gettext_lazy("Mr")), ("f", gettext_lazy("Ms"))])
     title = models.CharField(max_length=40, blank=True)
     firstname = models.CharField(max_length=40)
     surname = models.CharField(max_length=40)
@@ -826,7 +826,7 @@ class InvestigatorEmployee(models.Model):
 class Measure(models.Model):
     submission_form = models.ForeignKey(SubmissionForm, related_name='measures', on_delete=models.CASCADE)
     
-    category = models.CharField(max_length=3, choices=[('6.1', ugettext_lazy("only study-related")), ('6.2', ugettext_lazy("for routine purposes"))])
+    category = models.CharField(max_length=3, choices=[('6.1', gettext_lazy("only study-related")), ('6.2', gettext_lazy("for routine purposes"))])
     type = models.CharField(max_length=150)
     count = models.CharField(max_length=150)
     period = models.CharField(max_length=30)

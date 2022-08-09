@@ -2,8 +2,10 @@ from django.conf import settings
 
 from ecs.tasks.models import Task
 from ecs.utils.lazy import LazyList
+from ecs.utils import is_ajax
 
 from django.utils.deprecation import MiddlewareMixin
+
 
 class RelatedTasksMiddleware(MiddlewareMixin):
     def _get_related_tasks(self, request):
@@ -14,7 +16,7 @@ class RelatedTasksMiddleware(MiddlewareMixin):
                 yield t
 
     def process_request(self, request):
-        if not request.user.is_authenticated or request.is_ajax() or \
+        if not request.user.is_authenticated or is_ajax(request) or \
             request.path.startswith(settings.STATIC_URL):
             return
 

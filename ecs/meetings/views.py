@@ -8,7 +8,7 @@ from django.conf import settings
 from django.http import FileResponse, HttpResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.utils.text import slugify
 from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType

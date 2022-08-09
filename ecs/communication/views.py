@@ -4,7 +4,7 @@ from django.db.models import Q, Prefetch
 from django.db.models.expressions import RawSQL
 from django.core.paginator import Paginator, EmptyPage
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from ecs.utils.viewutils import redirect_to_next_url
 from ecs.core.models import Submission

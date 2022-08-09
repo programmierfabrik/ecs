@@ -7,8 +7,8 @@ from collections import OrderedDict
 from diff_match_patch import diff_match_patch
 from django_countries import countries
 
-from django.utils.translation import ugettext as _
-from django.utils.encoding import force_text
+from django.utils.translation import gettext as _
+from django.utils.encoding import force_str
 from django.utils import timezone
 from django.db import models
 from django.db.models import Manager, QuerySet
@@ -92,12 +92,12 @@ class AtomicDiffNode(DiffNode):
             old = self.old
             if isinstance(old, collections.Callable):
                 old = old(plainhtml=plain)
-            result.append('<span class="deleted">- %s</span>' % force_text(old))
+            result.append('<span class="deleted">- %s</span>' % force_str(old))
         if not self.ignore_new:
             new = self.new
             if isinstance(new, collections.Callable):
                 new = new(plainhtml=plain)
-            result.append('<span class="inserted">+ %s</span>' % force_text(new))
+            result.append('<span class="inserted">+ %s</span>' % force_str(new))
         return '<div class="atomic">%s</div>' % ''.join(result)
         
 
@@ -298,7 +298,7 @@ class ModelDiffer(object):
             if name in self.label_map:
                 label = self.label_map[name]
             elif field_info is not None:
-                label = force_text(field_info.label)
+                label = force_str(field_info.label)
                 if field_info.number:
                     label = "%s %s" % (field_info.number, label)
             else:

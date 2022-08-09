@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from django.db import models
 from django.db.models import Q, F
-from django.utils.translation import ugettext as _, ugettext_lazy
+from django.utils.translation import gettext as _, gettext_lazy
 from django.utils.text import slugify
 
 from reversion import revisions as reversion
@@ -40,11 +40,11 @@ class ChecklistQuestion(models.Model):
 
 
 CHECKLIST_STATUS_CHOICES = (
-    ('new', ugettext_lazy('New')),
-    ('completed', ugettext_lazy('Completed')),
-    ('review_ok', ugettext_lazy('Review OK')),
-    ('review_fail', ugettext_lazy('Review Failed')),
-    ('dropped', ugettext_lazy('Dropped')),
+    ('new', gettext_lazy('New')),
+    ('completed', gettext_lazy('Completed')),
+    ('review_ok', gettext_lazy('Review OK')),
+    ('review_fail', gettext_lazy('Review Failed')),
+    ('dropped', gettext_lazy('Dropped')),
 )
 
 class Checklist(models.Model):
@@ -146,7 +146,7 @@ class Checklist(models.Model):
 class ChecklistAnswer(models.Model):
     checklist = models.ForeignKey(Checklist, related_name='answers', on_delete=models.CASCADE)
     question = models.ForeignKey(ChecklistQuestion, on_delete=models.CASCADE)
-    answer = models.NullBooleanField(null=True)
+    answer = models.BooleanField(null=True)
     comment = models.TextField(null=True, blank=True)
 
     class Meta:

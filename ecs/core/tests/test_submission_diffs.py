@@ -1,4 +1,4 @@
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from ecs.utils.testcases import EcsTestCase
 from ecs.core.diff import diff_submission_forms

@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.urls import reverse
 from django.template import loader
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.db.models import Min, Q, Prefetch
 
 from ecs.utils.viewutils import render_html, redirect_to_next_url

@@ -1,4 +1,6 @@
-from ubuntu:bionic
+from ubuntu:focal
+
+ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -y && apt-get install -y python3 \
     python3-venv \

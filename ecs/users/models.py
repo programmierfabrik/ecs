@@ -6,7 +6,7 @@ from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 from django_extensions.db.fields.json import JSONField
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
 class UserProfile(models.Model):

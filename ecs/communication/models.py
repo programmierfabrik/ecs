@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from ecs.communication.mailutils import deliver_to_recipient
 from ecs.users.utils import get_full_name

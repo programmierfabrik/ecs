@@ -1,6 +1,6 @@
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 
 from reversion.models import Version
 
@@ -23,8 +23,8 @@ ALLOWED_MODEL_FIELDS = {
 def _render_value(val):
     return {
         None: '',
-        False: ugettext('No'),
-        True: ugettext('Yes'),
+        False: gettext('No'),
+        True: gettext('Yes'),
     }.get(val, str(val))
 
 

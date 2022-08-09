@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.conf import settings
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib import auth
 from django.contrib.auth import views as auth_views
@@ -18,7 +18,7 @@ from django.contrib.sessions.models import Session
 from django.contrib import messages
 from django.contrib.staticfiles.storage import staticfiles_storage
 
-from ecs.utils import forceauth
+from ecs.utils import forceauth, is_ajax
 from ecs.utils.viewutils import render_html
 from ecs.utils.ratelimitcache import ratelimit_post
 from ecs.communication.mailutils import deliver
@@ -54,7 +54,7 @@ _registration_token_factory = TimestampedTokenFactory(
 @forceauth.exempt
 @ratelimit_post(minutes=5, requests=15, key_field='username')
 def login(request, *args, **kwargs):
-    if request.is_ajax():
+    if is_ajax(request):
         return HttpResponse('<script type="text/javascript">window.location.href="%s";</script>' % reverse('users.login'))
 
     ua_str = request.META.get('HTTP_USER_AGENT')

@@ -7,7 +7,7 @@ from django.db.models import F, Prefetch
 from django.dispatch import receiver
 from django.db.models.signals import post_delete, post_save
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 from django.utils.text import slugify
 from django.conf import settings
 from django.utils import timezone
@@ -179,7 +179,7 @@ class MeetingManager(AuthorizationManager):
                     deadline += month
                     deadline_thesis += month
             title = timezone.localtime(start).strftime(
-                ugettext('%B Meeting %Y (automatically generated)'))
+                gettext('%B Meeting %Y (automatically generated)'))
             m = Meeting.objects.create(start=start, deadline=deadline,
                 deadline_diplomathesis=deadline_thesis, title=title)
             return m

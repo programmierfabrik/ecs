@@ -4,9 +4,9 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import user_passes_test
 from django.utils.functional import wraps
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.http import HttpRequest
 
 from ecs.users.middleware import current_user_store
@@ -53,9 +53,9 @@ def get_full_name(user):
             nameparts.insert(0, profile.title)
         if profile.gender:
             if profile.gender == 'f':
-                nameparts.insert(0, force_text(_('Ms.')))
+                nameparts.insert(0, force_str(_('Ms.')))
             if profile.gender == 'm':
-                nameparts.insert(0, force_text(_('Mr.')))
+                nameparts.insert(0, force_str(_('Mr.')))
         return ' '.join(nameparts)
     else:
         return str(user.email)

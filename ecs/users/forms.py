@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.forms import SetPasswordForm as DjangoSetPasswordForm
 from django.contrib.auth.forms import PasswordChangeForm as DjangoPasswordChangeForm
 from django.contrib.auth.forms import AuthenticationForm as DjangoAuthenticationForm
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from ecs.users.models import UserProfile
 from ecs.core.models import MedicalCategory

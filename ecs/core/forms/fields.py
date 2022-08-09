@@ -1,8 +1,8 @@
 import datetime
 
 from django import forms
-from django.utils.translation import ugettext as _
-from django.utils.encoding import force_text
+from django.utils.translation import gettext as _
+from django.utils.encoding import force_str
 from django.contrib.auth.models import User
 from django.urls import reverse
 
@@ -62,7 +62,7 @@ class AutocompleteWidgetMixin(object):
         return super().render(name, value, attrs=attrs)
 
     def render_options(self, choices, selected_choices):
-        selected_choices = set(force_text(v) for v in selected_choices if v != '')
+        selected_choices = set(force_str(v) for v in selected_choices if v != '')
         output = []
         objs = self.field.queryset.filter(pk__in=selected_choices)
         for obj in objs:

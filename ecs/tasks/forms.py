@@ -3,7 +3,7 @@ from urllib.parse import urlencode
 from django import forms
 from django.http import QueryDict
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from ecs.tasks.models import TaskType
 

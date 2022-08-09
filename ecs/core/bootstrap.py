@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.contrib.sites.models import Site
-from django.utils.translation import ugettext_noop as _
+from django.utils.translation import gettext_noop as _
 
 from ecs import bootstrap
 from ecs.core.models import Submission, MedicalCategory, EthicsCommission, AdvancedSettings

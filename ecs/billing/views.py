@@ -4,7 +4,7 @@ from io import BytesIO
 import math
 
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, InvalidPage

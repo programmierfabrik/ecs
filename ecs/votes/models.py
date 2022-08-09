@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
 from reversion.models import Version
@@ -25,7 +25,7 @@ class Vote(models.Model):
     top = models.OneToOneField('meetings.TimetableEntry', related_name='vote', null=True, on_delete=models.CASCADE)
     upgrade_for = models.OneToOneField('self', null=True, related_name='previous', on_delete=models.CASCADE)
     result = models.CharField(max_length=2, choices=VOTE_RESULT_CHOICES, null=True, verbose_name=_('vote'))
-    executive_review_required = models.NullBooleanField(blank=True)
+    executive_review_required = models.BooleanField(blank=True, null=True)
     text = models.TextField(blank=True, verbose_name=_('comment'))
     is_draft = models.BooleanField(default=False)
     is_final_version = models.BooleanField(default=False)

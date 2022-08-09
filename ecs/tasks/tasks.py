@@ -1,5 +1,5 @@
 from django.utils import timezone
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.db.models.expressions import RawSQL
 
 from celery.task import periodic_task

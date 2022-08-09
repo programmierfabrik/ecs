@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.forms.models import model_to_dict
 from django.db.models import Q, Prefetch, Min, F
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.core.cache import cache

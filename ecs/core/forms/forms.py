@@ -5,7 +5,7 @@ from functools import reduce
 from django import forms
 from django.forms.formsets import BaseFormSet, formset_factory
 from django.forms.models import modelformset_factory
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import Q

@@ -1,7 +1,7 @@
 from copy import deepcopy
 from collections import OrderedDict
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.db.models import F, Prefetch
 
 from ecs.core.models import (

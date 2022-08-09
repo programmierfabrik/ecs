@@ -11,7 +11,7 @@ from django.utils.text import slugify
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext
+from django.utils.translation import gettext
 from django.utils import timezone
 
 from ecs.utils.pdfutils import pdf_barcodestamp
@@ -28,7 +28,7 @@ class DocumentType(models.Model):
     is_downloadable = models.BooleanField(default=True)
 
     def __str__(self):
-        return ugettext(self.name)
+        return gettext(self.name)
 
 
 class DocumentManager(models.Manager):

@@ -2,8 +2,8 @@ from importlib import import_module
 
 from django.conf import settings
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
-from django.utils.translation import ugettext
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext
 from django.template import loader
 from django.utils.text import slugify
 from django.utils import timezone
@@ -253,7 +253,7 @@ class NotificationAnswer(models.Model):
             if finish:
                 submission.finish()
             presenting_parties = submission.current_submission_form.get_presenting_parties()
-            _ = ugettext
+            _ = gettext
             presenting_parties.send_message(
                 _('New Notification Answer'),
                 'notifications/answers/new_message.txt',

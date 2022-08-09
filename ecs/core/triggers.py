@@ -1,5 +1,5 @@
 from django.dispatch import receiver
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from ecs.communication.utils import send_system_message_template
 from ecs.core import signals
