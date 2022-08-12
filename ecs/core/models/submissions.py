@@ -252,11 +252,10 @@ class SubmissionForm(models.Model):
     is_notification_update = models.BooleanField(default=False)
     is_transient = models.BooleanField(default=False)
     is_acknowledged = models.BooleanField(default=False)
-    is_old_medtech = models.NullBooleanField(blank=True)
 
     project_title = models.TextField()
     eudract_number = models.CharField(max_length=60, null=True, blank=True)
-    submission_type = models.SmallIntegerField(null=True, blank=True, choices=SUBMISSION_TYPE_CHOICES)
+    submission_type = models.SmallIntegerField(null=True, blank=True, choices=SUBMISSION_TYPE_CHOICES, default=SUBMISSION_TYPE_MONOCENTRIC)
     presenter = models.ForeignKey(User, related_name='presented_submission_forms')
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -364,6 +363,7 @@ class SubmissionForm(models.Model):
     # 3b (via NonTestedUsedDrugs)
     
     # 4.x
+    medtech_is_new_law = models.BooleanField(default=True)
     medtech_product_name = models.CharField(max_length=210, null=True, blank=True)
     medtech_manufacturer = models.CharField(max_length=80, null=True, blank=True)
     medtech_certified_for_exact_indications = models.NullBooleanField(blank=True)
@@ -689,8 +689,7 @@ class SubmissionForm(models.Model):
         if self.is_amg:
             bits.append('{0}({1})'.format(_('AMG'), self.get_submission_type_display()))
         if self.is_mpg:
-            old_text = ' alt' if self.is_old_medtech else ''
-            bits.append('{0}{1}({2})'.format(_('MPG'), old_text, self.get_submission_type_display()))
+            bits.append('{0}({1})'.format(_('MPG'), self.get_submission_type_display()))
         if self.is_thesis:
             bits.append(self.get_project_type_education_context_display())
         if self.includes_minors:

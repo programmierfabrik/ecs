@@ -223,23 +223,23 @@
                 ecs.mainForm.submit('validate');
             });
 
-            changeOldMedtechState();
-            $('#id_project_type_medical_device').on('change', changeOldMedtechState)
-            function changeOldMedtechState() {
-                $('#id_is_old_medtech').prop('disabled', !$('#id_project_type_medical_device').is(':checked'));
-            }
-
-            changeSubmissionTypeState();
-            $('#id_project_type_non_reg_drug, #id_project_type_reg_drug, #id_project_type_medical_device').on('change', changeSubmissionTypeState);
-            function changeSubmissionTypeState() {
-                var isAmg = $('#id_project_type_non_reg_drug').is(':checked') || $('#id_project_type_reg_drug').is(':checked');
-                var isMpg = $('#id_project_type_medical_device').is(':checked');
-
-                $('#id_submission_type').prop('disabled', !(isAmg || isMpg));
-            }
-
             $('.upload_container').load(
                 '{% url 'ecs.core.views.submissions.upload_document_for_submission' docstash_key=request.docstash.key %}');
+
+            $('#id_medtech_is_new_law').parent().parent().hide();
+            var is_new_law = $('#id_medtech_is_new_law').prop("checked");
+            if (is_new_law) {
+                $('#tabs-6 #id_submission_type').on('input', function() {
+                    $('#tabs-7 #id_submission_type').val(this.value);
+                });
+
+                $('#tabs-7 #id_submission_type').on('input', function() {
+                    $('#tabs-6 #id_submission_type').val(this.value);
+                });
+            } else {
+                $('#tabs-7 #id_submission_type').val('');
+                $('#tabs-7 #id_submission_type').prop('disabled', true);
+            }
 
             {% if valid %}
                 ecs.confirm({
