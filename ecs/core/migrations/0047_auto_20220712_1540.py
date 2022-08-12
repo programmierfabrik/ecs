@@ -11,8 +11,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
+        migrations.AlterField(
             model_name='submissionform',
-            name='medtech_is_new_law',
+            name='submission_type',
+            field=models.SmallIntegerField(choices=[(1, 'monocentric'), (2, 'multicentric, main ethics commission'), (6, 'multicentric, local ethics commission')], null=True, blank=True),
         ),
     ]
