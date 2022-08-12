@@ -58,7 +58,7 @@ CHANGELOG = (
     ('*', '1.2'),
     ('-', SubmissionForm, 'sponsor_agrees_to_publishing', True),
     ('*', '1.3'),
-    ('+', SubmissionForm, 'is_old_medtech', True),
+    ('+', SubmissionForm, 'is_new_medtech_law', False),
     ('*', '1.4'),
 )
 
