@@ -144,7 +144,7 @@ def collect_submission_stats_for_year(year):
                 sf.medtech_ce_symbol and sf.medtech_certified_for_other_indications,
             'mpg.no_ce': sf.is_mpg and not sf.medtech_ce_symbol,
             'mpg.also_amg': sf.is_amg and sf.is_mpg,
-            'mpg.not_categorized': sf.is_old_medtech
+            'mpg.not_categorized': not sf.is_new_medtech_law
         }
 
         for key, value in classification.items():

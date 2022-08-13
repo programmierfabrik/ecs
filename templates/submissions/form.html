@@ -226,7 +226,7 @@
             changeOldMedtechState();
             $('#id_project_type_medical_device').on('change', changeOldMedtechState)
             function changeOldMedtechState() {
-                $('#id_is_old_medtech').prop('disabled', !$('#id_project_type_medical_device').is(':checked'));
+                $('#id_is_new_medtech_law').prop('disabled', !$('#id_project_type_medical_device').is(':checked'));
             }
 
             changeSubmissionTypeState();

@@ -252,7 +252,7 @@ class SubmissionForm(models.Model):
     is_notification_update = models.BooleanField(default=False)
     is_transient = models.BooleanField(default=False)
     is_acknowledged = models.BooleanField(default=False)
-    is_old_medtech = models.NullBooleanField(blank=True)
+    is_new_medtech_law = models.NullBooleanField(blank=True)
 
     project_title = models.TextField()
     eudract_number = models.CharField(max_length=60, null=True, blank=True)
@@ -689,7 +689,7 @@ class SubmissionForm(models.Model):
         if self.is_amg:
             bits.append('{0}({1})'.format(_('AMG'), self.get_submission_type_display()))
         if self.is_mpg:
-            old_text = ' alt' if self.is_old_medtech else ''
+            old_text = ' alt' if not self.is_new_medtech_law else ''
             bits.append('{0}{1}({2})'.format(_('MPG'), old_text, self.get_submission_type_display()))
         if self.is_thesis:
             bits.append(self.get_project_type_education_context_display())
