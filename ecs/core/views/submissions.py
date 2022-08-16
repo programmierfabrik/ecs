@@ -4,7 +4,7 @@ import re
 from itertools import groupby
 
 from django.conf import settings
-from django.http import HttpResponse, Http404, JsonResponse, FileResponse
+from django.http import HttpResponse, HttpResponseBadRequest, Http404, JsonResponse, FileResponse
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.forms.models import model_to_dict
@@ -1301,3 +1301,13 @@ def revoke_temporary_access(request, submission_pk=None, temp_auth_pk=None):
     temp_auth.end = timezone.now()
     temp_auth.save()
     return redirect(reverse('ecs.core.views.submissions.view_submission', kwargs={'submission_pk': submission_pk}) + '#involved_parties_tab')
+
+@user_flag_required('is_executive')
+def toggle_mpg(request, submission_form_pk=None):
+    submission = get_object_or_404(SubmissionForm, pk=submission_form_pk)
+    if not submission.is_mpg:
+       return HttpResponseBadRequest()
+
+    submission.is_new_medtech_law = not submission.is_new_medtech_law
+    submission.save()
+    return HttpResponse()

@@ -58,6 +58,7 @@ urlpatterns = (
     url(r'^form/(?P<submission_form_pk>\d+)/vote/prepare/$', views.vote_preparation),
     url(r'^form/(?P<submission_form_pk>\d+)/vote/prepare/$', views.vote_preparation),
     url(r'^form/(?P<submission_form_pk>\d+)/vote/b2-prepare/$', views.b2_vote_preparation),
+    url(r'^form/(?P<submission_form_pk>\d+)/toggle-mpg', views.toggle_mpg, name='core.submission.toggle_mpg')
 )
 
 if settings.DEBUG:
