@@ -1304,10 +1304,9 @@ def revoke_temporary_access(request, submission_pk=None, temp_auth_pk=None):
 
 @user_flag_required('is_executive')
 def toggle_mpg(request, submission_form_pk=None):
-    submission = get_object_or_404(SubmissionForm, pk=submission_form_pk)
-    if not submission.is_mpg:
-       return HttpResponseBadRequest()
+    submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
+    if submission_form.is_mpg:
+        submission_form.is_new_medtech_law = not submission_form.is_new_medtech_law
+        submission_form.save()
 
-    submission.is_new_medtech_law = not submission.is_new_medtech_law
-    submission.save()
-    return HttpResponse()
+    return redirect(reverse('readonly_submission_form', kwargs={'submission_form_pk': submission_form.pk}))

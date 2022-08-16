@@ -470,22 +470,9 @@
         });
 
         $('#mpg_is_new_law_checkbox').click(function(event) {
-            var isChecked = $(this).is(':checked');
             event.preventDefault();
-
             $(this).prop('disabled', true);
-            this.request = $.ajax({
-                url: "{% url 'core.submission.toggle_mpg' submission_form_pk=submission_form.pk %}",
-                method: 'POST',
-                processData: false,
-                contentType: false,
-                context: this,
-                headers: { 'X-CSRFToken': '{{csrf_token}}' },
-                success: function(data, second, third) {
-                    $(this).prop('disabled', false);
-                    $(this).prop('checked', isChecked);
-                }
-            });
+            $(this).parent().submit();
         });
 
     </script>

@@ -280,7 +280,10 @@
         <tr>
             <th class="text-nowrap">MPG neues Recht</th>
             <td>
-                <input type="checkbox" id="mpg_is_new_law_checkbox" {% if submission_form.is_new_medtech_law %} checked {% endif %}>
+                <form action="{% url 'core.submission.toggle_mpg' submission_form_pk=submission_form.pk %}" method="post">
+                    {% csrf_token %}
+                    <input type="checkbox" id="mpg_is_new_law_checkbox" {% if submission_form.is_new_medtech_law %} checked {% endif %}>
+                </form>
             </td>
         </tr>
         hello
