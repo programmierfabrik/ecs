@@ -469,5 +469,11 @@
             }
         });
 
+        $('#mpg_is_new_law_checkbox').click(function(event) {
+            event.preventDefault();
+            $(this).prop('disabled', true);
+            $(this).parent().submit();
+        });
+
     </script>
 {% endblock %}
