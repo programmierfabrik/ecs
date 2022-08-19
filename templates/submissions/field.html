@@ -37,7 +37,9 @@
             <label class="col-md-3 col-form-label" for="{{ field.id_for_label }}">
                 {% spaceless %}
                     {% if readonly and field_info.help_text or field_info.icon_text %}
-                        <span class="fa fa-info text-info" title="{{ field_info.icon_text }}"></span>&nbsp;
+                        <span class="fa fa-info text-info" title="
+                        {% if field_info.icon_text %} {{ field_info.icon_text }} {% else %} {{ field_info.help_text }} {% endif %}
+                        "></span>&nbsp;
                     {% endif %}
                     <span>{{ field_info.label|default:field.label }}</span>
                     {% if field_info.number %}
