@@ -28,8 +28,12 @@ if os.getenv('DATABASE_URL'):
     }
 else:
     DATABASES['default'] = {
+        'NAME': 'test-ecs',
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'ecs',
+        'USER': 'test-ecs',
+        'PASSWORD': 'test-ecs',
+        'HOST': 'localhost',
+        'PORT': '5432',
         'ATOMIC_REQUESTS': True,
     }
 
@@ -315,6 +319,7 @@ CELERY_IMPORTS = (
     'ecs.votes.tasks',
 )
 CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_SERIALIZER = 'pickle' # Maybe?
 CELERY_ACCEPT_CONTENT = (CELERY_TASK_SERIALIZER,)
 # try to propagate exceptions back to caller
 CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
