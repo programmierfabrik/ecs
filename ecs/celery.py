@@ -12,4 +12,4 @@ if hasattr(settings, 'RAVEN_CONFIG'):
     register_signal(client)
 
 app = Celery('ecs.celery')
-app.config_from_object('django.conf:settings')
+app.config_from_object('django.conf:settings', namespace='CELERY')
