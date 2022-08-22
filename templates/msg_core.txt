@@ -3,4 +3,5 @@
 
 {% block content %}{% endblock %}
 
-{% db_setting 'signature_block' %}
+{% db_setting 'signature_block' as signature_block %}
+{{ signature_block }}
