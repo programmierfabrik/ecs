@@ -13,6 +13,15 @@ The devserver requires at least 10GB Harddisk Space and 1,5GB RAM.
 Needed packages
 
 ```
+gettext
+```
+
+TODO:
+
+* Sanitize read / write only pdfs in python only
+* Barcode on every pdf page when generating a pdf
+
+```
 apt-get install python3 \
     python3-venv \
     python3-pip \
