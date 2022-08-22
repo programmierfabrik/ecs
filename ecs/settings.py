@@ -322,19 +322,19 @@ CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_SERIALIZER = 'pickle' # Maybe?
 CELERY_ACCEPT_CONTENT = (CELERY_TASK_SERIALIZER,)
 # try to propagate exceptions back to caller
-CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+CELERY_TASK_EAGER_PROPAGATES = True
 
 if os.getenv('REDIS_URL'):
-    BROKER_URL = os.getenv('REDIS_URL')
-    BROKER_TRANSPORT_OPTIONS = {
+    CELERY_BROKER_URL = os.getenv('REDIS_URL')
+    CELERY_BROKER_TRANSPORT_OPTIONS = {
         'fanout_prefix': True,
         'fanout_patterns': True
     }
-    CELERY_RESULT_BACKEND = BROKER_URL
-    CELERY_ALWAYS_EAGER = False
+    CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+    CELERY_TASK_ALWAYS_EAGER = False
 else:
     # dont use queueing backend but consume it right away
-    CELERY_ALWAYS_EAGER = True
+    CELERY_TASK_ALWAYS_EAGER = True
 
 
 # ### django_compressor ###
@@ -421,7 +421,7 @@ if 'ECS_DEBUGTOOLBAR' in locals() and ECS_DEBUGTOOLBAR:
 
 # hack some settings for test and runserver
 if 'test' in sys.argv:
-    CELERY_ALWAYS_EAGER = True
+    CELERY_TASK_ALWAYS_EAGER = True
     INSTALLED_APPS += ('ecs.workflow.tests',)
 
 if 'runserver' in sys.argv:
