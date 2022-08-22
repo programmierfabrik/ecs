@@ -6,6 +6,7 @@ from collections import OrderedDict
 
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
+from django.core.exceptions import FieldDoesNotExist
 from django.utils import timezone
 from django.contrib.postgres.fields import ArrayField
 
@@ -224,7 +225,7 @@ class ModelSerializer(object):
             return val, False
         try:
             field = self.model._meta.get_field(fieldname)
-        except models.fields.FieldDoesNotExist:
+        except FieldDoesNotExist:
             field = None
         deferr = False
         if field:
