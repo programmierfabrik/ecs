@@ -61,4 +61,4 @@ class DocStash(models.Model):
                 raise self.ConcurrentModification()
 
         self.current_version += 1
-        return super().save(**kwargs)
+        return super(DocStash, self).save(**kwargs)
