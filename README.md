@@ -14,6 +14,14 @@ Needed packages
 
 ```
 gettext
+libmemcached-dev
+```
+
+MacOS:
+
+```
+gettext
+libmemcached
 ```
 
 TODO:
@@ -42,7 +50,7 @@ apt-get install python3 \
 ```
 
 ```bash
-docker run --rm -p 5432:5432 -e POSTGRES_USER=app -e POSTGRES_PASSWORD=app -e POSTGRES_DB=app postgres:12-alpine
+docker run --rm -p 5432:5432 -e POSTGRES_USER=test-ecs -e POSTGRES_PASSWORD=test-ecs -e POSTGRES_DB=test-ecs postgres:12-alpine
 docker run --rm --network host -v $PWD/:/app/ test-ecs
 ```
 
