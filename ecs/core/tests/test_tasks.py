@@ -1,5 +1,5 @@
 from django.conf import settings
-from celery.task import task
+from celery import task
 
 from ecs.utils.testcases import EcsTestCase
 

@@ -1,29 +1,28 @@
+import hashlib
 import os
 import time
-import hashlib
 from io import BytesIO
 
 import xlwt
-from celery.task import task, periodic_task
 from celery.schedules import crontab
-
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import Min
-from django.contrib.auth.models import User
-from django.utils.translation import gettext as _
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
-from ecs.core.models import Submission, SubmissionForm, Investigator
-from ecs.core.forms import AllSubmissionsFilterForm
-from ecs.core.paper_forms import get_field_info
+from ecs.celery import app as celery_app
 from ecs.communication.utils import send_system_message_template
+from ecs.core.forms import AllSubmissionsFilterForm
+from ecs.core.models import Submission, SubmissionForm, Investigator
+from ecs.core.paper_forms import get_field_info
 
+from celery.utils.log import get_task_logger
 
-@task()
+logger = get_task_logger(__name__)
+@celery_app.task()
 def render_submission_form(submission_form_id=None):
-    logger = render_submission_form.get_logger()
-
     # XXX: Look to wait for submission form to appear. The celery task is
     # triggered on submit before the request transaction is committed, so we
     # have to wait. We should start using transaction.on_commit() as soon as
@@ -43,7 +42,7 @@ def render_submission_form(submission_form_id=None):
         return
 
 
-@task
+@celery_app.task
 def xls_export(user_id=None, filters=None):
     user = User.objects.get(id=user_id)
 
@@ -86,7 +85,7 @@ def xls_export(user_id=None, filters=None):
     sheet.write(2, 5, _('Type'), header)
     sheet.write_merge(0, 2, 6, 6, _('MPG'), header)
     sheet.write_merge(0, 2, 7, 7, _('monocentric') + '/' + _('multicentric'),
-        header)
+                      header)
     sheet.write_merge(0, 2, 8, 8, _('workflow lane'), header)
     sheet.write_merge(0, 2, 9, 9, _('remission'), header)
     sheet.write_merge(0, 2, 10, 10, _('Medical Categories'), header)
@@ -129,33 +128,33 @@ def xls_export(user_id=None, filters=None):
     sheet.write(2, 38, _('Yes') + '/' + _('No'), header)
     sheet.write(2, 39, label('project_type_reg_drug_within_indication'), header)
     sheet.write(2, 40, label('project_type_reg_drug_not_within_indication'),
-        header)
+                header)
     sheet.write_merge(1, 2, 41, 41, label('project_type_medical_method'),
-        header)
+                      header)
     sheet.write_merge(1, 1, 42, 45, label('project_type_medical_device'),
-        header)
+                      header)
     sheet.write(2, 42, _('Yes') + '/' + _('No'), header)
     sheet.write(2, 43, label('project_type_medical_device_with_ce'), header)
     sheet.write(2, 44, label('project_type_medical_device_without_ce'), header)
     sheet.write(2, 45,
-        label('project_type_medical_device_performance_evaluation'), header)
+                label('project_type_medical_device_performance_evaluation'), header)
     sheet.write_merge(1, 2, 46, 46, label('project_type_basic_research'),
-        header)
+                      header)
     sheet.write_merge(1, 2, 47, 47, label('project_type_genetic_study'), header)
     sheet.write_merge(1, 2, 48, 48, label('project_type_misc'), header)
     sheet.write_merge(1, 2, 49, 49, label('project_type_education_context'),
-        header)
+                      header)
     sheet.write_merge(1, 2, 50, 50, label('project_type_register'), header)
     sheet.write_merge(1, 2, 51, 51, label('project_type_biobank'), header)
     sheet.write_merge(1, 2, 52, 52, label('project_type_retrospective'), header)
     sheet.write_merge(1, 2, 53, 53, label('project_type_questionnaire'), header)
     sheet.write_merge(1, 2, 54, 54, label('project_type_psychological_study'),
-        header)
+                      header)
     sheet.write_merge(1, 2, 55, 55, label('project_type_nursing_study'), header)
     sheet.write_merge(1, 2, 56, 56,
-        label('project_type_non_interventional_study'), header)
+                      label('project_type_non_interventional_study'), header)
     sheet.write_merge(1, 2, 57, 57, label('project_type_gender_medicine'),
-        header)
+                      header)
 
     # format helpers
     _b = lambda x: _('Yes') if x else _('No')
@@ -167,9 +166,9 @@ def xls_export(user_id=None, filters=None):
         pi = sf.primary_investigator
 
         multicentric = (
-            sf.investigators.count() +
-            sf.foreignparticipatingcenter_set.count()
-        ) > 1
+                           sf.investigators.count() +
+                           sf.foreignparticipatingcenter_set.count()
+                       ) > 1
 
         sheet.write(i, 0, submission.get_ec_number_display())
         sheet.write(i, 1, sf.project_title)
@@ -177,10 +176,10 @@ def xls_export(user_id=None, filters=None):
         sheet.write(i, 3, sf.eudract_number)
         sheet.write(i, 4, _b(sf.is_amg))
         sheet.write(i, 5,
-            sf.get_submission_type_display() if sf.is_amg else None)
+                    sf.get_submission_type_display() if sf.is_amg else None)
         sheet.write(i, 6, _b(sf.is_mpg))
         sheet.write(i, 7,
-            _('multicentric') if multicentric else _('monocentric'))
+                    _('multicentric') if multicentric else _('monocentric'))
         sheet.write(i, 8, submission.get_workflow_lane_display())
         sheet.write(i, 9, _b(submission.remission))
         sheet.write(i, 10, ', '.join(sorted(
@@ -223,7 +222,7 @@ def xls_export(user_id=None, filters=None):
         sheet.write(i, 43, _b(sf.project_type_medical_device_with_ce))
         sheet.write(i, 44, _b(sf.project_type_medical_device_without_ce))
         sheet.write(i, 45,
-            _b(sf.project_type_medical_device_performance_evaluation))
+                    _b(sf.project_type_medical_device_performance_evaluation))
         sheet.write(i, 46, _b(sf.project_type_basic_research))
         sheet.write(i, 47, _b(sf.project_type_genetic_study))
         sheet.write(i, 48, sf.project_type_misc)
@@ -245,16 +244,22 @@ def xls_export(user_id=None, filters=None):
     h.update(xls_data)
 
     cache_file = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR,
-        '{}.xls'.format(h.hexdigest()))
+                              '{}.xls'.format(h.hexdigest()))
 
     with open(cache_file, 'wb') as f:
         f.write(xls_data)
 
     send_system_message_template(user, _('XLS-Export done'),
-        'submissions/xls_export_done.txt', {'shasum': h.hexdigest()})
+                                 'submissions/xls_export_done.txt', {'shasum': h.hexdigest()})
+
+
+@celery_app.on_after_finalize.connect
+def setup_periodic_tasks(sender, **kwargs):
+    sender.add_periodic_task(crontab(hour=3, minute=28), cull_cache_dir.s())
+
 
 # run once per day at 03:28
-@periodic_task(run_every=crontab(hour=3, minute=28))
+@celery_app.task
 def cull_cache_dir():
     logger = cull_cache_dir.get_logger()
     logger.info("culling download cache")

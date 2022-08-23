@@ -7,6 +7,7 @@ from django.conf import settings
 if hasattr(settings, 'RAVEN_CONFIG'):
     import raven
     from raven.contrib.celery import register_signal, register_logger_signal
+
     client = raven.Client(**settings.RAVEN_CONFIG)
     register_logger_signal(client)
     register_signal(client)

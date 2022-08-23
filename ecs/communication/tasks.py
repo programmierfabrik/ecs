@@ -1,13 +1,19 @@
 from datetime import timedelta
 
-from celery.task import periodic_task
 from django.utils import timezone
 
 from ecs.communication.models import Message
 from ecs.utils.celeryutils import translate
+from ecs.celery import app as celery_app
+
+@celery_app.on_after_finalize.connect
+def setup_periodic_tasks(sender, **kwargs):
+    # Run forward message, every 60 seconds
+    sender.add_periodic_task(60, forward_messages.s(), name='Forward messages every 60s')
+
 
 # run once every minute
-@periodic_task(run_every=timedelta(minutes=1))
+@celery_app.task
 @translate
 def forward_messages():
     logger = forward_messages.get_logger()

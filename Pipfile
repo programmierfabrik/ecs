@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 django = "==4.0"
-celery = "==4.0.0"
+celery = "==5.0.0"
 chardet = "==2.3.0"
 diff-match-patch = "==20121119"
 django-compressor = "==4.1"
@@ -15,18 +15,17 @@ django-picklefield = "==3.1.0"
 django-reversion = "==5.0.2"
 django-widget-tweaks = "==1.4.9"
 httpagentparser = "==1.7.8"
-psycopg2 = "==2.8"
+psycopg2-binary = "~=2.9.3"
 pylibmc = "==1.6.1"
 pyscss = "==1.4.0"
-pytz = "==2016.10"
 raven = "==5.32.0"
-redis = "==2.10.5"
+redis = "==3.3.0"
 requests = "==2.12.4"
-uwsgi = "==2.0.14"
+uwsgi = "~=2.0.20"
 weasyprint = "==0.39"
 xlwt = "==1.2.0"
 
 [dev-packages]
 
 [requires]
-python_version = "3.8"
+python_version = "3.10"
