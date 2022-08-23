@@ -1,6 +1,6 @@
+import html
 import re
 import textwrap
-from html.parser import HTMLParser
 
 from django.conf import settings
 from django.core import mail
@@ -9,7 +9,7 @@ from django.utils.html import strip_tags
 
 
 def html2text(htmltext):
-    text = HTMLParser().unescape(strip_tags(htmltext))
+    text = html.unescape(strip_tags(htmltext))
     text = '\n\n'.join(re.split(r'\s*\n\s*\n\s*', text))
     text = re.sub('\s\s\s+', ' ', text)
     wrapper = textwrap.TextWrapper(
