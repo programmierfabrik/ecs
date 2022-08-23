@@ -79,7 +79,7 @@ class sudo(object):
         self._previous_previous_user = getattr(current_user_store, '_previous_user', None)
         self._previous_user = getattr(current_user_store, 'user', None)
         user = self.user
-        if isinstance(user, collections.Callable):
+        if isinstance(user, collections.abc.Callable):
             user = user()
         current_user_store._previous_user = self._previous_user
         current_user_store.user = user

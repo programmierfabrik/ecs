@@ -90,12 +90,12 @@ class AtomicDiffNode(DiffNode):
         result = []
         if not self.ignore_old:
             old = self.old
-            if isinstance(old, collections.Callable):
+            if isinstance(old, collections.abc.Callable):
                 old = old(plainhtml=plain)
             result.append('<span class="deleted">- %s</span>' % force_str(old))
         if not self.ignore_new:
             new = self.new
-            if isinstance(new, collections.Callable):
+            if isinstance(new, collections.abc.Callable):
                 new = new(plainhtml=plain)
             result.append('<span class="inserted">+ %s</span>' % force_str(new))
         return '<div class="atomic">%s</div>' % ''.join(result)
