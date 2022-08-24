@@ -1,30 +1,25 @@
 #!/usr/bin/env python3
 import getopt
+import io
 import os
 import sys
-import re
 import mimetypes
 
-from weasyprint import HTML
-from weasyprint.urls import open_data_url
-
+from weasyprint import HTML, default_url_fetcher
 
 static_root = None
 
 
 def _url_fetcher(url):
-    if url.startswith('data:'):
-        return open_data_url(url)
-    elif url.startswith('static:'):
+    if url.startswith('static:'):
         path = os.path.abspath(os.path.join(static_root, url[len('static:'):]))
         if not path.startswith(static_root):
-            raise ValueError(
-                'static: URI points outside of static directory!')
+            raise ValueError('static: URI points outside of static directory!')
         with open(path, 'rb') as f:
             data = f.read()
         return {'string': data, 'mime_type': mimetypes.guess_type(path)[0]}
 
-    raise ValueError('Only data: and static: URIs are allowed')
+    return default_url_fetcher(url)
 
 
 def usage():
@@ -51,20 +46,9 @@ def main():
 
     html = sys.stdin.read()
 
-    # XXX: Remove control characters, otherwise lxml will go kaboom.
-    html = re.sub(r'[\x00-\x08\x0b\x0e-\x1f\x7f]', '', html)
-
-    # XXX: Remove soft hyphens, otherwise weasyprint's line breaking code will
-    # be confused and error out with an AssertionError.
-    html = html.replace('\xad', '')
-
-    # XXX: Replace unicode line separator character with a plain newline
-    # character, otherwise weasyprint's line breaking code will be confused
-    # and error out with an AssertionError.
-    html = html.replace('\u2028', '\n')
-
     html = html.encode('utf-8')
-    HTML(string=html, url_fetcher=_url_fetcher).write_pdf(sys.stdout.buffer)
+    HTML(string=html, url_fetcher=_url_fetcher).write_pdf(
+        sys.stdout.buffer)
 
 
 if __name__ == '__main__':
