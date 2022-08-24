@@ -392,16 +392,27 @@ if 'SECURE_PROXY_SSL' in locals() and SECURE_PROXY_SSL:
 
 # sentry/raven
 if 'SENTRY_DSN' in locals():
-    import raven
-    from raven.transport.threaded_requests import ThreadedRequestsHTTPTransport
-    # if no threading support: from raven.transport.requests import RequestsHTTPTransport
-    RAVEN_CONFIG = {
-        'dsn': SENTRY_DSN,
-        'release': ECS_GIT_REV,
-        'transport': ThreadedRequestsHTTPTransport,
-        'site': DOMAIN,
-    }
-    SENTRY_CLIENT = 'ecs.utils.ravenutils.DjangoClient'
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        # We recommend adjusting this value in production,
+        traces_sample_rate=1.0,
+        send_default_pii=True,
+
+        # By default the SDK will try to use the SENTRY_RELEASE
+        # environment variable, or infer a git commit
+        # SHA as release, however you may want to set
+        # something more human-readable.
+        # release="myapp@1.0.0",
+        release=ECS_GIT_REV
+    )
+
 
 # user switcher
 if 'ECS_USERSWITCHER_ENABLED' not in locals():
