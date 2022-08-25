@@ -44,9 +44,13 @@ def main():
     if not static_root or args:
         usage()
 
-    html = sys.stdin.read()
+    html = ''
+    while True:
+        read = sys.stdin.read()
+        html += read
+        if not read:
+            break
 
-    html = html.encode('utf-8')
     HTML(string=html, url_fetcher=_url_fetcher).write_pdf(
         sys.stdout.buffer)
 
