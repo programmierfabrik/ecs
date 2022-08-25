@@ -3,6 +3,7 @@ import io
 import zipfile
 
 from celery.schedules import crontab
+from celery.utils.log import get_task_logger
 
 from django.db import transaction
 from django.contrib.contenttypes.models import ContentType
@@ -13,6 +14,9 @@ from ecs.meetings.models import Meeting
 from ecs.checklists.models import Checklist
 from ecs.documents.models import Document
 from ecs.celery import app as celery_app
+
+
+logger = get_task_logger(__name__)
 
 
 @celery_app.on_after_finalize.connect
@@ -65,7 +69,6 @@ def _eval_timetable(metrics):
 @celery_app.task
 @transaction.atomic
 def optimize_timetable_task(meeting_id=None, algorithm=None, algorithm_parameters=None):
-    logger = optimize_timetable_task.get_logger()
     meeting = Meeting.objects.get(id=meeting_id)
     retval = False
     try:

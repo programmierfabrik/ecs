@@ -21,6 +21,8 @@ from ecs.core.paper_forms import get_field_info
 from celery.utils.log import get_task_logger
 
 logger = get_task_logger(__name__)
+
+
 @celery_app.task()
 def render_submission_form(submission_form_id=None):
     # XXX: Look to wait for submission form to appear. The celery task is
@@ -261,7 +263,6 @@ def setup_periodic_tasks(sender, **kwargs):
 # run once per day at 03:28
 @celery_app.task
 def cull_cache_dir():
-    logger = cull_cache_dir.get_logger()
     logger.info("culling download cache")
     for path in os.listdir(settings.ECS_DOWNLOAD_CACHE_DIR):
         if path.startswith('.'):
