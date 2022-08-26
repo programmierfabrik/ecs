@@ -1,0 +1,10 @@
+version: '3'
+services:
+  database:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: test-ecs
+      POSTGRES_PASSWORD: test-ecs
+      POSTGRES_DB: test-ecs
+    ports:
+      - "5432:5432"

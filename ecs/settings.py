@@ -19,7 +19,7 @@ if os.getenv('DATABASE_URL'):
     url = urlparse(os.getenv('DATABASE_URL'))
     DATABASES['default'] = {
         'NAME': url.path[1:] or '',
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'USER': url.username,
         'PASSWORD': url.password,
         'HOST': url.hostname or '',
@@ -29,7 +29,7 @@ if os.getenv('DATABASE_URL'):
 else:
     DATABASES['default'] = {
         'NAME': 'test-ecs',
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'USER': 'test-ecs',
         'PASSWORD': 'test-ecs',
         'HOST': 'localhost',
@@ -92,7 +92,7 @@ if os.getenv('MEMCACHED_URL'):
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
-            'LOCATION': os.getenv('MEMCACHED_URL').split('//')[1],
+            'LOCATION': os.getenv('MEMCACHED_URL'),
         }
     }
 else:
