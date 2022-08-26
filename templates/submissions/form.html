@@ -55,7 +55,7 @@
 
 {% block jsbottom %}
     {{ block.super }}
-    <script type="text/javascript"> 
+    <script type="text/javascript">
         $(function(){
             var setup = ecs.setupForms();
 
@@ -213,7 +213,7 @@
                     this.requireField($(requiredFields), require);
                 }
             });
-            
+
             $('#save-button').click(function(ev){
                 ev.preventDefault();
                 ecs.mainForm.save();
@@ -223,9 +223,24 @@
                 ecs.mainForm.submit('validate');
             });
 
+            changeOldMedtechState();
+            $('#id_project_type_medical_device').on('change', changeOldMedtechState)
+            function changeOldMedtechState() {
+                $('#id_is_new_medtech_law').prop('disabled', !$('#id_project_type_medical_device').is(':checked'));
+            }
+
+            changeSubmissionTypeState();
+            $('#id_project_type_non_reg_drug, #id_project_type_reg_drug, #id_project_type_medical_device').on('change', changeSubmissionTypeState);
+            function changeSubmissionTypeState() {
+                var isAmg = $('#id_project_type_non_reg_drug').is(':checked') || $('#id_project_type_reg_drug').is(':checked');
+                var isMpg = $('#id_project_type_medical_device').is(':checked');
+
+                $('#id_submission_type').prop('disabled', !(isAmg || isMpg));
+            }
+
             $('.upload_container').load(
                 '{% url 'core.submission.upload_document_for_submission' docstash_key=request.docstash.key %}');
-            
+
             {% if valid %}
                 ecs.confirm({
                     question: '{% if notification_type %}{% trans "You filled out the form correctly. Do you want to create a notification now?" %}{% else %}{% trans "You filled out the form correctly. Do want to submit the study?" %}{% endif %}',

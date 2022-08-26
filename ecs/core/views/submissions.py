@@ -806,6 +806,7 @@ def create_submission_form(request):
             return redirect('readonly_submission_form',
                 submission_form_pk=submission_form.submission.current_submission_form.pk)
 
+
     context = {
         'form': form,
         'tabs': SUBMISSION_FORM_TABS,
@@ -1300,3 +1301,13 @@ def revoke_temporary_access(request, submission_pk=None, temp_auth_pk=None):
     temp_auth.end = timezone.now()
     temp_auth.save()
     return redirect(reverse('view_submission', kwargs={'submission_pk': submission_pk}) + '#involved_parties_tab')
+
+
+@user_flag_required('is_executive')
+def toggle_mpg(request, submission_form_pk=None):
+    submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
+    if submission_form.is_mpg:
+        submission_form.is_new_medtech_law = not submission_form.is_new_medtech_law
+        submission_form.save()
+
+    return redirect(reverse('readonly_submission_form', kwargs={'submission_form_pk': submission_form.pk}))

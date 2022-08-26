@@ -21,7 +21,7 @@ from ecs.core.models import (
 )
 
 from ecs.utils.formutils import require_fields
-from ecs.core.forms.fields import StrippedTextInput, NullBooleanField, \
+from ecs.core.forms.fields import StrippedTextInput, NullBooleanField, NullBooleanFieldNewMedtechLaw, \
     EmailUserSelectWidget, AutocompleteModelChoiceField, DateTimeField
 from ecs.core.forms.utils import ReadonlyFormMixin, ReadonlyFormSetMixin
 from ecs.users.utils import get_current_user
@@ -38,7 +38,7 @@ AMG_FIELDS = AMG_REQUIRED_FIELDS + ('substance_registered_in_countries', 'substa
     'substance_p_c_t_application_type', 'substance_p_c_t_gcp_rules', 'substance_p_c_t_final_report',)
 
 MPG_FIELDS = (
-    'medtech_checked_product', 'medtech_reference_substance',
+    'is_new_medtech_law', 'medtech_checked_product', 'medtech_reference_substance',
     'medtech_product_name', 'medtech_manufacturer', 'medtech_certified_for_exact_indications', 'medtech_certified_for_other_indications', 'medtech_ce_symbol',
     'medtech_manual_included', 'medtech_technical_safety_regulations', 'medtech_departure_from_regulations',
 )
@@ -74,6 +74,8 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
         ('2', _('Yes, but only childbearing')),
         ('3', _('No')),
     ))
+
+    is_new_medtech_law = NullBooleanFieldNewMedtechLaw(required=False)
 
     # non model fields (required for validation)
     invoice_differs_from_sponsor = forms.BooleanField(required=False, label=_('The account beneficiary is not the sponsor'))
@@ -163,6 +165,9 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
             require_fields(self, ('substance_p_c_t_phase', 'substance_p_c_t_period', 'substance_p_c_t_application_type', 'substance_p_c_t_gcp_rules', 'substance_p_c_t_final_report',))
 
         require_fields(self, ('subject_males',))
+
+        if any(cleaned_data.get(f, False) for f in ('project_type_reg_drug', 'project_type_non_reg_drug', 'project_type_medical_device')):
+            require_fields(self, ('submission_type',))
         return cleaned_data
 
     def save(self, commit=True):

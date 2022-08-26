@@ -16,11 +16,12 @@ from ecs.documents.models import Document
 _form_info = {}
 
 class FieldInfo(object):
-    def __init__(self, number, name, paper_label=None, help_text=None, short_label=None, db_field=True):
+    def __init__(self, number, name, paper_label=None, help_text=None, icon_text=False, short_label=None, db_field=True):
         self.number = number
         self.name = name
         self.paper_label = paper_label
         self.help_text = help_text
+        self.icon_text= icon_text
         self.short_label = short_label
         self._db_field = db_field or None
 
@@ -166,6 +167,8 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('2.1.15', 'project_type_nursing_study', _('Nursing Scientific Study')),
     FieldInfo('2.1.16', 'project_type_non_interventional_study', _('Non-interventional Study (NIS)')),
     FieldInfo('2.1.17', 'project_type_gender_medicine', _('Gender medicine')),
+    FieldInfo(None, 'submission_type', _('Submit as')),
+    FieldInfo(None, 'is_new_medtech_law', _('is_new_medtech_law'), help_text=_('is_new_medtech_law_help'), icon_text=_('is_new_medtech_law_icon')),
     FieldInfo('2.2', 'specialism', _('special field')),
     # 2.3 Arzneimittelstudie (wenn zutreffend)
     FieldInfo('2.3.1', 'pharma_checked_substance', _('Test substances')),
@@ -191,7 +194,6 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('2.11.2', 'subject_duration_controls', _('Follow-up inspections')),
     FieldInfo('2.12', 'subject_planned_total_duration', _('Expected total duration of the study')),
     # 3a. Betrifft nur Studien gemäß AMG: Angaben zur Prüfsubstanz (falls nicht in Österreich registriert)
-    FieldInfo(None, 'submission_type', _('Submit as')),
     FieldInfo('3.1', 'substance_registered_in_countries', _('Registration in other states?')),
     FieldInfo('3.2', 'substance_preexisting_clinical_tries', _('Are there already results of clinical trials for the tested drug?')),
     FieldInfo('3.2.1', 'substance_p_c_t_countries', _('3.2.1 Countries in which the tests were conducted')),

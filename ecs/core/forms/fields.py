@@ -48,6 +48,16 @@ class NullBooleanField(forms.NullBooleanField):
         kwargs.setdefault('widget', NullBooleanWidget)
         super().__init__(*args, **kwargs)
 
+class NullBooleanWidgetNewMedtechLaw(forms.widgets.NullBooleanSelect):
+    def __init__(self, attrs=None):
+        choices = (('1', '-'), ('2', 'Ja - nach neuem Gesetz'), ('3', 'Nein - nach altem Gesetz'))
+        forms.widgets.Select.__init__(self, attrs, choices)
+
+class NullBooleanFieldNewMedtechLaw(forms.NullBooleanField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('widget', NullBooleanWidgetNewMedtechLaw)
+        super().__init__(*args, **kwargs)
+
 
 class AutocompleteWidgetMixin(object):
     def __init__(self, field):

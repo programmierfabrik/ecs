@@ -15,4 +15,5 @@ urlpatterns = (
     path('submission/', include('ecs.core.urls.submission')),
     path('comments/', include('ecs.core.urls.comments')),
     path('catalog/', include('ecs.core.urls.catalog')),
+    path('medical-category/', include('ecs.core.urls.medical_category'))
 )
