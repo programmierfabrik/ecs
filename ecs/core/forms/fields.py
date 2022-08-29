@@ -50,7 +50,7 @@ class NullBooleanField(forms.NullBooleanField):
 
 class NullBooleanWidgetNewMedtechLaw(forms.widgets.NullBooleanSelect):
     def __init__(self, attrs=None):
-        choices = (('1', '-'), ('2', 'Ja - nach neuem Gesetz'), ('3', 'Nein - nach altem Gesetz'))
+        choices = (('unknown', '-'), ('true', 'Ja - nach neuem Gesetz'), ('false', 'Nein - nach altem Gesetz'))
         forms.widgets.Select.__init__(self, attrs, choices)
 
 class NullBooleanFieldNewMedtechLaw(forms.NullBooleanField):

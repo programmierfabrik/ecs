@@ -252,7 +252,7 @@ class SubmissionForm(models.Model):
     is_notification_update = models.BooleanField(default=False)
     is_transient = models.BooleanField(default=False)
     is_acknowledged = models.BooleanField(default=False)
-    is_new_medtech_law = models.NullBooleanField(blank=True)
+    is_new_medtech_law = models.BooleanField(null=True, blank=True)
 
     project_title = models.TextField()
     eudract_number = models.CharField(max_length=60, null=True, blank=True)
