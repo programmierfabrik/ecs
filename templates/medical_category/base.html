@@ -7,7 +7,7 @@
 
 
 <div class="container">
-    <a class="btn btn-primary mr-3" href="{% url 'ecs.core.views.medical_category.create_medical_category' %}">{% trans "create_new_category" %}</a>
+    <a class="btn btn-primary mr-3" href="{% url 'core.medical_category.create_medical_category' %}">{% trans "create_new_category" %}</a>
 
     {% include 'paginator.html' with page=medical_category %}
     <ul class="list-group mb-3">
@@ -16,19 +16,19 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <span>{{ singleCategory.name }} ({{ singleCategory.abbrev }})</span>
                     <div>
-                        <a class="btn btn-secondary" href="{% url 'ecs.core.views.medical_category.toggle_disabled' pk=singleCategory.id %}">
+                        <a class="btn btn-secondary" href="{% url 'core.medical_category.toggle_disabled' pk=singleCategory.id %}">
                             {% if singleCategory.is_disabled %}
                                 {% trans 'Activate' %}
                             {% else %}
                                 {% trans 'Deactivate' %}
                             {% endif %}
                         </a>
-                        <a class="btn btn-primary ml-3" href="{% url 'ecs.core.views.medical_category.update_medical_category' pk=singleCategory.id %}">{% trans 'edit' %}</a>
+                        <a class="btn btn-primary ml-3" href="{% url 'core.medical_category.update_medical_category' pk=singleCategory.id %}">{% trans 'edit' %}</a>
                     </div>
                 </div>
             </li>
         {% endfor %}
-    </ul>    
+    </ul>
     {% include 'paginator.html' with page=medical_category %}
 
 </div>

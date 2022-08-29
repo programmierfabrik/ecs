@@ -58,6 +58,7 @@ urlpatterns = (
     path('form/<int:submission_form_pk>/review/vote/', views.vote_review, name='core.submission.vote_review'),
     path('form/<int:submission_form_pk>/vote/prepare/', views.vote_preparation, name='core.submission.vote_preparation'),
     path('form/<int:submission_form_pk>/vote/b2-prepare/', views.b2_vote_preparation, name='core.submission.b2_vote_preparation'),
+    path('form/<int:submission_form_pk>/toggle-mpg/', views.toggle_mpg, name='core.submission.toggle_mpg'),
 )
 
 if settings.DEBUG:
