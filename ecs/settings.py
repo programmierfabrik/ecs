@@ -25,7 +25,7 @@ if os.getenv('ECS_COMMISSION_UUID'):
 else:
     ETHICS_COMMISSION_UUID = 'ecececececececececececececececec'
 
-ALLOWED_HOSTS = [DOMAIN, ]
+ALLOWED_HOSTS = [DOMAIN]
 
 # Production settings
 if os.getenv('ECS_PROD'):
@@ -35,7 +35,7 @@ if os.getenv('ECS_PROD'):
     DEBUG = False
     EMAIL_BACKEND_UNFILTERED = 'django.core.mail.backends.smtp.EmailBackend'
     SMTPD_ADDRESS = ('0.0.0.0', 25)
-# Default devlopment settings
+# Default development settings
 else:
     # PDF Signing will use fake signing if PDFAS_SERVICE is "mock:"
     PDFAS_SERVICE = 'mock:'
@@ -57,10 +57,9 @@ if os.getenv('ECS_PASSWORD_RESET_SECRET'):
 else:
     PASSWORD_RESET_SECRET = 'j2obdvrb-hm$$x949k*f5gk_2$1x%2etxhd!$+*^qs8$4ra3=a'
 
-# standard django settings
-##########################
+ECS_CHANGED = os.getenv('BUILD_TIME', 'unknown')
 
-# database configuration defaults, may get overwritten in local_settings
+# Database configuration with development fallback
 DATABASES = {}
 if os.getenv('DATABASE_URL'):
     url = urlparse(os.getenv('DATABASE_URL'))
@@ -82,6 +81,21 @@ else:
         'HOST': 'localhost',
         'PORT': '5432',
         'ATOMIC_REQUESTS': True,
+    }
+
+# cache backend, warning, this is seperate for each process, for production use memcache
+if os.getenv('MEMCACHED_URL'):
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
+            'LOCATION': os.getenv('MEMCACHED_URL'),
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        },
     }
 
 # Local time zone for this installation. See http://en.wikipedia.org/wiki/List_of_tz_zones_by_name,
@@ -108,7 +122,6 @@ LOCALE_PATHS = (os.path.join(PROJECT_DIR, "locale"),)
 # We do not want to expose our internal denglish to the end-user, so disable english
 # in the settings
 LANGUAGES = (
-    #('en', gettext('English')),
     ('de-AT', gettext('German')),
 )
 
@@ -133,21 +146,6 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 # additional fixture search paths. implicitly used by every app the needs fixtures
 FIXTURE_DIRS = [os.path.join(PROJECT_DIR, "fixtures")]
-
-# cache backend, warning, this is seperate for each process, for production use memcache
-if os.getenv('MEMCACHED_URL'):
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
-            'LOCATION': os.getenv('MEMCACHED_URL'),
-        }
-    }
-else:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        },
-    }
 
 # django.contrib.messages
 MESSAGE_STORE = 'django.contrib.messages.storage.session.SessionStorage'
@@ -394,16 +392,6 @@ try:
     from ecs.local_settings import *
 except ImportError:
     pass
-
-# try to get ECS_VERSION, ECS_GIT_REV from version.py
-if not all([k in locals() for k in ['ECS_VERSION', 'ECS_GIT_REV', 'ECS_GIT_BRANCH']]):
-    try:
-        from ecs.version import ECS_VERSION, ECS_GIT_REV, ECS_GIT_BRANCH, ECS_CHANGED
-    except ImportError:
-        ECS_VERSION = 'unknown'
-        ECS_GIT_BRANCH = 'unknown'
-        ECS_GIT_REV = 'badbadbadbadbadbadbadbadbadbadbadbadbad0'
-        ECS_CHANGED = 'unknown'
 
 DEFAULT_FROM_EMAIL = SERVER_EMAIL = 'noreply@{}'.format(DOMAIN)
 
