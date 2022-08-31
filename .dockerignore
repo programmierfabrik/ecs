@@ -1,0 +1,11 @@
+# Ignore everything
+*
+# Except:
+!ecs
+!locale
+!static
+!templates
+!docker-entrypoint.sh
+!manage.py
+!Pipfile
+!Pipfile.lock
