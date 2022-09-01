@@ -5,7 +5,7 @@ from django.utils.translation import gettext_noop as _
 
 from ecs import bootstrap
 from ecs.documents.models import DocumentType
-from ecs.utils import Args, gpgutils
+from ecs.utils import Args
 
 
 @bootstrap.register()
@@ -48,23 +48,6 @@ def document_types():
             'is_hidden': args.get('is_hidden', False),
             'is_downloadable': args.get('is_downloadable', True),
         })
-
-
-@bootstrap.register()
-def import_keys():
-    secring = os.path.join(settings.STORAGE_VAULT['gpghome'], 'secring.gpg')
-    if os.path.exists(secring):
-        return
-
-    os.makedirs(settings.STORAGE_VAULT['gpghome'], exist_ok=True)
-
-    print('creating ecs-gpg using default STORAGE_VAULT keys')
-    enc_key = open(os.path.join(settings.PROJECT_DIR, 'conf',
-        'storagevault_encrypt.sec')).read()
-    sig_key = open(os.path.join(settings.PROJECT_DIR, 'conf',
-        'storagevault_sign.sec')).read()
-    gpgutils.import_key(enc_key, settings.STORAGE_VAULT['gpghome'])
-    gpgutils.import_key(sig_key, settings.STORAGE_VAULT['gpghome'])
 
 
 @bootstrap.register()

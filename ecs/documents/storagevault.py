@@ -30,8 +30,6 @@ import os
 
 from django.conf import settings
 
-from ecs.utils import gpgutils
-
 
 def getVault():
     return StorageVault(settings.STORAGE_VAULT['dir'])
