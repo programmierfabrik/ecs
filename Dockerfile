@@ -33,9 +33,8 @@ RUN pipenv install --deploy --ignore-pipfile
 # Copy rest of code
 COPY . .
 
+# Compile the messages
 RUN pipenv run ./manage.py compilemessages
-#./manage.py compilemessages && \
-#./manage.py collectstatic --noinput
 
 EXPOSE 8000
 
