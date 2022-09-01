@@ -27,11 +27,11 @@ USER ecs
 WORKDIR /opt/ecs
 
 # Copy pip files and install
-COPY Pipfile Pipfile.lock ./
+COPY --chown=ecs Pipfile Pipfile.lock ./
 RUN pipenv install --deploy --ignore-pipfile
 
 # Copy rest of code
-COPY . .
+COPY --chown=ecs . .
 
 # Compile the messages
 RUN pipenv run ./manage.py compilemessages
