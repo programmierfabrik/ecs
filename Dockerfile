@@ -33,6 +33,7 @@ RUN pipenv install --deploy --ignore-pipfile
 # Copy rest of code
 COPY . .
 
+RUN pipenv run ./manage.py compilemessages
 #./manage.py compilemessages && \
 #./manage.py collectstatic --noinput
 
