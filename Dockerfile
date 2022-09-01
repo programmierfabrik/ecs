@@ -36,6 +36,9 @@ COPY --chown=ecs . .
 # Compile the messages
 RUN pipenv run ./manage.py compilemessages
 
+# Create folders that will be mounted via volumes. We have problems with permission, as docker uses the root account for volumes and we use ecs (1000)
+RUN mkdir /opt/ecs/{data,volatile}
+
 EXPOSE 8000
 
 ENTRYPOINT ["/opt/ecs/docker-entrypoint.sh"]
