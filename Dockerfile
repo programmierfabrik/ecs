@@ -6,14 +6,17 @@ ARG TZ="Europe/Vienna"
 
 # Global environment variables
 ENV BUILD_TIME=${BUILD_TIME}
+ENV LANG en_US.UTF-8
 
 # Install dependencies
 RUN apt-get update -y && \
     apt-get install -y \
-    # python dependencies
+    # Python
     python3 python3-pip \
-    # ecs dependencies
+    # ecs
     gettext libmemcached-dev tzdata \
+    # Weasyprint
+    libpango-1.0-0 libharfbuzz0b libpangoft2-1.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install pipenv
