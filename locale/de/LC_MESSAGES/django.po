@@ -872,7 +872,7 @@ msgid "Nursing Scientific Study"
 msgstr "Pflegewissenschaftliche Studie"
 
 msgid "Non-interventional Study (NIS)"
-msgstr "Nicht-interventionelle Studie (NIS) nur gem. § 2a Abs. 3 AMG"
+msgstr "Nicht-interventionelle Studie (NIS) nur gem. Arzneimittelrecht"
 
 msgid "Gender medicine"
 msgstr "Gendermedizin"
