@@ -1,7 +1,8 @@
 FROM ubuntu:22.04
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG BUILD_TIME='unknown'
+ARG BUILD_TIME="unknown"
+ARG TZ="Europe/Vienna"
 
 # Global environment variables
 ENV BUILD_TIME=${BUILD_TIME}
@@ -12,7 +13,7 @@ RUN apt-get update -y && \
     # python dependencies
     python3 python3-pip \
     # ecs dependencies
-    gettext libmemcached-dev \
+    gettext libmemcached-dev tzdata \
     && rm -rf /var/lib/apt/lists/*
 
 # Install pipenv
