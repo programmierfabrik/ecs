@@ -3,6 +3,7 @@
 # Except:
 !ecs
 !locale
+!scripts
 !static
 !templates
 !docker-entrypoint.sh
