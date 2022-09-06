@@ -20,10 +20,9 @@ else:
     ABSOLUTE_URL_PREFIX = "http://" + DOMAIN + ":8000"
 
 # This is used by the EthicsCommission model to identify the system
-if os.getenv('ECS_COMMISSION_UUID'):
-    ETHICS_COMMISSION_UUID = os.getenv('ECS_COMMISSION_UUID')
-else:
-    ETHICS_COMMISSION_UUID = 'ecececececececececececececececec'
+ETHICS_COMMISSION_UUID = os.getenv('ECS_COMMISSION_UUID', 'ecececececececececececececececec')
+ECS_REQUIRE_CLIENT_CERTS = os.getenv('ECS_REQUIRE_CLIENT_CERTS', '').lower() == 'true'
+ECS_USERSWITCHER_ENABLED = os.getenv('ECS_USERSWITCHER_ENABLED', 'true').lower() == 'true'
 
 ALLOWED_HOSTS = [DOMAIN]
 
@@ -31,7 +30,6 @@ ALLOWED_HOSTS = [DOMAIN]
 if os.getenv('ECS_PROD'):
     PDFAS_SERVICE = ABSOLUTE_URL_PREFIX + '/pdf-as-web/'
     SECURE_PROXY_SSL = True
-    ECS_REQUIRE_CLIENT_CERTS = True
     DEBUG = False
     EMAIL_BACKEND_UNFILTERED = 'django.core.mail.backends.smtp.EmailBackend'
     SMTPD_ADDRESS = ('0.0.0.0', 25)
@@ -375,11 +373,6 @@ COMPRESS_PRECOMPILERS = (
 ###################
 #these are local fixes, they default to a sane value if unset
 
-#ECS_USERSWITCHER_ENABLED = True/False
-# default to True, Userswitcher will be shown so user can switch to testusers quickly
-if os.getenv('ECS_USERSWITCHER_ENABLED'):
-    ECS_USERSWITCHER_ENABLED = os.getenv('ECS_USERSWITCHER_ENABLED','').lower() == 'true'
-
 #ECS_DEBUGTOOLBAR = True/False defaults to False if empty
 # loads support for django-debug-toolbar
 
@@ -423,10 +416,6 @@ if os.getenv('SENTRY_DSN'):
         release=ECS_GIT_REV
     )
 
-
-# user switcher
-if 'ECS_USERSWITCHER_ENABLED' not in locals():
-    ECS_USERSWITCHER_ENABLED = True
 
 if not ECS_USERSWITCHER_ENABLED:
     MIDDLEWARE = tuple(item for item in MIDDLEWARE if item != 'ecs.userswitcher.middleware.UserSwitcherMiddleware')
