@@ -15,6 +15,7 @@ from django.db.models import Manager, QuerySet
 from django.http import HttpRequest
 from django.contrib.auth.models import User
 from django.utils.html import escape
+from django.core import exceptions
 
 from ecs.core.models import SubmissionForm, Investigator, EthicsCommission, \
     Measure, NonTestedUsedDrug, ParticipatingCenterNonSubject, \
@@ -270,7 +271,7 @@ class ModelDiffer(object):
         
         try:
             field = self.model._meta.get_field(name)
-        except models.FieldDoesNotExist:
+        except exceptions.FieldDoesNotExist:
             field = None
         
         if isinstance(field, models.ForeignKey):

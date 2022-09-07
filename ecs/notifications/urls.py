@@ -25,6 +25,6 @@ urlpatterns = (
 
 if settings.DEBUG:
     urlpatterns += (
-        path('<int:notification_pk>/pdf/debug/', views.notification_pdf_debug),
+        path('<int:notification_pk>/pdf/debug/', views.notification_pdf_debug, name='notifications.notification_pdf_debug'),
         path('<int:notification_pk>/answer/pdf/debug/', views.notification_answer_pdf_debug, name='notifications.notification_answer_pdf_debug'),
     )
