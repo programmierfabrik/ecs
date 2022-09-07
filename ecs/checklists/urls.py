@@ -13,5 +13,5 @@ urlpatterns = (
 
 if settings.DEBUG:
     urlpatterns += (
-        path('<int:checklist_pk>/pdf/debug/', views.checklist_pdf_debug),
+        path('<int:checklist_pk>/pdf/debug/', views.checklist_pdf_debug, name='checklists.checklist_pdf_debug'),
     )
