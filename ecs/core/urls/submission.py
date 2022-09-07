@@ -14,7 +14,7 @@ urlpatterns = (
 
     path('list/all/', views.all_submissions, name='core.submission.all_submissions'),
     path('list/xls/', views.xls_export, name='core.submission.xls_export'),
-    re_path(r'^list/xls/(?P<shasum>[0-9a-f]{40})/$', views.xls_export_download),
+    re_path(r'^list/xls/(?P<shasum>[0-9a-f]{40})/$', views.xls_export_download, name='core.submission.xls_export_download'),
     path('list/assigned/', views.assigned_submissions, name='core.submission.assigned_submissions'),
     path('list/mine/', views.my_submissions, name='core.submission.my_submissions'),
 
