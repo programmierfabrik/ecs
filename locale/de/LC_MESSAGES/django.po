@@ -3244,3 +3244,6 @@ msgstr "Mit Stand vor Juli 2021"
 
 msgid "date of last modification:"
 msgstr "Datum der letzten Änderung:"
+
+msgid "project_type_non_interventional_study_mpg"
+msgstr "Nicht-interventionelle Studie - nur gem. Medizinprodukterecht"

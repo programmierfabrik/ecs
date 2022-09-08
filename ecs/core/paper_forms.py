@@ -167,6 +167,7 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('2.1.15', 'project_type_nursing_study', _('Nursing Scientific Study')),
     FieldInfo('2.1.16', 'project_type_non_interventional_study', _('Non-interventional Study (NIS)')),
     FieldInfo('2.1.17', 'project_type_gender_medicine', _('Gender medicine')),
+    FieldInfo('2.1.18', 'project_type_non_interventional_study_mpg', _('project_type_non_interventional_study_mpg')),
     FieldInfo(None, 'submission_type', _('Submit as')),
     FieldInfo(None, 'is_new_medtech_law', _('is_new_medtech_law'), help_text=_('is_new_medtech_law_help'), icon_text=_('is_new_medtech_law_icon')),
     FieldInfo('2.2', 'specialism', _('special field')),
