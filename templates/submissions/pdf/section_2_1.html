@@ -19,7 +19,7 @@
             </p>
 
             <div class="indented">
-                {{ submission_form.project_type_reg_drug_within_indication|checkbox }} 2.1.2.1 gemäß der Indikation 
+                {{ submission_form.project_type_reg_drug_within_indication|checkbox }} 2.1.2.1 gemäß der Indikation
                 {{ submission_form.project_type_reg_drug_not_within_indication|checkbox }} 2.1.2.2 nicht gemäß der Indikation
             </div>
 
@@ -29,12 +29,14 @@
 
             <p>{{ submission_form.project_type_medical_device|checkbox }} 2.1.4 Klinische Prüfung eines <strong>Medizinproduktes</strong></p>
 
-            <div class="indented border_bottom">
-                {{ submission_form.project_type_medical_device_with_ce|checkbox }} 2.1.4.1 mit CE-Kennzeichnung 
+            <div class="indented">
+                {{ submission_form.project_type_medical_device_with_ce|checkbox }} 2.1.4.1 mit CE-Kennzeichnung
                 {{ submission_form.project_type_medical_device_without_ce|checkbox }} 2.1.4.2 ohne CE-Kennzeichnung
                 <br/>
                 {{ submission_form.project_type_medical_device_performance_evaluation|checkbox }} 2.1.4.3 Leistungsbewertungsprüfung (In-vitro-Diagnostika)
             </div>
+
+            <p class="border_bottom">{{ submission_form.project_type_non_interventional_study_mpg|checkbox }} 2.1.18 <strong>Nicht-interventionelle Studie</strong> – nur gem. Medizinprodukterecht</p>
 
             <p class="border_bottom">{{ submission_form.project_type_basic_research|checkbox }} 2.1.5 <strong>Nicht-therapeutische biomedizinische Forschung</strong> am Menschen (Grundlagenforschung)</p>
 
@@ -58,7 +60,7 @@
             spezifizieren:</p>
             <p class="value">{{ submission_form.project_type_misc|default_if_none:""|linebreaksbr }}</p>
 
-            <p class="border_bottom"><strong>Zusatzinformation:</strong> 
+            <p class="border_bottom"><strong>Zusatzinformation:</strong>
             {{ submission_form.project_type_education_context_phd|checkbox }} 2.1.8 <strong>Dissertation</strong>
             {{ submission_form.project_type_education_context_master|checkbox }} 2.1.9 <strong>Diplomarbeit</strong></p>
 
