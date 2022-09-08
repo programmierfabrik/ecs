@@ -398,7 +398,7 @@ _differs = {
             'project_type_medical_device_with_ce',
             'project_type_medical_device_without_ce',
             'project_type_medical_device_performance_evaluation',
-            'project_type_basic_research', 'project_type_genetic_study',
+            'project_type_non_interventional_study_mpg', 'project_type_basic_research', 'project_type_genetic_study',
             'project_type_misc', 'project_type_education_context',
             'project_type_register', 'project_type_biobank',
             'project_type_retrospective', 'project_type_questionnaire',
