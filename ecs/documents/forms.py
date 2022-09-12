@@ -5,7 +5,6 @@ from django.core.files.uploadedfile import UploadedFile
 
 from ecs.core.forms.fields import DateField
 from ecs.documents.models import Document, DocumentType
-from ecs.utils.pdfutils import decrypt_pdf
 
 
 PDF_MAGIC = b'%PDF'
@@ -26,7 +25,7 @@ class DocumentForm(forms.ModelForm):
             raise ValidationError(_('This file is not a PDF document.'))
         pdf.seek(0)
         
-        # TODO: consider removing
+        # TODO: H consider removing
         # # sanitization
         # try:
         #     f = decrypt_pdf(pdf)
