@@ -295,7 +295,7 @@ ECS_DOWNLOAD_CACHE_MAX_AGE = 30 * 24 * 60 * 60  # 30 days
 
 # Storage Vault settings
 STORAGE_VAULT = {
-    'dir': os.path.join(PROJECT_DIR, 'data', 'ecs-storage-vault'),
+    'dir': os.path.join(PROJECT_DIR, 'data', 'storage-vault'),
     'encryption_uid': 'ecs_mediaserver',
     'signature_uid': 'ecs_authority',
 }
