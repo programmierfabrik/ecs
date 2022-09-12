@@ -9,15 +9,12 @@ pdfutils
 - creation (from html)
 
 '''
+import logging
+import mimetypes
 import os
-import subprocess, logging
-from binascii import hexlify
-from tempfile import TemporaryFile, NamedTemporaryFile
 
 from django.conf import settings
-from django.template import loader
-from django.utils.encoding import smart_bytes
-
+from weasyprint import default_url_fetcher, HTML
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +24,7 @@ def pdf_barcodestamp(source, barcode, text=None):
 
     :raise IOError: if something goes wrong (including exit errorcode and stderr output attached)
     '''
-    # TODO: Replace pdftk and possibly gs
+    # TODO: H Replace pdftk and possibly gs
     return source
     # barcode_ps = loader.render_to_string('pdf/barcode.ps') + """
     #     gsave
@@ -78,34 +75,17 @@ def pdf_barcodestamp(source, barcode, text=None):
     # return stamped
 
 
-def decrypt_pdf(src):
-    decrypted = TemporaryFile()
-    popen = subprocess.Popen(['qpdf', '--decrypt', '/dev/stdin', '-'],
-        stdin=src, stdout=decrypted, stderr=subprocess.PIPE)
-    stdout, stderr = popen.communicate()
-    if popen.returncode in (0, 3):  # 0 == ok, 3 == warning
-        if popen.returncode == 3:
-            logger.warn('qpdf warning:\n%s', smart_bytes(stderr, errors='backslashreplace'))
-    else:
-        from ecs.users.utils import get_current_user
-        user = get_current_user()
-        logger.warn('qpdf error (returncode=%s):\nUser: %s (%s)\n%s', popen.returncode, user, user.email if user else 'anonymous', smart_bytes(stderr, errors='backslashreplace'))
-        raise ValueError('pdf broken')
-    decrypted.seek(0)
-    return decrypted
+def _url_fetcher(url):
+    if url.startswith('static:'):
+        path = os.path.abspath(os.path.join(settings.STATIC_ROOT, url[len('static:'):]))
+        if not path.startswith(settings.STATIC_ROOT):
+            raise ValueError('static: URI points outside of static directory!')
+        with open(path, 'rb') as f:
+            data = f.read()
+        return {'string': data, 'mime_type': mimetypes.guess_type(path)[0]}
+
+    return default_url_fetcher(url)
 
 
 def html2pdf(html):
-    p = subprocess.Popen([
-        os.path.join(settings.PROJECT_DIR, 'scripts', 'html2pdf.py'),
-        '-s', settings.STATIC_ROOT,
-    ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    stdout, stderr = p.communicate(html.encode('utf-8'))
-    if p.returncode != 0:
-        raise IOError(
-            'html2pdf returned with exit status {}, stderr: {}'.format(
-                p.returncode, stderr.decode('utf-8'))
-        )
-
-    return stdout
+    return HTML(string=html, url_fetcher=_url_fetcher).write_pdf()
