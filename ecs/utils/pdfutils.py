@@ -9,14 +9,23 @@ pdfutils
 - creation (from html)
 
 '''
+import io
 import logging
 import mimetypes
 import os
 
+import pikepdf
 from django.conf import settings
 from weasyprint import default_url_fetcher, HTML
 
 logger = logging.getLogger(__name__)
+
+
+def decrypt_pdf(src):
+    pdf = pikepdf.Pdf.open(src)
+    pdf_stream = io.BytesIO()
+    pdf.save(pdf_stream)
+    return pdf_stream
 
 
 def pdf_barcodestamp(source, barcode, text=None):
