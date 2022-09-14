@@ -701,7 +701,7 @@ class SubmissionForm(models.Model):
             bits.append(_('minors'))
         if self.submission.invite_primary_investigator_to_meeting and self.submission.timetable_entries.filter(meeting__ended=None).exists():
             bits.append(_('Investigator invited'))
-        if self.project_type_non_interventional_study:
+        if self.project_type_non_interventional_study or self.project_type_non_interventional_study_mpg:
             bits.append(_('NIS'))
         return ', '.join(bits)
 
