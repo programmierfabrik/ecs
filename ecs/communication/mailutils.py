@@ -72,12 +72,7 @@ def deliver_to_recipient(recipient, subject, message, from_email,
                       message_html, attachments, rfc2822_headers)
     msgid = msg.extra_headers['Message-ID']
 
-    backend = settings.EMAIL_BACKEND
-    if (nofilter or recipient.split('@')[1] in settings.EMAIL_UNFILTERED_DOMAINS or
-            recipient in settings.EMAIL_UNFILTERED_INDIVIDUALS):
-        backend = settings.EMAIL_BACKEND_UNFILTERED
-
-    connection = mail.get_connection(backend=backend)
+    connection = mail.get_connection()
     connection.send_messages([msg])
 
     return (msgid, msg.message(),)

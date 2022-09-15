@@ -27,18 +27,18 @@ ECS_USERSWITCHER_ENABLED = os.getenv('ECS_USERSWITCHER_ENABLED', 'true').lower()
 ALLOWED_HOSTS = [DOMAIN]
 
 # Production settings
-if os.getenv('ECS_PROD'):
+if os.getenv('ECS_PROD', 'false').lower() == 'true':
     PDFAS_SERVICE = ABSOLUTE_URL_PREFIX + '/pdf-as-web/'
     SECURE_PROXY_SSL = True
     DEBUG = False
-    EMAIL_BACKEND_UNFILTERED = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     SMTPD_ADDRESS = ('0.0.0.0', 25)
 # Default development settings
 else:
     # PDF Signing will use fake signing if PDFAS_SERVICE is "mock:"
     PDFAS_SERVICE = 'mock:'
     DEBUG = True
-    EMAIL_BACKEND_UNFILTERED = 'django.core.mail.backends.console.EmailBackend'
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     SMTPD_ADDRESS = ('127.0.0.1', 8025)
 
 # Django keys
@@ -299,15 +299,6 @@ STORAGE_VAULT = {
     'encryption_uid': 'ecs_mediaserver',
     'signature_uid': 'ecs_authority',
 }
-
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_UNFILTERED_DOMAINS = ()  # = ('example.com', )
-EMAIL_UNFILTERED_INDIVIDUALS = ()  # = ('ada@example.org', 'tom@example.com')
-
-# EMAIL_BACKEND_UNFILTERED will be used for
-#  User registration & invitation, password reset, send client certificate,
-#  and all mails to domains in EMAIL_UNFILTERED_DOMAINS and user
-#  listed in EMAIL_UNFILTERED_INDIVIDUALS
 
 if os.getenv('SMTP_URL'):
     url = urlparse(os.getenv('SMTP_URL'))
