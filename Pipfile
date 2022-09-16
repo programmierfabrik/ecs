@@ -24,7 +24,7 @@ weasyprint = "==56.1"
 xlwt = "==1.3.*"
 celery = {extras = ["redis"], version = "==5.2.*"}
 daphne = "==3.0.*"
-pikepdf = "*"
+pikepdf = "==6.0.*"
 
 [dev-packages]
 
