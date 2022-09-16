@@ -138,25 +138,20 @@ def xls_export(user_id=None, filters=None):
     sheet.write(2, 42, _('Yes') + '/' + _('No'), header)
     sheet.write(2, 43, label('project_type_medical_device_with_ce'), header)
     sheet.write(2, 44, label('project_type_medical_device_without_ce'), header)
-    sheet.write(2, 45,
-                label('project_type_medical_device_performance_evaluation'), header)
-    sheet.write_merge(1, 2, 46, 46, label('project_type_basic_research'),
-                      header)
+    sheet.write(2, 45, label('project_type_medical_device_performance_evaluation'), header)
+    sheet.write_merge(1, 2, 46, 46, label('project_type_basic_research'), header)
     sheet.write_merge(1, 2, 47, 47, label('project_type_genetic_study'), header)
     sheet.write_merge(1, 2, 48, 48, label('project_type_misc'), header)
-    sheet.write_merge(1, 2, 49, 49, label('project_type_education_context'),
-                      header)
+    sheet.write_merge(1, 2, 49, 49, label('project_type_education_context'), header)
     sheet.write_merge(1, 2, 50, 50, label('project_type_register'), header)
     sheet.write_merge(1, 2, 51, 51, label('project_type_biobank'), header)
     sheet.write_merge(1, 2, 52, 52, label('project_type_retrospective'), header)
     sheet.write_merge(1, 2, 53, 53, label('project_type_questionnaire'), header)
-    sheet.write_merge(1, 2, 54, 54, label('project_type_psychological_study'),
-                      header)
+    sheet.write_merge(1, 2, 54, 54, label('project_type_psychological_study'), header)
     sheet.write_merge(1, 2, 55, 55, label('project_type_nursing_study'), header)
-    sheet.write_merge(1, 2, 56, 56,
-                      label('project_type_non_interventional_study'), header)
-    sheet.write_merge(1, 2, 57, 57, label('project_type_gender_medicine'),
-                      header)
+    sheet.write_merge(1, 2, 56, 56, label('project_type_non_interventional_study'), header)
+    sheet.write_merge(1, 2, 57, 57, label('project_type_gender_medicine'), header)
+    sheet.write_merge(1, 2, 58, 58, label('project_type_non_interventional_study_mpg'), header)
 
     # format helpers
     _b = lambda x: _('Yes') if x else _('No')
@@ -237,6 +232,7 @@ def xls_export(user_id=None, filters=None):
         sheet.write(i, 55, _b(sf.project_type_nursing_study))
         sheet.write(i, 56, _b(sf.project_type_non_interventional_study))
         sheet.write(i, 57, _b(sf.project_type_gender_medicine))
+        sheet.write(i, 58, _b(sf.project_type_non_interventional_study_mpg))
 
     xls_buf = BytesIO()
     xls.save(xls_buf)

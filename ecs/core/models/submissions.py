@@ -311,6 +311,7 @@ class SubmissionForm(models.Model):
     project_type_psychological_study = models.BooleanField(default=False)
     project_type_nursing_study = models.BooleanField(default=False)
     project_type_non_interventional_study = models.BooleanField(default=False)
+    project_type_non_interventional_study_mpg = models.BooleanField(default=False)
     project_type_gender_medicine = models.BooleanField(default=False)
     
     # 2.2
@@ -700,7 +701,7 @@ class SubmissionForm(models.Model):
             bits.append(_('minors'))
         if self.submission.invite_primary_investigator_to_meeting and self.submission.timetable_entries.filter(meeting__ended=None).exists():
             bits.append(_('Investigator invited'))
-        if self.project_type_non_interventional_study:
+        if self.project_type_non_interventional_study or self.project_type_non_interventional_study_mpg:
             bits.append(_('NIS'))
         return ', '.join(bits)
 
