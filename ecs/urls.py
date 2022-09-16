@@ -26,7 +26,6 @@ urlpatterns = [
     path('billing/', include('ecs.billing.urls')),
     path('boilerplate/', include('ecs.boilerplate.urls')),
     path('scratchpad/', include('ecs.scratchpad.urls')),
-    path('document/', include('ecs.documents.urls')),
     path('meeting/', include('ecs.meetings.urls')),
     path('notification/', include('ecs.notifications.urls')),
     path('signature/', include('ecs.signature.urls')),
