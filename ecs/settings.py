@@ -279,7 +279,7 @@ ECS_MEETING_PROTOCOL_RECEIVER_GROUPS = (
     'Omniscient Board Member',
 )
 
-ECS_AMG_MPG_VOTE_RECEIVERS = ('BASG.EKVoten@ages.at',)
+ECS_AMG_MPG_VOTE_RECEIVERS = (os.getenv('ECS_VOTE_RECEIVERS', 'BASG.EKVoten@ages.at'))
 
 ECS_MEETING_GRACE_PERIOD = timedelta(days=5)
 
