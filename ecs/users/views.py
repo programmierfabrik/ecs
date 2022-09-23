@@ -65,7 +65,6 @@ def login(request, *args, **kwargs):
 
     kwargs.setdefault('template_name', 'users/login.html')
     kwargs['authentication_form'] = EmailLoginForm
-    kwargs['extra_context'] = {'test_email': settings.ECS_AMG_MPG_VOTE_RECEIVERS}
     response = auth_views.LoginView.as_view(**kwargs)(request)
     if request.user.is_authenticated:
         LoginHistory.objects.create(type='login', user=request.user,
