@@ -45,7 +45,9 @@ class DocumentForm(forms.ModelForm):
         obj.original_file_name = self.cleaned_data.get('original_file_name')
         if commit:
             obj.save()
-            obj.store(self.cleaned_data.get('file'))
+            file = self.files.get('document-file')
+            file.seek(0)
+            obj.store(file)
         return obj
 
     class Meta:
