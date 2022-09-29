@@ -154,6 +154,13 @@ class ChecklistAnswer(models.Model):
 
     def __str__(self):
         return "Answer to '%s': %s" % (self.question, self.answer)
+    
+    def save(self, *args, **kwargs):
+        if self.answer or self.comment:
+            with reversion.create_revision():
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
 
     @property
     def is_answered(self):
