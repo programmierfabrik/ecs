@@ -68,12 +68,13 @@ class Vote(models.Model):
 
     def publish(self):
         assert self.published_at is None
-        self.published_at = timezone.now()
-        self.published_by = get_current_user()
-        if self.result == '1':
-            self.valid_until = self.published_at + timedelta(days=365)
-        self.save()
-
+        with reversion.create_revision():
+            self.published_at = timezone.now()
+            self.published_by = get_current_user()
+            if self.result == '1':
+                self.valid_until = self.published_at + timedelta(days=365)
+            self.save()
+    
         if not self.needs_signature:
             pdf_data = self.render_pdf()
             Document.objects.create_from_buffer(pdf_data, doctype='votes',
@@ -91,8 +92,9 @@ class Vote(models.Model):
 
     def expire(self):
         assert not self.is_expired
-        self.is_expired = True
-        self.save()
+        with reversion.create_revision():
+            self.is_expired = True
+            self.save()
 
         submission = self.get_submission()
         submission.is_expired = True
@@ -102,9 +104,10 @@ class Vote(models.Model):
             task_type__is_dynamic=True).open().mark_deleted()
     
     def extend(self):
-        self.valid_until += timedelta(days=365)
-        self.is_expired = False
-        self.save()
+        with reversion.create_revision():
+            self.valid_until += timedelta(days=365)
+            self.is_expired = False
+            self.save()
 
         submission = self.get_submission()
         submission.is_expired = False
