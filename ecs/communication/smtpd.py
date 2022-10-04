@@ -1,9 +1,11 @@
+import base64
 import email
 import logging
 import re
 from datetime import timedelta
 
 import chardet
+from asgiref.sync import sync_to_async
 from django.utils import timezone
 
 from ecs import settings
@@ -11,13 +13,6 @@ from ecs.communication.mailutils import html2text
 from ecs.communication.models import Message
 
 logger = logging.getLogger(__name__)
-
-
-class SMTPError(Exception):
-    def __init__(self, code, description):
-        super().__init__('{} {}'.format(code, description))
-        self.code = code
-        self.description = description
 
 
 def _get_content(message_part):
@@ -49,18 +44,6 @@ class SmtpdHandler:
         envelope.rcpt_tos.append(address)
         return '250 OK'
 
-    def _find_msg(self, recipient):
-        msg_uuid = recipient.split('@')
-
-        m = re.match(r'ecs-([0-9A-Fa-f]{32})$', msg_uuid)
-        if m:
-            try:
-                return Message.objects.get(uuid=m.group(1),
-                                           timestamp__gt=timezone.now() - timedelta(days=self.ANSWER_TIMEOUT))
-            except Message.DoesNotExist:
-                pass
-        raise SMTPError(553, 'Invalid recipient <{}>'.format(recipient))
-
     async def handle_DATA(self, server, session, envelope):
         if len(envelope.rcpt_tos) > 1:
             return '554 Too many recipients'
@@ -85,7 +68,18 @@ class SmtpdHandler:
             return '554 Invalid message format - empty message'
 
         text = plain or html
-        orig_msg = self._find_msg(envelope.rcpt_tos[0])
+        recipient = envelope.rcpt_tos[0]
+        msg_uuid, _ = recipient.split('@')
+
+        m = re.match(r'ecs-([0-9A-Fa-f]{32})$', msg_uuid)
+        if m:
+            orig_msg = await Message.objects.select_related('thread', 'receiver', 'sender').aget(
+                uuid=m.group(1),
+                timestamp__gt=timezone.now() - timedelta(days=self.ANSWER_TIMEOUT)
+            )
+        else:
+            return '553 Invalid recipient <{}>'.format(recipient)
+
         thread = orig_msg.thread
 
         creator = msg.get('Auto-Submitted', None)
@@ -100,26 +94,22 @@ class SmtpdHandler:
         else:
             creator = 'auto-custom'
 
-        thread.messages.filter(
-            receiver=orig_msg.receiver).update(unread=False)
+        await thread.messages.filter(receiver=orig_msg.receiver).aupdate(unread=False)
 
         # TODO rawmsg can include multiple content-charsets and should be a binaryfield
         # as a workaround we convert to base64
-        thread_msg = thread.add_message(orig_msg.receiver, text,
-                                        rawmsg=base64.b64encode(data),
-                                        incoming_msgid=msg['Message-ID'],
-                                        in_reply_to=orig_msg,
-                                        creator=creator)
+        thread_msg = await sync_to_async(thread.add_message)(
+            orig_msg.receiver, text,
+            rawmsg=base64.b64encode(envelope.content),
+            incoming_msgid=msg['Message-ID'],
+            in_reply_to=orig_msg,
+            creator=creator
+        )
 
         logger.info(
             'Accepted email (creator= {8})from {0} via {1} to {2} id {3} in-reply-to {4} thread {5} orig_msg {6} message {7}'.format(
-                mailfrom, orig_msg.receiver.email, orig_msg.sender.email,
+                envelope.mail_from, orig_msg.receiver.email, orig_msg.sender.email,
                 msg['Message-ID'], orig_msg.outgoing_msgid, thread.pk,
                 orig_msg.pk, thread_msg.pk, creator))
 
         return '250 Ok'
-    # print('Message for %s' % envelope.rcpt_tos)
-    # print('Message data:\n')
-    # for ln in envelope.content.decode('utf8', errors='replace').splitlines():
-    #     print(f'> {ln}'.strip())
-    # return '250 Message accepted for delivery'
