@@ -308,7 +308,7 @@ if os.getenv('SMTP_URL'):
     EMAIL_HOST_PASSWORD = url.password or ''
 
 SMTPD_CONFIG = {
-    'listen_addr': SMTPD_ADDRESS,
+    'listen_addr': ('0.0.0.0', 8025),
     'domain': DOMAIN,
     'store_exceptions': False,
 }
