@@ -37,5 +37,5 @@ class Command(BaseCommand):
         hostname, port = settings.SMTPD_CONFIG['listen_addr']
         controller = Controller(SmtpdHandler(), hostname=hostname, port=port, ssl_context=ssl_context)
         controller.start()
-        input('SMTP server running. Press Return to stop server and exit.')
+        controller._thread.join()
         controller.stop()
