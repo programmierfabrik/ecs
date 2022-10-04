@@ -1,4 +1,6 @@
 import logging
+import ssl
+from os.path import isfile
 
 from aiosmtpd.controller import Controller
 from django.core.management.base import BaseCommand
@@ -25,8 +27,15 @@ class Command(BaseCommand):
             level=log2level[options['loglevel'].upper()],
             format='%(levelname)s %(message)s',
         )
+        
+        if isfile('/opt/certs/fullchain.pem'):
+            ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+            ssl_context.load_cert_chain('/opt/certs/fullchain.pem', '/opt/certs/key.pem')
+        else:
+            ssl_context = None
+
         hostname, port = settings.SMTPD_CONFIG['listen_addr']
-        controller = Controller(SmtpdHandler(), hostname=hostname, port=port)
+        controller = Controller(SmtpdHandler(), hostname=hostname, port=port, ssl_context=ssl_context)
         controller.start()
         input('SMTP server running. Press Return to stop server and exit.')
         controller.stop()
