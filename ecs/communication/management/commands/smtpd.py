@@ -13,6 +13,7 @@ log2level = {'DEBUG': logging.DEBUG, 'INFO': logging.INFO,
              'WARNING': logging.WARNING, 'ERROR': logging.ERROR,
              'CRITICAL': logging.CRITICAL}
 
+logger = logging.getLogger(__name__)
 
 class SmtpController(Controller):
     def factory(self):
@@ -36,8 +37,10 @@ class Command(BaseCommand):
         )
 
         if isfile('/opt/certs/fullchain.pem'):
+            logger.info("Found fullchain.pem and key.pem...")
             ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
             ssl_context.load_cert_chain('/opt/certs/fullchain.pem', '/opt/certs/key.pem')
+            logger.info("Loaded fullchain.pem and key.pem...")
         else:
             ssl_context = None
 
