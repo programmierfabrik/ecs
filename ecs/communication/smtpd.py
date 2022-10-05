@@ -48,7 +48,6 @@ class SmtpdHandler:
         if len(envelope.rcpt_tos) > 1:
             return '554 Too many recipients'
 
-        # msg = envelope.content.decode('utf8', errors='replace')
         msg = email.message_from_bytes(envelope.content)
         plain = html = None
         for part in msg.walk():
