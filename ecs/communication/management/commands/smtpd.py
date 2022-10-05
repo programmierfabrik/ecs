@@ -1,4 +1,5 @@
 import logging
+import os
 import ssl
 from os.path import isfile
 
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class SmtpController(Controller):
     def factory(self):
-        time_out = None if self.ssl_context is None else 3
+        time_out = 3 if os.getenv('PROXY', '').lower() == 'true' else None
         return Server(self.handler, proxy_protocol_timeout=time_out)
 
 
