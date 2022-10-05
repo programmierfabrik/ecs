@@ -38,6 +38,10 @@ def _get_content(message_part):
 class SmtpdHandler:
     ANSWER_TIMEOUT = 365
 
+    async def handle_PROXY(self, server, session, envelope, proxy_data):
+        logger.info(proxy_data)
+        return True
+
     async def handle_RCPT(self, server, session, envelope, address, rcpt_options):
         if not settings.SMTPD_CONFIG['domain']:
             return '550 not relaying to that domain'
