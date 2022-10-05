@@ -3,6 +3,7 @@ import ssl
 from os.path import isfile
 
 from aiosmtpd.controller import Controller
+from aiosmtpd.smtp import SMTP as Server
 from django.core.management.base import BaseCommand
 
 from ecs import settings
@@ -11,6 +12,12 @@ from ecs.communication.smtpd import SmtpdHandler
 log2level = {'DEBUG': logging.DEBUG, 'INFO': logging.INFO,
              'WARNING': logging.WARNING, 'ERROR': logging.ERROR,
              'CRITICAL': logging.CRITICAL}
+
+
+class SmtpController(Controller):
+    def factory(self):
+        time_out = None if self.ssl_context is None else 3
+        return Server(self.handler, proxy_protocol_timeout=time_out)
 
 
 class Command(BaseCommand):
@@ -27,7 +34,7 @@ class Command(BaseCommand):
             level=log2level[options['loglevel'].upper()],
             format='%(levelname)s %(message)s',
         )
-        
+
         if isfile('/opt/certs/fullchain.pem'):
             ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
             ssl_context.load_cert_chain('/opt/certs/fullchain.pem', '/opt/certs/key.pem')
@@ -35,7 +42,7 @@ class Command(BaseCommand):
             ssl_context = None
 
         hostname, port = settings.SMTPD_CONFIG['listen_addr']
-        controller = Controller(SmtpdHandler(), hostname=hostname, port=port, ssl_context=ssl_context)
+        controller = SmtpController(SmtpdHandler(), hostname=hostname, port=port, ssl_context=ssl_context)
         controller.start()
         controller._thread.join()
         controller.stop()
