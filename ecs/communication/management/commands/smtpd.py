@@ -54,5 +54,7 @@ class Command(BaseCommand):
         hostname, port = settings.SMTPD_CONFIG['listen_addr']
         controller = SmtpController(SmtpdHandler(), hostname=hostname, port=port)
         controller.start()
+        # Consider a solution like this instead of accessing a private thread and join it:
+        # https://github.com/aio-libs/aiosmtpd/blob/d6976db28721c4afa06755c3c10be358a2553b7d/examples/basic/server.py
         controller._thread.join()
         controller.stop()
