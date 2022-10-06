@@ -16,10 +16,18 @@ log2level = {'DEBUG': logging.DEBUG, 'INFO': logging.INFO,
 
 logger = logging.getLogger(__name__)
 
+
 class SmtpController(Controller):
     def factory(self):
-        time_out = 3 if os.getenv('PROXY', '').lower() == 'true' else None
-        return Server(self.handler, proxy_protocol_timeout=time_out)
+        # require_starttls
+        if os.getenv('PROXY', '').lower() == 'true' and self.ssl_context is not None:
+            time_out = 3
+            require_starttls = True
+        else:
+            time_out = None
+            require_starttls = False
+
+        return Server(self.handler, proxy_protocol_timeout=time_out, require_starttls=require_starttls)
 
 
 class Command(BaseCommand):
