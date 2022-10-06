@@ -19,15 +19,21 @@ logger = logging.getLogger(__name__)
 
 class SmtpController(Controller):
     def factory(self):
-        # require_starttls
-        if os.getenv('PROXY', '').lower() == 'true' and self.ssl_context is not None:
-            time_out = 3
-            require_starttls = True
+        if isfile('/opt/certs/fullchain.pem') or True:
+            logger.info("Found fullchain.pem and key.pem...")
+            tls_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+            # tls_context.load_cert_chain('/opt/certs/fullchain.pem', '/opt/certs/key.pem')
+            tls_context.load_cert_chain('/opt/fullchain.pem', '/opt/key.pem')
+            logger.info("Loaded fullchain.pem and key.pem...")
         else:
-            time_out = None
-            require_starttls = False
+            tls_context = None
 
-        return Server(self.handler, proxy_protocol_timeout=time_out, require_starttls=require_starttls)
+        time_out = 3 if os.getenv('PROXY', '').lower() == 'true' else None
+        require_starttls = True if tls_context is not None else None
+
+        return Server(
+            self.handler, proxy_protocol_timeout=time_out, require_starttls=require_starttls, tls_context=tls_context
+        )
 
 
 class Command(BaseCommand):
@@ -45,16 +51,8 @@ class Command(BaseCommand):
             format='%(levelname)s %(message)s',
         )
 
-        if isfile('/opt/certs/fullchain.pem'):
-            logger.info("Found fullchain.pem and key.pem...")
-            ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
-            ssl_context.load_cert_chain('/opt/certs/fullchain.pem', '/opt/certs/key.pem')
-            logger.info("Loaded fullchain.pem and key.pem...")
-        else:
-            ssl_context = None
-
         hostname, port = settings.SMTPD_CONFIG['listen_addr']
-        controller = SmtpController(SmtpdHandler(), hostname=hostname, port=port, ssl_context=ssl_context)
+        controller = SmtpController(SmtpdHandler(), hostname=hostname, port=port)
         controller.start()
         controller._thread.join()
         controller.stop()
