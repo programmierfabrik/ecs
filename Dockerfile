@@ -32,7 +32,7 @@ WORKDIR /opt/ecs
 
 # Copy pip files and install
 COPY --chown=ecs Pipfile Pipfile.lock ./
-RUN pipenv install --deploy --ignore-pipfile
+RUN pipenv install --deploy --ignore-pipfile || pipenv install --deploy --ignore-pipfile
 
 # Copy rest of code
 COPY --chown=ecs . .
