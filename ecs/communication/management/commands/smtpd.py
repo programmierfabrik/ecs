@@ -22,8 +22,7 @@ class SmtpController(Controller):
         if isfile('/opt/certs/fullchain.pem') or True:
             logger.info("Found fullchain.pem and key.pem...")
             tls_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-            # tls_context.load_cert_chain('/opt/certs/fullchain.pem', '/opt/certs/key.pem')
-            tls_context.load_cert_chain('/opt/fullchain.pem', '/opt/key.pem')
+            tls_context.load_cert_chain('/opt/certs/fullchain.pem', '/opt/certs/key.pem')
             logger.info("Loaded fullchain.pem and key.pem...")
         else:
             tls_context = None
