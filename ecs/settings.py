@@ -405,7 +405,6 @@ if os.getenv('ECS_SENTRY_DSN', '') != '':
         # SHA as release, however you may want to set
         # something more human-readable.
         # release="myapp@1.0.0",
-        release=ECS_GIT_REV
     )
 
 
