@@ -56,6 +56,7 @@ else:
     PASSWORD_RESET_SECRET = 'j2obdvrb-hm$$x949k*f5gk_2$1x%2etxhd!$+*^qs8$4ra3=a'
 
 ECS_CHANGED = os.getenv('BUILD_TIME', 'unknown')
+ECS_DISABLE_REGISTER = os.getenv('ECS_DISABLE_REGISTER', '').lower() == 'true'
 
 # Database configuration with development fallback
 DATABASES = {}

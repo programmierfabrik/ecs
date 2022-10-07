@@ -110,6 +110,9 @@ def change_password(request):
 @ratelimit_post(minutes=5, requests=15, key_field='email')
 def register(request):
     form = RegistrationForm(request.POST or None)
+    if settings.ECS_DISABLE_REGISTER:
+        form.add_error(None, "Die Registierung für diese Instanz ist ausgeschaltet")
+
     if form.is_valid():
         token = _registration_token_factory.generate_token(form.cleaned_data)
         activation_url = request.build_absolute_uri(reverse('users.activate', kwargs={'token': token}))
