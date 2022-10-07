@@ -10,6 +10,6 @@ class ClientCertMiddleware(MiddlewareMixin):
         if request.user.is_authenticated:
             profile = request.user.profile
             if (profile.is_internal or profile.is_omniscient_member) and \
-                request.META.get('HTTP_X_FORWARDED_TLS_CLIENT_CERT', '') != '':
+                request.META.get('HTTP_X_FORWARDED_TLS_CLIENT_CERT', '') == '':
 
                 raise PermissionDenied()
