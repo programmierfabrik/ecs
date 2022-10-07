@@ -385,7 +385,7 @@ if 'SECURE_PROXY_SSL' in locals() and SECURE_PROXY_SSL:
   SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # sentry
-if os.getenv('SENTRY_DSN'):
+if os.getenv('SENTRY_DSN', '') != '':
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
 
