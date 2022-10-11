@@ -15,7 +15,6 @@ django-reversion = "==5.0.*"
 django-widget-tweaks = "==1.4.*"
 httpagentparser = "==1.9.*"
 psycopg2-binary = "==2.9.*"
-pylibmc = "==1.6.*"
 pyscss = "==1.4.*"
 sentry-sdk = "==1.9.*"
 requests = "==2.28.*"
@@ -26,6 +25,8 @@ celery = {extras = ["redis"], version = "==5.2.*"}
 daphne = "==3.0.*"
 pikepdf = "==6.0.*"
 aiosmtpd = "==1.4.*"
+redis = "==4.3.*"
+hiredis = "==2.0.*"
 
 [dev-packages]
 

@@ -82,21 +82,6 @@ else:
         'ATOMIC_REQUESTS': True,
     }
 
-# cache backend, warning, this is seperate for each process, for production use memcache
-if os.getenv('MEMCACHED_URL'):
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
-            'LOCATION': os.getenv('MEMCACHED_URL'),
-        }
-    }
-else:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        },
-    }
-
 # Local time zone for this installation. See http://en.wikipedia.org/wiki/List_of_tz_zones_by_name,
 # although not all choices may be available on all operating systems.
 TIME_ZONE = 'Europe/Vienna'
@@ -345,10 +330,22 @@ if os.getenv('REDIS_URL'):
     }
     CELERY_RESULT_BACKEND = CELERY_BROKER_URL
     CELERY_TASK_ALWAYS_EAGER = False
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            # Remove last to characters because of the '/0'
+            'LOCATION': os.getenv('REDIS_URL')[:-2],
+            'KEY_PREFIX': 'django-'
+        }
+    }
 else:
     # dont use queueing backend but consume it right away
     CELERY_TASK_ALWAYS_EAGER = True
-
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        },
+    }
 
 # ### django_compressor ###
 COMPRESS_ENABLED = True
