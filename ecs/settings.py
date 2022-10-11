@@ -335,7 +335,7 @@ if os.getenv('REDIS_URL'):
             'BACKEND': 'django.core.cache.backends.redis.RedisCache',
             # Remove last to characters because of the '/0'
             'LOCATION': os.getenv('REDIS_URL')[:-2],
-            'KEY_PREFIX': 'django-'
+            'KEY_PREFIX': 'django'
         }
     }
 else:
