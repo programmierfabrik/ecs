@@ -35,7 +35,7 @@ def assign(request, submission_pk=None):
     form = TagAssignForm(request.POST or None, prefix='assign_tags')
     form.fields['tags'].initial = submission.tags.all()
     if request.method == 'POST' and form.is_valid():
-        submission.tags = form.cleaned_data['tags']
+        submission.tags.set(form.cleaned_data['tags'])
         return redirect('tags.assign', submission_pk=submission_pk)
     return render(request, 'tags/assign.html', {
         'submission': submission,
