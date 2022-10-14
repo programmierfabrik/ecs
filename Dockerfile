@@ -14,7 +14,7 @@ RUN apt-get update -y && \
     # Python
     python3 python3-pip \
     # ecs
-    gettext libmemcached-dev tzdata \
+    gettext tzdata \
     # Weasyprint
     libpango-1.0-0 libharfbuzz0b libpangoft2-1.0-0 \
     && rm -rf /var/lib/apt/lists/*

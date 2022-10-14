@@ -15,14 +15,12 @@ Ubuntu 22.04:
 
 ```
 gettext
-libmemcached-dev
 ```
 
 MacOS (incomplete):
 
 ```
 gettext
-libmemcached
 ```
 
 Start the development database:
