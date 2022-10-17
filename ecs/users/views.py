@@ -461,7 +461,7 @@ def accept_invitation(request, invitation_uuid=None):
         auth.login(request, user)
         return redirect('users.edit_profile')
 
-    return render(request, 'users/invitation/set_password_form.html', {
+    return render(request, 'users/password_reset/reset_form.html', {
         'form': form,
     })
 
