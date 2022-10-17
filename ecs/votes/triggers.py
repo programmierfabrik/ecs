@@ -53,6 +53,9 @@ def on_vote_published(sender, **kwargs):
     template = loader.get_template('meetings/email/basg.txt')
     text = str(template.render({}))
     for receiver in receivers:
+        import logging
+        logging.critical(receiver)
+    for receiver in receivers:
         deliver(receiver, subject=name, message=text,
             from_email=settings.DEFAULT_FROM_EMAIL, attachments=attachments)
 
