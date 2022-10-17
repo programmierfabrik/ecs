@@ -13,7 +13,7 @@
             {{ meeting.title }}
         </td>
         <td>
-            {% if not meeting.started and user.profile.is_internal %}
+            {% if not meeting.started and user.profile.is_office %}
                 <a class="btn btn-primary" href="{% url 'meetings.edit_meeting' meeting_pk=meeting.pk %}">
                     {% trans 'Edit' %}
                 </a>

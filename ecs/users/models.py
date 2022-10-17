@@ -93,6 +93,9 @@ class UserProfile(models.Model):
         tasks = self.user.tasks(manager='unfiltered').open().for_widget()
         return self.can_have_tasks or tasks.exists()
 
+    @property
+    def is_office(self):
+        return 'EC-Office' in self.user.groups.values_list('name', flat=True)
 
 class UserSettings(models.Model):
     user = models.OneToOneField(User, related_name='ecs_settings', on_delete=models.CASCADE)
