@@ -52,4 +52,4 @@ def document_types():
 
 @bootstrap.register()
 def create_local_storage_vault():
-    os.makedirs(settings.STORAGE_VAULT['dir'], exist_ok=True)
+    os.makedirs(settings.STORAGE_VAULT, exist_ok=True)

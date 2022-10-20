@@ -32,7 +32,7 @@ from django.conf import settings
 
 
 def getVault():
-    return StorageVault(settings.STORAGE_VAULT['dir'])
+    return StorageVault(settings.STORAGE_VAULT)
 
 
 class StorageVault(object):
