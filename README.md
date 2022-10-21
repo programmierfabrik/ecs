@@ -49,5 +49,4 @@ or in your Jetbrains based IDE with the `run` or (preferably) `debug` button.
 
 ## TODO:
 
-* Sanitize read / write only pdfs in python only
 * Barcode on every pdf page when generating a pdf
