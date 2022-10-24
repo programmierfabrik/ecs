@@ -30,10 +30,19 @@ def on_meeting_end(sender, **kwargs):
         pk__in=Vote.objects.exclude(top=None).values("top__pk").query
     ):
         # update eventual existing vote from vote preperation
-        vote, created = Vote.objects.update_or_create(
-            submission_form=top.submission.current_submission_form,
-            defaults={"top": top, "result": "3a", "is_draft": False},
-        )
+        defaults = {"top": top, "result": "3a", "is_draft": False}
+        try:
+            vote = Vote.objects.get(submission_form=top.submission.current_submission_form)
+            for key, value in defaults.items():
+                setattr(vote, key, value)
+            vote.save()
+        except Vote.DoesNotExist:
+            new_values = {'submission_form': top.submission.current_submission_form}
+            new_values.update(defaults)
+            vote = Vote(**new_values)
+            vote.save()
+        # update_or_create uses select_for_update. Due to that django generates an invalid query with the error:
+        # FOR UPDATE is not allowed with DISTINCT clause
         top.is_open = False
         top.save()
 
