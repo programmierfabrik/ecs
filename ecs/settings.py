@@ -317,6 +317,7 @@ CELERY_RESULT_SERIALIZER = 'pickle' # Maybe?
 CELERY_ACCEPT_CONTENT = (CELERY_TASK_SERIALIZER,)
 # try to propagate exceptions back to caller
 CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_TIMEZONE = 'Europe/Vienna'
 
 if os.getenv('REDIS_URL'):
     CELERY_BROKER_URL = os.getenv('REDIS_URL')
