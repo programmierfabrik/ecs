@@ -467,7 +467,7 @@ _differs = {
             'submitter_is_sponsor', 'submitter_is_authorized_by_sponsor',
             'participatingcenternonsubject_set',
             'foreignparticipatingcenter_set', 'investigators', 'measures',
-            'nontesteduseddrug_set',
+            'nontesteduseddrug_set', 'is_new_medtech_law'
         ),
         label_map=dict([
             ('participatingcenternonsubject_set', _('centers (non subject)')),
