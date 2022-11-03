@@ -12,6 +12,7 @@ from reversion.models import Version
 from reversion import revisions as reversion
 
 from ecs.documents.models import Document
+from ecs.users.utils import get_current_user
 from ecs.utils.viewutils import render_pdf_context
 from ecs.notifications.constants import SAFETY_TYPE_CHOICES
 from ecs.notifications.managers import NotificationManager
@@ -229,8 +230,10 @@ class NotificationAnswer(models.Model):
     
     def distribute(self):
         from ecs.core.models.submissions import Submission
-        self.published_at = timezone.now()
-        self.save()
+        with reversion.create_revision():
+            reversion.set_user(get_current_user())
+            self.published_at = timezone.now()
+            self.save()
         
         if not self.is_rejected and self.notification.type.includes_diff:
             try:
