@@ -15,12 +15,16 @@ class CurrentUserMiddleware:
 
     def process_response(self, request, response):
         # when response is ready, request should be flushed
-        del _user.value
+        self.reset()
         return response
 
     def process_exception(self, request, exception):
         # if an exception has happened, request should be flushed too
-        del _user.value
+        self.reset()
+
+    def reset(self):
+        if getattr(_user, 'value', None) is not None:
+            del _user.value
 
 
 def get_current_user():
