@@ -172,6 +172,7 @@ MIDDLEWARE = (
     'ecs.users.middleware.GlobalUserMiddleware',
     'ecs.tasks.middleware.RelatedTasksMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'ecs.utils.current_user.CurrentUserMiddleware',
 )
 
 INSTALLED_APPS = (

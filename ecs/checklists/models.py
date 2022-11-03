@@ -1,3 +1,4 @@
+import threading
 from uuid import uuid4
 
 from django.db import models
@@ -158,6 +159,7 @@ class ChecklistAnswer(models.Model):
     def save(self, *args, **kwargs):
         if self.answer or self.comment:
             with reversion.create_revision():
+                reversion.set_user(get_current_user())
                 super().save(*args, **kwargs)
         else:
             super().save(*args, **kwargs)

@@ -43,8 +43,7 @@ def field_history(request, model_name=None, pk=None):
     history = []
     last_value = {fieldname: '' for fieldname, label in fields}
     last_change = None
-    versions = Version.objects.get_for_object(obj).order_by(
-        'revision__date_created')
+    versions = Version.objects.get_for_object(obj).order_by('revision__date_created')
     for change in versions:
         diffs = []
         for fieldname, label in fields:
