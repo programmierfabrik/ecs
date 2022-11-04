@@ -635,10 +635,12 @@ def meeting_assistant_other_tops(request, meeting_pk=None):
         )), prefix='amendment')
 
     if request.method == 'POST':
-        thesis_vote_formset.save()
-        expedited_vote_formset.save()
-        localec_vote_formset.save()
-        amendment_vote_formset.save()
+        with reversion.create_revision():
+            reversion.set_user(get_current_user())
+            thesis_vote_formset.save()
+            expedited_vote_formset.save()
+            localec_vote_formset.save()
+            amendment_vote_formset.save()
 
         return redirect('meetings.meeting_assistant_other_tops',
             meeting_pk=meeting_pk)
