@@ -4,6 +4,7 @@ import re
 import io
 from collections import OrderedDict
 
+import reversion
 from django.conf import settings
 from django.http import FileResponse, HttpResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
@@ -18,7 +19,7 @@ from django.contrib import messages
 
 from ecs.utils.viewutils import render_html, pdf_response
 from ecs.users.models import UserProfile
-from ecs.users.utils import user_flag_required, user_group_required, sudo
+from ecs.users.utils import user_flag_required, user_group_required, sudo, get_current_user
 from ecs.core.models import Submission, SubmissionForm, MedicalCategory, AdvancedSettings
 from ecs.core.models.constants import SUBMISSION_TYPE_MULTICENTRIC
 from ecs.checklists.models import Checklist, ChecklistBlueprint
@@ -699,6 +700,9 @@ def meeting_assistant_top(request, meeting_pk=None, top_pk=None):
             if autosave:
                 return HttpResponse('OK')
             if form.cleaned_data['close_top']:
+                with reversion.create_revision():
+                    reversion.set_user(get_current_user())
+                    vote = form.save(top)
                 top.is_open = False
                 top.save()
                 return next_top_redirect()
