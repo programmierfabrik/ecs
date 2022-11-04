@@ -1,5 +1,6 @@
 from uuid import uuid4
 
+import reversion
 from django.http import HttpResponse
 from django.urls import reverse
 from django.template import loader
@@ -22,7 +23,7 @@ from ecs.notifications.forms import (
     AmendmentAnswerForm,
 )
 from ecs.documents.views import handle_download, upload_document, delete_document
-from ecs.users.utils import user_group_required
+from ecs.users.utils import user_group_required, get_current_user
 from ecs.tasks.utils import task_required, with_task_management
 from ecs.signature.views import init_batch_sign
 
@@ -246,14 +247,16 @@ def edit_notification_answer(request, notification_pk=None):
     
     form = form_cls(request.POST or None, instance=answer, **kwargs)
     if form.is_valid():
-        answer = form.save(commit=False)
-        answer.notification = notification
-        answer.save()
-        if hasattr(notification, 'amendmentnotification'):
-            an = notification.amendmentnotification
-            an.is_substantial = form.cleaned_data.get('is_substantial', False)
-            an.needs_signature = form.cleaned_data.get('needs_signature', False)
-            an.save()
+        with reversion.create_revision():
+            reversion.set_user(get_current_user())
+            answer = form.save(commit=False)
+            answer.notification = notification
+            answer.save()
+            if hasattr(notification, 'amendmentnotification'):
+                an = notification.amendmentnotification
+                an.is_substantial = form.cleaned_data.get('is_substantial', False)
+                an.needs_signature = form.cleaned_data.get('needs_signature', False)
+                an.save()
 
     response = render(request, 'notifications/answers/form.html', {
         'notification': notification,
