@@ -392,7 +392,7 @@ if os.getenv('ECS_SENTRY_DSN', '') != '':
         # Set traces_sample_rate to 1.0 to capture 100%
         # of transactions for performance monitoring.
         # We recommend adjusting this value in production,
-        traces_sample_rate=1.0,
+        traces_sample_rate=0,
         send_default_pii=True,
 
         # By default the SDK will try to use the SENTRY_RELEASE
