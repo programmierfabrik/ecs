@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 class SmtpController(Controller):
     def factory(self):
-        if isfile('/opt/certs/fullchain.pem') or True:
+        if isfile('/opt/certs/fullchain.pem'):
             logger.info("Found fullchain.pem and key.pem...")
             tls_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
             tls_context.load_cert_chain('/opt/certs/fullchain.pem', '/opt/certs/key.pem')
