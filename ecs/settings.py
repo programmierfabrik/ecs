@@ -31,15 +31,18 @@ if os.getenv('ECS_PROD', 'false').lower() == 'true':
     PDFAS_SERVICE = ABSOLUTE_URL_PREFIX + '/pdf-as-web/'
     SECURE_PROXY_SSL = True
     DEBUG = False
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     SMTPD_ADDRESS = ('0.0.0.0', 25)
 # Default development settings
 else:
     # PDF Signing will use fake signing if PDFAS_SERVICE is "mock:"
     PDFAS_SERVICE = 'mock:'
     DEBUG = True
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     SMTPD_ADDRESS = ('127.0.0.1', 8025)
+
+if os.getenv('ECS_EMAIL_ENABLED', '').lower() == 'true':
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Django keys
 if os.getenv('ECS_SECRET_KEY'):
