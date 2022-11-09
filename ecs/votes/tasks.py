@@ -14,6 +14,7 @@ from ecs.votes.constants import PERMANENT_VOTE_RESULTS
 from ecs.celery import app as celery_app
 
 
+@celery_app.task
 def send_vote_reminder(vote, subject, template, recipients):
     sender = get_user('root@system.local')
     submission = vote.get_submission()
