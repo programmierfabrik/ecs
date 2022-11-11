@@ -14,7 +14,6 @@ from ecs.votes.constants import PERMANENT_VOTE_RESULTS
 from ecs.celery import app as celery_app
 
 
-@celery_app.task
 def send_vote_reminder(vote, subject, template, recipients):
     sender = get_user('root@system.local')
     submission = vote.get_submission()
@@ -71,7 +70,7 @@ def send_temporary_vote_reminder(vote):
 @celery_app.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
     # run once per day at 09:00
-    sender.add_periodic_task(crontab(hour=9, minute=0), send_vote_reminder.s())
+    sender.add_periodic_task(crontab(hour=9, minute=0), send_reminder_messages.s())
     # run once per day at 03:58
     sender.add_periodic_task(crontab(hour=3, minute=58), expire_votes.s())
 
