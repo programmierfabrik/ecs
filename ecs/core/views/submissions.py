@@ -857,10 +857,10 @@ def change_submission_susar_presenter(request, submission_pk=None):
         submission = get_object_or_404(Submission, pk=submission_pk, susar_presenter=request.user)
 
     previous_susar_presenter = submission.susar_presenter
-    form = SusarPresenterChangeForm(request.POST or None, instance=submission)
+    form = SusarPresenterChangeForm(request.POST or None)
 
     if request.method == 'POST' and form.is_valid():
-        new_susar_presenter = form.cleaned_data['susar_presenter']
+        new_susar_presenter = User.objects.get(id=form.cleaned_data['susar_presenter'])
         submission.susar_presenter = new_susar_presenter
         submission.save(update_fields=('susar_presenter',))
         on_susar_presenter_change.send(Submission, 

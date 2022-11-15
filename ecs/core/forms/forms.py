@@ -270,17 +270,14 @@ class PresenterChangeForm(forms.Form):
                 'users', User.objects.filter(is_active=True),
                 label=_('Presenter'))
 
-class SusarPresenterChangeForm(forms.ModelForm):
+
+class SusarPresenterChangeForm(forms.Form):
     susar_presenter = forms.ModelChoiceField(
         User.objects.filter(is_active=True), required=True,
         error_messages={'required': _('Please enter a valid e-mail address')},
         label=_('Susar Presenter'),
         widget=EmailUserSelectWidget()
     )
-
-    class Meta:
-        model = Submission
-        fields = ('susar_presenter',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
