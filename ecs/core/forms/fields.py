@@ -95,7 +95,7 @@ class AutocompleteModelChoiceField(forms.ChoiceField):
         kwargs['widget'] = self.Widget(self)
         self.queryset_name = queryset_name
         self.queryset = queryset
-        self.valid_choices = list(queryset)
+        self.valid_choices = queryset
         super().__init__(**kwargs)
 
     def clean(self, value):
