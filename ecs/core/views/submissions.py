@@ -828,11 +828,12 @@ def change_submission_presenter(request, submission_pk=None):
         submission = get_object_or_404(Submission, pk=submission_pk, presenter=request.user)
 
     previous_presenter = submission.presenter
-    form = PresenterChangeForm(request.POST or None, instance=submission)
+    form = PresenterChangeForm(request.POST or None)
 
-    if request.method == 'POST' and form.is_valid():
-        new_presenter = form.cleaned_data['presenter']
-        submission.presenter = new_presenter
+    valid = form.is_valid()
+    if request.method == 'POST' and valid:
+        new_presenter = User.objects.get(id=form.cleaned_data['presenter'])
+        submission.presenter_id = new_presenter
         submission.save(update_fields=('presenter',))
         on_presenter_change.send(Submission, 
             submission=submission, 
