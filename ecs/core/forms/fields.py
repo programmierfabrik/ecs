@@ -98,6 +98,10 @@ class AutocompleteModelChoiceField(forms.ChoiceField):
         self.valid_choices = list(queryset)
         super().__init__(**kwargs)
 
+    def clean(self, value):
+        value = super().clean(value)
+        return User.objects.get(id=value)
+
     def valid_value(self, value):
         """Check to see if the provided value is a valid choice."""
         text_value = str(value)
