@@ -363,9 +363,6 @@ COMPRESS_PRECOMPILERS = (
 ###################
 #these are local fixes, they default to a sane value if unset
 
-#ECS_DEBUGTOOLBAR = True/False defaults to False if empty
-# loads support for django-debug-toolbar
-
 #ECS_WORDING = True/False defaults to False if empty
 # activates django-rosetta
 
@@ -412,11 +409,6 @@ if not ECS_USERSWITCHER_ENABLED:
 # django rosetta activation
 if 'ECS_WORDING' in locals() and ECS_WORDING:
     INSTALLED_APPS +=('rosetta',) # anywhere
-
-# django-debug-toolbar activation
-if 'ECS_DEBUGTOOLBAR' in locals() and ECS_DEBUGTOOLBAR:
-    INSTALLED_APPS += ('debug_toolbar',)
-    INTERNAL_IPS = ('127.0.0.1',)
 
 # hack some settings for test and runserver
 if 'test' in sys.argv:
