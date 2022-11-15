@@ -18,40 +18,48 @@ class LooseTimeWidget(forms.TextInput):
             return value.strftime('%H:%M')
         return value
 
+
 class DateField(forms.DateField):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('input_formats', DATE_INPUT_FORMATS)
         kwargs.setdefault('error_messages', {'invalid': _('Please enter a date in the format dd.mm.yyyy.')})
         super().__init__(*args, **kwargs)
 
+
 class DateTimeField(forms.SplitDateTimeField):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('input_date_formats', DATE_INPUT_FORMATS)
         kwargs.setdefault('input_time_formats', TIME_INPUT_FORMATS)
         kwargs.setdefault('widget', forms.SplitDateTimeWidget(date_format=DATE_INPUT_FORMATS[0]))
-        kwargs.setdefault('error_messages', {'invalid': _('Please enter a date in dd.mm.yyyy format and time in format HH:MM.')})
+        kwargs.setdefault('error_messages',
+                          {'invalid': _('Please enter a date in dd.mm.yyyy format and time in format HH:MM.')})
         super().__init__(*args, **kwargs)
+
 
 class TimeField(forms.TimeField):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('error_messages', {'invalid': _('Please enter a time in the format HH: MM.')})
         kwargs.setdefault('widget', LooseTimeWidget())
         super().__init__(*args, **kwargs)
-        
+
+
 class NullBooleanWidget(forms.widgets.NullBooleanSelect):
     def __init__(self, attrs=None):
         choices = (('unknown', '-'), ('true', _('Yes')), ('false', _('No')))
         forms.widgets.Select.__init__(self, attrs, choices)
+
 
 class NullBooleanField(forms.NullBooleanField):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('widget', NullBooleanWidget)
         super().__init__(*args, **kwargs)
 
+
 class NullBooleanWidgetNewMedtechLaw(forms.widgets.NullBooleanSelect):
     def __init__(self, attrs=None):
         choices = (('unknown', '-'), ('true', 'Ja - nach neuem Gesetz'), ('false', 'Nein - nach altem Gesetz'))
         forms.widgets.Select.__init__(self, attrs, choices)
+
 
 class NullBooleanFieldNewMedtechLaw(forms.NullBooleanField):
     def __init__(self, *args, **kwargs):
@@ -82,19 +90,23 @@ class AutocompleteWidgetMixin(object):
         return '\n'.join(output)
 
 
-class AutocompleteFieldMixin:
+class AutocompleteModelChoiceField(forms.ChoiceField):
     def __init__(self, queryset_name, queryset, **kwargs):
+        kwargs['widget'] = self.Widget(self)
         self.queryset_name = queryset_name
-        kwargs['widget'] = self.widget(self)
-        super().__init__(queryset, **kwargs)
+        self.queryset = queryset
+        self.valid_choices = list(queryset)
+        super().__init__(**kwargs)
 
-class AutocompleteModelChoiceField(AutocompleteFieldMixin, forms.ModelChoiceField):
-    class widget(AutocompleteWidgetMixin, forms.Select):
-        pass
+    def valid_value(self, value):
+        """Check to see if the provided value is a valid choice."""
+        text_value = str(value)
+        for choice in self.valid_choices:
+            if str(choice.pk) == text_value:
+                return True
+        return False
 
-
-class AutocompleteModelMultipleChoiceField(AutocompleteFieldMixin, forms.ModelMultipleChoiceField):
-    class widget(AutocompleteWidgetMixin, forms.SelectMultiple):
+    class Widget(AutocompleteWidgetMixin, forms.Select):
         pass
 
 
