@@ -832,7 +832,11 @@ def change_submission_presenter(request, submission_pk=None):
 
     valid = form.is_valid()
     if request.method == 'POST' and valid:
-        new_presenter = User.objects.get(id=form.cleaned_data['presenter'])
+        presenter_result = form.cleaned_data['presenter']
+        if isinstance(presenter_result, User):
+            new_presenter = presenter_result
+        else:
+            new_presenter = User.objects.get(id=presenter_result)
         submission.presenter_id = new_presenter
         submission.save(update_fields=('presenter',))
         on_presenter_change.send(Submission, 
@@ -860,7 +864,11 @@ def change_submission_susar_presenter(request, submission_pk=None):
     form = SusarPresenterChangeForm(request.POST or None)
 
     if request.method == 'POST' and form.is_valid():
-        new_susar_presenter = User.objects.get(id=form.cleaned_data['susar_presenter'])
+        presenter_result = form.cleaned_data['susar_presenter']
+        if isinstance(presenter_result, User):
+            new_susar_presenter = presenter_result
+        else:
+            new_susar_presenter = User.objects.get(id=presenter_result)
         submission.susar_presenter = new_susar_presenter
         submission.save(update_fields=('susar_presenter',))
         on_susar_presenter_change.send(Submission, 
