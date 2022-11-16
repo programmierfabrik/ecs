@@ -99,6 +99,8 @@ class AutocompleteModelChoiceField(forms.ChoiceField):
         super().__init__(**kwargs)
 
     def clean(self, value):
+        if value is None:
+            return ''
         value = super().clean(value)
         return User.objects.get(id=value)
 
