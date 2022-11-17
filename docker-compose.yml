@@ -2,7 +2,7 @@ version: '3'
 services:
   database:
     container_name: test-ecs
-    image: postgres:14-alpine
+    image: postgres:11-alpine
     environment:
       POSTGRES_USER: test-ecs
       POSTGRES_PASSWORD: test-ecs
