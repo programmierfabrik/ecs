@@ -18,6 +18,7 @@ urlpatterns = [
     path('', include('ecs.users.urls')),
     path('core/', include('ecs.core.urls')),
     path('docstash/', include('ecs.docstash.urls')),
+    path('documents/', include('ecs.documents.urls')),
     path('checklist/', include('ecs.checklists.urls')),
     path('vote/', include('ecs.votes.urls')),
     path('dashboard/', include('ecs.dashboard.urls')),
