@@ -73,24 +73,15 @@ def download_once(request, ref_key=None, title=''):
     doc = get_object_or_404(Document, pk=doc_id)
     response = FileResponse(doc.retrieve(request.user, 'view'), content_type=doc.mimetype)
 
-    title_bits = [str(doc.doctype), doc.name]
-    sf = doc.submission_forms.first()
-    if sf:
-        title_bits.insert(0, sf.submission.get_ec_number_display())
-    n = doc.notifications.first()
-    if n:
-        title_bits.insert(0, str(n))
-
+    doc_name = doc.name
     version = '{} vom {}'.format(doc.version, timezone.localtime(doc.date).strftime('%d.%m.%Y'))
-    if request.user.profile.is_internal:
-        title_bits.insert(0, version)
-    else:
-        title_bits.append(version)
+    file_name = doc_name + ' - ' + version + '.pdf'
 
     # Disable browser caching, so the PDF won't end up on the users hard disk.
     response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response['Pragma'] = 'no-cache'
     response['Expires'] = '0'
     response['Vary'] = '*'
-    response['Content-Disposition'] = 'filename={}'.format(' - '.join(title_bits))
+    response['Content-Type'] = 'application/pdf'
+    response['Content-Disposition'] = 'filename="{}"'.format(file_name)
     return response
