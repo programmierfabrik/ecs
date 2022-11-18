@@ -2304,10 +2304,10 @@ const PDFViewerApplication = {
         pdfTitle = metadataTitle;
       }
     }
-    if (pdfTitle) {
-      this.setTitle(`${pdfTitle} - ${this._contentDispositionFilename || this._title}`);
-    } else if (this._contentDispositionFilename) {
+    if (this._contentDispositionFilename) {
       this.setTitle(this._contentDispositionFilename);
+    } else if (pdfTitle) {
+      this.setTitle(`${pdfTitle} - ${this._contentDispositionFilename || this._title}`);
     }
     if (info.IsXFAPresent && !info.IsAcroFormPresent && !pdfDocument.isPureXfa) {
       if (pdfDocument.loadingParams.enableXfa) {
@@ -14612,7 +14612,7 @@ function getXfaHtmlForPrinting(printContainer, pdfDocument) {
 /************************************************************************/
 /******/ 	// The module cache
 /******/ 	var __webpack_module_cache__ = {};
-/******/ 	
+/******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
 /******/ 		// Check if module is in cache
@@ -14626,14 +14626,14 @@ function getXfaHtmlForPrinting(printContainer, pdfDocument) {
 /******/ 			// no module.loaded needed
 /******/ 			exports: {}
 /******/ 		};
-/******/ 	
+/******/
 /******/ 		// Execute the module function
 /******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 	
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/ 	
+/******/
 /************************************************************************/
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
