@@ -15,6 +15,7 @@ Ubuntu 22.04:
 
 ```
 gettext
+libpq-dev
 ```
 
 MacOS (incomplete):

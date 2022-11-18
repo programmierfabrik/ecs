@@ -13,6 +13,8 @@ RUN apt-get update -y && \
     apt-get install -y \
     # Python
     python3 python3-pip \
+    # PostgreSQL
+    libpq-dev \
     # ecs
     gettext tzdata \
     # Weasyprint
