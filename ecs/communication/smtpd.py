@@ -72,14 +72,17 @@ class SmtpdHandler:
 
         text = plain or html
         recipient = envelope.rcpt_tos[0]
-        msg_uuid, _ = recipient.split('@')
+        msg_uuid, host = recipient.split('@')
 
         m = re.match(r'ecs-([0-9A-Fa-f]{32})$', msg_uuid)
-        if m:
-            orig_msg = await Message.objects.select_related('thread', 'receiver', 'sender').aget(
-                uuid=m.group(1),
-                timestamp__gt=timezone.now() - timedelta(days=self.ANSWER_TIMEOUT)
-            )
+        if m and host == settings.DOMAIN:
+            try:
+                orig_msg = await Message.objects.select_related('thread', 'receiver', 'sender').aget(
+                    uuid=m.group(1),
+                    timestamp__gt=timezone.now() - timedelta(days=self.ANSWER_TIMEOUT)
+                )
+            except Message.DoesNotExist:
+                return '553 Invalid recipient <{}>'.format(recipient)
         else:
             return '553 Invalid recipient <{}>'.format(recipient)
 
