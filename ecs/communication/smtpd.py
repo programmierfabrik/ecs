@@ -64,7 +64,7 @@ class SmtpdHandler:
             elif content_type == 'text/html':
                 logger.debug('message: message-part: text/html')
                 html = html2text(_get_content(part))
-            elif content_type == 'application/pkcs7-signature':
+            elif content_type == 'application/pkcs7-signature' or content_type == 'application/pgp-keys':
                 logger.warning("Signature: " + part)
                 raise Exception()
             else:
