@@ -64,14 +64,11 @@ class SmtpdHandler:
             elif content_type == 'text/html':
                 logger.debug('message: message-part: text/html')
                 html = html2text(_get_content(part))
-            elif content_type == 'application/pkcs7-signature' or content_type == 'application/pgp-keys':
-                logger.warning("Signature: " + part)
-                raise Exception()
             else:
-                return '554 Invalid message format - invalid content type {0}'.format(part.get_content_type())
+                logger.info('message: message-part: ' + content_type + ' ignored')
 
         if not plain and not html:
-            return '554 Invalid message format - empty message'
+            return '554 Invalid message format, no content'
 
         text = plain or html
         recipient = envelope.rcpt_tos[0]
