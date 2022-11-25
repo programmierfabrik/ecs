@@ -55,8 +55,8 @@ def pdf_barcodestamp(source, barcode, text=None):
     can.save()
     new_pdf_data.seek(0)
 
-    new_pdf = PdfFileReader(new_pdf_data)
-    existing_pdf = PdfFileReader(source)
+    new_pdf = PdfFileReader(new_pdf_data, strict=False)
+    existing_pdf = PdfFileReader(source, strict=False)
     output = PdfFileWriter()
 
     for i in range(len(existing_pdf.pages)):
