@@ -13,9 +13,14 @@ import io
 import logging
 import mimetypes
 import os
+import tempfile
 
 import pikepdf
+from PyPDF2 import PdfFileWriter, PdfFileReader
 from django.conf import settings
+from qrcode import QRCode
+from reportlab.lib import pagesizes
+from reportlab.pdfgen import canvas
 from weasyprint import default_url_fetcher, HTML
 
 logger = logging.getLogger(__name__)
@@ -29,59 +34,41 @@ def decrypt_pdf(src):
 
 
 def pdf_barcodestamp(source, barcode, text=None):
-    ''' takes source pdf, stamps a barcode onto every page and output it to dest
+    qr = QRCode()
+    qr.add_data(barcode)
+    qrcode_image = qr.make_image()
 
-    :raise IOError: if something goes wrong (including exit errorcode and stderr output attached)
-    '''
-    # TODO: H Replace pdftk and possibly gs
-    return source
-    # barcode_ps = loader.render_to_string('pdf/barcode.ps') + """
-    #     gsave
-    #     20 100 moveto 0.5 0.5 scale 0 rotate
-    #     ({}) () /qrcode /uk.co.terryburton.bwipp findresource exec
-    #     grestore
-    # """.format(barcode)
+    new_pdf_data = io.BytesIO()
+    can = canvas.Canvas(new_pdf_data, pagesize=pagesizes.A4)
+    width = 40
+    font_size = 8
+    text_offset = (width - font_size) / 2
+    with tempfile.NamedTemporaryFile() as tmp:
+        qrcode_image.save(tmp)
+        can.drawImage(tmp.name, x=0, y=0, width=width, height=width)
+    can.rotate(90)
+    pdf_text = can.beginText(x=width, y=-text_offset - font_size)
+    pdf_text.setFont("Helvetica", 8)
+    pdf_text.textLine(text=text)
+    can.drawText(pdf_text)
 
-    # if text:
-    #     barcode_ps += '''
-    #         gsave
+    can.save()
+    new_pdf_data.seek(0)
 
-    #         % Define the HelveticaLatin1 font, which is like Helvetica, but
-    #         % using the ISOLatin1Encoding encoding vector.
-    #         /Helvetica findfont
-    #         dup length dict
-    #         begin
-    #             {{def}} forall
-    #             /Encoding ISOLatin1Encoding def
-    #             currentdict
-    #         end
-    #         /HelveticaLatin1 exch definefont
+    new_pdf = PdfFileReader(new_pdf_data)
+    existing_pdf = PdfFileReader(source)
+    output = PdfFileWriter()
 
-    #         /HelveticaLatin1 6 selectfont
-    #         <{}> dup stringwidth pop 132 add 32 exch moveto
-    #         270 rotate show
-    #         grestore
-    #     '''.format(hexlify(text.encode('latin-1', 'replace')).decode('ascii'))
+    for i in range(len(existing_pdf.pages)):
+        page = existing_pdf.getPage(i)
+        page.mergePage(new_pdf.getPage(0))
+        output.addPage(page)
 
-    # with NamedTemporaryFile() as pdf:
-    #     p = subprocess.Popen([
-    #         'gs', '-q', '-dNOPAUSE', '-dBATCH', '-sDEVICE=pdfwrite',
-    #         '-sPAPERSIZE=a4', '-dAutoRotatePages=/None', '-sOutputFile=-', '-c',
-    #         '<</Orientation 0>> setpagedevice', '-'
-    #     ], stdin=subprocess.PIPE, stdout=pdf, stderr=subprocess.PIPE)
-    #     p.stdin.write(barcode_ps.encode('ascii'))
-    #     p.stdin.close()
-    #     if p.wait():
-    #         raise subprocess.CalledProcessError(p.returncode, 'ghostscript')
+    pdf_data = io.BytesIO()
+    output.write(pdf_data)
+    pdf_data.seek(0)
 
-    #     stamped = TemporaryFile()
-    #     p = subprocess.check_call(
-    #         ['pdftk', '-', 'stamp', pdf.name, 'output', '-', 'dont_ask'],
-    #         stdin=source, stdout=stamped
-    #     )
-
-    # stamped.seek(0)
-    # return stamped
+    return pdf_data
 
 
 def _url_fetcher(url):
