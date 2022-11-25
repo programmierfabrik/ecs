@@ -277,9 +277,9 @@ class InvitationForm(UserDetailsForm):
 
 
 class IndispositionForm(forms.ModelForm):
-    is_indisposed = forms.BooleanField(required=False, label=_('is_indisposed'))
+    is_indisposed = forms.BooleanField(required=True, label=_('is_indisposed'))
     communication_proxy = AutocompleteModelChoiceField(
-        'users', User.objects.all(), required=False, label=_('communication_proxy'))
+        'users', User.objects.all(), required=True, label=_('communication_proxy'))
 
     class Meta:
         model = UserProfile
