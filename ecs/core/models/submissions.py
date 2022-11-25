@@ -256,7 +256,7 @@ class SubmissionForm(models.Model):
 
     project_title = models.TextField()
     eudract_number = models.CharField(max_length=60, null=True, blank=True)
-    submission_type = models.SmallIntegerField(null=True, blank=True, choices=SUBMISSION_TYPE_CHOICES, default=SUBMISSION_TYPE_MONOCENTRIC)
+    submission_type = models.SmallIntegerField(null=True, blank=True, choices=SUBMISSION_TYPE_CHOICES)
     presenter = models.ForeignKey(User, related_name='presented_submission_forms', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     
