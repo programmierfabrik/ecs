@@ -3,7 +3,7 @@
     {% for docstash in stashed_notifications %}
         {% if docstash.value %}
             <li class="list-group-item d-block">
-                <a href="{% url 'notifications.create_notification' notification_type_pk=docstash.value.type_id docstash_key=docstash.key %}">
+                <a href="{% url 'notifications.create_notification' notification_type_pk=docstash.value.type_id|add:"0" docstash_key=docstash.key %}">
                     {{ docstash.name|default:"<strong>Unbenannt</strong>" }}
                 </a>
                 <a class="delete_docstash btn btn-outline-danger float-right" href="{% url 'notifications.delete_docstash_entry' docstash_key=docstash.key %}?next={{ request.path|urlencode }}">
