@@ -59,7 +59,7 @@ ssh root@example.com cat /data/ecs-pgdump/ecs.pgdump.gz | \
 ```
 
 ```shell
-ssh root@example.com cat ./deployment/data/ecs/dump/ecs.pgdump.gz | \
+ssh ecs@example.com cat ./deployment/data/ecs/dump/ecs.pgdump.gz | \
   gzip -d | \
   docker exec -i test-ecs pg_restore -U test-ecs -1 --format=custom --schema=public --no-owner --dbname=test-ecs
 ```
