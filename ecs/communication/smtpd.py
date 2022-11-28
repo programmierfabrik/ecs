@@ -43,7 +43,8 @@ class SmtpdHandler:
         return True
 
     async def handle_RCPT(self, server, session, envelope, address, rcpt_options):
-        if not settings.SMTPD_CONFIG['domain']:
+        _, domain = address.split('@')
+        if domain != settings.SMTPD_CONFIG['domain']:
             return '550 not relaying to that domain'
         envelope.rcpt_tos.append(address)
         return '250 OK'
@@ -72,10 +73,10 @@ class SmtpdHandler:
 
         text = plain or html
         recipient = envelope.rcpt_tos[0]
-        msg_uuid, host = recipient.split('@')
+        msg_uuid, _ = recipient.split('@')
 
         m = re.match(r'ecs-([0-9A-Fa-f]{32})$', msg_uuid)
-        if m and host == settings.DOMAIN:
+        if m:
             try:
                 orig_msg = await Message.objects.select_related('thread', 'receiver', 'sender').aget(
                     uuid=m.group(1),
