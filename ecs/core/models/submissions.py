@@ -255,7 +255,7 @@ class SubmissionForm(models.Model):
     is_new_medtech_law = models.BooleanField(null=True, blank=True)
 
     project_title = models.TextField()
-    eudract_number = models.CharField(max_length=60, null=True, blank=True)
+    eudract_number = models.CharField(max_length=60, blank=True)
     submission_type = models.SmallIntegerField(null=True, blank=True, choices=SUBMISSION_TYPE_CHOICES)
     presenter = models.ForeignKey(User, related_name='presented_submission_forms', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -270,25 +270,25 @@ class SubmissionForm(models.Model):
 
     # 1.5
     sponsor = models.ForeignKey(User, null=True, related_name="sponsored_submission_forms", on_delete=models.CASCADE)
-    sponsor_name = models.CharField(max_length=100, null=True)
+    sponsor_name = models.CharField(max_length=100)
     sponsor_contact = NameField(required=('gender', 'first_name', 'last_name',))
-    sponsor_address = models.CharField(max_length=60, null=True)
-    sponsor_zip_code = models.CharField(max_length=10, null=True)
-    sponsor_city = models.CharField(max_length=80, null=True)
-    sponsor_phone = models.CharField(max_length=30, null=True)
-    sponsor_fax = models.CharField(max_length=30, null=True, blank=True)
-    sponsor_email = models.EmailField(null=True)
-    sponsor_uid = models.CharField(max_length=35, null=True, blank=True)
+    sponsor_address = models.CharField(max_length=60)
+    sponsor_zip_code = models.CharField(max_length=10)
+    sponsor_city = models.CharField(max_length=80)
+    sponsor_phone = models.CharField(max_length=30)
+    sponsor_fax = models.CharField(max_length=30, blank=True)
+    sponsor_email = models.EmailField()
+    sponsor_uid = models.CharField(max_length=35, blank=True)
     
-    invoice_name = models.CharField(max_length=160, null=True, blank=True)
+    invoice_name = models.CharField(max_length=160, blank=True)
     invoice_contact = NameField()
-    invoice_address = models.CharField(max_length=60, null=True, blank=True)
-    invoice_zip_code = models.CharField(max_length=10, null=True, blank=True)
-    invoice_city = models.CharField(max_length=80, null=True, blank=True)
-    invoice_phone = models.CharField(max_length=50, null=True, blank=True)
-    invoice_fax = models.CharField(max_length=45, null=True, blank=True)
-    invoice_email = models.EmailField(null=True, blank=True)
-    invoice_uid = models.CharField(max_length=35, null=True, blank=True) # 24? need to check
+    invoice_address = models.CharField(max_length=60, blank=True)
+    invoice_zip_code = models.CharField(max_length=10, blank=True)
+    invoice_city = models.CharField(max_length=80, blank=True)
+    invoice_phone = models.CharField(max_length=50, blank=True)
+    invoice_fax = models.CharField(max_length=45, blank=True)
+    invoice_email = models.EmailField(blank=True)
+    invoice_uid = models.CharField(max_length=35, blank=True) # 24? need to check
     
     # 2.1
     project_type_non_reg_drug = models.BooleanField(default=False)
@@ -307,7 +307,7 @@ class SubmissionForm(models.Model):
     project_type_retrospective = models.BooleanField(default=False)
     project_type_questionnaire = models.BooleanField(default=False)
     project_type_education_context = models.SmallIntegerField(null=True, blank=True, choices=[(1, 'Dissertation'), (2, 'Diplomarbeit')])
-    project_type_misc = models.TextField(null=True, blank=True)
+    project_type_misc = models.TextField(blank=True)
     project_type_psychological_study = models.BooleanField(default=False)
     project_type_nursing_study = models.BooleanField(default=False)
     project_type_non_interventional_study = models.BooleanField(default=False)
@@ -315,18 +315,18 @@ class SubmissionForm(models.Model):
     project_type_gender_medicine = models.BooleanField(default=False)
     
     # 2.2
-    specialism = models.TextField(null=True)
+    specialism = models.TextField()
 
     # 2.3
-    pharma_checked_substance = models.TextField(null=True, blank=True)
-    pharma_reference_substance = models.TextField(null=True, blank=True)
+    pharma_checked_substance = models.TextField(blank=True)
+    pharma_reference_substance = models.TextField(blank=True)
     
     # 2.4
-    medtech_checked_product = models.TextField(null=True, blank=True)
-    medtech_reference_substance = models.TextField(null=True, blank=True)
+    medtech_checked_product = models.TextField(blank=True)
+    medtech_reference_substance = models.TextField(blank=True)
 
     # 2.5
-    clinical_phase = models.CharField(max_length=10, null=True, blank=True)
+    clinical_phase = models.CharField(max_length=10, blank=True)
     
     # 2.6 + 2.7 (via ParticipatingCenter)
     
@@ -347,7 +347,7 @@ class SubmissionForm(models.Model):
     # 2.11
     subject_duration = models.CharField(max_length=200)
     subject_duration_active = models.CharField(max_length=200)
-    subject_duration_controls = models.CharField(max_length=200, null=True, blank=True)
+    subject_duration_controls = models.CharField(max_length=200, blank=True)
 
     # 2.12
     subject_planned_total_duration = models.CharField(max_length=250)
@@ -356,31 +356,31 @@ class SubmissionForm(models.Model):
     substance_registered_in_countries = ArrayField(CountryField(), default=list)
     substance_preexisting_clinical_tries = models.BooleanField(blank=True, db_column='existing_tries', null=True)
     substance_p_c_t_countries = ArrayField(CountryField(), default=list)
-    substance_p_c_t_phase = models.CharField(max_length=80, null=True, blank=True)
-    substance_p_c_t_period = models.TextField(null=True, blank=True)
-    substance_p_c_t_application_type = models.CharField(max_length=145, null=True, blank=True)
+    substance_p_c_t_phase = models.CharField(max_length=80, blank=True)
+    substance_p_c_t_period = models.TextField(blank=True)
+    substance_p_c_t_application_type = models.CharField(max_length=145, blank=True)
     substance_p_c_t_gcp_rules = models.BooleanField(blank=True, null=True)
     substance_p_c_t_final_report = models.BooleanField(blank=True, null=True)
     
     # 3b (via NonTestedUsedDrugs)
     
     # 4.x
-    medtech_product_name = models.CharField(max_length=210, null=True, blank=True)
-    medtech_manufacturer = models.CharField(max_length=80, null=True, blank=True)
+    medtech_product_name = models.CharField(max_length=210, blank=True)
+    medtech_manufacturer = models.CharField(max_length=80, blank=True)
     medtech_certified_for_exact_indications = models.BooleanField(blank=True, null=True)
     medtech_certified_for_other_indications = models.BooleanField(blank=True, null=True)
     medtech_ce_symbol = models.BooleanField(blank=True, null=True)
     medtech_manual_included = models.BooleanField(blank=True, null=True)
-    medtech_technical_safety_regulations = models.TextField(null=True, blank=True)
-    medtech_departure_from_regulations = models.TextField(null=True, blank=True)
+    medtech_technical_safety_regulations = models.TextField(blank=True)
+    medtech_departure_from_regulations = models.TextField(blank=True)
     
     # 5.x
     insurance_not_required = models.BooleanField(default=False)
-    insurance_name = models.CharField(max_length=125, null=True, blank=True)
-    insurance_address = models.CharField(max_length=80, null=True, blank=True)
-    insurance_phone = models.CharField(max_length=30, null=True, blank=True)
-    insurance_contract_number = models.CharField(max_length=60, null=True, blank=True)
-    insurance_validity = models.CharField(max_length=60, null=True, blank=True)
+    insurance_name = models.CharField(max_length=125, blank=True)
+    insurance_address = models.CharField(max_length=80, blank=True)
+    insurance_phone = models.CharField(max_length=30, blank=True)
+    insurance_contract_number = models.CharField(max_length=60, blank=True)
+    insurance_validity = models.CharField(max_length=60, blank=True)
     
     # 6.1 + 6.2 (via Measure)
 
@@ -388,28 +388,28 @@ class SubmissionForm(models.Model):
     additional_therapy_info = models.TextField(blank=True)
 
     # 7.x
-    german_project_title = models.TextField(null=True)
-    german_summary = models.TextField(null=True)
-    german_preclinical_results = models.TextField(null=True)
-    german_primary_hypothesis = models.TextField(null=True)
-    german_inclusion_exclusion_crit = models.TextField(null=True)
-    german_ethical_info = models.TextField(null=True)
-    german_protected_subjects_info = models.TextField(null=True, blank=True)
-    german_recruitment_info = models.TextField(null=True)
-    german_consent_info = models.TextField(null=True)
-    german_risks_info = models.TextField(null=True)
-    german_benefits_info = models.TextField(null=True)
-    german_relationship_info = models.TextField(null=True)
-    german_concurrent_study_info = models.TextField(null=True)
-    german_sideeffects_info = models.TextField(null=True)
-    german_statistical_info = models.TextField(null=True, blank=True)
-    german_dataprotection_info = models.TextField(null=True, blank=True)
-    german_aftercare_info = models.TextField(null=True)
-    german_payment_info = models.TextField(null=True)
-    german_abort_info = models.TextField(null=True)
-    german_dataaccess_info = models.TextField(null=True, blank=True)
-    german_financing_info = models.TextField(null=True, blank=True)
-    german_additional_info = models.TextField(null=True, blank=True)
+    german_project_title = models.TextField()
+    german_summary = models.TextField()
+    german_preclinical_results = models.TextField()
+    german_primary_hypothesis = models.TextField()
+    german_inclusion_exclusion_crit = models.TextField()
+    german_ethical_info = models.TextField()
+    german_protected_subjects_info = models.TextField(blank=True)
+    german_recruitment_info = models.TextField()
+    german_consent_info = models.TextField()
+    german_risks_info = models.TextField()
+    german_benefits_info = models.TextField()
+    german_relationship_info = models.TextField()
+    german_concurrent_study_info = models.TextField()
+    german_sideeffects_info = models.TextField()
+    german_statistical_info = models.TextField(blank=True)
+    german_dataprotection_info = models.TextField(blank=True)
+    german_aftercare_info = models.TextField()
+    german_payment_info = models.TextField()
+    german_abort_info = models.TextField()
+    german_dataaccess_info = models.TextField(blank=True)
+    german_financing_info = models.TextField(blank=True)
+    german_additional_info = models.TextField(blank=True)
     
     # 8.1
     study_plan_blind = models.SmallIntegerField(choices=[(0, gettext_lazy('open')), (1, gettext_lazy('blind')), (2, gettext_lazy('double-blind')), (3, gettext_lazy('not applicable'))])
@@ -422,14 +422,14 @@ class SubmissionForm(models.Model):
     study_plan_factorized = models.BooleanField(default=False)
     study_plan_pilot_project = models.BooleanField(default=False)
     study_plan_equivalence_testing = models.BooleanField(default=False)
-    study_plan_misc = models.TextField(null=True, blank=True)
-    study_plan_number_of_groups = models.TextField(null=True, blank=True)
-    study_plan_stratification = models.TextField(null=True, blank=True)
-    study_plan_sample_frequency = models.TextField(null=True, blank=True) 
-    study_plan_primary_objectives = models.TextField(null=True, blank=True)
-    study_plan_null_hypothesis = models.TextField(null=True, blank=True)
-    study_plan_alternative_hypothesis = models.TextField(null=True, blank=True)
-    study_plan_secondary_objectives = models.TextField(null=True, blank=True)
+    study_plan_misc = models.TextField(blank=True)
+    study_plan_number_of_groups = models.TextField(blank=True)
+    study_plan_stratification = models.TextField(blank=True)
+    study_plan_sample_frequency = models.TextField(blank=True) 
+    study_plan_primary_objectives = models.TextField(blank=True)
+    study_plan_null_hypothesis = models.TextField(blank=True)
+    study_plan_alternative_hypothesis = models.TextField(blank=True)
+    study_plan_secondary_objectives = models.TextField(blank=True)
 
     # 8.2
     study_plan_alpha = models.CharField(max_length=80)
@@ -437,15 +437,15 @@ class SubmissionForm(models.Model):
     study_plan_power = models.CharField(max_length=80)
     study_plan_statalgorithm = models.CharField(max_length=80)
     study_plan_multiple_test = models.BooleanField(default=False)
-    study_plan_multiple_test_correction_algorithm = models.CharField(max_length=100, null=True, blank=True)
+    study_plan_multiple_test_correction_algorithm = models.CharField(max_length=100, blank=True)
     study_plan_dropout_ratio = models.CharField(max_length=80)
     
     # 8.3
     study_plan_population_intention_to_treat  = models.BooleanField(default=False)
     study_plan_population_per_protocol  = models.BooleanField(default=False)
     study_plan_interim_evaluation = models.BooleanField(default=False)
-    study_plan_abort_crit = models.CharField(max_length=265, null=True, blank=True)
-    study_plan_planned_statalgorithm = models.TextField(null=True, blank=True)
+    study_plan_abort_crit = models.CharField(max_length=265, blank=True)
+    study_plan_planned_statalgorithm = models.TextField(blank=True)
 
     # 8.4
     study_plan_dataquality_checking = models.TextField()
@@ -457,14 +457,14 @@ class SubmissionForm(models.Model):
 
     # 8.6 (either anonalgorith or reason or dvr may be set.)
     study_plan_dataprotection_choice = models.CharField(max_length=15, choices=SUBMISSION_INFORMATION_PRIVACY_CHOICES, default='non-personal')
-    study_plan_dataprotection_reason = models.CharField(max_length=120, null=True, blank=True)
-    study_plan_dataprotection_dvr = models.CharField(max_length=180, null=True, blank=True)
-    study_plan_dataprotection_anonalgoritm = models.TextField(null=True, blank=True)
+    study_plan_dataprotection_reason = models.CharField(max_length=120, blank=True)
+    study_plan_dataprotection_dvr = models.CharField(max_length=180, blank=True)
+    study_plan_dataprotection_anonalgoritm = models.TextField(blank=True)
     
     # 9.x
     submitter = models.ForeignKey(User, null=True, related_name='submitted_submission_forms', on_delete=models.CASCADE)
     submitter_contact = NameField(required=('gender', 'first_name', 'last_name',))
-    submitter_email = models.EmailField(blank=False, null=True)
+    submitter_email = models.EmailField(blank=False)
     submitter_organisation = models.CharField(max_length=180)
     submitter_jobtitle = models.CharField(max_length=130)
     submitter_is_coordinator = models.BooleanField(default=False)
