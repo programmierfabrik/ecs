@@ -147,12 +147,21 @@ class ListDiffNode(DiffNode):
         else:
             self.diffs = []
             return
+        
+        def get_match_fields(a):
+            result = []
+            for f in differ.match_fields:
+                value = getattr(a, f)
+                if isinstance(value, str):
+                    value = value.strip()
+                result.append(value)
+            return result
 
         diffs = []
         for old in self.old:
-            omf = [getattr(old, f) for f in differ.match_fields]
+            omf = get_match_fields(old)
             for new in self.new:
-                nmf = [getattr(new, f) for f in differ.match_fields]
+                nmf = get_match_fields(new)
                 if omf == nmf:
                     self.new.remove(new)
                     break
@@ -287,6 +296,10 @@ class ModelDiffer(object):
             new_val = str(dict(field.choices)[new_val]) if new_val else _('No Information')
             return AtomicDiffNode(old_val, new_val, **kwargs)
         elif isinstance(field, (models.CharField, models.TextField)) and old_val and new_val:
+            old_val_stripped = old_val.strip()
+            new_val_stripped = new_val.strip()
+            if old_val_stripped == new_val_stripped:
+                return None
             return TextDiffNode(old_val, new_val, **kwargs)
         else:
             return AtomicDiffNode(_render_value(old_val), _render_value(new_val), **kwargs)
