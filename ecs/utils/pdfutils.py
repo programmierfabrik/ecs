@@ -13,16 +13,15 @@ import io
 import logging
 import mimetypes
 import os
-import subprocess
 import tempfile
 
 import pikepdf
 from django.conf import settings
+from pikepdf import Pdf
 from qrcode import QRCode
 from reportlab.lib import pagesizes
 from reportlab.pdfgen import canvas
 from weasyprint import default_url_fetcher, HTML
-from pikepdf import Pdf
 
 logger = logging.getLogger(__name__)
 
@@ -61,11 +60,8 @@ def pdf_barcodestamp(source, barcode, text=None):
         qrcode_pdf = Pdf.open(pdf)
         formx_text = source_pdf.copy_foreign(qrcode_pdf.pages[0].as_form_xobject())
         for i in range(len(source_pdf.pages)):
-            formx_page = source_pdf.pages[i]
-            formx_name = formx_page.add_resource(formx_text, pikepdf.Name.XObject)
-            stamp_text = source_pdf.make_stream(b'q 1 0 0 1 0 0 cm %s Do Q' % formx_name)
-
-            source_pdf.pages[i].contents_add(stamp_text)
+            page = source_pdf.pages[i]
+            page.add_overlay(formx_text)
         source_pdf.save(data)
 
     data.seek(0)
