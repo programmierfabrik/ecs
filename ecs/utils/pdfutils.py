@@ -22,6 +22,7 @@ from qrcode import QRCode
 from reportlab.lib import pagesizes
 from reportlab.pdfgen import canvas
 from weasyprint import default_url_fetcher, HTML
+from pikepdf import Pdf
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,7 @@ def pdf_barcodestamp(source, barcode, text=None):
     qr.add_data(barcode)
     qrcode_image = qr.make_image()
 
+    data = io.BytesIO()
     with tempfile.NamedTemporaryFile() as pdf:
         can = canvas.Canvas(pdf, pagesize=pagesizes.A4)
         width = 40
@@ -55,14 +57,19 @@ def pdf_barcodestamp(source, barcode, text=None):
         can.save()
         pdf.seek(0)
 
-        stamped = tempfile.TemporaryFile()
-        p = subprocess.check_call(
-            ['pdftk', '-', 'stamp', pdf.name, 'output', '-', 'dont_ask'],
-            stdin=source, stdout=stamped
-        )
+        source_pdf = Pdf.open(source)
+        qrcode_pdf = Pdf.open(pdf)
+        formx_text = source_pdf.copy_foreign(qrcode_pdf.pages[0].as_form_xobject())
+        for i in range(len(source_pdf.pages)):
+            formx_page = source_pdf.pages[i]
+            formx_name = formx_page.add_resource(formx_text, pikepdf.Name.XObject)
+            stamp_text = source_pdf.make_stream(b'q 1 0 0 1 0 0 cm %s Do Q' % formx_name)
 
-    stamped.seek(0)
-    return stamped
+            source_pdf.pages[i].contents_add(stamp_text)
+        source_pdf.save(data)
+
+    data.seek(0)
+    return data
 
 
 def _url_fetcher(url):
