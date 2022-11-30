@@ -13,10 +13,10 @@ import io
 import logging
 import mimetypes
 import os
+import subprocess
 import tempfile
 
 import pikepdf
-from PyPDF2 import PdfFileWriter, PdfFileReader
 from django.conf import settings
 from qrcode import QRCode
 from reportlab.lib import pagesizes
@@ -38,37 +38,31 @@ def pdf_barcodestamp(source, barcode, text=None):
     qr.add_data(barcode)
     qrcode_image = qr.make_image()
 
-    new_pdf_data = io.BytesIO()
-    can = canvas.Canvas(new_pdf_data, pagesize=pagesizes.A4)
-    width = 40
-    font_size = 8
-    text_offset = (width - font_size) / 2
-    with tempfile.NamedTemporaryFile() as tmp:
-        qrcode_image.save(tmp)
-        can.drawImage(tmp.name, x=0, y=0, width=width, height=width)
-    can.rotate(90)
-    pdf_text = can.beginText(x=width, y=-text_offset - font_size)
-    pdf_text.setFont("Helvetica", 8)
-    pdf_text.textLine(text=text)
-    can.drawText(pdf_text)
+    with tempfile.NamedTemporaryFile() as pdf:
+        can = canvas.Canvas(pdf, pagesize=pagesizes.A4)
+        width = 40
+        font_size = 8
+        text_offset = (width - font_size) / 2
+        with tempfile.NamedTemporaryFile() as tmp:
+            qrcode_image.save(tmp)
+            can.drawImage(tmp.name, x=0, y=0, width=width, height=width)
+        can.rotate(90)
+        pdf_text = can.beginText(x=width, y=-text_offset - font_size)
+        pdf_text.setFont("Helvetica", 8)
+        pdf_text.textLine(text=text)
+        can.drawText(pdf_text)
 
-    can.save()
-    new_pdf_data.seek(0)
+        can.save()
+        pdf.seek(0)
 
-    new_pdf = PdfFileReader(new_pdf_data, strict=False)
-    existing_pdf = PdfFileReader(source, strict=False)
-    output = PdfFileWriter()
+        stamped = tempfile.TemporaryFile()
+        p = subprocess.check_call(
+            ['pdftk', '-', 'stamp', pdf.name, 'output', '-', 'dont_ask'],
+            stdin=source, stdout=stamped
+        )
 
-    for i in range(len(existing_pdf.pages)):
-        page = existing_pdf.getPage(i)
-        page.mergePage(new_pdf.getPage(0))
-        output.addPage(page)
-
-    pdf_data = io.BytesIO()
-    output.write(pdf_data)
-    pdf_data.seek(0)
-
-    return pdf_data
+    stamped.seek(0)
+    return stamped
 
 
 def _url_fetcher(url):

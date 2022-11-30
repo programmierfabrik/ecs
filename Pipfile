@@ -27,7 +27,6 @@ pikepdf = "==6.2.*"
 aiosmtpd = "==1.4.*"
 redis = "==4.3.*"
 hiredis = "==2.0.*"
-pypdf2 = "==2.11.*"
 reportlab = "==3.6.*"
 qrcode = "==7.3.*"
 
