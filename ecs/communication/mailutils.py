@@ -28,7 +28,7 @@ def create_mail(subject, message, from_email, recipient, message_html=None,
         if not rfc2822_headers or not rfc2822_headers.get('Auto-Submitted', None):
             headers.update({'Auto-Submitted': 'auto-generated'})
         if not rfc2822_headers or not rfc2822_headers.get('Reply-To', None):
-            headers.update({'Reply-To': AdvancedSettings.objects.get(pk=1).default_contact})
+            headers.update({'Reply-To': AdvancedSettings.objects.get(pk=1).default_contact.email})
 
     if rfc2822_headers:
         headers.update(rfc2822_headers)
