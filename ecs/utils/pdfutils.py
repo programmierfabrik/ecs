@@ -9,6 +9,7 @@ pdfutils
 - creation (from html)
 
 '''
+import datetime
 import io
 import logging
 import mimetypes
@@ -43,15 +44,24 @@ def pdf_barcodestamp(source, barcode, text=None):
         can = canvas.Canvas(pdf, pagesize=pagesizes.A4)
         width = 40
         font_size = 8
-        text_offset = (width - font_size) / 2
+        text_gap = 2
+        padding = 11
         with tempfile.NamedTemporaryFile() as tmp:
             qrcode_image.save(tmp)
             can.drawImage(tmp.name, x=0, y=0, width=width, height=width)
         can.rotate(90)
-        pdf_text = can.beginText(x=width, y=-text_offset - font_size)
-        pdf_text.setFont("Helvetica", 8)
+        # Text from the parameter
+        pdf_text = can.beginText(x=width, y=-(padding + font_size))
+        pdf_text.setFont("Helvetica", font_size)
         pdf_text.textLine(text=text)
+        # Text which ethic commision this is and when
+        pdf_text_ec = can.beginText(x=width, y=-(padding + font_size + text_gap + font_size))
+        pdf_text_ec.setFont("Helvetica", font_size)
+        now = datetime.datetime.today()
+        date_str = now.strftime('%d.%m.%Y')
+        pdf_text_ec.textLine(text=settings.DOMAIN + ", " + date_str)
         can.drawText(pdf_text)
+        can.drawText(pdf_text_ec)
 
         can.save()
         pdf.seek(0)
