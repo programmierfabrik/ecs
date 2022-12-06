@@ -1,10 +1,9 @@
 import datetime
 
 from django import forms
-from django.utils.translation import gettext as _
-from django.utils.encoding import force_str
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from ecs.users.utils import get_user
 
@@ -67,29 +66,6 @@ class NullBooleanFieldNewMedtechLaw(forms.NullBooleanField):
         super().__init__(*args, **kwargs)
 
 
-class AutocompleteWidgetMixin(object):
-    def __init__(self, field):
-        self.field = field
-        return super().__init__()
-
-    def render(self, name, value, attrs=None, renderer=None, choices=()):
-        attrs['data-ajax--url'] = reverse(
-            'core.autocomplete',
-            kwargs={'queryset_name': self.field.queryset_name}
-        )
-        return super().render(name, value, attrs=attrs)
-
-    def render_options(self, choices, selected_choices):
-        selected_choices = set(force_str(v) for v in selected_choices if v != '')
-        output = []
-        objs = self.field.queryset.filter(pk__in=selected_choices)
-        for obj in objs:
-            option_value = self.field.prepare_value(obj)
-            option_label = self.field.label_from_instance(obj)
-            output.append(self.render_option(selected_choices, option_value, option_label))
-        return '\n'.join(output)
-
-
 class AutocompleteModelChoiceField(forms.ChoiceField):
     def __init__(self, queryset_name, queryset, **kwargs):
         kwargs['widget'] = self.Widget(self)
@@ -112,8 +88,24 @@ class AutocompleteModelChoiceField(forms.ChoiceField):
                 return True
         return False
 
-    class Widget(AutocompleteWidgetMixin, forms.Select):
-        pass
+    class Widget(forms.Select):
+        def __init__(self, field):
+            self.field = field
+            super().__init__()
+
+        def render(self, name, value, attrs=None, renderer=None):
+            attrs['data-ajax--url'] = reverse(
+                'core.autocomplete',
+                kwargs={'queryset_name': self.field.queryset_name}
+            )
+
+            try:
+                user = User.objects.get(pk=value)
+                self.choices = [(user.pk, '{} [{}]'.format(user, user.email))]
+            except User.DoesNotExist:
+                pass
+
+            return super().render(name, value, attrs=attrs)
 
 
 class StrippedTextInput(forms.TextInput):
