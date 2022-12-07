@@ -50,6 +50,8 @@ class SmtpdHandler:
         return '250 OK'
 
     async def handle_DATA(self, server, session, envelope):
+        mail_from = envelope.mail_from
+        rcpt_tos = envelope.rcpt_tos
         if len(envelope.rcpt_tos) > 1:
             return '554 Too many recipients'
 
