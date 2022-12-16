@@ -233,6 +233,15 @@ FILE_UPLOAD_HANDLERS = (
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': os.getenv('ECS_LOG_LEVEL', 'WARNING'),
+    },
     'loggers': {
         'django': {
             'level': 'NOTSET',
