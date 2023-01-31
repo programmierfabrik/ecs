@@ -93,6 +93,13 @@
             });
 
             new ecs.FormFieldController({
+                fields: '#id_subject_noncompetents',
+                disable: true,
+                sourceFieldClass: 'pl-5',
+                sources: 'input[id^=id_subject_noncompetent_]'
+            });
+
+            new ecs.FormFieldController({
                 fields: '#id_project_type_medical_device',
                 disable: true,
                 sourceFieldClass: 'pl-5',

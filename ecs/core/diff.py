@@ -423,7 +423,7 @@ _differs = {
             'clinical_phase', 'already_voted', 'subject_count',
             'subject_minage', 'subject_minage_unit', 'subject_maxage', 'subject_maxage_unit', 'subject_males',
             'subject_females_childbearing', 'subject_females',
-            'subject_childbearing', 'subject_noncompetents', 'subject_duration',
+            'subject_childbearing', 'subject_noncompetent_unconscious', 'subject_noncompetent_guarded', 'subject_noncompetent_minor', 'subject_noncompetent_emergency_study', 'subject_duration',
             'subject_duration_active', 'subject_duration_controls',
             'subject_planned_total_duration', 'submission_type',
             'substance_registered_in_countries',

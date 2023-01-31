@@ -91,7 +91,7 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
             'project_type_biobank', 'project_type_retrospective', 'project_type_questionnaire', 'project_type_psychological_study', 'project_type_education_context',
             'project_type_non_interventional_study', 'project_type_gender_medicine', 'project_type_misc', 'project_type_nursing_study',
 
-            'subject_count', 'subject_minage_unit', 'subject_minage', 'subject_maxage_unit', 'subject_maxage', 'subject_noncompetents', 'subject_males', 'subject_females_childbearing',
+            'subject_count', 'subject_minage_unit', 'subject_minage', 'subject_maxage_unit', 'subject_maxage', 'subject_noncompetents', 'subject_noncompetent_unconscious', 'subject_noncompetent_guarded', 'subject_noncompetent_minor', 'subject_noncompetent_emergency_study', 'subject_males', 'subject_females_childbearing',
             'subject_duration', 'subject_duration_active', 'subject_duration_controls', 'subject_planned_total_duration',
 
             'submitter_contact_gender', 'submitter_contact_title', 'submitter_contact_first_name', 'submitter_contact_last_name',
@@ -137,6 +137,7 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
         cleaned_data = super().clean()
         cleaned_data['project_type_reg_drug'] = any(self.cleaned_data.get(f, False) for f in ('project_type_reg_drug_within_indication', 'project_type_reg_drug_not_within_indication'))
         cleaned_data['project_type_medical_device'] = any(self.cleaned_data.get(f, False) for f in ('project_type_medical_device_with_ce', 'project_type_medical_device_without_ce', 'project_type_medical_device_performance_evaluation'))
+        cleaned_data['subject_noncompetents'] = any(self.cleaned_data.get(f, False) for f in ('subject_noncompetent_unconscious', 'subject_noncompetent_guarded', 'subject_noncompetent_minor', 'subject_noncompetent_emergency_study'))
 
         if any(cleaned_data.get(f, False) for f in ('project_type_reg_drug', 'project_type_non_reg_drug')):
             require_fields(self, AMG_REQUIRED_FIELDS)

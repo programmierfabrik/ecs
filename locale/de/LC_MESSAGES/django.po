@@ -933,11 +933,6 @@ msgstr "gebärfähige Frauen"
 msgid "non competent participants"
 msgstr "Nicht-persönlich-Einwilligungsfähige"
 
-msgid "non competents explanation"
-msgstr ""
-"z.B. Bewusstlose, Besachwaltete, aber NICHT Minderjährige, retrospektive "
-"Beobachtungen oder Proben"
-
 msgid ""
 "Duration of participation of the individual test participants in the study"
 msgstr ""
@@ -3265,3 +3260,15 @@ msgstr "Mindestalter Einheit"
 
 msgid "maximum age unit"
 msgstr "Höchstalter Einheit"
+
+msgid "noncompetent unconscious"
+msgstr "Bewusstlose"
+
+msgid "noncompetent guarded"
+msgstr "Besachwaltete"
+
+msgid "noncompetent minor"
+msgstr "Minderjährige"
+
+msgid "noncompetent emergency_study"
+msgstr "Notfallstudien"

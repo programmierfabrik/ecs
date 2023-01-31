@@ -190,7 +190,11 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('2.10.4/5', 'subject_females_childbearing', _('female participants')),
     FieldInfo('2.10.4', 'subject_females', _('female participants')),
     FieldInfo('2.10.5', 'subject_childbearing', _('women of childbearing age')),
-    FieldInfo('2.10.3', 'subject_noncompetents', _('non competent participants'), help_text=_('non competents explanation')),
+    FieldInfo('2.10.3', 'subject_noncompetents', _('non competent participants')),
+    FieldInfo('2.10.3.1', 'subject_noncompetent_unconscious', _('noncompetent unconscious')),
+    FieldInfo('2.10.3.2', 'subject_noncompetent_guarded', _('noncompetent guarded')),
+    FieldInfo('2.10.3.3', 'subject_noncompetent_minor', _('noncompetent minor')),
+    FieldInfo('2.10.3.4', 'subject_noncompetent_emergency_study', _('noncompetent emergency_study')),
 
     FieldInfo('2.11', 'subject_duration', _('Duration of participation of the individual test participants in the study')),
     FieldInfo('2.11.1', 'subject_duration_active', _('active phase')),
