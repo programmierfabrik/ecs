@@ -39,7 +39,7 @@
 </p>
 
 <p>
-    2.6 Nehmen andere Zentren an der Studie teil: 
+    2.6 Nehmen andere Zentren an der Studie teil:
     {% with multicentric=submission_form.is_multicentric %}
         {{ multicentric|checkbox }} ja
         {{ multicentric|not|checkbox }} nein.
@@ -84,7 +84,7 @@
 </p>
 
 <p class="border_bottom">
-    2.9 Geplante Anzahl der Prüfungsteilnehmer/innen gesamt (<span class="underline">Dies bezieht sich auf alle teilnehmenden Zentren</span>): 
+    2.9 Geplante Anzahl der Prüfungsteilnehmer/innen gesamt (<span class="underline">Dies bezieht sich auf alle teilnehmenden Zentren</span>):
     <span class="value">{{ submission_form.subject_count }}</span>
 </p>
 
@@ -104,9 +104,24 @@
         </p>
 
         <p>
-            2.10.3 Sind auch nicht persönlich Einwilligungsfähige einschließbar?
-            {{ submission_form.subject_noncompetents|checkbox }} ja 
-            {{ submission_form.subject_noncompetents|not|checkbox }} nein
+            2.10.3.1 Sind auch bewusstlose einschließbar?
+            {{ submission_form.subject_noncompetent_unconscious|checkbox }} ja
+            {{ submission_form.subject_noncompetent_unconscious|not|checkbox }} nein
+        </p>
+        <p>
+            2.10.3.2 Sind auch Besachwaltete einschließbar?
+            {{ submission_form.subject_noncompetent_guarded|checkbox }} ja
+            {{ submission_form.subject_noncompetent_guarded|not|checkbox }} nein
+        </p>
+        <p>
+            2.10.3.3 Sind auch Minderjährige einschließbar?
+            {{ submission_form.subject_noncompetent_minor|checkbox }} ja
+            {{ submission_form.subject_noncompetent_minor|not|checkbox }} nein
+        </p>
+        <p>
+            2.10.3.4 Sind auch Notfallstudien einschließbar?
+            {{ submission_form.subject_noncompetent_emergency_study|checkbox }} ja
+            {{ submission_form.subject_noncompetent_emergency_study|not|checkbox }} nein
         </p>
 
         <p>
