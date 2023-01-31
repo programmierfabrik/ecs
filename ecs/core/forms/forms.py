@@ -5,7 +5,7 @@ from functools import reduce
 from django import forms
 from django.forms.formsets import BaseFormSet, formset_factory
 from django.forms.models import modelformset_factory
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import Q
@@ -87,7 +87,7 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
 
             'project_type_non_reg_drug', 'project_type_reg_drug', 'project_type_reg_drug_within_indication', 'project_type_reg_drug_not_within_indication',
             'project_type_medical_method', 'project_type_medical_device', 'project_type_medical_device_with_ce', 'project_type_medical_device_without_ce',
-            'project_type_medical_device_performance_evaluation', 'project_type_basic_research', 'project_type_genetic_study', 'project_type_register',
+            'project_type_medical_device_performance_evaluation', 'project_type_non_interventional_study_mpg', 'project_type_basic_research', 'project_type_genetic_study', 'project_type_register',
             'project_type_biobank', 'project_type_retrospective', 'project_type_questionnaire', 'project_type_psychological_study', 'project_type_education_context',
             'project_type_non_interventional_study', 'project_type_gender_medicine', 'project_type_misc', 'project_type_nursing_study',
 
@@ -254,17 +254,14 @@ class InvestigatorForm(forms.ModelForm):
             'email': StrippedTextInput(),
         }
 
-class PresenterChangeForm(forms.ModelForm):
+
+class PresenterChangeForm(forms.Form):
     presenter = forms.ModelChoiceField(
         User.objects.filter(is_active=True), required=True,
         error_messages={'required': _('Please enter a valid e-mail address')},
         label=_('Presenter'),
         widget=EmailUserSelectWidget()
     )
-
-    class Meta:
-        model = Submission
-        fields = ('presenter',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -273,17 +270,14 @@ class PresenterChangeForm(forms.ModelForm):
                 'users', User.objects.filter(is_active=True),
                 label=_('Presenter'))
 
-class SusarPresenterChangeForm(forms.ModelForm):
+
+class SusarPresenterChangeForm(forms.Form):
     susar_presenter = forms.ModelChoiceField(
         User.objects.filter(is_active=True), required=True,
         error_messages={'required': _('Please enter a valid e-mail address')},
         label=_('Susar Presenter'),
         widget=EmailUserSelectWidget()
     )
-
-    class Meta:
-        model = Submission
-        fields = ('susar_presenter',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -527,20 +521,19 @@ class SubmissionImportForm(forms.Form):
                 self.submission_form = serializer.read(self.cleaned_data['file'])
         except Exception as e:
             import_error_logger.debug('invalid ecx file')
+            import_error_logger.info('ecx Exception: ' + str(e))
             self.add_error('file', _('This file is not a valid ECX archive.'))
         f.seek(0)
         return f
 
 class TemporaryAuthorizationForm(forms.ModelForm):
     start = DateTimeField(initial=timezone.now, label=_('Start'))
-    end = DateTimeField(initial=lambda: timezone.now() + timedelta(days=30),
-        label=_('End'))
-    user = AutocompleteModelChoiceField('users', User.objects.all(),
-        label=_('User'))
+    end = DateTimeField(initial=lambda: timezone.now() + timedelta(days=30), label=_('End'))
+    user = AutocompleteModelChoiceField('users', User.objects.all(), label=_('User'))
 
     class Meta:
         model = TemporaryAuthorization
-        exclude = ('submission',)
+        exclude = ('submission', 'objects')
 
 class AdvancedSettingsForm(forms.ModelForm):
     default_contact = AutocompleteModelChoiceField(

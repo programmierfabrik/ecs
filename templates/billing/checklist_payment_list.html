@@ -18,7 +18,7 @@
         <ul class="list-group mb-3">
             {% for payment in payments.object_list %}
                 <li class="list-group-item d-block">
-                    <a href="{% url 'ecs.billing.views.view_checklist_payment' payment_pk=payment.pk %}">
+                    <a href="{% url 'billing.view_checklist_payment' payment_pk=payment.pk %}">
                         {% blocktrans with payment.created_at|date:'d.m.Y' as date %}Payment of {{ date }}{% endblocktrans %}
                     </a>:
                     {% with payment.checklists.count as count %}

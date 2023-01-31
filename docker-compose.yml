@@ -1,0 +1,13 @@
+version: '3'
+services:
+  database:
+    container_name: test-ecs
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: test-ecs
+      POSTGRES_PASSWORD: test-ecs
+      POSTGRES_DB: test-ecs
+    ports:
+      - "5432:5432"
+    command: postgres -c jit=off
+    shm_size: 1024mb

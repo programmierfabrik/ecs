@@ -1,17 +1,17 @@
 from django.conf import settings
-from django.conf.urls import url
+from django.urls import path, re_path
 
 from ecs.checklists import views
 
 
 urlpatterns = (
-    url(r'^(?P<checklist_pk>\d+)/comments/(?P<flavour>positive|negative)/', views.checklist_comments),
-    url(r'^(?P<checklist_pk>\d+)/pdf/$', views.checklist_pdf),
-    url(r'^create_task/submission/(?P<submission_pk>\d+)/$', views.create_task),
-    url(r'^categorization_tasks/submissions/(?P<submission_pk>\d+)/$', views.categorization_tasks),
+    re_path(r'^(?P<checklist_pk>\d+)/comments/(?P<flavour>positive|negative)/', views.checklist_comments, name='checklists.checklist_comments'),
+    path('(<int:checklist_pk>)/pdf/', views.checklist_pdf, name='checklists.checklist_pdf'),
+    path('create_task/submission/(<int:submission_pk>/', views.create_task, name='checklists.create_task'),
+    path('categorization_tasks/submissions/<int:submission_pk>/', views.categorization_tasks, name='checklists.categorization_tasks'),
 )
 
 if settings.DEBUG:
     urlpatterns += (
-        url(r'^(?P<checklist_pk>\d+)/pdf/debug/$', views.checklist_pdf_debug),
+        path('<int:checklist_pk>/pdf/debug/', views.checklist_pdf_debug, name='checklists.checklist_pdf_debug'),
     )

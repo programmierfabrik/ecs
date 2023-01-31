@@ -3,7 +3,7 @@ from functools import wraps
 from django.shortcuts import redirect
 from django.http import QueryDict
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.exceptions import PermissionDenied
 
 from ecs.tasks.models import Task
@@ -120,8 +120,8 @@ class TaskManagementData(object):
                     url = reverse('view_submission', kwargs={'submission_pk': submission.pk})
                 else:
                     if self.request.user.profile.show_task_widget:
-                        url = reverse('ecs.tasks.views.task_list')
+                        url = reverse('tasks.task_list')
                     else:
-                        url = reverse('ecs.dashboard.views.view_dashboard')
+                        url = reverse('dashboard')
             return redirect(url)
         return response

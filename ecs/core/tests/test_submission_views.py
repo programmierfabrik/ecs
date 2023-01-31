@@ -99,7 +99,7 @@ class SubmissionViewsTestCase(LoginTestCase):
         profile.save()
 
     def get_docstash_url(self):
-        url = reverse('ecs.core.views.submissions.create_submission_form')
+        url = reverse('core.submission.create_submission_form')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
         url = response['Location']
@@ -176,7 +176,7 @@ class SubmissionViewsTestCase(LoginTestCase):
         '''
 
         submission_form = create_submission_form()
-        response = self.client.get(reverse('ecs.core.views.submissions.submission_form_pdf', kwargs={'submission_form_pk': submission_form.pk}))
+        response = self.client.get(reverse('core.submission.submission_form_pdf', kwargs={'submission_form_pk': submission_form.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertEqual(next(response.streaming_content)[:5], b'%PDF-')
@@ -184,7 +184,7 @@ class SubmissionViewsTestCase(LoginTestCase):
     def test_document_download(self):
         submission_form = create_submission_form()
         document_pk = submission_form.documents.get().pk
-        response = self.client.get(reverse('ecs.core.views.submissions.download_document', kwargs={'submission_form_pk': submission_form.pk, 'document_pk': document_pk}))
+        response = self.client.get(reverse('core.submission.download_document', kwargs={'submission_form_pk': submission_form.pk, 'document_pk': document_pk}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertEqual(next(response.streaming_content)[:5], b'%PDF-')
@@ -200,7 +200,7 @@ class SubmissionViewsTestCase(LoginTestCase):
         self.client.logout()
         self.client.login(email='someone@example.org', password='password')
 
-        response = self.client.get(reverse('ecs.core.views.submissions.download_document', kwargs={'submission_form_pk': submission_form.pk, 'document_pk': document_pk}))
+        response = self.client.get(reverse('core.submission.download_document', kwargs={'submission_form_pk': submission_form.pk, 'document_pk': document_pk}))
         self.assertEqual(response.status_code, 404)
 
     def test_submission_form_search(self):
@@ -211,7 +211,7 @@ class SubmissionViewsTestCase(LoginTestCase):
         create_submission_form(20200001)
         create_submission_form(20200042)
         create_submission_form(20209942)
-        url = reverse('ecs.core.views.submissions.all_submissions')
+        url = reverse('core.submission.all_submissions')
         
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -230,7 +230,7 @@ class SubmissionViewsTestCase(LoginTestCase):
         '''
         
         submission_form = create_submission_form(presenter=self.user)
-        response = self.client.get(reverse('ecs.core.views.submissions.copy_latest_submission_form', kwargs={'submission_pk': submission_form.submission.pk}))
+        response = self.client.get(reverse('core.submission.copy_latest_submission_form', kwargs={'submission_pk': submission_form.submission.pk}))
         self.assertEqual(response.status_code, 302)
         url = reverse('ecs.core.views.submissions.copy_submission_form', kwargs={'submission_form_pk': submission_form.pk})
         self.assertEqual(url, urlsplit(response['Location']).path)
@@ -252,7 +252,7 @@ class SubmissionViewsTestCase(LoginTestCase):
         refetch = lambda: Task.objects.get(pk=task.pk)
 
         # accept initial review task
-        response = self.client.post(reverse('ecs.tasks.views.accept_task', kwargs={'task_pk': task.pk}))
+        response = self.client.post(reverse('tasks.accept_task', kwargs={'task_pk': task.pk}))
         self.assertEqual(response.status_code, 302)
         task = refetch()
         self.assertEqual(self.office_user, task.assigned_to)
@@ -268,7 +268,7 @@ class SubmissionViewsTestCase(LoginTestCase):
         self.assertEqual(None, task.assigned_to)
 
         # accept the task again
-        response = self.client.post(reverse('ecs.tasks.views.accept_task', kwargs={'task_pk': task.pk}))
+        response = self.client.post(reverse('tasks.accept_task', kwargs={'task_pk': task.pk}))
         self.assertEqual(response.status_code, 302)
         task = refetch()
         self.assertEqual(self.office_user, task.assigned_to)

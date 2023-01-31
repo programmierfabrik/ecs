@@ -48,11 +48,11 @@ class SignatureTest(LoginTestCase):
         
     def test_success(self):
         ''' Tests that signing a document is possible; Will use mock signing. '''
-        response = self.client.get(reverse('ecs.signature.tests.sign_success'))
+        response = self.client.get(reverse('signature.sign_success'))
         self.assertEqual(response.status_code, 302)
         self.assertTrue('/success/' in response['Location'])
     
     def test_failure(self):     
         ''' Tests that signing a document fails; Will use mock signing. '''
-        response = self.client.get(reverse('ecs.signature.tests.sign_fail'))
+        response = self.client.get(reverse('signature.sign_fail'))
         self.assertTrue(b'error' in response.content)

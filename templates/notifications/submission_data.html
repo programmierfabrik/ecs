@@ -15,7 +15,7 @@
                 {% with submission=submission_form.submission %}
                     <tr>
                         <td>
-                            {% url 'ecs.core.views.submissions.view_submission' submission_pk=submission.pk as submission_url %}
+                            {% url 'view_submission' submission_pk=submission.pk as submission_url %}
                             <a href="{{ submission_url }}">
                                 {{ submission|ec_number }}
                                 {{ submission.project_title_display }}

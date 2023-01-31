@@ -1,12 +1,11 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core.files.uploadedfile import UploadedFile
 
 from ecs.core.forms.fields import DateField
 from ecs.documents.models import Document, DocumentType
 from ecs.utils.pdfutils import decrypt_pdf
-
 
 PDF_MAGIC = b'%PDF'
 
@@ -29,10 +28,9 @@ class DocumentForm(forms.ModelForm):
         # sanitization
         try:
             f = decrypt_pdf(pdf)
-        except ValueError:
+        except:
             raise ValidationError(_('The PDF-File seems to broken. For more Information click on the question mark in the sidebar.'))
 
-        f.seek(0)
         return UploadedFile(f, content_type='application/pdf', name='upload.pdf')
 
     def clean(self):
@@ -47,7 +45,9 @@ class DocumentForm(forms.ModelForm):
         obj.original_file_name = self.cleaned_data.get('original_file_name')
         if commit:
             obj.save()
-            obj.store(self.cleaned_data.get('file'))
+            file = self.files.get('document-file')
+            file.seek(0)
+            obj.store(file)
         return obj
 
     class Meta:

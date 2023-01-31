@@ -4,12 +4,12 @@ import re
 from itertools import groupby
 
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseBadRequest, Http404, JsonResponse, FileResponse
-from django.core.urlresolvers import reverse
+from django.http import HttpResponse, Http404, JsonResponse, FileResponse
+from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.forms.models import model_to_dict
 from django.db.models import Q, Prefetch, Min, F
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.core.cache import cache
@@ -130,7 +130,7 @@ def copy_submission_form(request, submission_form_pk=None, notification_type_pk=
             if sf_id and docstash['type_id'] == notification_type_pk:
                 sf = SubmissionForm.objects.get(id=sf_id)
                 if sf.submission == submission_form.submission:
-                    return redirect('ecs.notifications.views.create_notification',
+                    return redirect('notifications.create_notification',
                         docstash_key=docstash.key,
                         notification_type_pk=notification_type_pk)
 
@@ -160,14 +160,14 @@ def copy_submission_form(request, submission_form_pk=None, notification_type_pk=
     if delete:
         submission_form.submission.delete()
 
-    return redirect('ecs.core.views.submissions.create_submission_form',
+    return redirect('core.submission.create_submission_form_by_docstash_key',
         docstash_key=docstash.key)
 
 
 def copy_latest_submission_form(request, submission_pk=None, **kwargs):
     submission = get_object_or_404(Submission, pk=submission_pk)
     kwargs['submission_form_pk'] = submission.newest_submission_form.pk
-    return redirect('ecs.core.views.submissions.copy_submission_form', **kwargs)
+    return redirect(copy_submission_form, **kwargs)
 
 
 def view_submission(request, submission_pk=None):
@@ -479,7 +479,7 @@ def paper_submission_review(request, submission_pk=None):
     task = submission.paper_submission_review_task
     if not task.assigned_to == request.user:
         task.accept(request.user)
-        return redirect('ecs.core.views.submissions.paper_submission_review', submission_pk=submission_pk)
+        return redirect('core.submission.paper_submission_review', submission_pk=submission_pk)
     return readonly_submission_form(request, submission_form=submission.current_submission_form)
 
 
@@ -509,7 +509,7 @@ def biased_board_members(request, submission_pk=None):
 
     if request.method == 'POST' and form.is_valid():
         submission.biased_board_members.add(form.cleaned_data['biased_board_member'])
-        return redirect('ecs.core.views.submissions.biased_board_members',
+        return redirect('core.submission.biased_board_members',
             submission_pk=submission_pk)
     return render(request, 'submissions/biased_board_members.html', {
         'submission': submission,
@@ -522,7 +522,7 @@ def biased_board_members(request, submission_pk=None):
 def remove_biased_board_member(request, submission_pk=None, user_pk=None):
     submission = get_object_or_404(Submission, pk=submission_pk)
     submission.biased_board_members.remove(user_pk)
-    return redirect('ecs.core.views.submissions.biased_board_members',
+    return redirect('core.submission.biased_board_members',
         submission_pk=submission_pk)
 
 
@@ -552,7 +552,7 @@ def drop_checklist_review(request, submission_form_pk=None, checklist_pk=None):
 def checklist_review(request, submission_form_pk=None, blueprint_pk=None):
     submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
     if request.method == 'GET' and not submission_form.is_current:
-        return redirect('ecs.core.views.submissions.checklist_review', submission_form_pk=submission_form.submission.current_submission_form.pk, blueprint_pk=blueprint_pk)
+        return redirect('', submission_form_pk=submission_form.submission.current_submission_form.pk, blueprint_pk=blueprint_pk)
     blueprint = get_object_or_404(ChecklistBlueprint, pk=blueprint_pk)
 
     user = request.user if blueprint.multiple else get_user('root@system.local')
@@ -686,7 +686,7 @@ def upload_document_for_submission(request):
 @with_docstash(group='ecs.core.views.submissions.create_submission_form')
 def delete_document_from_submission(request):
     delete_document(request, int(request.GET['document_pk']))
-    return redirect('ecs.core.views.submissions.upload_document_for_submission',
+    return redirect('core.submission.upload_document_for_submission',
         docstash_key=request.docstash.key)
 
 @with_docstash()
@@ -773,10 +773,10 @@ def create_submission_form(request):
             submission_form.save()
             form.save_m2m()
 
-            submission_form.documents = documents
             for doc in documents:
                 doc.parent_object = submission_form
                 doc.save()
+            submission_form.documents.set(documents)
         
             investigators = formsets.pop('investigator').save(commit=False)
             employees = formsets.pop('investigatoremployee').save(commit=False)
@@ -799,7 +799,7 @@ def create_submission_form(request):
             on_study_submit.send(Submission, submission=submission, form=submission_form, user=request.user)
 
             if notification_type:
-                return redirect('ecs.notifications.views.create_diff_notification',
+                return redirect('notifications.create_diff_notification',
                     submission_form_pk=submission_form.pk,
                     notification_type_pk=notification_type.pk)
 
@@ -828,11 +828,12 @@ def change_submission_presenter(request, submission_pk=None):
         submission = get_object_or_404(Submission, pk=submission_pk, presenter=request.user)
 
     previous_presenter = submission.presenter
-    form = PresenterChangeForm(request.POST or None, instance=submission)
+    form = PresenterChangeForm(request.POST or None)
 
-    if request.method == 'POST' and form.is_valid():
+    valid = form.is_valid()
+    if request.method == 'POST' and valid:
         new_presenter = form.cleaned_data['presenter']
-        submission.presenter = new_presenter
+        submission.presenter_id = new_presenter
         submission.save(update_fields=('presenter',))
         on_presenter_change.send(Submission, 
             submission=submission, 
@@ -841,7 +842,7 @@ def change_submission_presenter(request, submission_pk=None):
             user=request.user,
         )
         if request.user == previous_presenter:
-            return redirect('ecs.dashboard.views.view_dashboard')
+            return redirect('dashboard')
         else:
             return redirect('view_submission', submission_pk=submission.pk)
 
@@ -856,7 +857,7 @@ def change_submission_susar_presenter(request, submission_pk=None):
         submission = get_object_or_404(Submission, pk=submission_pk, susar_presenter=request.user)
 
     previous_susar_presenter = submission.susar_presenter
-    form = SusarPresenterChangeForm(request.POST or None, instance=submission)
+    form = SusarPresenterChangeForm(request.POST or None)
 
     if request.method == 'POST' and form.is_valid():
         new_susar_presenter = form.cleaned_data['susar_presenter']
@@ -869,7 +870,7 @@ def change_submission_susar_presenter(request, submission_pk=None):
             user=request.user,
         )
         if request.user == previous_susar_presenter:
-            return redirect('ecs.dashboard.views.view_dashboard')
+            return redirect('dashboard')
         else:
             return redirect('view_submission', submission_pk=submission.pk)
 
@@ -879,7 +880,7 @@ def change_submission_susar_presenter(request, submission_pk=None):
 @with_docstash(group='ecs.core.views.submissions.create_submission_form')
 def delete_docstash_entry(request):
     request.docstash.delete()
-    return redirect_to_next_url(request, reverse('ecs.dashboard.views.view_dashboard'))
+    return redirect_to_next_url(request, reverse('dashboard'))
 
 
 def export_submission(request, submission_pk):
@@ -1019,7 +1020,7 @@ def xls_export(request):
     messages.info(request,
         _('The XLS export has been started. You will get a message when the file is ready.'))
 
-    return redirect('ecs.core.views.submissions.all_submissions')
+    return redirect('core.submission.all_submissions')
 
 
 @user_flag_required('is_internal')
@@ -1214,7 +1215,7 @@ def catalog(request, year=None):
                 year = timezone.now().year
                 years = [year]
 
-            return redirect('ecs.core.views.submissions.catalog', year=year)
+            return redirect('core.catalog', year=year)
         else:
             year = int(year)
         votes = votes.filter(published_at__year=int(year))
@@ -1292,7 +1293,7 @@ def grant_temporary_access(request, submission_pk=None):
         temp_auth = form.save(commit=False)
         temp_auth.submission = submission
         temp_auth.save()
-    return redirect(reverse('ecs.core.views.submissions.view_submission', kwargs={'submission_pk': submission_pk}) + '#involved_parties_tab')
+    return redirect(reverse('view_submission', kwargs={'submission_pk': submission_pk}) + '#involved_parties_tab')
 
 
 @user_flag_required('is_executive')
@@ -1300,7 +1301,8 @@ def revoke_temporary_access(request, submission_pk=None, temp_auth_pk=None):
     temp_auth = get_object_or_404(TemporaryAuthorization, pk=temp_auth_pk)
     temp_auth.end = timezone.now()
     temp_auth.save()
-    return redirect(reverse('ecs.core.views.submissions.view_submission', kwargs={'submission_pk': submission_pk}) + '#involved_parties_tab')
+    return redirect(reverse('view_submission', kwargs={'submission_pk': submission_pk}) + '#involved_parties_tab')
+
 
 @user_flag_required('is_executive')
 def toggle_mpg(request, submission_form_pk=None):

@@ -74,6 +74,7 @@ def crawler_quirks(ua_str):
 BROWSER_FILTER_RULES = (
     supported_starting('Firefox', '28'),
     supported_starting('Chrome', '29'),
+    supported_starting('ChromiumEdge', '79'),
     android_quirks,
     supported_starting('Safari', '7'),
     supported_starting('Microsoft Internet Explorer', '11'),

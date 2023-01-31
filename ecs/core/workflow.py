@@ -1,9 +1,10 @@
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext as _
+from django.urls import reverse
+from django.utils.translation import gettext as _
 
-from ecs.workflow import Activity, guard, register
+from ecs.workflow.controllers import Activity, guard
+from ecs.workflow import register
 from ecs.workflow.patterns import Generic
 from ecs.users.utils import get_current_user, sudo
 from ecs.core.models import Submission
@@ -124,7 +125,7 @@ class InitialReview(Activity):
         return True
 
     def get_url(self):
-        return reverse('ecs.core.views.submissions.initial_review', kwargs={'submission_pk': self.workflow.data_id})
+        return reverse('core.submission.initial_review', kwargs={'submission_pk': self.workflow.data_id})
 
     def get_choices(self):
         return (
@@ -144,7 +145,7 @@ class Resubmission(Activity):
         model = Submission
 
     def get_url(self):
-        return reverse('ecs.core.views.submissions.copy_latest_submission_form', kwargs={'submission_pk': self.workflow.data_id})
+        return reverse('core.submission.copy_latest_submission_form', kwargs={'submission_pk': self.workflow.data_id})
 
     def get_final_urls(self):
         return super().get_final_urls() + [
@@ -163,7 +164,7 @@ class B2ResubmissionReview(Activity):
         model = Submission
 
     def get_url(self):
-        return reverse('ecs.core.views.submissions.b2_vote_preparation', kwargs={'submission_form_pk': self.workflow.data.newest_submission_form.pk})
+        return reverse('core.submission.b2_vote_preparation', kwargs={'submission_form_pk': self.workflow.data.newest_submission_form.pk})
 
     def receive_token(self, source, trail=(), repeated=False):
         token = super().receive_token(source, trail=trail, repeated=repeated)
@@ -207,7 +208,7 @@ class Categorization(Activity):
         return True
 
     def get_url(self):
-        return reverse('ecs.core.views.submissions.categorization',
+        return reverse('core.submission.categorization',
             kwargs={'submission_pk': self.workflow.data_id})
 
     def is_locked(self):
@@ -240,7 +241,7 @@ class CategorizationReview(Activity):
         return True
 
     def get_url(self):
-        return reverse('ecs.core.views.submissions.categorization_review',
+        return reverse('core.submission.categorization_review',
             kwargs={'submission_pk': self.workflow.data_id})
 
     def get_choices(self):
@@ -283,7 +284,7 @@ class PaperSubmissionReview(Activity):
         model = Submission
 
     def get_url(self):
-        return reverse('ecs.core.views.submissions.paper_submission_review', kwargs={'submission_pk': self.workflow.data_id})
+        return reverse('core.submission.paper_submission_review', kwargs={'submission_pk': self.workflow.data_id})
 
 
 class ChecklistReview(Activity):
@@ -311,7 +312,7 @@ class ChecklistReview(Activity):
     def get_url(self):
         blueprint_id = self.node.data_id
         submission_form_id = self.workflow.data.current_submission_form_id
-        return reverse('ecs.core.views.submissions.checklist_review', kwargs={'submission_form_pk': submission_form_id, 'blueprint_pk': blueprint_id})
+        return reverse('core.submission.checklist_review', kwargs={'submission_form_pk': submission_form_id, 'blueprint_pk': blueprint_id})
 
     def pre_perform(self, choice):
         blueprint = self.node.data
@@ -337,7 +338,7 @@ class VotePreparation(Activity):
         model = Submission
 
     def get_url(self):
-        return reverse('ecs.core.views.submissions.vote_preparation', kwargs={'submission_form_pk': self.workflow.data.current_submission_form_id})
+        return reverse('core.submission.vote_preparation', kwargs={'submission_form_pk': self.workflow.data.current_submission_form_id})
 
 
 ### to be deleted

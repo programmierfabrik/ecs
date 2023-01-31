@@ -1,25 +1,25 @@
-from django.conf.urls import url
+from django.urls import include, path, re_path
 
 from ecs.users import views
 
 
 urlpatterns = (
-    url(r'^accounts/login/$', views.login),
-    url(r'^accounts/logout/$', views.logout),
-    url(r'^accounts/register/$', views.register),
+    path('accounts/login/', views.login, name='users.login'),
+    path('accounts/logout/', views.logout),
+    path('accounts/register/', views.register, name='users.register'),
 
-    url(r'^activate/(?P<token>.+)$', views.activate),
-    url(r'^profile/$', views.profile),
-    url(r'^profile/edit/$', views.edit_profile),
-    url(r'^profile/change-password/$', views.change_password),
-    url(r'^request-password-reset/$', views.request_password_reset),
-    url(r'^password-reset/(?P<token>.+)$', views.do_password_reset),
-    url(r'^users/(?P<user_pk>\d+)/indisposition/$', views.indisposition),
-    url(r'^users/notify_return/$', views.notify_return),
-    url(r'^users/(?P<user_pk>\d+)/toggle_active/$', views.toggle_active),
-    url(r'^users/(?P<user_pk>\d+)/details/', views.details),
-    url(r'^users/administration/$', views.administration),
-    url(r'^users/invite/$', views.invite),
-    url(r'^users/login_history/$', views.login_history),
-    url(r'^accept_invitation/(?P<invitation_uuid>[\da-zA-Z]{32})/$', views.accept_invitation),
+    path('activate/<str:token>', views.activate, name='users.activate'),
+    path('profile/', views.profile, name='users.profile'),
+    path('profile/edit/', views.edit_profile, name='users.edit_profile'),
+    path('profile/change-password/', views.change_password, name='users.change_password'),
+    path('request-password-reset/', views.request_password_reset, name='users.request_password_reset'),
+    path('password-reset/<str:token>', views.do_password_reset, name='users.do_password_reset'),
+    path('users/<int:user_pk>/indisposition/', views.indisposition, name='users.indisposition'),
+    path('users/notify_return/', views.notify_return, name='users.notify_return'),
+    path('users/<int:user_pk>/toggle_active/', views.toggle_active, name='users.toggle_active'),
+    path('users/<int:user_pk>/details/', views.details, name='users.details'),
+    path('users/administration/', views.administration, name='users.administration'),
+    path('users/invite/', views.invite, name='users.invite'),
+    path('users/login_history/', views.login_history, name='users.login_history'),
+    re_path(r'^accept_invitation/(?P<invitation_uuid>[\da-zA-Z]{32})/$', views.accept_invitation, name='users.accept_invitation'),
 )

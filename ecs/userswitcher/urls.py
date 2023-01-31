@@ -1,8 +1,8 @@
-from django.conf.urls import url
+from django.urls import path
 
 from ecs.userswitcher import views
 
 
 urlpatterns = (
-    url(r'^switch/$', views.switch),
+    path('switch/', views.switch, name='userswitcher.switch'),
 )

@@ -1,10 +1,11 @@
 from uuid import uuid4
 
+import reversion
 from django.http import HttpResponse
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.template import loader
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.db.models import Min, Q, Prefetch
 
 from ecs.utils.viewutils import render_html, redirect_to_next_url
@@ -22,7 +23,7 @@ from ecs.notifications.forms import (
     AmendmentAnswerForm,
 )
 from ecs.documents.views import handle_download, upload_document, delete_document
-from ecs.users.utils import user_group_required
+from ecs.users.utils import user_group_required, get_current_user
 from ecs.tasks.utils import task_required, with_task_management
 from ecs.signature.views import init_batch_sign
 
@@ -159,7 +160,7 @@ def create_diff_notification(request, submission_form_pk=None, notification_type
         }
     )
 
-    return redirect('ecs.notifications.views.create_notification',
+    return redirect('notifications.create_notification',
         docstash_key=docstash.key, notification_type_pk=notification_type.pk)
 
 
@@ -169,7 +170,7 @@ def delete_docstash_entry(request):
         if sf.is_notification_update:
             sf.delete()
     request.docstash.delete()
-    return redirect_to_next_url(request, reverse('ecs.dashboard.views.view_dashboard'))
+    return redirect_to_next_url(request, reverse('dashboard'))
 
 @with_docstash(group='ecs.notifications.views.create_notification')
 def upload_document_for_notification(request):
@@ -178,7 +179,7 @@ def upload_document_for_notification(request):
 @with_docstash(group='ecs.notifications.views.create_notification')
 def delete_document_from_notification(request):
     delete_document(request, int(request.GET['document_pk']))
-    return redirect('ecs.notifications.views.upload_document_for_notification',
+    return redirect('notifications.upload_document_for_notification',
         docstash_key=request.docstash.key)
 
 @with_docstash()
@@ -212,12 +213,12 @@ def create_notification(request, notification_type_pk=None):
                 setattr(notification, key, value)
             notification.save()
             form.save_m2m()
-            notification.documents = Document.objects.filter(pk__in=request.docstash.get('document_pks', []))
+            notification.documents.set(Document.objects.filter(pk__in=request.docstash.get('document_pks', [])))
             notification.save() # send another post_save signal (required to properly start the workflow)
             request.docstash.delete()
             
             notification.render_pdf_document()
-            return redirect('ecs.notifications.views.view_notification',
+            return redirect('notifications.view_notification',
                 notification_pk=notification.pk)
 
     return render(request, 'notifications/form.html', {
@@ -246,14 +247,16 @@ def edit_notification_answer(request, notification_pk=None):
     
     form = form_cls(request.POST or None, instance=answer, **kwargs)
     if form.is_valid():
-        answer = form.save(commit=False)
-        answer.notification = notification
-        answer.save()
-        if hasattr(notification, 'amendmentnotification'):
-            an = notification.amendmentnotification
-            an.is_substantial = form.cleaned_data.get('is_substantial', False)
-            an.needs_signature = form.cleaned_data.get('needs_signature', False)
-            an.save()
+        with reversion.create_revision():
+            reversion.set_user(get_current_user())
+            answer = form.save(commit=False)
+            answer.notification = notification
+            answer.save()
+            if hasattr(notification, 'amendmentnotification'):
+                an = notification.amendmentnotification
+                an.is_substantial = form.cleaned_data.get('is_substantial', False)
+                an.needs_signature = form.cleaned_data.get('needs_signature', False)
+                an.save()
 
     response = render(request, 'notifications/answers/form.html', {
         'notification': notification,
@@ -308,4 +311,4 @@ def sign_success(request, document=None):
     answer.signed_at = document.date
     answer.pdf_document = document
     answer.save()
-    return reverse('ecs.notifications.views.view_notification', kwargs={'notification_pk': answer.notification.pk})
+    return reverse('notifications.view_notification', kwargs={'notification_pk': answer.notification.pk})

@@ -15,12 +15,12 @@ class DocStash(models.Model):
     key = models.UUIDField(default=uuid.uuid4, primary_key=True)
     group = models.CharField(max_length=120, db_index=True, null=True)
     current_version = models.IntegerField(default=-1)
-    owner = models.ForeignKey(User)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     modtime = models.DateTimeField(auto_now=True)
     name = models.TextField(blank=True, null=True)
     value = JSONField(null=False)
     
-    content_type = models.ForeignKey(ContentType, null=True)
+    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(null=True)
     parent_object = GenericForeignKey('content_type', 'object_id')
 
@@ -61,4 +61,4 @@ class DocStash(models.Model):
                 raise self.ConcurrentModification()
 
         self.current_version += 1
-        return super().save(**kwargs)
+        return super(DocStash, self).save(**kwargs)

@@ -31,9 +31,9 @@ class NodeType(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
     category = models.PositiveIntegerField(choices=CATEGORIES, db_index=True)
-    content_type = models.ForeignKey(ContentType, null=True, related_name='workflow_node_types')
+    content_type = models.ForeignKey(ContentType, null=True, related_name='workflow_node_types', on_delete=models.CASCADE)
     implementation = models.CharField(max_length=200)
-    data_type = models.ForeignKey(ContentType, null=True)
+    data_type = models.ForeignKey(ContentType, null=True, on_delete=models.CASCADE)
     
     objects = NodeTypeManager()
     
@@ -131,7 +131,7 @@ class Graph(NodeType):
 
 class Guard(models.Model):
     name = models.CharField(max_length=100)
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     implementation = models.CharField(max_length=200)
     
     class Meta:
@@ -140,10 +140,10 @@ class Guard(models.Model):
 
 class Node(models.Model):
     name = models.CharField(max_length=100, blank=True)
-    graph = models.ForeignKey(Graph, related_name='nodes')
-    node_type = models.ForeignKey(NodeType)
+    graph = models.ForeignKey(Graph, related_name='nodes', on_delete=models.CASCADE)
+    node_type = models.ForeignKey(NodeType, on_delete=models.CASCADE)
     data_id = models.PositiveIntegerField(null=True)
-    data_ct = models.ForeignKey(ContentType, null=True)
+    data_ct = models.ForeignKey(ContentType, null=True, on_delete=models.CASCADE)
     data = GenericForeignKey(ct_field='data_ct', fk_field='data_id')
     outputs = models.ManyToManyField('self', related_name='inputs', through='Edge', symmetrical=False)
     is_start_node = models.BooleanField(default=False)
@@ -174,10 +174,10 @@ class Node(models.Model):
 
 
 class Edge(models.Model):
-    from_node = models.ForeignKey(Node, related_name='edges', null=True)
-    to_node = models.ForeignKey(Node, related_name='incoming_edges', null=True)
+    from_node = models.ForeignKey(Node, related_name='edges', null=True, on_delete=models.CASCADE)
+    to_node = models.ForeignKey(Node, related_name='incoming_edges', null=True, on_delete=models.CASCADE)
     deadline = models.BooleanField(default=False)
-    guard = models.ForeignKey(Guard, related_name='nodes', null=True)
+    guard = models.ForeignKey(Guard, related_name='nodes', null=True, on_delete=models.CASCADE)
     negated = models.BooleanField(default=False)
     
     def bind(self, workflow):
@@ -198,12 +198,12 @@ class WorkflowManager(models.Manager):
         return workflow
 
 class Workflow(models.Model):
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     data_id = models.PositiveIntegerField()
     data = GenericForeignKey(ct_field='content_type', fk_field='data_id')
-    graph = models.ForeignKey(Graph, related_name='workflows')
+    graph = models.ForeignKey(Graph, related_name='workflows', on_delete=models.CASCADE)
     is_finished = models.BooleanField(default=False)
-    parent = models.ForeignKey('workflow.Token', null=True, related_name='parent_workflow')
+    parent = models.ForeignKey('workflow.Token', null=True, related_name='parent_workflow', on_delete=models.CASCADE)
     
     objects = WorkflowManager()
     
@@ -226,16 +226,16 @@ class Workflow(models.Model):
         
 
 class Token(models.Model):
-    workflow = models.ForeignKey(Workflow, related_name='tokens')
-    node = models.ForeignKey(Node, related_name='tokens')
+    workflow = models.ForeignKey(Workflow, related_name='tokens', on_delete=models.CASCADE)
+    node = models.ForeignKey(Node, related_name='tokens', on_delete=models.CASCADE)
     trail = models.ManyToManyField('self', related_name='future', symmetrical=False)
-    source = models.ForeignKey(Node, related_name='sent_tokens', null=True) # denormalized: can be derived from trail
+    source = models.ForeignKey(Node, related_name='sent_tokens', null=True, on_delete=models.CASCADE) # denormalized: can be derived from trail
     deadline = models.DateTimeField(null=True)
     locked = models.BooleanField(default=False)
     repeated = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     consumed_at = models.DateTimeField(null=True, blank=True, default=None)
-    consumed_by = models.ForeignKey(User, null=True, blank=True)
+    consumed_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     
     def consume(self, timestamp=None):
         if self.consumed_at:

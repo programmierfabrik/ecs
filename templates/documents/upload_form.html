@@ -8,9 +8,9 @@
 
     <div>
         {% if doc.doctype.is_downloadable or user.profile.is_internal %}
-            <a href="{% url 'ecs.docstash.views.download_document' docstash_key=request.docstash.key document_pk=doc.pk %}">{% trans "Download" %}</a> |
+            <a href="{% url 'docstash.download_document' docstash_key=request.docstash.key document_pk=doc.pk %}">{% trans "Download" %}</a> |
         {% endif %}
-        <a href="{% url 'ecs.docstash.views.view_document' docstash_key=request.docstash.key document_pk=doc.pk %}" target="_blank">{% trans "View" %}</a> |
+        <a href="{% url 'docstash.view_document' docstash_key=request.docstash.key document_pk=doc.pk %}" target="_blank">{% trans "View" %}</a> |
         <a href="{% block delete_url %}{% endblock %}?document_pk={{ doc.pk }}" class="delete_document">{% trans "Delete" %}</a>
         | <a href="" class="replace_document" data-document-id="{{ doc.pk }}" data-document-type="{{ doc.doctype.pk }}">{% trans "Replace" %}</a>
         <span class="document_display_name" hidden>

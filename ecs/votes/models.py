@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
 from reversion.models import Version
@@ -21,18 +21,18 @@ from ecs.tasks.models import Task
 
 @reversion.register(fields=('result', 'text'))
 class Vote(models.Model):
-    submission_form = models.ForeignKey('core.SubmissionForm', related_name='votes')
-    top = models.OneToOneField('meetings.TimetableEntry', related_name='vote', null=True)
-    upgrade_for = models.OneToOneField('self', null=True, related_name='previous')
+    submission_form = models.ForeignKey('core.SubmissionForm', related_name='votes', on_delete=models.CASCADE)
+    top = models.OneToOneField('meetings.TimetableEntry', related_name='vote', null=True, on_delete=models.CASCADE)
+    upgrade_for = models.OneToOneField('self', null=True, related_name='previous', on_delete=models.CASCADE)
     result = models.CharField(max_length=2, choices=VOTE_RESULT_CHOICES, null=True, verbose_name=_('vote'))
-    executive_review_required = models.NullBooleanField(blank=True)
+    executive_review_required = models.BooleanField(blank=True, null=True)
     text = models.TextField(blank=True, verbose_name=_('comment'))
     is_draft = models.BooleanField(default=False)
     is_final_version = models.BooleanField(default=False)
     is_expired = models.BooleanField(default=False)
     signed_at = models.DateTimeField(null=True)
     published_at = models.DateTimeField(null=True)
-    published_by = models.ForeignKey('auth.User', null=True)
+    published_by = models.ForeignKey('auth.User', null=True, on_delete=models.CASCADE)
     valid_until = models.DateTimeField(null=True)
     changed_after_voting = models.BooleanField(default=False)
     
@@ -68,11 +68,13 @@ class Vote(models.Model):
 
     def publish(self):
         assert self.published_at is None
-        self.published_at = timezone.now()
-        self.published_by = get_current_user()
-        if self.result == '1':
-            self.valid_until = self.published_at + timedelta(days=365)
-        self.save()
+        with reversion.create_revision():
+            reversion.set_user(get_current_user())
+            self.published_at = timezone.now()
+            self.published_by = get_current_user()
+            if self.result == '1':
+                self.valid_until = self.published_at + timedelta(days=365)
+            self.save()
 
         if not self.needs_signature:
             pdf_data = self.render_pdf()
@@ -91,8 +93,10 @@ class Vote(models.Model):
 
     def expire(self):
         assert not self.is_expired
-        self.is_expired = True
-        self.save()
+        with reversion.create_revision():
+            reversion.set_user(get_current_user())
+            self.is_expired = True
+            self.save()
 
         submission = self.get_submission()
         submission.is_expired = True
@@ -102,9 +106,11 @@ class Vote(models.Model):
             task_type__is_dynamic=True).open().mark_deleted()
     
     def extend(self):
-        self.valid_until += timedelta(days=365)
-        self.is_expired = False
-        self.save()
+        with reversion.create_revision():
+            reversion.set_user(get_current_user())
+            self.valid_until += timedelta(days=365)
+            self.is_expired = False
+            self.save()
 
         submission = self.get_submission()
         submission.is_expired = False

@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from ecs.tags.models import Tag
 from ecs.tags.forms import TagForm, TagAssignForm
@@ -23,7 +23,7 @@ def edit(request, pk=None):
     form = TagForm(request.POST or None, instance=instance)
     if request.method == 'POST' and form.is_valid():
         form.save()
-        return redirect('ecs.tags.views.index')
+        return redirect('tags.index')
     return render(request, 'tags/edit.html', {
         'form': form,
     })
@@ -35,8 +35,8 @@ def assign(request, submission_pk=None):
     form = TagAssignForm(request.POST or None, prefix='assign_tags')
     form.fields['tags'].initial = submission.tags.all()
     if request.method == 'POST' and form.is_valid():
-        submission.tags = form.cleaned_data['tags']
-        return redirect('ecs.tags.views.assign', submission_pk=submission_pk)
+        submission.tags.set(form.cleaned_data['tags'])
+        return redirect('tags.assign', submission_pk=submission_pk)
     return render(request, 'tags/assign.html', {
         'submission': submission,
         'form': form,
@@ -49,6 +49,6 @@ def delete(request, pk=None):
     if tag.submissions.exists():
         messages.error(request,
             _('This tag is still used and can\'t be deleted.'))
-        return redirect('ecs.tags.views.edit', pk=pk)
+        return redirect('tags.edit', pk=pk)
     tag.delete()
-    return redirect('ecs.tags.views.index')
+    return redirect('tags.index')

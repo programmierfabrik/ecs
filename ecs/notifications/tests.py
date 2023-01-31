@@ -24,7 +24,7 @@ class NotificationFormTest(LoginTestCase):
         '''
         
         NotificationType.objects.create(name='foo notif')
-        response = self.client.get(reverse('ecs.notifications.views.select_notification_creation_type'))
+        response = self.client.get(reverse('notification.select_notification_creation_type'))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(b'foo notif' in response.content)
         
@@ -43,7 +43,7 @@ class NotificationFormTest(LoginTestCase):
         notification_type = NotificationType.objects.create(name='foo notif')
 
         # GET the form and expect a docstash transactions redirect, then follow this redirect
-        response = self.client.get(reverse('ecs.notifications.views.create_notification', kwargs={'notification_type_pk': notification_type.pk}))
+        response = self.client.get(reverse('notifications.create_notification', kwargs={'notification_type_pk': notification_type.pk}))
         self.assertEqual(response.status_code, 302)
         url = response['Location']
         response = self.client.get(url)
@@ -85,7 +85,7 @@ class NotificationFormTest(LoginTestCase):
         notification_type, _ = NotificationType.objects.get_or_create(name='foo notif')
         notification = Notification.objects.create(type=notification_type)
         submission_form = create_submission_form()
-        response = self.client.get(reverse('ecs.notifications.views.submission_data_for_notification'), {'submission_form': submission_form.pk})
+        response = self.client.get(reverse('notifications.subimssion_data_for_notification'), {'submission_form': submission_form.pk})
         self.assertEqual(response.status_code, 200)
 
     def test_notification_pdf(self):
@@ -95,14 +95,14 @@ class NotificationFormTest(LoginTestCase):
         notification_type, _ = NotificationType.objects.get_or_create(name='foo notif')
         notification = Notification.objects.create(type=notification_type)
         notification.render_pdf_document()
-        response = self.client.get(reverse('ecs.notifications.views.notification_pdf', kwargs={'notification_pk': notification.pk}))
+        response = self.client.get(reverse('notifications.notification_pdf', kwargs={'notification_pk': notification.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertEqual(next(response.streaming_content)[:5], b'%PDF-')
 
     def _setup_POST_url(self):
         notification_type = NotificationType.objects.create(name='foo notif')
-        response = self.client.get(reverse('ecs.notifications.views.create_notification', kwargs={'notification_type_pk': notification_type.pk}))
+        response = self.client.get(reverse('notifications.create_notification', kwargs={'notification_type_pk': notification_type.pk}))
         return response['Location']
         
     def test_document_upload(self):
@@ -131,7 +131,7 @@ class NotificationFormTest(LoginTestCase):
         self.assertEqual(doc.version, '3.1415')
         
         response = self.client.get(
-            reverse('ecs.docstash.views.download_document', kwargs={
+            reverse('docstash.download_document', kwargs={
                 'docstash_key': response.context['request'].docstash.key,
                 'document_pk': doc.pk
             })
@@ -178,7 +178,7 @@ class NotificationFormTest(LoginTestCase):
         sf = create_submission_form(presenter=presenter)
 
         with self.login('test_presenter'):
-            response = self.client.get(reverse('ecs.notifications.views.create_notification', kwargs={'notification_type_pk': nt.pk}))
+            response = self.client.get(reverse('notifications.create_notification', kwargs={'notification_type_pk': nt.pk}))
             url = response['Location'] # docstash redirect
 
             # no vote yet => we cannot select the submission form
@@ -207,7 +207,7 @@ class NotificationFormTest(LoginTestCase):
             notification = self.client.get(response['Location']).context['notification']
         
         def do_review(user, action='complete'):
-            response = self.client.get(reverse('ecs.tasks.views.my_tasks', kwargs={'submission_pk': sf.submission.pk}))
+            response = self.client.get(reverse('tasks.my_tasks', kwargs={'submission_pk': sf.submission.pk}))
             task = response.context['open_tasks'].get(
                 data_id=notification.pk, 
                 content_type=ContentType.objects.get_for_model(ProgressReportNotification),

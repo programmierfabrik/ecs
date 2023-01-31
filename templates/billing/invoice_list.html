@@ -18,7 +18,7 @@
         <ul class="list-group mb-3">
             {% for invoice in invoices.object_list %}
                 <li class="list-group-item d-block">
-                    <a href="{% url 'ecs.billing.views.view_invoice' invoice_pk=invoice.pk %}">
+                    <a href="{% url 'billing.view_invoice' invoice_pk=invoice.pk %}">
                         {% blocktrans with invoice.created_at|date:'d.m.Y' as date %}Invoice of {{ date }}{% endblocktrans %}
                     </a>:
                     {% with invoice.submissions.count as count %}

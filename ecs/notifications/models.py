@@ -2,8 +2,8 @@ from importlib import import_module
 
 from django.conf import settings
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
-from django.utils.translation import ugettext
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext
 from django.template import loader
 from django.utils.text import slugify
 from django.utils import timezone
@@ -12,6 +12,7 @@ from reversion.models import Version
 from reversion import revisions as reversion
 
 from ecs.documents.models import Document
+from ecs.users.utils import get_current_user
 from ecs.utils.viewutils import render_pdf_context
 from ecs.notifications.constants import SAFETY_TYPE_CHOICES
 from ecs.notifications.managers import NotificationManager
@@ -45,15 +46,15 @@ class NotificationType(models.Model):
 
 
 class DiffNotification(models.Model):
-    old_submission_form = models.ForeignKey('core.SubmissionForm', related_name="old_for_notification")
-    new_submission_form = models.ForeignKey('core.SubmissionForm', related_name="new_for_notification")
+    old_submission_form = models.ForeignKey('core.SubmissionForm', related_name="old_for_notification", on_delete=models.CASCADE)
+    new_submission_form = models.ForeignKey('core.SubmissionForm', related_name="new_for_notification", on_delete=models.CASCADE)
     
     class Meta:
         abstract = True
         
     def save(self, **kwargs):
         super().save()
-        self.submission_forms = [self.old_submission_form]
+        self.submission_forms.set([self.old_submission_form])
         self.new_submission_form.is_transient = False
         self.new_submission_form.save(update_fields=('is_transient',))
         
@@ -72,14 +73,14 @@ class DiffNotification(models.Model):
 
 
 class Notification(models.Model):
-    type = models.ForeignKey(NotificationType, null=True, related_name='notifications')
+    type = models.ForeignKey(NotificationType, null=True, related_name='notifications', on_delete=models.CASCADE)
     submission_forms = models.ManyToManyField('core.SubmissionForm', related_name='notifications')
     documents = models.ManyToManyField('documents.Document', related_name='notifications')
-    pdf_document = models.OneToOneField(Document, related_name='_notification', null=True)
+    pdf_document = models.OneToOneField(Document, related_name='_notification', null=True, on_delete=models.CASCADE)
 
     comments = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey('auth.User', null=True)
+    user = models.ForeignKey('auth.User', null=True, on_delete=models.CASCADE)
     
     objects = NotificationManager()
     unfiltered = models.Manager()
@@ -169,7 +170,7 @@ class ProgressReportNotification(ReportNotification):
 class AmendmentNotification(DiffNotification, Notification):
     is_substantial = models.BooleanField(default=False)
     meeting = models.ForeignKey('meetings.Meeting', null=True,
-        related_name='amendments')
+        related_name='amendments', on_delete=models.CASCADE)
     needs_signature = models.BooleanField(default=False)
 
     def schedule_to_meeting(self):
@@ -184,18 +185,18 @@ class SafetyNotification(Notification):
 
 
 class CenterCloseNotification(Notification):
-    investigator = models.ForeignKey('core.Investigator', related_name="closed_by_notification")
+    investigator = models.ForeignKey('core.Investigator', related_name="closed_by_notification", on_delete=models.CASCADE)
     close_date = models.DateField()
 
 
 @reversion.register(fields=('text',))
 class NotificationAnswer(models.Model):
-    notification = models.OneToOneField(Notification, related_name="answer")
+    notification = models.OneToOneField(Notification, related_name="answer", on_delete=models.CASCADE)
     text = models.TextField()
     is_valid = models.BooleanField(default=True)
     is_final_version = models.BooleanField(default=False, verbose_name=_('Proofread'))
     is_rejected = models.BooleanField(default=False, verbose_name=_('rate negative'))
-    pdf_document = models.OneToOneField(Document, related_name='_notification_answer', null=True)
+    pdf_document = models.OneToOneField(Document, related_name='_notification_answer', null=True, on_delete=models.CASCADE)
     signed_at = models.DateTimeField(null=True)
     published_at = models.DateTimeField(null=True)
     
@@ -229,8 +230,10 @@ class NotificationAnswer(models.Model):
     
     def distribute(self):
         from ecs.core.models.submissions import Submission
-        self.published_at = timezone.now()
-        self.save()
+        with reversion.create_revision():
+            reversion.set_user(get_current_user())
+            self.published_at = timezone.now()
+            self.save()
         
         if not self.is_rejected and self.notification.type.includes_diff:
             try:
@@ -253,7 +256,7 @@ class NotificationAnswer(models.Model):
             if finish:
                 submission.finish()
             presenting_parties = submission.current_submission_form.get_presenting_parties()
-            _ = ugettext
+            _ = gettext
             presenting_parties.send_message(
                 _('New Notification Answer'),
                 'notifications/answers/new_message.txt',

@@ -1845,13 +1845,13 @@ msgid "Monocentric MPG studies"
 msgstr "Monozentrische MPG Studien"
 
 msgid "Studies not categorized"
-msgstr "Nicht kategorisierte Studien nach altem ECS"
+msgstr "Nicht kategorisierte Studien nach altem Recht"
 
 msgid "CE certified for exact indications"
 msgstr "Mit CE Kennzeichen innerhalb der Zweckbestimmung"
 
 msgid "CE certified for other indications"
-msgstr "Mit CE Kennzeichen ausserhalb der Zweckbestimmung"
+msgstr "Mit CE Kennzeichen außerhalb der Zweckbestimmung"
 
 msgid "Without CE marking"
 msgstr "Ohne CE-Kennzeichnung"
@@ -3244,3 +3244,6 @@ msgstr "Mit Stand vor Juli 2021"
 
 msgid "date of last modification:"
 msgstr "Datum der letzten Änderung:"
+
+msgid "project_type_non_interventional_study_mpg"
+msgstr "Nicht-interventionelle Studie - nur gem. Medizinprodukterecht"

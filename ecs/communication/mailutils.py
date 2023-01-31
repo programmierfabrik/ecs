@@ -1,6 +1,6 @@
+import html
 import re
 import textwrap
-from html.parser import HTMLParser
 
 from django.conf import settings
 from django.core import mail
@@ -9,7 +9,7 @@ from django.utils.html import strip_tags
 
 
 def html2text(htmltext):
-    text = HTMLParser().unescape(strip_tags(htmltext))
+    text = html.unescape(strip_tags(htmltext))
     text = '\n\n'.join(re.split(r'\s*\n\s*\n\s*', text))
     text = re.sub('\s\s\s+', ' ', text)
     wrapper = textwrap.TextWrapper(
@@ -28,7 +28,7 @@ def create_mail(subject, message, from_email, recipient, message_html=None,
         if not rfc2822_headers or not rfc2822_headers.get('Auto-Submitted', None):
             headers.update({'Auto-Submitted': 'auto-generated'})
         if not rfc2822_headers or not rfc2822_headers.get('Reply-To', None):
-            headers.update({'Reply-To': AdvancedSettings.objects.get(pk=1).default_contact})
+            headers.update({'Reply-To': AdvancedSettings.objects.get(pk=1).default_contact.email})
 
     if rfc2822_headers:
         headers.update(rfc2822_headers)
@@ -72,12 +72,7 @@ def deliver_to_recipient(recipient, subject, message, from_email,
                       message_html, attachments, rfc2822_headers)
     msgid = msg.extra_headers['Message-ID']
 
-    backend = settings.EMAIL_BACKEND
-    if (nofilter or recipient.split('@')[1] in settings.EMAIL_UNFILTERED_DOMAINS or
-            recipient in settings.EMAIL_UNFILTERED_INDIVIDUALS):
-        backend = settings.EMAIL_BACKEND_UNFILTERED
-
-    connection = mail.get_connection(backend=backend)
+    connection = mail.get_connection()
     connection.send_messages([msg])
 
     return (msgid, msg.message(),)

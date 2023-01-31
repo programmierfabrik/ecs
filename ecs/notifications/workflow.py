@@ -1,8 +1,9 @@
-from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext as _
+from django.urls import reverse
+from django.utils.translation import gettext as _
 from django.dispatch import receiver
 
-from ecs.workflow import Activity, guard, register
+from ecs.workflow import register
+from ecs.workflow.controllers import Activity, guard
 from ecs.workflow.patterns import Generic
 from ecs.meetings.signals import on_meeting_start, on_meeting_end
 from ecs.notifications.models import (
@@ -56,7 +57,7 @@ def needs_distribution(wf):
 
 class BaseNotificationReview(Activity):
     def get_url(self):
-        return reverse('ecs.notifications.views.edit_notification_answer',
+        return reverse('notifications.edit_notification_answer',
             kwargs={'notification_pk': self.workflow.data.pk})
 
     def receive_token(self, source, trail=(), repeated=False):
@@ -169,7 +170,7 @@ class SignNotificationAnswer(Activity):
         )
 
     def get_url(self):
-        return reverse('ecs.notifications.views.notification_answer_sign', kwargs={'notification_pk': self.workflow.data.pk})
+        return reverse('notifications.notification_answer_sign', kwargs={'notification_pk': self.workflow.data.pk})
 
     def pre_perform(self, choice):
         answer = self.workflow.data.answer

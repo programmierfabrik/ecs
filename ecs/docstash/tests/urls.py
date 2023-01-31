@@ -1,6 +1,6 @@
 import json
 
-from django.conf.urls import url
+from django.urls import re_path
 from django.http import HttpResponse
 from ecs.docstash.decorators import with_docstash
 
@@ -13,5 +13,5 @@ def simple_post_view(request):
     return HttpResponse(json.dumps(request.docstash.value), content_type='text/json')
 
 urlpatterns = (
-    url(r'^simple_post/(?:(?P<docstash_key>.*)/)?$', simple_post_view),
+    re_path(r'simple_post/(?:(?P<docstash_key>.*)/)?$', simple_post_view),
 )

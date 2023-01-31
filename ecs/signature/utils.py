@@ -6,7 +6,7 @@ import urllib.request, urllib.parse, urllib.error
 from django.conf import settings
 from django.core.cache import cache
 from django.http import Http404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 def _total_seconds(td): # work around python < 2.7
     return float(td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6
@@ -64,13 +64,13 @@ def with_sign_data(data=True, session=False):
 def get_pdfas_url(request, sign_data):
     values = {
         'connector': request.user.profile.signing_connector,
-        'invoke-app-url': request.build_absolute_uri(reverse('ecs.signature.views.sign_receive', kwargs={'pdf_id': sign_data.id})),
+        'invoke-app-url': request.build_absolute_uri(reverse('signature.sign_receive', kwargs={'pdf_id': sign_data.id})),
         'invoke-app-url-target': '_top',
-        'invoke-app-error-url': request.build_absolute_uri(reverse('ecs.signature.views.sign_error', kwargs={'pdf_id': sign_data.id})),
+        'invoke-app-error-url': request.build_absolute_uri(reverse('signature.sign_error', kwargs={'pdf_id': sign_data.id})),
         'locale': 'DE',
         'num-bytes': str(len(sign_data['pdf_data'])),
         'sig_type': 'SIGNATURBLOCK_DE',
-        'pdf-url': request.build_absolute_uri(reverse('ecs.signature.views.sign_send', kwargs={'pdf_id': sign_data.id})),
+        'pdf-url': request.build_absolute_uri(reverse('signature.sign_send', kwargs={'pdf_id': sign_data.id})),
 
         'verify-level': 'intOnly', # Dies bedeutet, dass eine Signaturprüfung durchgeführt wird, allerdings ohne Zertifikatsprüfung.
         'filename': sign_data['document_filename'],

@@ -1,7 +1,7 @@
 import re
 
 from django.template import Library, Node, TemplateSyntaxError
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.core.cache import cache
 from django.conf import settings
 
@@ -42,7 +42,9 @@ def get_field_info(formfield):
 @register.filter
 def form_value(form, fieldname):
     if form.data:
-        return form._raw_value(fieldname)
+        field = form.fields[fieldname]
+        prefix = form.add_prefix(fieldname)
+        return field.widget.value_from_datadict(form.data, form.files, prefix)
     try:
         return form.initial[fieldname]
     except KeyError:
@@ -122,7 +124,7 @@ class BreadcrumbsNode(Node):
 
     def render(self, context):
         user = context['request'].user
-        if not user.is_anonymous():
+        if not user.is_anonymous:
             crumbs_cache_key = 'submission_breadcrumbs-user_{0}'.format(user.pk)
             crumb_pks = cache.get(crumbs_cache_key, [])
             crumbs = list(Submission.objects.filter(pk__in=crumb_pks).only('ec_number'))

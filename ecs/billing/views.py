@@ -4,7 +4,7 @@ from io import BytesIO
 import math
 
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
@@ -151,9 +151,9 @@ def submission_billing(request):
             mimetype='application/vnd.ms-excel', doctype='invoice')
 
         invoice = Invoice.objects.create(document=doc)
-        invoice.submissions = selected_fee + selected_remission
+        invoice.submissions.set(selected_fee + selected_remission)
         
-        return redirect('ecs.billing.views.view_invoice', invoice_pk=invoice.pk)
+        return redirect('billing.view_invoice', invoice_pk=invoice.pk)
 
     return render(request, 'billing/submissions.html', {
         'submissions': unbilled_submissions,
@@ -226,9 +226,9 @@ def external_review_payment(request):
                 checklist=checklist, defaults={'billed_at': doc.date})
 
         payment = ChecklistPayment.objects.create(document=doc)
-        payment.checklists = selected_for_payment
+        payment.checklists.set(selected_for_payment)
 
-        return redirect('ecs.billing.views.view_checklist_payment', payment_pk=payment.pk)
+        return redirect('billing.view_checklist_payment', payment_pk=payment.pk)
 
     return render(request, 'billing/external_review.html', {
         'checklists': checklists,

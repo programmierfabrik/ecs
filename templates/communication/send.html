@@ -97,7 +97,7 @@
                 {% if user.profile.is_internal %}
                     ecs.textarea.toolbarItems.boilerplate(
                         "{{ _('Insert Boilerplate')|escapejs }}",
-                        "{% url 'ecs.boilerplate.views.select_boilerplate' %}"
+                        "{% url 'boilerplate.select_boilerplate' %}"
                     )
                 {% endif %}
             ]);

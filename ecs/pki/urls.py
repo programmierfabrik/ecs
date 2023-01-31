@@ -1,10 +1,10 @@
-from django.conf.urls import url
+from django.urls import path
 
 from ecs.pki import views
 
 
 urlpatterns = (
-    url(r'^pki/certs/new/$', views.create_cert),
-    url(r'^pki/certs/$', views.cert_list),
-    url(r'^pki/certs/(?P<cert_pk>\d+)/revoke/$', views.revoke_cert),
+    path('pki/certs/new/', views.create_cert, name='pki.create_cert'),
+    path('pki/certs/', views.cert_list, name='pki.cert_list'),
+    path('pki/certs/<int:cert_pk>/revoke/', views.revoke_cert, name='pki.revoke_cert'),
 )

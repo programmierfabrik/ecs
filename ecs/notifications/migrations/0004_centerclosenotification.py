@@ -15,8 +15,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='CenterCloseNotification',
             fields=[
-                ('notification_ptr', models.OneToOneField(parent_link=True, to='notifications.Notification', serialize=False, auto_created=True, primary_key=True)),
-                ('investigator', models.ForeignKey(to='core.Investigator', related_name='closed_by_notification')),
+                ('notification_ptr', models.OneToOneField(parent_link=True, to='notifications.Notification', serialize=False, auto_created=True, primary_key=True, on_delete=models.CASCADE)),
+                ('investigator', models.ForeignKey(to='core.Investigator', related_name='closed_by_notification', on_delete=models.CASCADE)),
                 ('close_date', models.DateField()),
             ],
             bases=('notifications.notification',),

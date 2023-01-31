@@ -24,7 +24,7 @@ class RegistrationTest(MailTestCase, WorkflowTestCase):
         # create user workflow
         auth_groups()
 
-        response = self.client.post(reverse('ecs.users.views.register'), {
+        response = self.client.post(reverse('users.register'), {
             'gender': 'm',
             'first_name': 'New',
             'last_name': 'User',
@@ -65,7 +65,7 @@ class PasswordChangeTest(MailTestCase):
         user = create_user('new.user@example.org')
         user.set_password('password')
         user.save()
-        response = self.client.post(reverse('ecs.users.views.request_password_reset'), {
+        response = self.client.post(reverse('users.request_password_reset'), {
             'email': 'new.user@example.org',
         })
         self.assertEqual(response.status_code, 200)
@@ -101,7 +101,7 @@ class PasswordChangeTest(MailTestCase):
         user.save()
         self.client.login(email='foobar@example.com', password='test')
 
-        url = reverse('ecs.users.views.change_password')
+        url = reverse('users.change_password')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -136,8 +136,8 @@ class MiddlewareTest(EcsTestCase):
         c1 = Client()
         c2 = Client()
 
-        login_url = reverse('ecs.users.views.login')
-        dashboard_url = reverse('ecs.dashboard.views.view_dashboard')
+        login_url = reverse('users.login')
+        dashboard_url = reverse('dashboard')
 
         response = c1.post(login_url, {'username': 'testuser@example.com', 'password': '4223'})
         self.assertEqual(response.status_code, 302)

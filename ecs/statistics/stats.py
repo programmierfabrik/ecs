@@ -1,7 +1,7 @@
 from copy import deepcopy
 from collections import OrderedDict
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.db.models import F, Prefetch
 
 from ecs.core.models import (
@@ -144,7 +144,7 @@ def collect_submission_stats_for_year(year):
                 sf.medtech_ce_symbol and sf.medtech_certified_for_other_indications,
             'mpg.no_ce': sf.is_mpg and not sf.medtech_ce_symbol,
             'mpg.also_amg': sf.is_amg and sf.is_mpg,
-            'mpg.not_categorized': not sf.is_new_medtech_law
+            'mpg.not_categorized': sf.is_new_medtech_law is not None and not sf.is_new_medtech_law
         }
 
         for key, value in classification.items():

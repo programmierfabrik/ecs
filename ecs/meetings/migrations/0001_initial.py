@@ -16,8 +16,8 @@ class Migration(migrations.Migration):
             name='AssignedMedicalCategory',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('board_member', models.ForeignKey(related_name='assigned_medical_categories', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('category', models.ForeignKey(to='core.MedicalCategory')),
+                ('board_member', models.ForeignKey(related_name='assigned_medical_categories', blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
+                ('category', models.ForeignKey(to='core.MedicalCategory', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -76,8 +76,8 @@ class Migration(migrations.Migration):
                 ('is_break', models.BooleanField(default=False)),
                 ('optimal_start', models.TimeField(null=True)),
                 ('is_open', models.BooleanField(default=True)),
-                ('meeting', models.ForeignKey(related_name='timetable_entries', to='meetings.Meeting')),
-                ('submission', models.ForeignKey(related_name='timetable_entries', to='core.Submission', null=True)),
+                ('meeting', models.ForeignKey(related_name='timetable_entries', to='meetings.Meeting', on_delete=models.CASCADE)),
+                ('submission', models.ForeignKey(related_name='timetable_entries', to='core.Submission', null=True, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -90,19 +90,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='participation',
             name='entry',
-            field=models.ForeignKey(related_name='participations', to='meetings.TimetableEntry'),
+            field=models.ForeignKey(related_name='participations', to='meetings.TimetableEntry', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='participation',
             name='medical_category',
-            field=models.ForeignKey(related_name='meeting_participations', blank=True, to='core.MedicalCategory', null=True),
+            field=models.ForeignKey(related_name='meeting_participations', blank=True, to='core.MedicalCategory', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='participation',
             name='user',
-            field=models.ForeignKey(related_name='meeting_participations', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='meeting_participations', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -114,19 +114,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='constraint',
             name='meeting',
-            field=models.ForeignKey(related_name='constraints', to='meetings.Meeting'),
+            field=models.ForeignKey(related_name='constraints', to='meetings.Meeting', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='constraint',
             name='user',
-            field=models.ForeignKey(related_name='meeting_constraints', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='meeting_constraints', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='assignedmedicalcategory',
             name='meeting',
-            field=models.ForeignKey(related_name='medical_categories', to='meetings.Meeting'),
+            field=models.ForeignKey(related_name='medical_categories', to='meetings.Meeting', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterUniqueTogether(

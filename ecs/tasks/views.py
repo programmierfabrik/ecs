@@ -2,7 +2,7 @@ import random
 from functools import reduce
 from collections import defaultdict
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q, Prefetch
 from django.http import Http404, QueryDict
 from django.shortcuts import render, redirect, get_object_or_404
@@ -56,10 +56,12 @@ def delete_task(request, submission_pk=None, task_pk=None):
     if task.task_type.is_dynamic and task.created_by and \
         task.created_by != request.user:
         send_delete_message(task, request.user)
-    return redirect('ecs.tasks.views.task_backlog', submission_pk=submission_pk)
+    return redirect('tasks.task_backlog', submission_pk=submission_pk)
 
 
-def my_tasks(request, template='tasks/compact_list.html', submission_pk=None, ignore_task_types=True):
+def my_tasks(request, template=None, submission_pk=None, ignore_task_types=True):
+    if template is None:
+        template = 'tasks/compact_list.html'
     submission = None
     all_tasks = (Task.objects.for_user(request.user).for_widget().open()
         .select_related('task_type__workflow_node')
@@ -346,7 +348,7 @@ def my_tasks(request, template='tasks/compact_list.html', submission_pk=None, ig
     return render(request, template, data)
 
 
-def task_list(request, **kwargs):
+def task_list(request, *args, **kwargs):
     kwargs.setdefault('template', 'tasks/list.html')
     kwargs.setdefault('ignore_task_types', False)
     return my_tasks(request, **kwargs)
@@ -358,7 +360,7 @@ def accept_task(request, task_pk=None, full=False):
     task.accept(request.user)
 
     submission_pk = request.GET.get('submission')
-    view = 'ecs.tasks.views.task_list' if full else 'ecs.tasks.views.my_tasks'
+    view = 'tasks.task_list' if full else 'tasks.my_tasks'
     return redirect_to_next_url(request, reverse(view, kwargs={'submission_pk': submission_pk} if submission_pk else None))
 
 @require_POST
@@ -374,7 +376,7 @@ def accept_tasks(request, full=False):
     for task in tasks:
         task.accept(request.user)
 
-    view = 'ecs.tasks.views.task_list' if full else 'ecs.tasks.views.my_tasks'
+    view = 'tasks.task_list' if full else 'tasks.my_tasks'
     return redirect_to_next_url(request, reverse(view, kwargs={'submission_pk': submission_pk} if submission_pk else None))
 
 @require_POST
@@ -389,7 +391,7 @@ def decline_task(request, task_pk=None, full=False):
     task_declined.send(type(task.node_controller), task=task)
 
     submission_pk = request.GET.get('submission')
-    view = 'ecs.tasks.views.task_list' if full else 'ecs.tasks.views.my_tasks'
+    view = 'tasks.task_list' if full else 'tasks.my_tasks'
     return redirect_to_next_url(request, reverse(view, kwargs={'submission_pk': submission_pk} if submission_pk else None))
 
 @require_POST

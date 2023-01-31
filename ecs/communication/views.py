@@ -1,10 +1,10 @@
 from django.shortcuts import render, get_object_or_404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q, Prefetch
 from django.db.models.expressions import RawSQL
 from django.core.paginator import Paginator, EmptyPage
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from ecs.utils.viewutils import redirect_to_next_url
 from ecs.core.models import Submission
@@ -30,7 +30,7 @@ def new_thread(request, submission_pk=None, to_user_pk=None):
 
     if request.method == 'POST' and form.is_valid():
         thread = send_message(request.user, form.cleaned_data['receiver'], form.cleaned_data['subject'], form.cleaned_data['text'], submission=submission)
-        return redirect_to_next_url(request, reverse('ecs.communication.views.read_thread', kwargs={'thread_pk': thread.pk}))
+        return redirect_to_next_url(request, reverse('communication.read_thread', kwargs={'thread_pk': thread.pk}))
 
     return render(request, 'communication/send.html', {
         'submission': submission,
@@ -76,19 +76,19 @@ def mark_read(request, thread_pk=None):
     thread = get_object_or_404(Thread.objects.by_user(request.user), pk=thread_pk)
     thread.messages.filter(receiver=request.user).update(unread=False)
     return redirect_to_next_url(request,
-        reverse('ecs.communication.views.dashboard_widget'))
+        reverse('communication.dashboard_widget'))
 
 
 def star(request, thread_pk=None):
     thread = get_object_or_404(Thread.objects.by_user(request.user), pk=thread_pk)
     thread.star(request.user)
-    return redirect_to_next_url(request, reverse('ecs.communication.views.dashboard_widget'))
+    return redirect_to_next_url(request, reverse('communication.dashboard_widget'))
 
 
 def unstar(request, thread_pk=None):
     thread = get_object_or_404(Thread.objects.by_user(request.user), pk=thread_pk)
     thread.unstar(request.user)
-    return redirect_to_next_url(request, reverse('ecs.communication.views.dashboard_widget'))
+    return redirect_to_next_url(request, reverse('communication.dashboard_widget'))
 
 
 def dashboard_widget(request):

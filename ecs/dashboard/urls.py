@@ -1,8 +1,8 @@
-from django.conf.urls import url
+from django.urls import path
 
 from ecs.dashboard import views
 
 
 urlpatterns = (
-    url(r'^$', views.view_dashboard),
+    path('', views.view_dashboard, name='dashboard'),
 )

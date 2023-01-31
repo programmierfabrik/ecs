@@ -3,10 +3,10 @@ from collections import defaultdict
 
 from django.http import Http404, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.models import User
 from django.conf import settings
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib import auth
 from django.contrib.auth import views as auth_views
@@ -18,7 +18,7 @@ from django.contrib.sessions.models import Session
 from django.contrib import messages
 from django.contrib.staticfiles.storage import staticfiles_storage
 
-from ecs.utils import forceauth
+from ecs.utils import forceauth, is_ajax
 from ecs.utils.viewutils import render_html
 from ecs.utils.ratelimitcache import ratelimit_post
 from ecs.communication.mailutils import deliver
@@ -29,6 +29,7 @@ from ecs.users.forms import EmailLoginForm, IndispositionForm, SetPasswordForm, 
 from ecs.users.utils import get_user, create_user, user_flag_required, user_group_required
 from ecs.communication.utils import send_system_message_template
 from ecs.utils.browserutils import UA
+from django.template.loader import render_to_string
 
 
 class TimestampedTokenFactory(object):
@@ -53,19 +54,20 @@ _registration_token_factory = TimestampedTokenFactory(
 @forceauth.exempt
 @ratelimit_post(minutes=5, requests=15, key_field='username')
 def login(request, *args, **kwargs):
-    if request.is_ajax():
-        return HttpResponse('<script type="text/javascript">window.location.href="%s";</script>' % reverse('ecs.users.views.login'))
+    if is_ajax(request):
+        return HttpResponse('<script type="text/javascript">window.location.href="%s";</script>' % reverse('users.login'))
 
     ua_str = request.META.get('HTTP_USER_AGENT')
     if ua_str:
         request.ua = UA(ua_str)
         if request.ua.is_unsupported:
-            return redirect(staticfiles_storage.url('help/html5.html'))
+            return redirect('/help/html5.html')
 
     kwargs.setdefault('template_name', 'users/login.html')
     kwargs['authentication_form'] = EmailLoginForm
-    response = auth_views.login(request, *args, **kwargs)
-    if request.user.is_authenticated():
+
+    response = auth_views.LoginView.as_view(**kwargs)(request)
+    if request.user.is_authenticated:
         LoginHistory.objects.create(type='login', user=request.user,
             ip=request.META['REMOTE_ADDR'])
 
@@ -86,8 +88,8 @@ def login(request, *args, **kwargs):
 def logout(request, *args, **kwargs):
     kwargs.setdefault('next_page', '/')
     user_id = getattr(request, 'original_user', request.user).id
-    response = auth_views.logout(request, *args, **kwargs)
-    if not request.user.is_authenticated():
+    response = auth_views.LogoutView.as_view(**kwargs)(request)
+    if not request.user.is_authenticated:
         LoginHistory.objects.create(type='logout', user_id=user_id,
             ip=request.META['REMOTE_ADDR'])
     return response
@@ -108,13 +110,16 @@ def change_password(request):
 @ratelimit_post(minutes=5, requests=15, key_field='email')
 def register(request):
     form = RegistrationForm(request.POST or None)
+    if settings.ECS_DISABLE_REGISTER:
+        form.add_error(None, "Die Registierung für diese Instanz ist ausgeschaltet")
+
     if form.is_valid():
         token = _registration_token_factory.generate_token(form.cleaned_data)
-        activation_url = request.build_absolute_uri(reverse('ecs.users.views.activate', kwargs={'token': token}))
-        htmlmail = str(render_html(request, 'users/registration/activation_email.html', {
+        activation_url = request.build_absolute_uri(reverse('users.activate', kwargs={'token': token}))
+        htmlmail = render_to_string('users/registration/activation_email.html', {
             'activation_url': activation_url,
             'form': form,
-        }))
+        })
         deliver(form.cleaned_data['email'], subject=_('ECS - Registration'), message=None, message_html=htmlmail,
             from_email= settings.DEFAULT_FROM_EMAIL, nofilter=True)
         return render(request, 'users/registration/registration_complete.html', {})
@@ -170,7 +175,7 @@ def request_password_reset(request):
             try:
                 user = get_user(email)
             except User.DoesNotExist:
-                register_url = request.build_absolute_uri(reverse('ecs.users.views.register'))
+                register_url = request.build_absolute_uri(reverse('users.register'))
                 htmlmail = str(render_html(request, 'users/password_reset/register_email.html', {
                     'register_url': register_url,
                     'email': email,
@@ -178,7 +183,7 @@ def request_password_reset(request):
             else:
                 timestamp = (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()
                 token = _password_reset_token_factory.generate_token([email, timestamp])
-                reset_url = request.build_absolute_uri(reverse('ecs.users.views.do_password_reset', kwargs={'token': token}))
+                reset_url = request.build_absolute_uri(reverse('users.do_password_reset', kwargs={'token': token}))
                 htmlmail = str(render_html(request, 'users/password_reset/reset_email.html', {
                     'reset_url': reset_url,
                 }))
@@ -230,7 +235,7 @@ def edit_profile(request):
     
     if form.is_valid():
         form.save()
-        return redirect('ecs.users.views.profile')
+        return redirect('users.profile')
         
     return render(request, 'users/profile_form.html', {
         'form': form,
@@ -245,7 +250,7 @@ def notify_return(request):
     profile = request.user.profile
     profile.is_indisposed = False
     profile.save()
-    return redirect('ecs.users.views.profile')
+    return redirect('users.profile')
 
 
 @user_group_required('EC-Office', 'EC-Executive')
@@ -258,7 +263,7 @@ def indisposition(request, user_pk=None):
         profile = user.profile
         if profile.is_indisposed:
             send_system_message_template(profile.communication_proxy, _('{user} indisposed').format(user=user), 'users/indisposed_proxy.txt', {'user': user})
-        return redirect('ecs.users.views.administration')
+        return redirect('users.administration')
 
     return render(request, 'users/indisposition.html', {
         'profile_user': user,
@@ -276,7 +281,7 @@ def toggle_active(request, user_pk=None):
         user.is_active = True
 
     user.save()
-    return redirect('ecs.users.views.administration')
+    return redirect('users.administration')
 
 
 @user_group_required('EC-Office', 'EC-Executive')
@@ -407,7 +412,7 @@ def invite(request):
         invitation = Invitation.objects.create(user=user)
         subject = 'Erstellung eines Zugangs zum ECS'
         link = request.build_absolute_uri(
-            reverse('ecs.users.views.accept_invitation',
+            reverse('users.accept_invitation',
                 kwargs={'invitation_uuid': invitation.uuid.hex})
         )
         htmlmail = str(render_html(request, 'users/invitation/invitation_email.html', {
@@ -421,7 +426,7 @@ def invite(request):
         if user.groups.filter(name='EC-Signing').exists():
             for u in User.objects.filter(groups__name='EC-Signing'):
                 send_system_message_template(u, _('New Signing User'), 'users/new_signing_user.txt', {'user': user})
-        return redirect('ecs.users.views.details', user_pk=user.pk)
+        return redirect('users.details', user_pk=user.pk)
 
     return render(request, 'users/invitation/invite_user.html', {
         'form': form,
@@ -454,9 +459,9 @@ def accept_invitation(request, invitation_uuid=None):
         invitation.save()
         user = auth.authenticate(email=invitation.user.email, password=form.cleaned_data['new_password1'])
         auth.login(request, user)
-        return redirect('ecs.users.views.edit_profile')
+        return redirect('users.edit_profile')
 
-    return render(request, 'users/invitation/set_password_form.html', {
+    return render(request, 'users/password_reset/reset_form.html', {
         'form': form,
     })
 

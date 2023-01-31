@@ -7,19 +7,67 @@ from urllib.parse import urlparse
 # root dir of project
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-# standard django settings
-##########################
+# import and execute ECS_SETTINGS from environment as python code if they exist
+if os.getenv('ECS_SETTINGS'):
+    exec(os.getenv('ECS_SETTINGS'))
 
-# Default is DEBUG, others may override it later
-DEBUG = True
+# absolute URL prefix w/out trailing slash
+if os.getenv('ECS_DOMAIN'):
+    DOMAIN = os.getenv('ECS_DOMAIN')
+    ABSOLUTE_URL_PREFIX = 'https://{}'.format(DOMAIN)
+else:
+    DOMAIN = "localhost"
+    ABSOLUTE_URL_PREFIX = "http://" + DOMAIN + ":8000"
 
-# database configuration defaults, may get overwritten in local_settings
+# This is used by the EthicsCommission model to identify the system
+ETHICS_COMMISSION_UUID = os.getenv('ECS_COMMISSION_UUID', 'ecececececececececececececececec')
+ECS_REQUIRE_CLIENT_CERTS = os.getenv('ECS_REQUIRE_CLIENT_CERTS', '').lower() == 'true'
+ECS_USERSWITCHER_ENABLED = os.getenv('ECS_USERSWITCHER_ENABLED', 'true').lower() == 'true'
+
+ALLOWED_HOSTS = [DOMAIN]
+
+# Production settings
+if os.getenv('ECS_PROD', 'false').lower() == 'true':
+    PDFAS_SERVICE = ABSOLUTE_URL_PREFIX + '/pdf-as-web/'
+    SECURE_PROXY_SSL = True
+    DEBUG = False
+    SMTPD_ADDRESS = ('0.0.0.0', 25)
+# Default development settings
+else:
+    # PDF Signing will use fake signing if PDFAS_SERVICE is "mock:"
+    PDFAS_SERVICE = 'mock:'
+    DEBUG = True
+    SMTPD_ADDRESS = ('127.0.0.1', 8025)
+
+if os.getenv('ECS_EMAIL_ENABLED', '').lower() == 'true':
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Django keys
+if os.getenv('ECS_SECRET_KEY'):
+    SECRET_KEY = os.getenv('ECS_SECRET_KEY')
+else:
+    SECRET_KEY = 'ptn5xj+85fvd=d4u@i1-($z*otufbvlk%x1vflb&!5k94f$i3w'
+if os.getenv('ECS_REGISTRATION_SECRET'):
+    REGISTRATION_SECRET = os.getenv('ECS_REGISTRATION_SECRET')
+else:
+    REGISTRATION_SECRET = '!brihi7#cxrd^twvj$r=398mdp4neo$xa-rm7b!8w1jfa@7zu_'
+if os.getenv('ECS_PASSWORD_RESET_SECRET'):
+    PASSWORD_RESET_SECRET = os.getenv('ECS_PASSWORD_RESET_SECRET')
+else:
+    PASSWORD_RESET_SECRET = 'j2obdvrb-hm$$x949k*f5gk_2$1x%2etxhd!$+*^qs8$4ra3=a'
+
+ECS_CHANGED = os.getenv('BUILD_TIME', 'unknown')
+ECS_DISABLE_REGISTER = os.getenv('ECS_DISABLE_REGISTER', '').lower() == 'true'
+
+# Database configuration with development fallback
 DATABASES = {}
 if os.getenv('DATABASE_URL'):
     url = urlparse(os.getenv('DATABASE_URL'))
     DATABASES['default'] = {
         'NAME': url.path[1:] or '',
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'USER': url.username,
         'PASSWORD': url.password,
         'HOST': url.hostname or '',
@@ -28,8 +76,12 @@ if os.getenv('DATABASE_URL'):
     }
 else:
     DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'ecs',
+        'NAME': 'test-ecs',
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'test-ecs',
+        'PASSWORD': 'test-ecs',
+        'HOST': 'localhost',
+        'PORT': '5432',
         'ATOMIC_REQUESTS': True,
     }
 
@@ -57,8 +109,7 @@ LOCALE_PATHS = (os.path.join(PROJECT_DIR, "locale"),)
 # We do not want to expose our internal denglish to the end-user, so disable english
 # in the settings
 LANGUAGES = (
-    #('en', gettext('English')),
-    ('de', gettext('German')),
+    ('de-AT', gettext('German')),
 )
 
 # default site id, some thirdparty libraries expect it to be set
@@ -83,21 +134,6 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 # additional fixture search paths. implicitly used by every app the needs fixtures
 FIXTURE_DIRS = [os.path.join(PROJECT_DIR, "fixtures")]
 
-# cache backend, warning, this is seperate for each process, for production use memcache
-if os.getenv('MEMCACHED_URL'):
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
-            'LOCATION': os.getenv('MEMCACHED_URL').split('//')[1],
-        }
-    }
-else:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        },
-    }
-
 # django.contrib.messages
 MESSAGE_STORE = 'django.contrib.messages.storage.session.SessionStorage'
 
@@ -105,9 +141,6 @@ MESSAGE_STORE = 'django.contrib.messages.storage.session.SessionStorage'
 SESSION_COOKIE_AGE = 28800               # logout after 8 hours of inactivity
 SESSION_SAVE_EVERY_REQUEST = True        # so, every "click" on the pages resets the expiry time
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True   # session cookie expires at close of browser
-
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = 'ptn5xj+85fvd=d4u@i1-($z*otufbvlk%x1vflb&!5k94f$i3w'
 
 TEMPLATES = [
     {
@@ -129,24 +162,24 @@ TEMPLATES = [
     },
 ]
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'ecs.utils.forceauth.ForceAuth',
     'ecs.userswitcher.middleware.UserSwitcherMiddleware',
     'ecs.pki.middleware.ClientCertMiddleware',
     #'ecs.TestMiddleware',
     'ecs.users.middleware.GlobalUserMiddleware',
-    'reversion.middleware.RevisionMiddleware',
     'ecs.tasks.middleware.RelatedTasksMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'ecs.utils.current_user.CurrentUserMiddleware',
 )
 
 INSTALLED_APPS = (
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -159,7 +192,7 @@ INSTALLED_APPS = (
     'compressor',
     'reversion',
     'django_countries',
-    'raven.contrib.django.raven_compat',
+    # 'raven.contrib.django.raven_compat',
     'widget_tweaks',
 
     'ecs.core',
@@ -200,6 +233,15 @@ FILE_UPLOAD_HANDLERS = (
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': os.getenv('ECS_LOG_LEVEL', 'WARNING'),
+    },
     'loggers': {
         'django': {
             'level': 'NOTSET',
@@ -210,20 +252,22 @@ LOGGING = {
             # the root logger.
             'level': 'INFO',
         },
+        'django.template': {
+            'level': 'ERROR'
+        },
+        'django.utils.autoreload': {
+            'level': 'INFO'
+        }
     },
 }
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # ecs settings
 ##############
 
 # used by ecs.pki
-ECS_CA_ROOT = os.path.join(PROJECT_DIR, '..', 'ecs-ca')
-# if set to true:  users of internal groups need a client certificate to logon
-# ECS_REQUIRE_CLIENT_CERTS = false  # default
-
-# this is used by the EthicsCommission model to identify the system
-ETHICS_COMMISSION_UUID = 'ecececececececececececececececec'
+ECS_CA_ROOT = os.path.join(PROJECT_DIR, 'data', 'ca')
 
 # users in these groups receive messages even when they are not related to studies
 ECS_MEETING_AGENDA_RECEIVER_GROUPS = (
@@ -234,7 +278,7 @@ ECS_MEETING_PROTOCOL_RECEIVER_GROUPS = (
     'Omniscient Board Member',
 )
 
-ECS_AMG_MPG_VOTE_RECEIVERS = ('BASG.EKVoten@ages.at',)
+ECS_AMG_MPG_VOTE_RECEIVERS = (os.getenv('ECS_VOTE_RECEIVERS', 'BASG.EKVoten@ages.at'), )
 
 ECS_MEETING_GRACE_PERIOD = timedelta(days=5)
 
@@ -242,41 +286,14 @@ ECS_MEETING_GRACE_PERIOD = timedelta(days=5)
 AUTHORIZATION_CONFIG = 'ecs.auth_conf'
 
 # registration/login settings
-REGISTRATION_SECRET = '!brihi7#cxrd^twvj$r=398mdp4neo$xa-rm7b!8w1jfa@7zu_'
-PASSWORD_RESET_SECRET = 'j2obdvrb-hm$$x949k*f5gk_2$1x%2etxhd!$+*^qs8$4ra3=a'
 LOGIN_REDIRECT_URL = '/dashboard/'
 
-# PDF Signing will use fake signing if PDFAS_SERVICE is "mock:"
-# deployment should use 'https://hostname/pdf-as-web/'
-PDFAS_SERVICE = 'mock:'
-
 # directory where to store zipped submission patientinformation and submission form pdfs
-ECS_DOWNLOAD_CACHE_DIR = os.path.realpath(os.path.join(PROJECT_DIR, "..", "ecs-cache"))
+ECS_DOWNLOAD_CACHE_DIR = os.path.realpath(os.path.join(PROJECT_DIR, 'volatile', 'ecs-cache'))
 ECS_DOWNLOAD_CACHE_MAX_AGE = 30 * 24 * 60 * 60  # 30 days
 
 # Storage Vault settings
-STORAGE_VAULT = {
-    'dir': os.path.join(PROJECT_DIR, '..', 'ecs-storage-vault'),
-    'gpghome' : os.path.join(PROJECT_DIR, '..', 'ecs-gpg'),
-    'encryption_uid': 'ecs_mediaserver',
-    'signature_uid': 'ecs_authority',
-}
-
-# domain to use
-DOMAIN= "localhost"
-
-# absolute URL prefix w/out trailing slash
-ABSOLUTE_URL_PREFIX = "http://"+ DOMAIN+ ":8000"
-
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_BACKEND_UNFILTERED = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_UNFILTERED_DOMAINS = ()  # = ('example.com', )
-EMAIL_UNFILTERED_INDIVIDUALS = ()  # = ('ada@example.org', 'tom@example.com')
-
-# EMAIL_BACKEND_UNFILTERED will be used for
-#  User registration & invitation, password reset, send client certificate,
-#  and all mails to domains in EMAIL_UNFILTERED_DOMAINS and user
-#  listed in EMAIL_UNFILTERED_INDIVIDUALS
+STORAGE_VAULT = os.path.join(PROJECT_DIR, 'data', 'storage-vault')
 
 if os.getenv('SMTP_URL'):
     url = urlparse(os.getenv('SMTP_URL'))
@@ -286,7 +303,7 @@ if os.getenv('SMTP_URL'):
     EMAIL_HOST_PASSWORD = url.password or ''
 
 SMTPD_CONFIG = {
-    'listen_addr': ('127.0.0.1', 8025),
+    'listen_addr': ('0.0.0.0', 8025),
     'domain': DOMAIN,
     'store_exceptions': False,
 }
@@ -309,22 +326,36 @@ CELERY_IMPORTS = (
     'ecs.votes.tasks',
 )
 CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_SERIALIZER = 'pickle' # Maybe?
 CELERY_ACCEPT_CONTENT = (CELERY_TASK_SERIALIZER,)
 # try to propagate exceptions back to caller
-CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_TIMEZONE = 'Europe/Vienna'
 
 if os.getenv('REDIS_URL'):
-    BROKER_URL = os.getenv('REDIS_URL')
-    BROKER_TRANSPORT_OPTIONS = {
+    CELERY_BROKER_URL = os.getenv('REDIS_URL')
+    CELERY_BROKER_TRANSPORT_OPTIONS = {
         'fanout_prefix': True,
         'fanout_patterns': True
     }
-    CELERY_RESULT_BACKEND = BROKER_URL
-    CELERY_ALWAYS_EAGER = False
+    CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+    CELERY_TASK_ALWAYS_EAGER = False
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            # Remove last to characters because of the '/0'
+            'LOCATION': os.getenv('REDIS_URL')[:-2],
+            'KEY_PREFIX': 'django'
+        }
+    }
 else:
     # dont use queueing backend but consume it right away
-    CELERY_ALWAYS_EAGER = True
-
+    CELERY_TASK_ALWAYS_EAGER = True
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        },
+    }
 
 # ### django_compressor ###
 COMPRESS_ENABLED = True
@@ -341,36 +372,14 @@ COMPRESS_PRECOMPILERS = (
 ###################
 #these are local fixes, they default to a sane value if unset
 
-#ECS_USERSWITCHER_ENABLED = True/False
-# default to True, Userswitcher will be shown so user can switch to testusers quickly
-if os.getenv('ECS_USERSWITCHER_ENABLED'):
-    ECS_USERSWITCHER_ENABLED = os.getenv('ECS_USERSWITCHER_ENABLED','').lower() == 'true'
-
-#ECS_DEBUGTOOLBAR = True/False defaults to False if empty
-# loads support for django-debug-toolbar
-
 #ECS_WORDING = True/False defaults to False if empty
 # activates django-rosetta
-
-# import and execute ECS_SETTINGS from environment as python code if they exist
-if os.getenv('ECS_SETTINGS'):
-    exec(os.getenv('ECS_SETTINGS'))
 
 # overwrite settings from local_settings.py if it exists
 try:
     from ecs.local_settings import *
 except ImportError:
     pass
-
-# try to get ECS_VERSION, ECS_GIT_REV from version.py
-if not all([k in locals() for k in ['ECS_VERSION', 'ECS_GIT_REV', 'ECS_GIT_BRANCH']]):
-    try:
-        from ecs.version import ECS_VERSION, ECS_GIT_REV, ECS_GIT_BRANCH, ECS_CHANGED
-    except ImportError:
-        ECS_VERSION = 'unknown'
-        ECS_GIT_BRANCH = 'unknown'
-        ECS_GIT_REV = 'badbadbadbadbadbadbadbadbadbadbadbadbad0'
-        ECS_CHANGED = 'unknown'
 
 DEFAULT_FROM_EMAIL = SERVER_EMAIL = 'noreply@{}'.format(DOMAIN)
 
@@ -380,38 +389,39 @@ if 'SECURE_PROXY_SSL' in locals() and SECURE_PROXY_SSL:
   SESSION_COOKIE_SECURE = True
   SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# sentry/raven
-if 'SENTRY_DSN' in locals():
-    import raven
-    from raven.transport.threaded_requests import ThreadedRequestsHTTPTransport
-    # if no threading support: from raven.transport.requests import RequestsHTTPTransport
-    RAVEN_CONFIG = {
-        'dsn': SENTRY_DSN,
-        'release': ECS_GIT_REV,
-        'transport': ThreadedRequestsHTTPTransport,
-        'site': DOMAIN,
-    }
-    SENTRY_CLIENT = 'ecs.utils.ravenutils.DjangoClient'
+# sentry
+if os.getenv('ECS_SENTRY_DSN', '') != '':
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
 
-# user switcher
-if 'ECS_USERSWITCHER_ENABLED' not in locals():
-    ECS_USERSWITCHER_ENABLED = True
+    sentry_sdk.init(
+        dsn=os.getenv('ECS_SENTRY_DSN'),
+        integrations=[DjangoIntegration()],
+
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        # We recommend adjusting this value in production,
+        traces_sample_rate=0,
+        send_default_pii=True,
+
+        # By default the SDK will try to use the SENTRY_RELEASE
+        # environment variable, or infer a git commit
+        # SHA as release, however you may want to set
+        # something more human-readable.
+        # release="myapp@1.0.0",
+    )
+
 
 if not ECS_USERSWITCHER_ENABLED:
-    MIDDLEWARE_CLASSES = tuple(item for item in MIDDLEWARE_CLASSES if item != 'ecs.userswitcher.middleware.UserSwitcherMiddleware')
+    MIDDLEWARE = tuple(item for item in MIDDLEWARE if item != 'ecs.userswitcher.middleware.UserSwitcherMiddleware')
 
 # django rosetta activation
 if 'ECS_WORDING' in locals() and ECS_WORDING:
     INSTALLED_APPS +=('rosetta',) # anywhere
 
-# django-debug-toolbar activation
-if 'ECS_DEBUGTOOLBAR' in locals() and ECS_DEBUGTOOLBAR:
-    INSTALLED_APPS += ('debug_toolbar',)
-    INTERNAL_IPS = ('127.0.0.1',)
-
 # hack some settings for test and runserver
 if 'test' in sys.argv:
-    CELERY_ALWAYS_EAGER = True
+    CELERY_TASK_ALWAYS_EAGER = True
     INSTALLED_APPS += ('ecs.workflow.tests',)
 
 if 'runserver' in sys.argv:

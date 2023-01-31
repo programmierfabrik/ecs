@@ -30,11 +30,9 @@ import os
 
 from django.conf import settings
 
-from ecs.utils import gpgutils
-
 
 def getVault():
-    return StorageVault(settings.STORAGE_VAULT['dir'])
+    return StorageVault(settings.STORAGE_VAULT)
 
 
 class StorageVault(object):
@@ -56,20 +54,12 @@ class StorageVault(object):
         assert not os.path.exists(path)
         os.makedirs(os.path.dirname(path), exist_ok=True)
 
-        gpgutils.encrypt_sign(
-            f, path,
-            settings.STORAGE_VAULT['gpghome'],
-            settings.STORAGE_VAULT['encryption_uid'],
-            settings.STORAGE_VAULT['signature_uid']
-        )
+        with open(path, 'wb') as file:
+            file.write(f.read())
 
     def __getitem__(self, identifier):
-        return gpgutils.decrypt_verify(
-            self._gen_path(identifier),
-            settings.STORAGE_VAULT['gpghome'],
-            settings.STORAGE_VAULT['encryption_uid'],
-            settings.STORAGE_VAULT['signature_uid']
-        )
+        path = self._gen_path(identifier)
+        return open(path, 'rb')
 
     def __delitem__(self, identifier):
         os.remove(self._gen_path(identifier))

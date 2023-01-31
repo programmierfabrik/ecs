@@ -3,7 +3,7 @@
 <h2>{% trans 'Submissions' %}</h2>
 
 {% if meeting.documents_zip %}
-    <a class="btn btn-outline-primary" href="{% url 'ecs.meetings.views.download_zipped_documents' meeting_pk=meeting.pk %}">
+    <a class="btn btn-outline-primary" href="{% url 'meetings.download_zipped_documents_by_meeting_pk' meeting_pk=meeting.pk %}">
         {% trans 'Download all documents for this meeting (zip)' %}
         <div class="text-muted">
             {% blocktrans trimmed with date=meeting.documents_zip.date|date:'d.m.Y' time=meeting.documents_zip.date|date:'H:i' %}
@@ -38,13 +38,13 @@
                     </span>
                 {% endif %}
 
-                {% url 'ecs.meetings.views.download_zipped_documents' meeting_pk=meeting.pk submission_pk=top.submission.pk as zip_url %}
+                {% url 'meetings.download_zipped_documents' meeting_pk=meeting.pk submission_pk=top.submission.pk as zip_url %}
                 <a class="ml-3" href="{{ zip_url }}" title="{% trans 'Download documents (zip)' %}">
                     <span class="fa fa-download"></span>
                 </a>
 
                 {% if top.submission.is_accessible %}
-                    {% url 'ecs.scratchpad.views.popup' as scratchpad_url %}
+                    {% url 'scratchpad.popup' as scratchpad_url %}
                     <a class="ml-3 scratchpad" href="{{ scratchpad_url }}?submission={{ top.submission.pk }}" title="{% trans 'Scratchpad' %}">
                         <span class="fa fa-sticky-note"></span>
                     </a>
@@ -79,8 +79,8 @@
                     {% with doc=top.submission.current_submission_form.pdf_document %}
                         <dt class="col-md-3">{{ doc.doctype }}</dt>
                         <dd class="col-md-9">
-                            {% url 'ecs.meetings.views.download_document' meeting_pk=meeting.pk document_pk=doc.pk as download_url %}
-                            {% url 'ecs.meetings.views.view_document' meeting_pk=meeting.pk document_pk=doc.pk as view_url %}
+                            {% url 'meetings.download_document' meeting_pk=meeting.pk document_pk=doc.pk as download_url %}
+                            {% url 'meetings.view_document' meeting_pk=meeting.pk document_pk=doc.pk as view_url %}
                             <a href="{{ view_url }}" target="_blank">
                                 {{ doc.name }}
                             </a>
@@ -97,8 +97,8 @@
                         <dt class="col-md-3">{{ document.grouper }}</dt>
                         <dd class="col-md-9">
                             {% for doc in document.list %}
-                                {% url 'ecs.meetings.views.download_document' meeting_pk=meeting.pk document_pk=doc.pk as download_url %}
-                                {% url 'ecs.meetings.views.view_document' meeting_pk=meeting.pk document_pk=doc.pk as view_url %}
+                                {% url 'meetings.download_document' meeting_pk=meeting.pk document_pk=doc.pk as download_url %}
+                                {% url 'meetings.view_document' meeting_pk=meeting.pk document_pk=doc.pk as view_url %}
                                 <a href="{{ view_url }}" target="_blank">
                                     {{ doc.name }}
                                 </a>

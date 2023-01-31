@@ -24,12 +24,12 @@
         <li class="list-group-item d-block">
             {% if submission|is_docstash %}
                 {% with submission as docstash %}
-                    <a class="delete_docstash btn btn-outline-danger float-right" href="{% url 'ecs.core.views.submissions.delete_docstash_entry' docstash_key=docstash.key %}?next={{ request.path|urlencode }}">
+                    <a class="delete_docstash btn btn-outline-danger float-right" href="{% url 'core.submission.delete_docstash_entry' docstash_key=docstash.key %}?next={{ request.path|urlencode }}">
                         {% trans 'Delete' %}
                     </a>
                     <h5 class="font-weight-normal">
                         <span class="fa fa-wrench text-info"></span>
-                        <a href="{% url 'ecs.core.views.submissions.create_submission_form' docstash_key=docstash.key %}">
+                        <a href="{% url 'core.submission.create_submission_form_by_docstash_key' docstash_key=docstash.key %}">
                             {% if docstash.value.notification_type %}
                                 <strong>{{ docstash.value.notification_type }}</strong> für
                             {% endif %}
@@ -67,7 +67,7 @@
                         <strong>{% trans "Meetings" %}:</strong>
                         {% for meeting in submission.meetings.all %}
                             {% if user.profile.is_internal %}
-                                <a href="{% url 'ecs.meetings.views.meeting_details' meeting_pk=meeting.pk %}">
+                                <a href="{% url 'meetings.meeting_details' meeting_pk=meeting.pk %}">
                                     {{ meeting.start|date:'d.m.Y' }} ({{ meeting.title }})
                                 </a>
                             {% else %}
@@ -115,7 +115,7 @@
                 {% if matched_document.parent_object == submission or matched_document.parent_object.submission == submission %}
                     <div class="matched_document">
                         {% trans 'Document' %}:
-                        <a href="{% url 'ecs.core.views.submissions.submission_form_pdf_view' submission_form_pk=matched_document.submission_form.pk %}" target="_blank">
+                        <a href="{% url 'core.submission.submission_form_pdf_view' submission_form_pk=matched_document.submission_form.pk %}" target="_blank">
                             {{ matched_document }}
                         </a>
                     </div>

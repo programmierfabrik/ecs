@@ -1,5 +1,5 @@
 {% extends "submissions/base_form.html" %}
-{% load core i18n staticfiles %}
+{% load core i18n static %}
 
 {% block htmltitle %}
     … |
@@ -37,7 +37,7 @@
 {% endblock %}
 
 {% block content %}
-    <form action="" method="post" enctype="multipart/form-data" class="form_main">
+    <form action="" method="post" enctype="multipart/form-data" class="form_main" novalidate>
         {% csrf_token %}
         {{ block.super }}
         <input type="submit" name="validate" value="validate" class="hidden" />
@@ -48,14 +48,14 @@
 {% block section_6_1 %}
     <div class="alert alert-info text-center">
         Bitte beachten Sie die
-        <a href="{% static 'help/index.html' %}">Hinweise in den Hilfeseiten</a>
+        <a href="/help/index.html">Hinweise in den Hilfeseiten</a>
     </div>
     {{ block.super }}
 {% endblock %}
 
 {% block jsbottom %}
     {{ block.super }}
-    <script type="text/javascript"> 
+    <script type="text/javascript">
         $(function(){
             var setup = ecs.setupForms();
 
@@ -213,7 +213,7 @@
                     this.requireField($(requiredFields), require);
                 }
             });
-            
+
             $('#save-button').click(function(ev){
                 ev.preventDefault();
                 ecs.mainForm.save();
@@ -239,7 +239,7 @@
             }
 
             $('.upload_container').load(
-                '{% url 'ecs.core.views.submissions.upload_document_for_submission' docstash_key=request.docstash.key %}');
+                '{% url 'core.submission.upload_document_for_submission' docstash_key=request.docstash.key %}');
 
             {% if valid %}
                 ecs.confirm({

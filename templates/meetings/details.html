@@ -65,18 +65,18 @@
     </div>
     {% if user.profile.is_internal %}
         <div id="open_tasks_tab" class="collapse">
-            <div data-widget-url="{% url 'ecs.meetings.views.open_tasks' meeting_pk=meeting.pk %}"></div>
+            <div data-widget-url="{% url 'meetings.open_tasks' meeting_pk=meeting.pk %}"></div>
         </div>
     {% endif %}
     <div id="submissions_tab" class="container collapse">
-        <div data-widget-url="{% url 'ecs.meetings.views.submission_list' meeting_pk=meeting.pk %}"{% if not meeting.ended %} data-widget-reload-interval="10"{% endif %}></div>
+        <div data-widget-url="{% url 'meetings.submission_list' meeting_pk=meeting.pk %}"{% if not meeting.ended %} data-widget-reload-interval="10"{% endif %}></div>
     </div>
     <div id="notifications_tab" class="container collapse">
-        <div data-widget-url="{% url 'ecs.meetings.views.notification_list' meeting_pk=meeting.pk %}"></div>
+        <div data-widget-url="{% url 'meetings.notification_list' meeting_pk=meeting.pk %}"></div>
     </div>
     {% if user|is_member_of:'EC-Office' and meeting.ended and not meeting.protocol_sent_at %}
         <div id="protocol_tab" class="collapse">
-            <div data-widget-url="{% url 'ecs.meetings.views.edit_protocol' meeting_pk=meeting.pk %}"></div>
+            <div data-widget-url="{% url 'meetings.edit_protocol' meeting_pk=meeting.pk %}"></div>
         </div>
     {% endif %}
 
@@ -85,10 +85,10 @@
             {% include 'meetings/tabs/experts.html' %}
         </div>
         <div id="timetable_tab" class="container collapse">
-            <div data-widget-url="{% url 'ecs.meetings.views.timetable_editor' meeting_pk=meeting.pk %}"></div>
+            <div data-widget-url="{% url 'meetings.timetable_editor' meeting_pk=meeting.pk %}"></div>
         </div>
         <div id="assistant_tab" class="collapse">
-            <div data-widget-url="{% url 'ecs.meetings.views.meeting_assistant' meeting_pk=meeting.pk %}"></div>
+            <div data-widget-url="{% url 'meetings.meeting_assistant' meeting_pk=meeting.pk %}"></div>
         </div>
     {% endif %}
 </div>

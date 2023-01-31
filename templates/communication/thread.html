@@ -6,10 +6,10 @@
 {% block htmltitle %}{{ thread|remote:user }} - "{{ thread.subject }}" | {{ block.super }}{% endblock %}
 {% block headertitle %}
     {% if thread|starred_by:user %}
-        {% url 'ecs.communication.views.unstar' thread_pk=thread.pk as unstar_url %}
+        {% url 'communication.unstar' thread_pk=thread.pk as unstar_url %}
         <a class="fa fa-star text-warning" title="{% trans "Remove star" %}" href="{{ unstar_url }}?next={{ request.path|urlencode }}"></a>
     {% else %}
-        {% url 'ecs.communication.views.star' thread_pk=thread.pk as star_url %}
+        {% url 'communication.star' thread_pk=thread.pk as star_url %}
         <a class="fa fa-star-o text-muted" title="{% trans "Add star" %}" href="{{ star_url }}?next={{ request.path|urlencode }}"></a>
     {% endif %}
     {{ thread|remote:user }} -
@@ -61,7 +61,7 @@
 {% if thread.related_thread %}
 {% if user == thread.related_thread.sender or user == thread.related_thread.receiver %}
     Den betreffenden Nachrichtenstrang finden Sie
-    <a href="{% url 'ecs.communication.views.read_thread' thread_pk=thread.related_thread.pk %}" target="_blank">hier</a>.
+    <a href="{% url 'communication.read_thread' thread_pk=thread.related_thread.pk %}" target="_blank">hier</a>.
 {% endif %}
 {% endif %}
 </div>
@@ -105,7 +105,7 @@
                 {% if user.profile.is_internal %}
                     ecs.textarea.toolbarItems.boilerplate(
                         "{{ _('Insert Boilerplate')|escapejs }}",
-                        "{% url 'ecs.boilerplate.views.select_boilerplate' %}"
+                        "{% url 'boilerplate.select_boilerplate' %}"
                     )
                 {% endif %}
             ]);

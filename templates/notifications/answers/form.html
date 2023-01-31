@@ -8,7 +8,7 @@
 
 {% block content %}
 <div class="notification container">
-    <h2>Antwort auf <a target="_blank" href="{% url 'ecs.notifications.views.view_notification' notification_pk=notification.pk %}">{{ notification }}</a> vom {{ notification.timestamp|date:'d.m.Y' }}</h2>
+    <h2>Antwort auf <a target="_blank" href="{% url 'notifications.view_notification' notification_pk=notification.pk %}">{{ notification }}</a> vom {{ notification.timestamp|date:'d.m.Y' }}</h2>
 
     <p>
     {% block notification_answer_head %}
@@ -45,12 +45,12 @@
                 {% if answer and user.profile.is_internal %}
                     ecs.textarea.toolbarItems.versionHistory(
                         "{{ _('History')|escapejs }} ({{ answer_version }})",
-                        "{% url 'ecs.core.views.fieldhistory.field_history' model_name='notification_answer' pk=answer.pk %}"
+                        "{% url 'core.field_history' model_name='notification_answer' pk=answer.pk %}"
                     ),
                 {% endif %}
                 ecs.textarea.toolbarItems.boilerplate(
                     "{{ _('Insert Boilerplate')|escapejs }}",
-                    "{% url 'ecs.boilerplate.views.select_boilerplate' %}"
+                    "{% url 'boilerplate.select_boilerplate' %}"
                 )
             ]);
         });

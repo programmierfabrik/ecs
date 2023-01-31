@@ -6,10 +6,10 @@
             {{ comment.author }} {% trans 'on the' %}
             {{ comment.timestamp|date:'d.m.Y H:i' }}
 
-            {% url 'ecs.core.views.comments.edit' pk=comment.pk as edit_url %}
+            {% url 'core.comments.edit' pk=comment.pk as edit_url %}
             <a class="fa fa-pencil ml-2 edit" href="{{ edit_url }}"></a>
 
-            {% url 'ecs.core.views.comments.delete' pk=comment.pk as delete_url %}
+            {% url 'core.comments.delete' pk=comment.pk as delete_url %}
             <a class="float-right delete" href="{{ delete_url }}">&times;</a>
         </div>
         <div class="card-block">
@@ -19,10 +19,10 @@
             {% if comment.attachment %}
                 <hr>
                 {% trans 'Attachment' %}:
-                {% url 'ecs.core.views.comments.download_attachment' pk=comment.pk as download_url %}
+                {% url 'core.comments.download_attachment' pk=comment.pk as download_url %}
                 <a href="{{ download_url }}">{{ comment.attachment.name }}</a>
                 {% if comment.attachment.mimetype == 'application/pdf' %}
-                    {% url 'ecs.core.views.comments.view_attachment' pk=comment.pk as view_url %}
+                    {% url 'core.comments.view_attachment' pk=comment.pk as view_url %}
                     | <a href="{{ view_url }}" target="_blank">{% trans 'View' %}</a>
                 {% endif %}
             {% endif %}
@@ -36,7 +36,7 @@
     </div>
 </div>
 
-{% url 'ecs.core.views.comments.edit' submission_pk=submission.pk as create_url %}
+{% url 'core.comments.edit_by_submission_pk' submission_pk=submission.pk as create_url %}
 <a class="btn btn-primary add-comment" href="{{ create_url }}">
     <span class="fa fa-plus"></span>
     {% trans 'Add Comment' %}

@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.forms import SetPasswordForm as DjangoSetPasswordForm
 from django.contrib.auth.forms import PasswordChangeForm as DjangoPasswordChangeForm
 from django.contrib.auth.forms import AuthenticationForm as DjangoAuthenticationForm
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from ecs.users.models import UserProfile
 from ecs.core.models import MedicalCategory
@@ -210,12 +210,13 @@ class UserDetailsForm(forms.ModelForm):
 
     def clean_groups(self):
         groups = self.cleaned_data.get('groups', [])
-        amcs = self.instance.assigned_medical_categories.filter(meeting__ended=None)
-        if amcs.exists() and not 'Specialist' in [g.name for g in groups]:
-            raise forms.ValidationError(
-                _('{} is a specialist in following meetings: {}').format(
-                    self.instance, ', '.join(amc.meeting.title for amc in amcs))
-            )
+        if self.instance.pk is not None:
+            amcs = self.instance.assigned_medical_categories.filter(meeting__ended=None)
+            if amcs.exists() and not 'Specialist' in [g.name for g in groups]:
+                raise forms.ValidationError(
+                    _('{} is a specialist in following meetings: {}').format(
+                        self.instance, ', '.join(amc.meeting.title for amc in amcs))
+                )
         return groups
 
     def clean(self):
@@ -234,7 +235,7 @@ class UserDetailsForm(forms.ModelForm):
 
     def save(self):
         user = super().save()
-        user.medical_categories = self.cleaned_data.get('medical_categories', ())
+        user.medical_categories.set(self.cleaned_data.get('medical_categories', ()))
         profile = user.profile
         profile.gender = self.cleaned_data['gender']
         profile.title = self.cleaned_data['title']
@@ -276,9 +277,9 @@ class InvitationForm(UserDetailsForm):
 
 
 class IndispositionForm(forms.ModelForm):
-    is_indisposed = forms.BooleanField(required=False, label=_('is_indisposed'))
+    is_indisposed = forms.BooleanField(label=_('is_indisposed'), required=False)
     communication_proxy = AutocompleteModelChoiceField(
-        'users', User.objects.all(), required=False, label=_('communication_proxy'))
+        'users', User.objects.all(), required=True, label=_('communication_proxy'))
 
     class Meta:
         model = UserProfile

@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.db.models import Count
 from django.utils.text import slugify
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from ecs.communication.mailutils import deliver
 from ecs.users.utils import user_flag_required
@@ -65,4 +65,4 @@ def create_cert(request):
 def revoke_cert(request, cert_pk=None):
     cert = get_object_or_404(Certificate, pk=cert_pk)
     cert.revoke()
-    return redirect('ecs.pki.views.cert_list')
+    return redirect('pki.cert_list')

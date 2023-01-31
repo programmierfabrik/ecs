@@ -11,7 +11,7 @@ from django.utils.text import slugify
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext
+from django.utils.translation import gettext
 from django.utils import timezone
 
 from ecs.utils.pdfutils import pdf_barcodestamp
@@ -28,7 +28,7 @@ class DocumentType(models.Model):
     is_downloadable = models.BooleanField(default=True)
 
     def __str__(self):
-        return ugettext(self.name)
+        return gettext(self.name)
 
 
 class DocumentManager(models.Manager):
@@ -57,13 +57,13 @@ class Document(models.Model):
 
     # user supplied data
     name = models.CharField(max_length=250)
-    doctype = models.ForeignKey(DocumentType)
+    doctype = models.ForeignKey(DocumentType, on_delete=models.CASCADE)
     version = models.CharField(max_length=250)
     date = models.DateTimeField()
-    replaces_document = models.ForeignKey('Document', null=True, blank=True)
+    replaces_document = models.ForeignKey('Document', null=True, blank=True, on_delete=models.CASCADE)
     
     # relation to a object
-    content_type = models.ForeignKey(ContentType, null=True)
+    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(null=True)
     parent_object = GenericForeignKey('content_type', 'object_id')
     
@@ -118,8 +118,8 @@ def on_document_delete(sender, **kwargs):
 
 
 class DownloadHistory(models.Model):
-    document = models.ForeignKey(Document, db_index=True)
-    user = models.ForeignKey(User)
+    document = models.ForeignKey(Document, db_index=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     downloaded_at = models.DateTimeField(auto_now_add=True)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, db_index=True)
     context = models.CharField(max_length=15)

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext_lazy as _
-from django.utils.translation import ugettext
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext
 
 from ecs.communication.models import Message, Thread
 from ecs.utils.formutils import require_fields
@@ -52,7 +52,7 @@ class SendMessageForm(forms.ModelForm):
         self.submission = submission
 
         receiver_type_choices = [
-            ('ec', '{0} ({1})'.format(ugettext('Ethics Commission'), get_office_user(submission=self.submission))),
+            ('ec', '{0} ({1})'.format(gettext('Ethics Commission'), get_office_user(submission=self.submission))),
         ]
         receiver_type_initial = 'ec'
 

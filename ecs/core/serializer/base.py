@@ -6,6 +6,7 @@ from collections import OrderedDict
 
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
+from django.core.exceptions import FieldDoesNotExist
 from django.utils import timezone
 from django.contrib.postgres.fields import ArrayField
 
@@ -60,6 +61,8 @@ CHANGELOG = (
     ('*', '1.3'),
     ('+', SubmissionForm, 'is_new_medtech_law', False),
     ('*', '1.4'),
+    ('+', SubmissionForm, 'project_type_non_interventional_study_mpg', False),
+    ('*', '1.5'),
 )
 
 class FieldDocs(object):
@@ -226,7 +229,7 @@ class ModelSerializer(object):
             return val, False
         try:
             field = self.model._meta.get_field(fieldname)
-        except models.fields.FieldDoesNotExist:
+        except FieldDoesNotExist:
             field = None
         deferr = False
         if field:
@@ -244,13 +247,13 @@ class ModelSerializer(object):
                     commit=False)
                 deferr = True
             elif isinstance(field, models.ForeignKey):
-                val = load_model_instance(field.rel.to, val, zf, version)
+                val = load_model_instance(field.related_model, val, zf, version)
             elif isinstance(field, GenericRelation):
-                val = self.load_many(field.rel.to, val, zf, version,
+                val = self.load_many(field.related_model, val, zf, version,
                     commit=False)
                 deferr = True
         elif isinstance(val, list):
-            rel_model = getattr(self.model, fieldname).related.related_model
+            rel_model = getattr(self.model, fieldname).rel.related_model
             val = self.load_many(rel_model, val, zf, version, commit=False)
             deferr = True
         return val, deferr
@@ -289,7 +292,10 @@ class ModelSerializer(object):
             for name, val, action in deferred:
                 manager = getattr(obj, name)
                 for item in val:
-                    manager.add(item)
+                    try:
+                        manager.add(item, bulk=False)
+                    except TypeError:
+                        manager.add(item)
         obj.save = _save
         if commit:
             obj.save()
@@ -299,9 +305,9 @@ class ModelSerializer(object):
         try:
             field = self.model._meta.get_field(fieldname)
             if isinstance(field, models.ForeignKey):
-                return _serializers[field.rel.to].docs()
+                return _serializers[field.related_model].docs()
             elif isinstance(field, models.ManyToManyField):
-                spec = _serializers[field.rel.to].docs()
+                spec = _serializers[field.related_model].docs()
                 spec['array'] = True
                 return spec
             elif isinstance(field, models.ManyToOneRel):
@@ -310,7 +316,7 @@ class ModelSerializer(object):
                 return spec
             return FieldDocs(self.model, field)
         except models.FieldDoesNotExist:
-            model = getattr(self.model, fieldname).related.related_model
+            model = getattr(self.model, fieldname).rel.related_model
             spec = _serializers[model].docs()
             spec['array'] = True
             return spec

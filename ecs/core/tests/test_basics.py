@@ -18,12 +18,12 @@ class CoreUrlsTest(LoginTestCase):
     def test_index(self):
         '''Tests if the Dashboard/main-site of the system is accessible.'''
         
-        response = self.client.get(reverse('ecs.dashboard.views.view_dashboard'))
+        response = self.client.get(reverse('dashboard'))
         self.assertEqual(response.status_code, 200)
         
     def test_submission_forms(self):
         '''Tests if the all-submissions view of the system is accessible.'''
         
-        response = self.client.get(reverse('ecs.core.views.submissions.all_submissions'))
+        response = self.client.get(reverse('core.submission.all_submissions'))
         self.assertEqual(response.status_code, 200)
 

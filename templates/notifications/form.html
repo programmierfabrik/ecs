@@ -17,9 +17,9 @@
 {% block content %}
     <div id="tabs_notification" class="collapse">
         <ul class="nav nav-tabs flex-wrap mb-3 tab_headers">
-            {% for tab, fieldsets in tabs %}
+            {% for tab in tabs %}
                 <li class="nav-item">
-                    <a class="nav-link" href="#tabs-{{ forloop.counter }}">{{ tab }}</a>
+                    <a class="nav-link" href="#tabs-{{ forloop.counter }}">{{ tab.label }}</a>
                 </li>
             {% endfor %}
             <li class="nav-item ml-auto">
@@ -125,7 +125,7 @@
 
             function loadSubmissionFormData(pks) {
                 submissionDataDisplay.load(
-                    '{% url 'ecs.notifications.views.submission_data_for_notification' %}',
+                    '{% url 'notifications.subimssion_data_for_notification' %}',
                     'submission_form=' + pks.join('&submission_form=')
                 );
             }
@@ -145,7 +145,7 @@
                     investigatorSelect.html('');
                     if (pk) {
                         investigatorSelect.load(
-                            '{% url 'ecs.notifications.views.investigators_for_notification' %}',
+                            '{% url 'notification.investigators_for_notification' %}',
                             'submission_form=' + pk,
                             function() {
                                 investigatorSelect.val(investigator_pk);
@@ -165,7 +165,7 @@
             });
 
             $('.upload_container').load(
-                '{% url 'ecs.notifications.views.upload_document_for_notification' docstash_key=request.docstash.key %}');
+                '{% url 'notifications.upload_document_for_notification' docstash_key=request.docstash.key %}');
 
             if ($('#id_study_started').length) {
                 new ecs.FormFieldController({

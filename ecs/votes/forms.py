@@ -1,5 +1,6 @@
+import reversion
 from django import forms
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from ecs.core.forms.utils import ReadonlyFormMixin
 from ecs.votes.models import Vote
@@ -72,7 +73,9 @@ class VoteReviewForm(ReadonlyFormMixin, forms.ModelForm):
                 instance.is_final_version = False
                 instance.changed_after_voting = True
         if commit:
-            instance.save()
+            with reversion.create_revision():
+                reversion.set_user(get_current_user())
+                instance.save()
 
 
 class VotePreparationForm(forms.ModelForm):

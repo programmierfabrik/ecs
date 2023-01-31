@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='investigator',
             name='ethics_commission',
-            field=models.ForeignKey(to='core.EthicsCommission', related_name='investigators'),
+            field=models.ForeignKey(to='core.EthicsCommission', related_name='investigators', on_delete=models.CASCADE),
         ),
     ]

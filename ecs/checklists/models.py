@@ -1,13 +1,14 @@
+import threading
 from uuid import uuid4
 
 from django.db import models
 from django.db.models import Q, F
-from django.utils.translation import ugettext as _, ugettext_lazy
+from django.utils.translation import gettext as _, gettext_lazy
 from django.utils.text import slugify
 
 from reversion import revisions as reversion
 
-from ecs.authorization import AuthorizationManager
+from ecs.authorization.managers import AuthorizationManager
 from ecs.documents.models import Document
 from ecs.utils.viewutils import render_pdf_context
 from ecs.users.utils import get_current_user
@@ -22,7 +23,7 @@ class ChecklistBlueprint(models.Model):
         return _(self.name)
 
 class ChecklistQuestion(models.Model):
-    blueprint = models.ForeignKey(ChecklistBlueprint, related_name='questions')
+    blueprint = models.ForeignKey(ChecklistBlueprint, related_name='questions', on_delete=models.CASCADE)
     number = models.CharField(max_length=5, db_index=True)
     index = models.IntegerField(db_index=True)
     text = models.CharField(max_length=300)
@@ -40,20 +41,20 @@ class ChecklistQuestion(models.Model):
 
 
 CHECKLIST_STATUS_CHOICES = (
-    ('new', ugettext_lazy('New')),
-    ('completed', ugettext_lazy('Completed')),
-    ('review_ok', ugettext_lazy('Review OK')),
-    ('review_fail', ugettext_lazy('Review Failed')),
-    ('dropped', ugettext_lazy('Dropped')),
+    ('new', gettext_lazy('New')),
+    ('completed', gettext_lazy('Completed')),
+    ('review_ok', gettext_lazy('Review OK')),
+    ('review_fail', gettext_lazy('Review Failed')),
+    ('dropped', gettext_lazy('Dropped')),
 )
 
 class Checklist(models.Model):
-    blueprint = models.ForeignKey(ChecklistBlueprint, related_name='checklists')
-    submission = models.ForeignKey('core.Submission', related_name='checklists', null=True)
-    user = models.ForeignKey('auth.user')
+    blueprint = models.ForeignKey(ChecklistBlueprint, related_name='checklists', on_delete=models.CASCADE)
+    submission = models.ForeignKey('core.Submission', related_name='checklists', null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey('auth.user', on_delete=models.CASCADE)
     status = models.CharField(max_length=15, default='new', choices=CHECKLIST_STATUS_CHOICES)
-    pdf_document = models.OneToOneField(Document, related_name="checklist", null=True)
-    last_edited_by = models.ForeignKey('auth.user', related_name='edited_checklists')
+    pdf_document = models.OneToOneField(Document, related_name="checklist", null=True, on_delete=models.CASCADE)
+    last_edited_by = models.ForeignKey('auth.user', related_name='edited_checklists', on_delete=models.CASCADE)
 
     objects = AuthorizationManager()
     unfiltered = models.Manager()
@@ -144,9 +145,9 @@ class Checklist(models.Model):
 
 @reversion.register(fields=('answer', 'comment'))
 class ChecklistAnswer(models.Model):
-    checklist = models.ForeignKey(Checklist, related_name='answers')
-    question = models.ForeignKey(ChecklistQuestion)
-    answer = models.NullBooleanField(null=True)
+    checklist = models.ForeignKey(Checklist, related_name='answers', on_delete=models.CASCADE)
+    question = models.ForeignKey(ChecklistQuestion, on_delete=models.CASCADE)
+    answer = models.BooleanField(null=True)
     comment = models.TextField(null=True, blank=True)
 
     class Meta:
@@ -154,6 +155,14 @@ class ChecklistAnswer(models.Model):
 
     def __str__(self):
         return "Answer to '%s': %s" % (self.question, self.answer)
+    
+    def save(self, *args, **kwargs):
+        if self.answer or self.comment:
+            with reversion.create_revision():
+                reversion.set_user(get_current_user())
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
 
     @property
     def is_answered(self):

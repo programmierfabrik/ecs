@@ -1,5 +1,5 @@
 from django.dispatch import receiver
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.utils.text import slugify
@@ -52,6 +52,7 @@ def on_vote_published(sender, **kwargs):
     attachments = ((name + '.pdf', vote_pdf, 'application/pdf'),)
     template = loader.get_template('meetings/email/basg.txt')
     text = str(template.render({}))
+
     for receiver in receivers:
         deliver(receiver, subject=name, message=text,
             from_email=settings.DEFAULT_FROM_EMAIL, attachments=attachments)

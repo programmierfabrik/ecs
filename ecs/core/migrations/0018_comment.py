@@ -19,8 +19,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('timestamp', models.DateTimeField(auto_now=True)),
                 ('text', models.TextField()),
-                ('author', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
-                ('submission', models.ForeignKey(to='core.Submission')),
+                ('author', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
+                ('submission', models.ForeignKey(to='core.Submission', on_delete=models.CASCADE)),
             ],
         ),
     ]

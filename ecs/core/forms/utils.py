@@ -1,6 +1,6 @@
 from django import forms
 from django.forms.models import model_to_dict
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 
 def mark_readonly(form):
@@ -33,7 +33,9 @@ class ReadonlyFormSetMixin(object):
                 mark_readonly(form)
 
 def submission_form_to_dict(sf):
-    d = model_to_dict(sf)
+    d = model_to_dict(sf, exclude=['ethics_commissions', 'documents'])
+    d['ethics_commissions'] = list(sf.ethics_commissions.values_list('pk', flat=True))
+    d['documents'] = list(sf.documents.values_list('pk', flat=True))
     d['invoice_differs_from_sponsor'] = bool(sf.invoice_name)
     d['subject_females_childbearing'] = str((
         (True, True),

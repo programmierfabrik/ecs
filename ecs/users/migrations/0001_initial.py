@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('uuid', models.CharField(unique=True, max_length=32)),
                 ('is_accepted', models.BooleanField(default=False)),
-                ('user', models.ForeignKey(related_name='ecs_invitations', to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(related_name='ecs_invitations', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                 ('type', models.CharField(max_length=32, choices=[('login', 'login'), ('logout', 'logout')])),
                 ('timestamp', models.DateTimeField(auto_now_add=True)),
                 ('ip', models.IPAddressField()),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -71,8 +71,8 @@ class Migration(migrations.Migration):
                 ('fax', models.CharField(max_length=45, blank=True)),
                 ('social_security_number', models.CharField(max_length=10, blank=True)),
                 ('forward_messages_after_minutes', models.PositiveIntegerField(default=0)),
-                ('communication_proxy', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True)),
-                ('user', models.OneToOneField(related_name='profile', to=settings.AUTH_USER_MODEL)),
+                ('communication_proxy', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
+                ('user', models.OneToOneField(related_name='profile', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -91,7 +91,7 @@ class Migration(migrations.Migration):
                 ('task_filter', models.TextField(null=True)),
                 ('communication_filter', django_extensions.db.fields.json.JSONField()),
                 ('useradministration_filter', django_extensions.db.fields.json.JSONField()),
-                ('user', models.OneToOneField(related_name='ecs_settings', to=settings.AUTH_USER_MODEL)),
+                ('user', models.OneToOneField(related_name='ecs_settings', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },

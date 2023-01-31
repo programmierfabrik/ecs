@@ -7,8 +7,8 @@ from django.db.models.signals import post_save
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
-from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext as _
+from django.urls import reverse
+from django.utils.translation import gettext as _
 from django.utils import timezone
 
 from ecs.utils import cached_property
@@ -18,8 +18,8 @@ from ecs.authorization.managers import AuthorizationManager
 
 class TaskType(models.Model):
     name = models.CharField(max_length=100)
-    workflow_node = models.OneToOneField(Node, null=True)
-    group = models.ForeignKey(Group, related_name='task_types', null=True)
+    workflow_node = models.OneToOneField(Node, null=True, on_delete=models.CASCADE)
+    group = models.ForeignKey(Group, related_name='task_types', null=True, on_delete=models.CASCADE)
     is_delegatable = models.BooleanField(default=True)
     is_dynamic = models.BooleanField(default=False)
     
@@ -107,25 +107,25 @@ class TaskManager(AuthorizationManager.from_queryset(TaskQuerySet)):
         return TaskQuerySet(self.model).distinct()
 
 class Task(models.Model):
-    task_type = models.ForeignKey(TaskType, related_name='tasks')
-    workflow_token = models.OneToOneField(Token, null=True, related_name='task')
-    content_type = models.ForeignKey(ContentType, null=True)
+    task_type = models.ForeignKey(TaskType, related_name='tasks', on_delete=models.CASCADE)
+    workflow_token = models.OneToOneField(Token, null=True, related_name='task', on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.CASCADE)
     data_id = models.PositiveIntegerField(null=True)
     data = GenericForeignKey(ct_field='content_type', fk_field='data_id')
     
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(User, null=True, related_name='created_tasks')
+    created_by = models.ForeignKey(User, null=True, related_name='created_tasks', on_delete=models.CASCADE)
 
     assigned_at = models.DateTimeField(null=True)
-    assigned_to = models.ForeignKey(User, null=True, related_name='tasks')
+    assigned_to = models.ForeignKey(User, null=True, related_name='tasks', on_delete=models.CASCADE)
     closed_at = models.DateTimeField(null=True, db_index=True)
     deleted_at = models.DateTimeField(null=True, db_index=True)
     
     accepted = models.BooleanField(default=False)
 
-    medical_category = models.ForeignKey('core.MedicalCategory', null=True)
+    medical_category = models.ForeignKey('core.MedicalCategory', null=True, on_delete=models.CASCADE)
 
-    review_for = models.ForeignKey('self', null=True)
+    review_for = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
 
     send_message_on_close = models.BooleanField(default=False)
     reminder_message_timeout = models.DurationField(null=True)
@@ -145,7 +145,7 @@ class Task(models.Model):
         from ecs.notifications.models import Notification
 
         if isinstance(self.data, Notification):
-            return reverse('ecs.notifications.views.view_notification',
+            return reverse('notifications.view_notification',
                 kwargs={'notification_pk': self.data.pk})
 
         submission = self.data.get_submission()

@@ -1,5 +1,5 @@
 from django import forms
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from ecs.notifications.models import NotificationAnswer
 from ecs.core.models import Submission, SubmissionForm, Investigator
@@ -10,7 +10,7 @@ from ecs.notifications.models import (
     AmendmentNotification, SafetyNotification, CenterCloseNotification,
 )
 from ecs.core.forms.fields import DateField
-
+import types
 
 class NotificationAnswerForm(forms.ModelForm):
     class Meta:
@@ -98,10 +98,10 @@ class SingleStudyNotificationForm(NotificationForm):
             obj.submission_forms = [self.get_submission_form()]
         else:
             old_save_m2m = self.save_m2m
-            def _save_m2m():
+            def _save_m2m(self):
                 old_save_m2m()
-                obj.submission_forms = [self.get_submission_form()]
-            self.save_m2m = _save_m2m
+                obj.submission_forms.set([self.get_submission_form()])
+            self.save_m2m = types.MethodType(_save_m2m, self)
         return obj
 
 

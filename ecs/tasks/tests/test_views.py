@@ -19,17 +19,17 @@ class ViewTestCase(LoginTestCase, WorkflowTestCase):
         refetch = lambda: Task.objects.get(pk=task.pk)
 
         # show the task list
-        response = self.client.get(reverse('ecs.tasks.views.my_tasks'))
+        response = self.client.get(reverse('tasks.my_tasks'))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(task in response.context['open_tasks'])
         
         # change the task list filter
-        response = self.client.post(reverse('ecs.tasks.views.my_tasks'), {'proxy': False, 'mine': True, 'open': True, 'amg': False, 'mpg': False, 'other': True})
+        response = self.client.post(reverse('tasks.my_tasks'), {'proxy': False, 'mine': True, 'open': True, 'amg': False, 'mpg': False, 'other': True})
         self.assertEqual(response.status_code, 200)
         self.assertTrue(task in response.context['open_tasks'])
         
         # accept the task
-        response = self.client.post(reverse('ecs.tasks.views.accept_task', kwargs={'task_pk': task.pk}))
+        response = self.client.post(reverse('tasks.accept_task', kwargs={'task_pk': task.pk}))
         task = refetch()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(self.user, task.assigned_to)

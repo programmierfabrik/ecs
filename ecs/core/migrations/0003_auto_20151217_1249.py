@@ -30,37 +30,37 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='submissionform',
             name='pdf_document',
-            field=models.OneToOneField(related_name='submission_form', null=True, to='documents.Document'),
+            field=models.OneToOneField(related_name='submission_form', null=True, to='documents.Document', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='submissionform',
             name='presenter',
-            field=models.ForeignKey(related_name='presented_submission_forms', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='presented_submission_forms', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='submissionform',
             name='primary_investigator',
-            field=models.OneToOneField(null=True, to='core.Investigator'),
+            field=models.OneToOneField(null=True, to='core.Investigator', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='submissionform',
             name='sponsor',
-            field=models.ForeignKey(related_name='sponsored_submission_forms', to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='sponsored_submission_forms', to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='submissionform',
             name='submission',
-            field=models.ForeignKey(related_name='forms', to='core.Submission'),
+            field=models.ForeignKey(related_name='forms', to='core.Submission', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='submissionform',
             name='submitter',
-            field=models.ForeignKey(related_name='submitted_submission_forms', to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='submitted_submission_forms', to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -82,7 +82,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='submission',
             name='current_submission_form',
-            field=models.OneToOneField(related_name='current_for_submission', null=True, to='core.SubmissionForm'),
+            field=models.OneToOneField(related_name='current_for_submission', null=True, to='core.SubmissionForm', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -106,19 +106,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='submission',
             name='presenter',
-            field=models.ForeignKey(related_name='presented_submissions', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='presented_submissions', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='submission',
             name='susar_presenter',
-            field=models.ForeignKey(related_name='susar_presented_submissions', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='susar_presented_submissions', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='nontesteduseddrug',
             name='submission_form',
-            field=models.ForeignKey(to='core.SubmissionForm'),
+            field=models.ForeignKey(to='core.SubmissionForm', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -130,37 +130,37 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='measure',
             name='submission_form',
-            field=models.ForeignKey(related_name='measures', to='core.SubmissionForm'),
+            field=models.ForeignKey(related_name='measures', to='core.SubmissionForm', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='investigatoremployee',
             name='investigator',
-            field=models.ForeignKey(related_name='employees', to='core.Investigator'),
+            field=models.ForeignKey(related_name='employees', to='core.Investigator', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='investigator',
             name='ethics_commission',
-            field=models.ForeignKey(related_name='investigators', to='core.EthicsCommission', null=True),
+            field=models.ForeignKey(related_name='investigators', to='core.EthicsCommission', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='investigator',
             name='submission_form',
-            field=models.ForeignKey(related_name='investigators', to='core.SubmissionForm'),
+            field=models.ForeignKey(related_name='investigators', to='core.SubmissionForm', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='investigator',
             name='user',
-            field=models.ForeignKey(related_name='investigations', to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='investigations', to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='foreignparticipatingcenter',
             name='submission_form',
-            field=models.ForeignKey(to='core.SubmissionForm'),
+            field=models.ForeignKey(to='core.SubmissionForm', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -172,7 +172,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='advancedsettings',
             name='default_contact',
-            field=models.ForeignKey(to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.RunSQL('''

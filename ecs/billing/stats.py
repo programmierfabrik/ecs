@@ -1,7 +1,7 @@
 from copy import deepcopy
 from collections import OrderedDict
 
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from ecs.billing.models import Price, STUDY_PRICING_OTHER, \
     STUDY_PRICING_MULTICENTRIC_AMG_MAIN, STUDY_PRICING_MULTICENTRIC_AMG_LOCAL, \

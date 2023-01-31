@@ -17,9 +17,12 @@ def _format_model(model):
     return "all models"
 
 class Command(BaseCommand):
-    option_list = BaseCommand.option_list + (
-        make_option('--quiet', dest='quiet', action='store_true', default=False, help="Suppress any output"),
-    )
+    def add_arguments(self, parser):
+        parser.add_argument('--quiet',
+            dest='quiet',
+            action='store_true',
+            default=False,
+            help='Suppress any output')
 
     def handle(self, quiet=False, **options):
         guards = set()

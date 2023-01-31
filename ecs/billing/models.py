@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 
 
@@ -49,14 +49,14 @@ class Price(models.Model):
 
 
 class ChecklistBillingState(models.Model):
-    checklist = models.OneToOneField('checklists.Checklist', null=True, related_name='billing_state')
+    checklist = models.OneToOneField('checklists.Checklist', null=True, related_name='billing_state', on_delete=models.CASCADE)
     billed_at = models.DateTimeField(null=True, default=None, blank=True, db_index=True)
 
 
 class Invoice(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     submissions = models.ManyToManyField('core.Submission')
-    document = models.OneToOneField('documents.Document', related_name="invoice", null=True)
+    document = models.OneToOneField('documents.Document', related_name="invoice", null=True, on_delete=models.CASCADE)
 
     @property
     def stats(self):
@@ -67,7 +67,7 @@ class Invoice(models.Model):
 class ChecklistPayment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     checklists = models.ManyToManyField('checklists.Checklist')
-    document = models.OneToOneField('documents.Document', related_name="checklist_payment", null=True)
+    document = models.OneToOneField('documents.Document', related_name="checklist_payment", null=True, on_delete=models.CASCADE)
 
     @property
     def reviewers(self):

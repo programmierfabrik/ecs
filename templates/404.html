@@ -1,10 +1,10 @@
 {% extends 'public.html' %}
-{% load core staticfiles %}
+{% load core static %}
 
 {% block content %}
 <div class="text-center">
     <a href="/">
-        <img class="logo mb-3" src="{% url 'ecs.core.views.logo' %}" alt="Logo"/>
+        <img class="logo mb-3" src="{% url 'core.logo' %}" alt="Logo"/>
     </a>
     <h1>Fehler 404</h1>
     <h2>Seite nicht gefunden!</h2>

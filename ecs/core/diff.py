@@ -7,14 +7,15 @@ from collections import OrderedDict
 from diff_match_patch import diff_match_patch
 from django_countries import countries
 
-from django.utils.translation import ugettext as _
-from django.utils.encoding import force_text
+from django.utils.translation import gettext as _
+from django.utils.encoding import force_str
 from django.utils import timezone
 from django.db import models
 from django.db.models import Manager, QuerySet
 from django.http import HttpRequest
 from django.contrib.auth.models import User
 from django.utils.html import escape
+from django.core import exceptions
 
 from ecs.core.models import SubmissionForm, Investigator, EthicsCommission, \
     Measure, NonTestedUsedDrug, ParticipatingCenterNonSubject, \
@@ -90,14 +91,14 @@ class AtomicDiffNode(DiffNode):
         result = []
         if not self.ignore_old:
             old = self.old
-            if isinstance(old, collections.Callable):
+            if isinstance(old, collections.abc.Callable):
                 old = old(plainhtml=plain)
-            result.append('<span class="deleted">- %s</span>' % force_text(old))
+            result.append('<span class="deleted">- %s</span>' % force_str(old))
         if not self.ignore_new:
             new = self.new
-            if isinstance(new, collections.Callable):
+            if isinstance(new, collections.abc.Callable):
                 new = new(plainhtml=plain)
-            result.append('<span class="inserted">+ %s</span>' % force_text(new))
+            result.append('<span class="inserted">+ %s</span>' % force_str(new))
         return '<div class="atomic">%s</div>' % ''.join(result)
         
 
@@ -146,12 +147,21 @@ class ListDiffNode(DiffNode):
         else:
             self.diffs = []
             return
+        
+        def get_match_fields(a):
+            result = []
+            for f in differ.match_fields:
+                value = getattr(a, f)
+                if isinstance(value, str):
+                    value = value.strip()
+                result.append(value)
+            return result
 
         diffs = []
         for old in self.old:
-            omf = [getattr(old, f) for f in differ.match_fields]
+            omf = get_match_fields(old)
             for new in self.new:
-                nmf = [getattr(new, f) for f in differ.match_fields]
+                nmf = get_match_fields(new)
                 if omf == nmf:
                     self.new.remove(new)
                     break
@@ -270,11 +280,11 @@ class ModelDiffer(object):
         
         try:
             field = self.model._meta.get_field(name)
-        except models.FieldDoesNotExist:
+        except exceptions.FieldDoesNotExist:
             field = None
         
         if isinstance(field, models.ForeignKey):
-            return diff_model_instances(old_val, new_val, model=field.rel.to, **kwargs)
+            return diff_model_instances(old_val, new_val, model=field.related_model, **kwargs)
         elif isinstance(new_val, (Manager, QuerySet)) or isinstance(old_val, (Manager, QuerySet)):
             old_val = list(old_val.all()) if old else []
             new_val = list(new_val.all()) if new else []
@@ -286,6 +296,10 @@ class ModelDiffer(object):
             new_val = str(dict(field.choices)[new_val]) if new_val else _('No Information')
             return AtomicDiffNode(old_val, new_val, **kwargs)
         elif isinstance(field, (models.CharField, models.TextField)) and old_val and new_val:
+            old_val_stripped = old_val.strip()
+            new_val_stripped = new_val.strip()
+            if old_val_stripped == new_val_stripped:
+                return None
             return TextDiffNode(old_val, new_val, **kwargs)
         else:
             return AtomicDiffNode(_render_value(old_val), _render_value(new_val), **kwargs)
@@ -298,7 +312,7 @@ class ModelDiffer(object):
             if name in self.label_map:
                 label = self.label_map[name]
             elif field_info is not None:
-                label = force_text(field_info.label)
+                label = force_str(field_info.label)
                 if field_info.number:
                     label = "%s %s" % (field_info.number, label)
             else:
@@ -397,7 +411,7 @@ _differs = {
             'project_type_medical_device_with_ce',
             'project_type_medical_device_without_ce',
             'project_type_medical_device_performance_evaluation',
-            'project_type_basic_research', 'project_type_genetic_study',
+            'project_type_non_interventional_study_mpg', 'project_type_basic_research', 'project_type_genetic_study',
             'project_type_misc', 'project_type_education_context',
             'project_type_register', 'project_type_biobank',
             'project_type_retrospective', 'project_type_questionnaire',
@@ -466,7 +480,7 @@ _differs = {
             'submitter_is_sponsor', 'submitter_is_authorized_by_sponsor',
             'participatingcenternonsubject_set',
             'foreignparticipatingcenter_set', 'investigators', 'measures',
-            'nontesteduseddrug_set',
+            'nontesteduseddrug_set', 'is_new_medtech_law'
         ),
         label_map=dict([
             ('participatingcenternonsubject_set', _('centers (non subject)')),

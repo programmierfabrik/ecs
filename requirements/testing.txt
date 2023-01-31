@@ -1,3 +1,0 @@
-# software quality testing packages, not strictly needed, except you do coverage analysis
-unittest-xml-reporting
-coverage

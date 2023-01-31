@@ -29,7 +29,7 @@ class QFactoryRegistry(object):
         if lookup:
             for bit in lookup.split('__'):
                 try:
-                    target_model = target_model._meta.get_field(bit).rel.to
+                    target_model = target_model._meta.get_field(bit).related_model
                 except AttributeError:
                     raise Exception("cannot lookup %s.%s for authoriation" % (target_model, bit))
         q_factory = self.q_factories.get(target_model, None)
@@ -54,7 +54,7 @@ class QFactory(object):
     def __call__(self, user):
         if not user or user.is_superuser:
             return Q()
-        elif user.is_anonymous():
+        elif user.is_anonymous:
             return self.make_deny_q() # exclude all
         if not self.lookup:
             return self.get_q(user)

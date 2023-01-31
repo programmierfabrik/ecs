@@ -41,7 +41,7 @@ class Command(BaseCommand):
                 if name.startswith('_'):
                     continue
                 func = getattr(module, name)
-                if isinstance(func, collections.Callable) and getattr(func, 'bootstrap', False):
+                if isinstance(func, collections.abc.Callable) and getattr(func, 'bootstrap', False):
                     bootstrap_funcs["%s.%s" % (func.__module__, func.__name__)] = func
 
         # XXX: inefficient (FMD3)

@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('answer', models.NullBooleanField()),
                 ('comment', models.TextField(null=True, blank=True)),
-                ('checklist', models.ForeignKey(related_name='answers', to='checklists.Checklist')),
+                ('checklist', models.ForeignKey(related_name='answers', to='checklists.Checklist', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ('question__blueprint', 'question__index'),
@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
                 ('link', models.CharField(max_length=100, null=True, blank=True)),
                 ('is_inverted', models.BooleanField(default=False)),
                 ('requires_comment', models.BooleanField(default=False)),
-                ('blueprint', models.ForeignKey(related_name='questions', to='checklists.ChecklistBlueprint')),
+                ('blueprint', models.ForeignKey(related_name='questions', to='checklists.ChecklistBlueprint', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ('blueprint', 'index'),
@@ -74,19 +74,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='checklistanswer',
             name='question',
-            field=models.ForeignKey(to='checklists.ChecklistQuestion'),
+            field=models.ForeignKey(to='checklists.ChecklistQuestion', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='checklist',
             name='blueprint',
-            field=models.ForeignKey(related_name='checklists', to='checklists.ChecklistBlueprint'),
+            field=models.ForeignKey(related_name='checklists', to='checklists.ChecklistBlueprint', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='checklist',
             name='last_edited_by',
-            field=models.ForeignKey(related_name='edited_checklists', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='edited_checklists', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

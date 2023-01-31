@@ -11,7 +11,7 @@
                 {% if year == current_year %}
                     <button class="btn btn-primary active">{{ year }}</button>
                 {% else %}
-                    <a class="btn btn-primary" href="{% url 'ecs.statistics.views.stats' year=year %}">{{ year }}</a>
+                    <a class="btn btn-primary" href="{% url 'statistics.stats' year=year %}">{{ year }}</a>
                 {% endif %}
             {% endfor %}
         </div>

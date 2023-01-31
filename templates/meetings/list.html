@@ -39,7 +39,7 @@
             {% for meeting in meetings.object_list %}
             <tr>
                 <td>
-                    <a href="{% url 'ecs.meetings.views.meeting_details' meeting_pk=meeting.pk %}">
+                    <a href="{% url 'meetings.meeting_details' meeting_pk=meeting.pk %}">
                         {{ meeting.title }}
                     </a>
                 </td>

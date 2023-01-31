@@ -7,5 +7,5 @@ Zur Studie {{ submission|ec_number }} "{{ submission.project_title_display }}" i
 Dieses steht Ihnen im ECS unter dem Reiter "Beurteilungen" zur Verfügung.
 
 Klicken Sie auf den folgenden Link um das Gutachten als PDF-Datei herunterzuladen:
-{{ ABSOLUTE_URL_PREFIX }}{% url 'ecs.checklists.views.checklist_pdf' checklist_pk=checklist.pk %}
+{{ ABSOLUTE_URL_PREFIX }}{% url 'checklists.checklist_pdf' checklist_pk=checklist.pk %}
 {% endblock %}

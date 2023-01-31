@@ -1,10 +1,10 @@
-from django.conf.urls import url
+from django.urls import path
 
 from ecs.core.views import medical_category as views
 
 urlpatterns = (
-    url(r'^$', views.administration),
-    url(r'^new', views.create_medical_category),
-    url(r'^(?P<pk>\d+)$', views.update_medical_category),
-    url(r'^toggle/(?P<pk>\d+)$', views.toggle_disabled),
+    path('', views.administration, name='core.medical_category.administration'),
+    path('new', views.create_medical_category, name='core.medical_category.create_medical_category'),
+    path('<int:pk>', views.update_medical_category, name='core.medical_category.update_medical_category'),
+    path('toggle/<int:pk>', views.toggle_disabled, name='core.medical_category.toggle_disabled'),
 )

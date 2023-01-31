@@ -30,7 +30,7 @@
         <div class="form-group col-sm-10 col-lg-11">
             {% if formset.readonly %}
                 <div>
-                    {% url 'ecs.core.views.fieldhistory.field_history' model_name='checklist_answer' pk=form.instance.pk as history_url %}
+                    {% url 'core.field_history' model_name='checklist_answer' pk=form.instance.pk as history_url %}
                     <a class="fa fa-2x fa-history" href="javascript:void(ecs.fieldhistory.show('{{ history_url }}'))"></a>
                 </div>
             {% endif %}

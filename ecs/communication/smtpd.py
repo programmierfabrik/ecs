@@ -1,39 +1,18 @@
-#!/usr/bin/env python
-import sys
-import os
-import re
-import logging
-import smtpd
-import asyncore
-import email
-import mailbox
 import base64
+import email
+import logging
+import re
 from datetime import timedelta
 
 import chardet
-
-from django.conf import settings
+from asgiref.sync import sync_to_async
 from django.utils import timezone
 
-from ecs.communication.models import Message
+from ecs import settings
 from ecs.communication.mailutils import html2text
+from ecs.communication.models import Message
 
 logger = logging.getLogger(__name__)
-
-
-class SMTPError(Exception):
-    def __init__(self, code, description):
-        super().__init__('{} {}'.format(code, description))
-        self.code = code
-        self.description = description
-
-
-class EcsSMTPChannel(smtpd.SMTPChannel):
-    def handle_error(self):
-        # Invoke the global exception hook to give raven a chance to report
-        # errors to sentry.
-        sys.excepthook(*sys.exc_info())
-        self.handle_close()
 
 
 def _get_content(message_part):
@@ -55,40 +34,29 @@ def _get_content(message_part):
     content = str(payload, charset, 'replace')
     return content
 
-class EcsMailReceiver(smtpd.SMTPServer):
-    channel_class = EcsSMTPChannel
 
-    # 1MB; this seems a lot, but also includes HTML and inline images.
-    MAX_MSGSIZE = 1024 * 1024
+class SmtpdHandler:
     ANSWER_TIMEOUT = 365
 
-    def __init__(self):
-        smtpd.SMTPServer.__init__(self, settings.SMTPD_CONFIG['listen_addr'], None,
-            data_size_limit=self.MAX_MSGSIZE, decode_data=False)
-        self.logger = logging.getLogger('EcsMailReceiver')
-        self.store_exceptions = settings.SMTPD_CONFIG.get('store_exceptions', True)
-        if self.store_exceptions:
-            self.undeliverable_maildir = mailbox.Maildir(
-                os.path.join(settings.PROJECT_DIR, '..', 'ecs-undeliverable'))
+    async def handle_PROXY(self, server, session, envelope, proxy_data):
+        logger.info(proxy_data)
+        return True
 
-    def _find_msg(self, recipient):
-        msg_uuid, domain = recipient.split('@')
-
+    async def handle_RCPT(self, server, session, envelope, address, rcpt_options):
+        _, domain = address.split('@')
         if domain != settings.SMTPD_CONFIG['domain']:
-            raise SMTPError(550, 'Relay access denied')
+            return '550 not relaying to that domain'
+        envelope.rcpt_tos.append(address)
+        return '250 OK'
 
-        m = re.match(r'ecs-([0-9A-Fa-f]{32})$', msg_uuid)
-        if m:
-            try:
-                return Message.objects.get(uuid=m.group(1),
-                    timestamp__gt=timezone.now() - timedelta(days=self.ANSWER_TIMEOUT))
-            except Message.DoesNotExist:
-                pass
-        raise SMTPError(553, 'Invalid recipient <{}>'.format(recipient))
+    async def handle_DATA(self, server, session, envelope):
+        mail_from = envelope.mail_from
+        rcpt_tos = envelope.rcpt_tos
+        if len(envelope.rcpt_tos) > 1:
+            return '554 Too many recipients'
 
-    def _get_text(self, msg):
+        msg = email.message_from_bytes(envelope.content)
         plain = html = None
-
         for part in msg.walk():
             content_type = part.get_content_type()
             if content_type.startswith('multipart/'):
@@ -100,66 +68,57 @@ class EcsMailReceiver(smtpd.SMTPServer):
                 logger.debug('message: message-part: text/html')
                 html = html2text(_get_content(part))
             else:
-                raise SMTPError(554,
-                    'Invalid message format - invalid content type {0}'.format(
-                        part.get_content_type()))
+                logger.info('message: message-part: ' + content_type + ' ignored')
 
         if not plain and not html:
-            raise SMTPError(554, 'Invalid message format - empty message')
+            return '554 Invalid message format, no content'
 
         text = plain or html
-        return text
+        recipient = envelope.rcpt_tos[0]
+        msg_uuid, _ = recipient.split('@')
 
-    def process_message(self, peer, mailfrom, rcpttos, data, **kwargs):
-        try:
-            if len(rcpttos) > 1:
-                raise SMTPError(554, 'Too many recipients')
+        m = re.match(r'ecs-([0-9A-Fa-f]{32})$', msg_uuid)
+        if m:
+            try:
+                orig_msg = await Message.objects.select_related('thread', 'receiver', 'sender').aget(
+                    uuid=m.group(1),
+                    timestamp__gt=timezone.now() - timedelta(days=self.ANSWER_TIMEOUT)
+                )
+            except Message.DoesNotExist:
+                return '553 Invalid recipient <{}>'.format(recipient)
+        else:
+            return '553 Invalid recipient <{}>'.format(recipient)
 
-            msg = email.message_from_bytes(data)
-            text = self._get_text(msg)
-            orig_msg = self._find_msg(rcpttos[0])
-            thread = orig_msg.thread
+        thread = orig_msg.thread
 
-            creator = msg.get('Auto-Submitted', None)
-            # XXX email header are case insentitiv matched,
-            # 'auto-submitted' will be matched too it there is no 'Auto-Submitted'
-            if creator in (None, '', 'no'):
-                creator = 'human'
-            elif creator[11] == 'auto-notify':
-                creator = 'auto-notify'
-            elif creator in ('auto-generated', 'auto-replied'):
-                pass
-            else:
-                creator = 'auto-custom'
+        creator = msg.get('Auto-Submitted', None)
+        # XXX email header are case insentitiv matched,
+        # 'auto-submitted' will be matched too it there is no 'Auto-Submitted'
+        if creator in (None, '', 'no'):
+            creator = 'human'
+        elif creator[11] == 'auto-notify':
+            creator = 'auto-notify'
+        elif creator in ('auto-generated', 'auto-replied'):
+            pass
+        else:
+            creator = 'auto-custom'
 
-            thread.messages.filter(
-                receiver=orig_msg.receiver).update(unread=False)
+        await thread.messages.filter(receiver=orig_msg.receiver).aupdate(unread=False)
 
-            # TODO rawmsg can include multiple content-charsets and should be a binaryfield
-            # as a workaround we convert to base64
-            thread_msg = thread.add_message(orig_msg.receiver, text,
-                rawmsg=base64.b64encode(data),
-                incoming_msgid=msg['Message-ID'],
-                in_reply_to=orig_msg,
-                creator=creator)
+        # TODO rawmsg can include multiple content-charsets and should be a binaryfield
+        # as a workaround we convert to base64
+        thread_msg = await sync_to_async(thread.add_message)(
+            orig_msg.receiver, text,
+            rawmsg=base64.b64encode(envelope.content),
+            incoming_msgid=msg['Message-ID'],
+            in_reply_to=orig_msg,
+            creator=creator
+        )
 
-            logger.info(
-                'Accepted email (creator= {8})from {0} via {1} to {2} id {3} in-reply-to {4} thread {5} orig_msg {6} message {7}'.format(
-                    mailfrom, orig_msg.receiver.email, orig_msg.sender.email,
-                    msg['Message-ID'], orig_msg.outgoing_msgid, thread.pk,
-                    orig_msg.pk, thread_msg.pk, creator))
-
-        except SMTPError as e:
-            logger.info('Rejected email: {0}'.format(e))
-            return str(e)
-
-        except Exception as e:
-            logger.error('email raised exception: {0}'.format(e))
-            if self.store_exceptions:
-                self.undeliverable_maildir.add(data)
-            raise
+        logger.info(
+            'Accepted email (creator= {8})from {0} via {1} to {2} id {3} in-reply-to {4} thread {5} orig_msg {6} message {7}'.format(
+                envelope.mail_from, orig_msg.receiver.email, orig_msg.sender.email,
+                msg['Message-ID'], orig_msg.outgoing_msgid, thread.pk,
+                orig_msg.pk, thread_msg.pk, creator))
 
         return '250 Ok'
-
-    def run_loop(self):
-        asyncore.loop()

@@ -26,9 +26,9 @@ class Migration(migrations.Migration):
                 ('published_at', models.DateTimeField(null=True)),
                 ('valid_until', models.DateTimeField(null=True)),
                 ('changed_after_voting', models.BooleanField(default=False)),
-                ('submission_form', models.ForeignKey(related_name='votes', to='core.SubmissionForm', null=True)),
-                ('top', models.OneToOneField(related_name='vote', null=True, to='meetings.TimetableEntry')),
-                ('upgrade_for', models.OneToOneField(related_name='previous', null=True, to='votes.Vote')),
+                ('submission_form', models.ForeignKey(related_name='votes', to='core.SubmissionForm', null=True, on_delete=models.CASCADE)),
+                ('top', models.OneToOneField(related_name='vote', null=True, to='meetings.TimetableEntry', on_delete=models.CASCADE)),
+                ('upgrade_for', models.OneToOneField(related_name='previous', null=True, to='votes.Vote', on_delete=models.CASCADE)),
             ],
             options={
                 'get_latest_by': 'published_at',

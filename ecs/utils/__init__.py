@@ -77,3 +77,6 @@ class Args(object):
         
     def __bool__(self):
         return bool(self.args or self.kwargs)
+
+def is_ajax(request):
+    return request.headers.get('x-requested-with') == 'XMLHttpRequest'

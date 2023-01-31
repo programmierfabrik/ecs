@@ -1,12 +1,12 @@
-from django.conf.urls import url
+from django.urls import path
 
 from ecs.tags import views
 
 
 urlpatterns = (
-    url(r'^$', views.index),
-    url(r'^new/$', views.edit),
-    url(r'^(?P<pk>\d+)/edit/$', views.edit),
-    url(r'^(?P<pk>\d+)/delete/$', views.delete),
-    url(r'^assign/submission/(?P<submission_pk>\d+)$', views.assign),
+    path('', views.index, name='tags.index'),
+    path('new/', views.edit, name='tags.edit'),
+    path('<int:pk>/edit/', views.edit, name='tags.edit_by_pk'),
+    path('<int:pk>/delete/', views.delete, name='tags.delete'),
+    path('assign/submission/<int:submission_pk>', views.assign, name='tags.assign'),
 )

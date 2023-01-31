@@ -1,10 +1,9 @@
 from datetime import timedelta
 
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.utils import timezone
 from django.db.models import F, Func
 
-from celery.task import periodic_task
 from celery.schedules import crontab
 
 from ecs.votes.models import Vote
@@ -12,6 +11,7 @@ from ecs.core.models.constants import SUBMISSION_LANE_LOCALEC
 from ecs.users.utils import get_user, get_office_user
 from ecs.communication.utils import send_message_template
 from ecs.votes.constants import PERMANENT_VOTE_RESULTS
+from ecs.celery import app as celery_app
 
 
 def send_vote_reminder(vote, subject, template, recipients):
@@ -42,7 +42,7 @@ def send_vote_reminder_submitter(vote):
     subject = _('Vote for Submission {ec_number} will expire in three weeks')
     send_vote_reminder(vote, subject, 'reminder_submitter.txt', recipients)
 
-    
+
 def send_vote_reminder_office(vote):
     recipients = [get_office_user()]
 
@@ -67,50 +67,55 @@ def send_temporary_vote_reminder(vote):
     send_vote_reminder(vote, subject, 'temporary_reminder.txt', recipients)
 
 
-# run once per day at 09:00
-@periodic_task(run_every=crontab(hour=9, minute=0))
+@celery_app.on_after_finalize.connect
+def setup_periodic_tasks(sender, **kwargs):
+    # run once per day at 09:00
+    sender.add_periodic_task(crontab(hour=9, minute=0), send_reminder_messages.s())
+    # run once per day at 03:58
+    sender.add_periodic_task(crontab(hour=3, minute=58), expire_votes.s())
+
+
+@celery_app.task
 def send_reminder_messages(today=None):
     if today is None:
         today = timezone.now().date()
 
-
     votes = (Vote.objects
-        .filter(published_at__isnull=False, valid_until__isnull=False)
-        .exclude(submission_form__submission__workflow_lane=SUBMISSION_LANE_LOCALEC)
-        .exclude(submission_form__submission__is_finished=True)
-        .annotate(valid_until_date=Func(F('valid_until'), function='DATE')))
+             .filter(published_at__isnull=False, valid_until__isnull=False)
+             .exclude(submission_form__submission__workflow_lane=SUBMISSION_LANE_LOCALEC)
+             .exclude(submission_form__submission__is_finished=True)
+             .annotate(valid_until_date=Func(F('valid_until'), function='DATE')))
 
     for vote in votes.filter(
-            valid_until_date=Func(today + timedelta(days=21), function='DATE')):
+        valid_until_date=Func(today + timedelta(days=21), function='DATE')):
         assert vote.result == '1'
         send_vote_reminder_submitter(vote)
 
     for vote in votes.filter(
-            valid_until_date=Func(today + timedelta(days=7), function='DATE')):
+        valid_until_date=Func(today + timedelta(days=7), function='DATE')):
         assert vote.result == '1'
         send_vote_reminder_office(vote)
 
     for vote in votes.filter(
-            valid_until_date=Func(today - timedelta(days=1), function='DATE')):
+        valid_until_date=Func(today - timedelta(days=1), function='DATE')):
         assert vote.result == '1'
         send_vote_expired(vote)
 
-
     tmp_votes = (Vote.objects
-        .exclude(result__in=PERMANENT_VOTE_RESULTS)
-        .exclude(_currently_published_for=None)
-        .annotate(published_date=Func(F('published_at'), function='DATE')))
+                 .exclude(result__in=PERMANENT_VOTE_RESULTS)
+                 .exclude(_currently_published_for=None)
+                 .annotate(published_date=Func(F('published_at'), function='DATE')))
 
     for vote in tmp_votes.filter(
-            published_date=Func(today - timedelta(days=183), function='DATE')):
+        published_date=Func(today - timedelta(days=183), function='DATE')):
         send_temporary_vote_reminder_submitter(vote)
 
     for vote in tmp_votes.filter(
-            published_date=Func(today - timedelta(days=365), function='DATE')):
+        published_date=Func(today - timedelta(days=365), function='DATE')):
         send_temporary_vote_reminder(vote)
 
-# run once per day at 03:58
-@periodic_task(run_every=crontab(hour=3, minute=58))
+
+@celery_app.task
 def expire_votes():
     now = timezone.now()
     for vote in Vote.objects.filter(valid_until__lt=now, is_expired=False):

@@ -13,8 +13,8 @@
             {{ meeting.title }}
         </td>
         <td>
-            {% if not meeting.started and user.profile.is_internal %}
-                <a class="btn btn-primary" href="{% url 'ecs.meetings.views.edit_meeting' meeting_pk=meeting.pk %}">
+            {% if not meeting.started and user.profile.is_office %}
+                <a class="btn btn-primary" href="{% url 'meetings.edit_meeting' meeting_pk=meeting.pk %}">
                     {% trans 'Edit' %}
                 </a>
             {% endif %}
@@ -44,7 +44,7 @@
             <td colspan="2">
                 {{ meeting.deadline_expedited_review|date:'d.m.Y'|default:'-' }}
                 {% if meeting.deadline_expedited_review %}
-                    {% url 'ecs.meetings.views.send_expedited_reviewer_invitations' meeting_pk=meeting.pk as url %}
+                    {% url 'meetings.send_expedited_reviewer_invitations' meeting_pk=meeting.pk as url %}
                     <a class="send_emails ml-3" href="{{ url }}">
                         <span class="fa fa-paper-plane-o"></span>
                         {% trans 'Send Invitations' %}
@@ -91,16 +91,16 @@
     <tr>
         <th>{% trans "Timetable" %}</th>
         <td colspan="2">
-            <a href="{% url 'ecs.meetings.views.agenda_pdf' meeting_pk=meeting.pk %}">
+            <a href="{% url 'meetings.agenda_pdf' meeting_pk=meeting.pk %}">
                 <span class="fa fa-file-pdf-o"></span>
                 {% trans "Agenda PDF" %}
             </a>
-            <a class="ml-3" href="{% url 'ecs.meetings.views.timetable_pdf' meeting_pk=meeting.pk %}">
+            <a class="ml-3" href="{% url 'meetings.timetable_pdf' meeting_pk=meeting.pk %}">
                 <span class="fa fa-file-pdf-o"></span>
                 {% trans "Timetable PDF" %}
             </a>
             {% if user|is_member_of:'EC-Office' %}
-                {% url 'ecs.meetings.views.send_agenda_to_board' meeting_pk=meeting.pk as url %}
+                {% url 'meetings.send_agenda_to_board' meeting_pk=meeting.pk as url %}
                 <a class="send_emails ml-3" href="{{ url }}">
                     <span class="fa fa-paper-plane-o"></span>
                     {% trans "Send agenda" %}
@@ -119,7 +119,7 @@
             <th>{% trans "Protocol" %}</th>
             <td colspan="2">
                 {% if meeting.protocol_id %}
-                    <a href="{% url 'ecs.meetings.views.protocol_pdf' meeting_pk=meeting.pk %}">
+                    <a href="{% url 'meetings.protocol_pdf' meeting_pk=meeting.pk %}">
                         <span class="fa fa-file-pdf-o"></span>
                         {% trans 'Download PDF' %}
                     </a>
@@ -127,7 +127,7 @@
                     {% trans 'PDF is being rendered' %}
                     <i class="fa fa-spinner fa-spin"></i>
                 {% else %}
-                    <a href="{% url 'ecs.meetings.views.render_protocol_pdf' meeting_pk=meeting.pk %}">
+                    <a href="{% url 'meetings.render_protocol_pdf' meeting_pk=meeting.pk %}">
                         {% trans "Render PDF" %}
                     </a>
                 {% endif %}
@@ -138,12 +138,12 @@
                         {{ meeting.protocol_sent_at|date:'d.m.Y H:i' }}
                     </div>
                 {% elif meeting.protocol_id %}
-                    <a class="ml-3" href="{% url 'ecs.meetings.views.render_protocol_pdf' meeting_pk=meeting.pk %}">
+                    <a class="ml-3" href="{% url 'meetings.render_protocol_pdf' meeting_pk=meeting.pk %}">
                         <span class="fa fa-refresh"></span>
                         {% trans "Discard and rerender PDF" %}
                     </a>
                     {% if user|is_member_of:'EC-Office' and meeting.ended %}
-                        {% url 'ecs.meetings.views.send_protocol' meeting_pk=meeting.pk as url %}
+                        {% url 'meetings.send_protocol' meeting_pk=meeting.pk as url %}
                         <a class="send_emails ml-3" href="{{ url }}">
                             <span class="fa fa-paper-plane-o"></span>
                             {% trans 'Send protocol' %}
@@ -292,7 +292,7 @@
         {% for amendment in substantial_amendments %}
             {% with submission=amendment.get_submission %}
                 {% if user.profile.is_internal %}
-                    <a href="{% url 'ecs.notifications.views.view_notification' notification_pk=amendment.pk %}" target="_blank">
+                    <a href="{% url 'notifications.view_notification' notification_pk=amendment.pk %}" target="_blank">
                         {{ submission.get_ec_number_display }}
                     </a>{% if not forloop.last %}, {% endif %}
                 {% else %}

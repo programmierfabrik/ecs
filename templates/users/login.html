@@ -1,5 +1,5 @@
 {% extends 'public.html' %}
-{% load i18n core staticfiles widget_tweaks %}
+{% load i18n core static widget_tweaks %}
 
 {% block htmlcss %}
     {{ block.super }}
@@ -16,16 +16,16 @@
 
     <script type="text/javascript">
         if(top != self){
-            top.location.href = '{% url 'ecs.users.views.login' %}';
+            top.location.href = '{% url 'users.login' %}';
         }
     </script>
 
-    <img class="logo full mb-3" src="{% url 'ecs.core.views.logo' %}" alt="Logo"/>
+    <img class="logo full mb-3" src="{% url 'core.logo' %}" alt="Logo"/>
 
     <noscript>
         <div id="script_warning" class="alert alert-danger">
             <strong>Achtung:</strong> Sie verwenden einen Webbrowser der Javascript deaktiviert hat oder nicht unterst&uuml;tzt.
-            Lesen Sie <a href="{% static 'help/noscript.html' %}" class="alert-link">hier</a> wie Sie Javascript aktivieren k&ouml;nnen.
+            Lesen Sie <a href="/help/noscript.html" class="alert-link">hier</a> wie Sie Javascript aktivieren k&ouml;nnen.
         </div>
     </noscript>
 
@@ -45,12 +45,12 @@
         {% endif %}
         <div class="d-flex justify-content-between mb-1">
             <div class="pw_reg">
-                <a href="{% url 'ecs.users.views.register' %}">Registrieren</a>
-                <a class="ml-3" href="{% url 'ecs.users.views.request_password_reset' %}">
+                <a href="{% url 'users.register' %}">Registrieren</a>
+                <a class="ml-3" href="{% url 'users.request_password_reset' %}">
                     Passwort vergessen/zurücksetzen
                 </a>
             </div>
-            <a href="{% static 'help/index.html' %}" target="_blank">
+            <a href="/help/index.html" target="_blank">
                 {% trans 'Online Help Pages' %}
             </a>
         </div>

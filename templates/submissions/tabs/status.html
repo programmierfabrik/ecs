@@ -8,7 +8,7 @@
         <tr>
             <th class="text-nowrap">{% trans 'Tags' %}</th>
             <td>
-                <div data-widget-url="{% url 'ecs.tags.views.assign' submission_pk=submission.pk %}"></div>
+                <div data-widget-url="{% url 'tags.assign' submission_pk=submission.pk %}"></div>
             </td>
         </tr>
     {% endif %}
@@ -38,11 +38,11 @@
                         </td>
                         <td>
                             {% if submission_form|allows_edits_by:user or submission_form|allows_amendments_by:user %}
-                                <a href="{% url 'ecs.core.views.submissions.create_submission_form' docstash_key=current_docstash.key %}">
+                                <a href="{% url 'core.submission.create_submission_form_by_docstash_key' docstash_key=current_docstash.key %}">
                                     <span class="fa fa-pencil"></span>
                                     {% trans 'Edit' %}
                                 </a><br>
-                                <a class="delete_docstash" href="{% url 'ecs.core.views.submissions.delete_docstash_entry' docstash_key=current_docstash.key %}?next={{ request.path|urlencode }}">
+                                <a class="delete_docstash" href="{% url 'core.submission.delete_docstash_entry' docstash_key=current_docstash.key %}?next={{ request.path|urlencode }}">
                                     <span class="fa fa-trash-o"></span>
                                     {% trans 'Delete Changes' %}
                                 </a>
@@ -58,13 +58,13 @@
                         <td>{{ sf.created_at|date:'d.m.Y, H:i' }} Uhr</td>
                         <td>
                             {% if sf.previous_form %}
-                                <a href="{% url 'ecs.core.views.submissions.diff' old_submission_form_pk=sf.previous_form.pk new_submission_form_pk=sf.pk %}">
+                                <a href="{% url 'core.submission.diff' old_submission_form_pk=sf.previous_form.pk new_submission_form_pk=sf.pk %}">
                                     <span class="fa fa-pencil-square-o"></span>
                                     Unterschiede zur Vorversion
                                 </a><br>
                             {% endif %}
                             {% if sf != newest_form %}
-                                <a href="{% url 'ecs.core.views.submissions.diff' old_submission_form_pk=sf.pk new_submission_form_pk=newest_form.pk %}">
+                                <a href="{% url 'core.submission.diff' old_submission_form_pk=sf.pk new_submission_form_pk=newest_form.pk %}">
                                     <span class="fa fa-pencil-square-o"></span>
                                     Unterschiede zur neuesten Version
                                 </a><br>
@@ -74,7 +74,7 @@
                             {% if sf.is_notification_update %}
                                 {% with sf.new_for_notification.all.0 as notif %}
                                     {% if notif %}
-                                        {% url 'ecs.notifications.views.view_notification' notification_pk=notif.pk as url %}
+                                        {% url 'notifications.view_notification' notification_pk=notif.pk as url %}
                                         <a href="{{ url }}"> {% trans 'Amendment' %}</a>
                                     {% else %}
                                         <em>{% trans 'Not submitted yet.' %}</em>
@@ -87,7 +87,7 @@
                         <td>
                             {% if forloop.first %}
                                 {% if sf.pdf_document_id %}
-                                    <a href="{% url 'ecs.core.views.submissions.submission_form_pdf' submission_form_pk=sf.pk %}">
+                                    <a href="{% url 'core.submission.submission_form_pdf' submission_form_pk=sf.pk %}">
                                         <span class="fa fa-file-pdf-o"></span>
                                         {% trans 'Download PDF' %}
                                     </a>
@@ -98,14 +98,14 @@
                                 <br>
                             {% endif %}
                             {% if debug %}
-                                <a href="{% url 'ecs.core.views.submissions.submission_form_pdf_debug' submission_form_pk=sf.pk %}">
+                                <a href="{% url 'core.submission.submission_form_pdf_debug' submission_form_pk=sf.pk %}">
                                     <span class="fa fa-file-pdf-o"></span>
                                     PDF Debug
                                 </a><br>
                             {% endif %}
                             {% if sf == submission.current_submission_form %}
                                 {% if user.profile.is_internal or user == submission.presenter %}
-                                    <a href="{% url 'ecs.core.views.submissions.export_submission' submission_pk=submission.pk %}">
+                                    <a href="{% url 'core.submission.export_submission' submission_pk=submission.pk %}">
                                         <span class="fa fa-file-archive-o"></span>
                                         {% trans "Export" %}
                                     </a><br>
@@ -132,7 +132,7 @@
                 {{ submission.presenter }}{% if organisation %} ({{ organisation }}){% endif %}
             {% endwith %}
             {% if user.profile.is_executive or user == submission.presenter %}
-                <a class="ml-2" href="{% url 'ecs.core.views.submissions.change_submission_presenter' submission_pk=submission.pk %}">
+                <a class="ml-2" href="{% url 'core.submission.change_submission_presenter' submission_pk=submission.pk %}">
                     <span class="fa fa-pencil"></span>
                     {% trans "change" %}
                 </a>
@@ -146,7 +146,7 @@
                 {{ submission.susar_presenter }}{% if organisation %} ({{ organisation }}){% endif %}
             {% endwith %}
             {% if user.profile.is_executive or user == submission.susar_presenter %}
-                <a class="ml-2" href="{% url 'ecs.core.views.submissions.change_submission_susar_presenter' submission_pk=submission.pk %}">
+                <a class="ml-2" href="{% url 'core.submission.change_submission_susar_presenter' submission_pk=submission.pk %}">
                     <span class="fa fa-pencil"></span>
                     {% trans "change" %}
                 </a>
@@ -232,7 +232,7 @@
             {% for meeting in submission.meetings.all %}
                 <div>
                     {% if user.profile.is_internal %}
-                        <a href="{% url 'ecs.meetings.views.meeting_details' meeting_pk=meeting.pk %}">{{ meeting.start|date:'d.m.Y' }} {{ meeting.title }}</a>
+                        <a href="{% url 'meetings.meeting_details' meeting_pk=meeting.pk %}">{{ meeting.start|date:'d.m.Y' }} {{ meeting.title }}</a>
                     {% else %}
                         {{ meeting.start|date:'d.m.Y' }} {{ meeting.title }}{% if not forloop.last %}, {% endif %}
                     {% endif %}
@@ -240,7 +240,7 @@
             {% endfor %}
             {% endsudo %}
             {% if user.profile.is_executive and submission.is_reschedulable %}
-                <a href="{% url 'ecs.meetings.views.reschedule_submission' submission_pk=submission.pk %}">{% trans 'Reschedule' %}</a>
+                <a href="{% url 'meetings.reschedule_submission' submission_pk=submission.pk %}">{% trans 'Reschedule' %}</a>
             {% endif %}
         </td>
     </tr>
@@ -263,7 +263,7 @@
             {% for checklist in external_review_checklists %}
                 <div>{{ checklist }} [{{ checklist.get_status_display }}]
                 {% if checklist.status == 'new' or checklist.status == 'review_fail' %}
-                    <a class="ml-2" href="{% url 'ecs.core.views.submissions.drop_checklist_review' submission_form_pk=submission_form.pk checklist_pk=checklist.pk %}">
+                    <a class="ml-2" href="{% url 'core.submission.drop_checklist_review' submission_form_pk=submission_form.pk checklist_pk=checklist.pk %}">
                         {% trans "drop" %}
                     </a>
                 {% endif %}</div>
@@ -291,5 +291,5 @@
 </table>
 
 {% if user.profile.is_internal %}
-    <div class="mt-4" data-widget-url="{% url 'ecs.core.views.comments.index' submission_pk=submission.pk %}"></div>
+    <div class="mt-4" data-widget-url="{% url 'core.comments.index' submission_pk=submission.pk %}"></div>
 {% endif %}

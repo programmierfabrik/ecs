@@ -10,7 +10,7 @@
 {% block content %}
 <div class="container">
     <div>
-        <a href="{% url 'ecs.meetings.views.meeting_details' meeting_pk=meeting.pk %}#timetable_tab">Zurück zur Zeitplanung für dieses Meeting</a>
+        <a href="{% url 'meetings.meeting_details' meeting_pk=meeting.pk %}#timetable_tab">Zurück zur Zeitplanung für dieses Meeting</a>
     </div>
     <form action="{{ request.path }}" method="post" class="mt-4">
         {% csrf_token %}

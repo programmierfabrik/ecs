@@ -1,6 +1,6 @@
 from django.db import models
 
-from ecs.authorization import AuthorizationManager
+from ecs.authorization.managers import AuthorizationManager
 from ecs.votes.constants import PERMANENT_VOTE_RESULTS, POSITIVE_VOTE_RESULTS, NEGATIVE_VOTE_RESULTS, RECESSED_VOTE_RESULTS
 
 
