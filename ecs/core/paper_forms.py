@@ -181,7 +181,9 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('2.8', 'already_voted', _('There are already votes of other ethics commissions.'), help_text=_('If so, upload the votes on the documents tab')),
     FieldInfo('2.9', 'subject_count', _('Planned number of trial participants total'), help_text=_('all participating centers')),
     # 2.10 Charakterisierung der Prüfungsteilnehmer/innen
+    FieldInfo('2.10.1', 'subject_minage_unit', _('minimum age unit')),
     FieldInfo('2.10.1', 'subject_minage', _('minimum age')),
+    FieldInfo('2.10.2', 'subject_maxage_unit', _('maximum age unit')),
     FieldInfo('2.10.2', 'subject_maxage', _('maximum age')),
 
     FieldInfo('2.10.4', 'subject_males', _('male participants')),

@@ -91,7 +91,7 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
             'project_type_biobank', 'project_type_retrospective', 'project_type_questionnaire', 'project_type_psychological_study', 'project_type_education_context',
             'project_type_non_interventional_study', 'project_type_gender_medicine', 'project_type_misc', 'project_type_nursing_study',
 
-            'subject_count', 'subject_minage', 'subject_maxage', 'subject_noncompetents', 'subject_males', 'subject_females_childbearing',
+            'subject_count', 'subject_minage_unit', 'subject_minage', 'subject_maxage_unit', 'subject_maxage', 'subject_noncompetents', 'subject_males', 'subject_females_childbearing',
             'subject_duration', 'subject_duration_active', 'subject_duration_controls', 'subject_planned_total_duration',
 
             'submitter_contact_gender', 'submitter_contact_title', 'submitter_contact_first_name', 'submitter_contact_last_name',

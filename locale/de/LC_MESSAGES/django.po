@@ -3247,3 +3247,21 @@ msgstr "Datum der letzten Änderung:"
 
 msgid "project_type_non_interventional_study_mpg"
 msgstr "Nicht-interventionelle Studie - nur gem. Medizinprodukterecht"
+
+msgid "hours"
+msgstr "Stunden"
+
+msgid "days"
+msgstr "Tage"
+
+msgid "months"
+msgstr "Monate"
+
+msgid "years"
+msgstr "Jahre"
+
+msgid "minimum age unit"
+msgstr "Mindestalter Einheit"
+
+msgid "maximum age unit"
+msgstr "Höchstalter Einheit"
