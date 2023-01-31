@@ -17,7 +17,7 @@ from ecs.core.models.constants import (
     MIN_EC_NUMBER, SUBMISSION_INFORMATION_PRIVACY_CHOICES, SUBMISSION_LANE_CHOICES, SUBMISSION_LANE_EXPEDITED,
     SUBMISSION_LANE_RETROSPECTIVE_THESIS, SUBMISSION_LANE_LOCALEC, SUBMISSION_LANE_BOARD,
     SUBMISSION_TYPE_CHOICES, SUBMISSION_TYPE_MONOCENTRIC, SUBMISSION_TYPE_MULTICENTRIC_LOCAL,
-    SUBMISSION_TYPE_MULTICENTRIC,
+    SUBMISSION_TYPE_MULTICENTRIC, SUBMISSION_AGE_UNIT, SUBMISSION_AGE_UNIT_YEARS,
 )
 from ecs.votes.constants import PERMANENT_VOTE_RESULTS, RECESSED_VOTE_RESULTS
 from ecs.core.models.managers import (
@@ -337,8 +337,10 @@ class SubmissionForm(models.Model):
     subject_count = models.PositiveIntegerField()
 
     # 2.10
-    subject_minage = models.PositiveIntegerField(null=True, blank=True)
-    subject_maxage = models.PositiveIntegerField(null=True, blank=True)
+    subject_minage = models.PositiveIntegerField(null=True)
+    subject_minage_unit = models.SmallIntegerField(choices=SUBMISSION_AGE_UNIT, default=SUBMISSION_AGE_UNIT_YEARS)
+    subject_maxage = models.PositiveIntegerField(null=True)
+    subject_maxage_unit = models.SmallIntegerField(choices=SUBMISSION_AGE_UNIT, default=SUBMISSION_AGE_UNIT_YEARS)
     subject_noncompetents = models.BooleanField(default=False)
     subject_males = models.BooleanField(default=False)
     subject_females = models.BooleanField(default=False)
