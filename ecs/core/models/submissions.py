@@ -1,38 +1,38 @@
 from datetime import timedelta
 
+from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models.signals import post_save
-from django.contrib.auth.models import User
 from django.dispatch import receiver
-from django.utils.translation import gettext as _, gettext_lazy
-from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
-
+from django.utils.translation import gettext as _, gettext_lazy
 from django_countries import countries
 from django_countries.fields import CountryField
 
 from ecs.authorization.managers import AuthorizationManager
-from ecs.core.models.names import NameField
 from ecs.core.models.constants import (
     MIN_EC_NUMBER, SUBMISSION_INFORMATION_PRIVACY_CHOICES, SUBMISSION_LANE_CHOICES, SUBMISSION_LANE_EXPEDITED,
     SUBMISSION_LANE_RETROSPECTIVE_THESIS, SUBMISSION_LANE_LOCALEC, SUBMISSION_LANE_BOARD,
     SUBMISSION_TYPE_CHOICES, SUBMISSION_TYPE_MONOCENTRIC, SUBMISSION_TYPE_MULTICENTRIC_LOCAL,
-    SUBMISSION_TYPE_MULTICENTRIC, SUBMISSION_AGE_UNIT, SUBMISSION_AGE_UNIT_YEARS,
+    SUBMISSION_TYPE_MULTICENTRIC, SUBMISSION_AGE_UNIT, SUBMISSION_AGE_UNIT_YEARS, SUBMISSION_AGE_UNIT_DAYS,
+    SUBMISSION_AGE_UNIT_MONTHS, SUBMISSION_AGE_UNIT_HOURS
 )
-from ecs.votes.constants import PERMANENT_VOTE_RESULTS, RECESSED_VOTE_RESULTS
 from ecs.core.models.managers import (
     SubmissionManager, SubmissionQuerySet, InvestigatorManager,
     TemporaryAuthorizationManager,
 )
+from ecs.core.models.names import NameField
 from ecs.core.parties import get_involved_parties, get_reviewing_parties, get_presenting_parties
-from ecs.documents.models import Document
-from ecs.users.utils import get_user, create_phantom_user, sudo
 from ecs.core.signals import on_study_change
-from ecs.votes.models import Vote
+from ecs.documents.models import Document
 from ecs.notifications.models import Notification
-from ecs.users.utils import get_current_user
-from ecs.utils.viewutils import render_pdf_context
 from ecs.tasks.models import Task
+from ecs.users.utils import get_current_user
+from ecs.users.utils import get_user, create_phantom_user, sudo
+from ecs.utils.viewutils import render_pdf_context
+from ecs.votes.constants import PERMANENT_VOTE_RESULTS, RECESSED_VOTE_RESULTS
+from ecs.votes.models import Vote
 
 
 class Submission(models.Model):
@@ -609,7 +609,18 @@ class SubmissionForm(models.Model):
     def includes_minors(self):
         if self.subject_minage is None:
             return None
-        return 0 <= self.subject_minage < 18
+        minage_in_years = 0
+        if self.subject_minage_unit == SUBMISSION_AGE_UNIT_HOURS:
+            # First map the hours to a day and divide it by 365 to get a year
+            minage_in_years = self.subject_minage / 24 / 365
+        if self.subject_minage_unit == SUBMISSION_AGE_UNIT_DAYS:
+            minage_in_years = self.subject_minage / 365
+        if self.subject_minage_unit == SUBMISSION_AGE_UNIT_MONTHS:
+            minage_in_years = self.subject_minage / 12
+        if self.subject_minage_unit == SUBMISSION_AGE_UNIT_YEARS:
+            minage_in_years = self.subject_minage
+
+        return 0 <= minage_in_years < 18
     
     @property
     def study_plan_open(self):
