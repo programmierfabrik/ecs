@@ -1074,7 +1074,7 @@ msgstr "Begründung für den Einschluss von Personen aus geschützten Gruppen"
 msgid "e.g. Minor, temporary or permanent non-competent person, if applicable"
 msgstr ""
 "z.B. Minderjährige, temporär oder permanent nicht-einwilligungsfähige "
-"Personen; wenn zutreffend"
+"Personen inklusive Beschreibung des direkten Nutzen des einzelnen oder der Gruppe; wenn zutreffend"
 
 msgid "Description of the recruitment process"
 msgstr "Beschreibung des Rekrutierungsverfahrens"
@@ -1088,12 +1088,21 @@ msgid ""
 msgstr ""
 "Vorgehensweise an der Prüfstelle, zur Erlangung der informierten Einwilligung"
 
+msgid "german_consent_info description"
+msgstr "von Prüfungsteilnehmer*innen bzw. Eltern oder gesetzlichen Vertreter*innen, wenn zutreffend (wer wird informieren und wann, Erfordernis für gesetzliche Vertretung, Zeugen, etc)"
+
 msgid "Risk assessment"
 msgstr "Risikoabschätzung"
+
+msgid "german_risks_info description"
+msgstr "Erläuterungen zu ethischem Nutzen Vorhersehbare Risiken der Behandlung und sonstiger Verfahren, die verwendet werden sollten (inkl. Schmerzen, Unannehmlichkeiten, Verletzung der persönlichen Integrität und Maßnahmen zur Vermeidung und/oder Versorgung von unvorhergesehenen / unerwünschten Ereignissen)"
 
 msgid "Expected benefits for the included test participants"
 msgstr ""
 "Voraussichtliche Vorteile für die eingeschlossenen Prüfungsteilnehmer/innen"
+
+msgid "german_benefits_info description"
+msgstr ""
 
 msgid "Relation between subject and investigator"
 msgstr "Relation zwischen Prüfungsteilnehmer/in und Prüfer/in"
