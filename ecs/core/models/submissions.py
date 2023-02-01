@@ -413,8 +413,8 @@ class SubmissionForm(models.Model):
     german_aftercare_info = models.TextField()
     german_payment_info = models.TextField()
     german_abort_info = models.TextField()
-    german_dataaccess_info = models.TextField(blank=True)
-    german_financing_info = models.TextField(blank=True)
+    german_dataaccess_info = models.TextField()
+    german_financing_info = models.TextField()
     german_additional_info = models.TextField(blank=True)
     
     # 8.1
