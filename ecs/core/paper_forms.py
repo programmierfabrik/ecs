@@ -230,7 +230,7 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('6.3', 'additional_therapy_info', _('Additional information on study-related activities and any necessary deviations from the routine treatment')),
     # 7. Strukturierte Kurzfassung des Projektes (in deutscher Sprache, kein Verweis auf das Protokoll)
     FieldInfo('7.1', 'german_project_title', _('If original project title is not in German: German translation of the title'), short_label=_('project title (kraut-speak)')),
-    FieldInfo('7.2', 'german_summary', _('project summary'), help_text=_('Justification, relevance, design, measures and procedure')),
+    FieldInfo('7.2', 'german_summary', _('project summary')),
     FieldInfo('7.3', 'german_preclinical_results', _('Results of pre-clinical tests or justification for the waiving of pre-clinical tests')),
     FieldInfo('7.4', 'german_primary_hypothesis', _('Primary hypothesis of the study'), help_text=_('if relevant, secondary hypotheses')),
     FieldInfo('7.5', 'german_inclusion_exclusion_crit', _('Relevant in- and exclusion criteria')),

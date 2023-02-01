@@ -1044,10 +1044,7 @@ msgid "project title (kraut-speak)"
 msgstr "Projekttitel (deutsch)"
 
 msgid "project summary"
-msgstr "Zusammenfassung des Projektes"
-
-msgid "Justification, relevance, design, measures and procedure"
-msgstr "Rechtfertigung, Relevanz, Design, Maßnahmen und Vorgehensweise"
+msgstr "Zusammenfassung des Projektes (Rechtfertigung, Relevanz, Design, Maßnahmen und Vorgehensweise)"
 
 msgid ""
 "Results of pre-clinical tests or justification for the waiving of pre-"
