@@ -30,7 +30,7 @@
           {% block tabs %}
             {% for tab in tabs %}
                 <div id="tabs-{{ forloop.counter }}" class="collapse {% if tab.slug != 'measures' %}container{% endif %}">
-                    
+
                     {% if unacknowledged_forms %}
                         <div class="alert alert-info text-center mb-3">
                             <strong>
@@ -47,12 +47,12 @@
                             </div>
                         </div>
                         {% endif %}
-                                            
+
                     {% if tab.slug == 'measures' %}
 
                         {% block section_6_1 %}
                             <h3 class="my-4">
-                                Ausschließlich studienbezogene Maßnahmen 
+                                Ausschließlich studienbezogene Maßnahmen
                                 <small class="text-muted">[6.1]</small>
                             </h3>
                             {% with measure_formset as formset %}
@@ -94,8 +94,14 @@
                             Probandeninformation enthalten sein!
                         </div>
 
+                    {% elif tab.slug == 'outline' %}
+
+                        <div class="alert alert-info text-center mt-3">
+                            Ausschließlich in deutscher Sprache auszufüllen, keine Verweis auf Studienunterlagen zulässig
+                        </div>
+
                     {% elif tab.slug == 'documents' %}
-                    
+
                         {% if not readonly %}
                             {% if not protocol_uploaded %}
                                 <div class="alert alert-danger text-center">
@@ -106,9 +112,9 @@
                         {% else %}
                             {% include "documents/compact_list.html" %}
                         {% endif %}
-                        
+
                     {% elif tab.slug == 'centers' %}
-                    
+
                         <h3 class="my-4">{% trans 'centers (subject)' %}</h3>
 
                         {% if investigator_formset.non_form_errors %}
