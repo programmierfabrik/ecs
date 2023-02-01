@@ -236,7 +236,7 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('7.5', 'german_inclusion_exclusion_crit', _('Relevant in- and exclusion criteria')),
     FieldInfo('7.6', 'german_ethical_info', _('ethical considerations'), help_text=_('ethical considerations description')),
     FieldInfo('7.7', 'german_protected_subjects_info', _('Justification for the inclusion of persons from protected groups'), help_text=_('e.g. Minor, temporary or permanent non-competent person, if applicable')),
-    FieldInfo('7.8', 'german_recruitment_info', _('Description of the recruitment process')),
+    FieldInfo('7.8', 'german_recruitment_info', _('Description of the recruitment process'), help_text=_('german_recruitment_info description')),
     FieldInfo('7.9', 'german_consent_info', _('Approach at test center(s), for informing and  obtaining an informed consent of candidates')),
     FieldInfo('7.10', 'german_risks_info', _('Risk assessment')),
     FieldInfo('7.11', 'german_benefits_info', _('Expected benefits for the included test participants')),

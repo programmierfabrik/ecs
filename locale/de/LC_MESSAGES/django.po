@@ -1079,6 +1079,9 @@ msgstr ""
 msgid "Description of the recruitment process"
 msgstr "Beschreibung des Rekrutierungsverfahrens"
 
+msgid "german_recruitment_info description"
+msgstr "Alle zur Verwendung bestimmte Materialien, zB Inserate inkl Layout müssen beigelegt werden"
+
 msgid ""
 "Approach at test center(s), for informing and  obtaining an informed consent "
 "of candidates"
