@@ -1065,6 +1065,9 @@ msgstr "Relevante Ein- und Ausschlusskriterien"
 msgid "ethical considerations"
 msgstr "Ethische Überlegungen"
 
+msgid "ethical considerations description"
+msgstr "Identifizieren und beschreiben Sie alle möglicherweise auftretenden Probleme. Beschreiben Sie den möglichen Wissenszuwachs, der durch die Studie erzielt werden soll, seine Bedeutung, sowie mögliche Risiken für Schädigungen oder Belastungen der Prüfungsteilnehmer*innen. Legen Sie Ihre eigene Bewertung des Nutzen/Risiko-Verhältnisses dar"
+
 msgid "Justification for the inclusion of persons from protected groups"
 msgstr "Begründung für den Einschluss von Personen aus geschützten Gruppen"
 
