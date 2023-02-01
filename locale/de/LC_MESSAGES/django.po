@@ -1197,7 +1197,7 @@ msgstr ""
 "Interessen der Prüferin/des Prüfers/der Prüfer"
 
 msgid "additional information"
-msgstr "Weitere Informationen"
+msgstr "Weitere Informationen (wenn erforderlich)"
 
 msgid "Open / Blind / Double-blind"
 msgstr "Offen / Blind / Doppelblind"
