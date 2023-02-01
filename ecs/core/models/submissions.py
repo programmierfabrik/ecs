@@ -409,7 +409,7 @@ class SubmissionForm(models.Model):
     german_concurrent_study_info = models.TextField()
     german_sideeffects_info = models.TextField()
     german_statistical_info = models.TextField(blank=True)
-    german_dataprotection_info = models.TextField(blank=True)
+    german_dataprotection_info = models.TextField()
     german_aftercare_info = models.TextField()
     german_payment_info = models.TextField()
     german_abort_info = models.TextField()
