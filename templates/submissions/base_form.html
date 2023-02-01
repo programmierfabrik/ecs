@@ -47,8 +47,12 @@
                             </div>
                         </div>
                         {% endif %}
-
-                    {% if tab.slug == 'measures' %}
+                    {% if tab.slug == 'key_data' %}
+                        <div class="alert alert-warning text-center mt-3">
+                            Achtung: Ab 31.01.2023 können Anträge auf Klinische Prüfungen von Arzneimitteln nur mehr im CTIS gestellt werden.
+                            Für klinische Prüfungen, die vor dem 31.01.2022 begonnen worden sind und für Anträge, die bis 31.01.2023 nach der "alten Rechtslage" gestellt werden, gilt die "alte Rechtslage". Die Studien sind nach der "alten Rechtslage" bis 31.01.2025 zu beenden oder rechtzeitig (vor 31.01.2025) zu transitieren.Ab 31.01.2025 gilt nur mehr das "neue AMG" idF BGBl. I Nr. 8/2022.
+                        </div>
+                    {% elif tab.slug == 'measures' %}
 
                         {% block section_6_1 %}
                             <h3 class="my-4">
