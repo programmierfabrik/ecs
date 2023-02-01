@@ -63,8 +63,8 @@ SUBMISSION_FORM_TABS = (
     ]),
     Tab('outline', _('outline'), [
         (_('outline'), [
-            'german_project_title', 'project_title',
-            'german_summary', 'german_preclinical_results', 'german_primary_hypothesis', 'german_inclusion_exclusion_crit',
+            'german_summary', 'german_project_title', 'project_title',
+            'german_preclinical_results', 'german_primary_hypothesis', 'german_inclusion_exclusion_crit',
             'german_ethical_info', 'german_protected_subjects_info', 'german_recruitment_info', 'german_consent_info', 'german_risks_info',
             'german_benefits_info', 'german_relationship_info', 'german_concurrent_study_info', 'german_sideeffects_info',
             'german_statistical_info', 'german_dataprotection_info', 'german_aftercare_info', 'german_payment_info', 'german_abort_info', 'german_dataaccess_info',
