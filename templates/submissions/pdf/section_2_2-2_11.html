@@ -95,11 +95,23 @@
         <p>
             <span>
                 2.10.1 Mindestalter:
-                <span class="value"> {{ submission_form.subject_minage|default_if_none:'-' }} </span>
+                <span class="value">
+                    {% if submission_form.subject_minage is None %}
+                        -
+                    {% else %}
+                        {{ submission_form.subject_minage }} {{ submission_form.subject_minage_unit|age_unit }}
+                    {% endif %}
+                </span>
             </span>
             <span class="indented">
                 2.10.2 Höchstalter:
-                <span class="value"> {{ submission_form.subject_maxage|default_if_none:'-' }} </span>
+                <span class="value">
+                    {% if submission_form.subject_maxage is None %}
+                        -
+                    {% else %}
+                        {{ submission_form.subject_maxage }} {{ submission_form.subject_maxage_unit|age_unit }}
+                    {% endif %}
+                </span>
             </span>
         </p>
 
