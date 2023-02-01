@@ -121,6 +121,10 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
             'study_plan_biometric_planning', 'study_plan_statistics_implementation', 'study_plan_dataprotection_choice', 'study_plan_dataprotection_reason',
             'study_plan_dataprotection_dvr', 'study_plan_dataprotection_anonalgoritm', 'submitter_email',
         ) + AMG_FIELDS + MPG_FIELDS + INSURANCE_FIELDS
+        # Change select to radio buttons
+        widgets = {
+            'project_type_education_context': forms.RadioSelect(attrs={'class': 'radio'})
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
