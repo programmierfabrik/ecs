@@ -306,7 +306,7 @@ class SubmissionForm(models.Model):
     project_type_biobank = models.BooleanField(default=False)
     project_type_retrospective = models.BooleanField(default=False)
     project_type_questionnaire = models.BooleanField(default=False)
-    project_type_education_context = models.SmallIntegerField(null=True, blank=True, choices=[(1, 'Dissertation'), (2, 'Diplomarbeit')])
+    project_type_education_context = models.SmallIntegerField(null=True, blank=True, choices=[(1, 'Dissertation'), (2, 'Diplomarbeit'), (3, 'Bachelorarbeit'), (4, 'Masterarbeit'), (5, 'PhD-Arbeit')])
     project_type_misc = models.TextField(blank=True)
     project_type_psychological_study = models.BooleanField(default=False)
     project_type_nursing_study = models.BooleanField(default=False)
