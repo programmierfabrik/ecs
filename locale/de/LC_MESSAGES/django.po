@@ -850,8 +850,8 @@ msgstr ""
 "z.B.: immunologische Untersuchung, Epidemiologische Untersuchung, Diätetik, "
 "etc."
 
-msgid "Dissertation / Thesis"
-msgstr "Diplomarbeit / Dissertation"
+msgid "extra information"
+msgstr "Zusatzinformation"
 
 msgid "Register"
 msgstr ""
