@@ -349,6 +349,7 @@ class SubmissionForm(models.Model):
     subject_males = models.BooleanField(default=False)
     subject_females = models.BooleanField(default=False)
     subject_childbearing = models.BooleanField(default=False)
+    subject_divers = models.BooleanField(default=False)
     
     # 2.11
     subject_duration = models.CharField(max_length=200)

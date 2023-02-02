@@ -930,6 +930,9 @@ msgstr "weibliche Teilnehmerinnen"
 msgid "women of childbearing age"
 msgstr "gebärfähige Frauen"
 
+msgid "diverse participants"
+msgstr "Divers"
+
 msgid "non competent participants"
 msgstr "Nicht-persönlich-Einwilligungsfähige"
 

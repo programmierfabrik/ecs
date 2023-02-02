@@ -74,6 +74,7 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
         ('2', _('Yes, but only childbearing')),
         ('3', _('No')),
     ))
+    subject_divers = NullBooleanField()
 
     is_new_medtech_law = NullBooleanFieldNewMedtechLaw(required=False)
 
@@ -91,7 +92,7 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
             'project_type_biobank', 'project_type_retrospective', 'project_type_questionnaire', 'project_type_psychological_study', 'project_type_education_context',
             'project_type_non_interventional_study', 'project_type_gender_medicine', 'project_type_misc', 'project_type_nursing_study',
 
-            'subject_count', 'subject_minage_unit', 'subject_minage', 'subject_maxage_unit', 'subject_maxage', 'subject_noncompetents', 'subject_noncompetent_unconscious', 'subject_noncompetent_guarded', 'subject_noncompetent_minor', 'subject_noncompetent_emergency_study', 'subject_males', 'subject_females_childbearing',
+            'subject_count', 'subject_minage_unit', 'subject_minage', 'subject_maxage_unit', 'subject_maxage', 'subject_noncompetents', 'subject_noncompetent_unconscious', 'subject_noncompetent_guarded', 'subject_noncompetent_minor', 'subject_noncompetent_emergency_study', 'subject_males', 'subject_females_childbearing', 'subject_divers',
             'subject_duration', 'subject_duration_active', 'subject_duration_controls', 'subject_planned_total_duration',
 
             'submitter_contact_gender', 'submitter_contact_title', 'submitter_contact_first_name', 'submitter_contact_last_name',
@@ -169,7 +170,7 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
         if cleaned_data.get('substance_preexisting_clinical_tries') == True:
             require_fields(self, ('substance_p_c_t_phase', 'substance_p_c_t_period', 'substance_p_c_t_application_type', 'substance_p_c_t_gcp_rules', 'substance_p_c_t_final_report',))
 
-        require_fields(self, ('subject_males',))
+        require_fields(self, ('subject_males', 'subject_divers',))
 
         if any(cleaned_data.get(f, False) for f in ('project_type_reg_drug', 'project_type_non_reg_drug', 'project_type_medical_device')):
             require_fields(self, ('submission_type',))
