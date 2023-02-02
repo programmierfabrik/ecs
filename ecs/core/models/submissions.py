@@ -664,12 +664,25 @@ class SubmissionForm(models.Model):
             return None
 
     @property
-    def project_type_education_context_phd(self):
+    def project_type_education_context_dissertation(self):
         return self.project_type_education_context == 1
 
     @property
-    def project_type_education_context_master(self):
+    def project_type_education_context_thesis(self):
         return self.project_type_education_context == 2
+
+
+    @property
+    def project_type_education_context_bachelor(self):
+        return self.project_type_education_context == 3
+
+    @property
+    def project_type_education_context_master(self):
+        return self.project_type_education_context == 4
+
+    @property
+    def project_type_education_context_phd(self):
+        return self.project_type_education_context == 5
 
     @property
     def measures_study_specific(self):
