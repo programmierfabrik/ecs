@@ -261,6 +261,8 @@ LOGGING = {
     },
 }
 
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 2500
+
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # ecs settings
