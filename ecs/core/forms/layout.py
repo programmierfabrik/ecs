@@ -75,7 +75,7 @@ SUBMISSION_FORM_TABS = (
         (_('sponsor'), [
             'sponsor_name', # 1.5.1
             'sponsor_address', 'sponsor_zip_code', 'sponsor_city', 'sponsor_country_code', # 1.5.2
-            'sponsor_contact_gender', 'sponsor_contact_title', 'sponsor_contact_first_name', 'sponsor_contact_last_name', # 1.5.3
+            'sponsor_contact_gender', 'sponsor_contact_title', 'sponsor_contact_suffix_title', 'sponsor_contact_first_name', 'sponsor_contact_last_name', # 1.5.3
             'sponsor_phone', # 1.5.4
             'sponsor_fax', # 1.5.5
             'sponsor_email', # 1.5.6
@@ -85,7 +85,7 @@ SUBMISSION_FORM_TABS = (
         (_('invoice recipient'), [
             'invoice_name',
             'invoice_address', 'invoice_zip_code', 'invoice_city',
-            'invoice_contact_gender', 'invoice_contact_title', 'invoice_contact_first_name', 'invoice_contact_last_name',
+            'invoice_contact_gender', 'invoice_contact_title', 'invoice_contact_suffix_title', 'invoice_contact_first_name', 'invoice_contact_last_name',
             'invoice_phone', 'invoice_fax', 'invoice_email',
             'invoice_uid',
         ]),

@@ -99,11 +99,11 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
             'submitter_organisation', 'submitter_jobtitle', 'submitter_is_coordinator',
             'submitter_is_main_investigator', 'submitter_is_sponsor', 'submitter_is_authorized_by_sponsor', 'sponsor_name',
 
-            'sponsor_contact_gender', 'sponsor_contact_title', 'sponsor_contact_first_name', 'sponsor_contact_last_name',
+            'sponsor_contact_gender', 'sponsor_contact_title', 'sponsor_contact_suffix_title', 'sponsor_contact_first_name', 'sponsor_contact_last_name',
             'sponsor_address', 'sponsor_zip_code',
             'sponsor_city', 'sponsor_country_code', 'sponsor_phone', 'sponsor_fax', 'sponsor_email', 'sponsor_uid', 'invoice_differs_from_sponsor',
 
-            'invoice_name', 'invoice_contact_gender', 'invoice_contact_title', 'invoice_contact_first_name', 'invoice_contact_last_name',
+            'invoice_name', 'invoice_contact_gender', 'invoice_contact_title', 'invoice_contact_suffix_title', 'invoice_contact_first_name', 'invoice_contact_last_name',
             'invoice_address', 'invoice_zip_code', 'invoice_city', 'invoice_phone', 'invoice_fax', 'invoice_email', 'invoice_uid',
 
             'additional_therapy_info',

@@ -777,7 +777,10 @@ msgid "sex of contact person"
 msgstr "Anrede der Kontaktperson"
 
 msgid "title of contact person"
-msgstr "Titel der Kontaktperson"
+msgstr "Vorangesteller titel der Kontaktperson"
+
+msgid "suffix title of contact person"
+msgstr "Nachgestellter titel der Kontaktperson"
 
 msgid "first name of contact person"
 msgstr "Vorname der Kontaktperson"
