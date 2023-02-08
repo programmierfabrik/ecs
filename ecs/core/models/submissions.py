@@ -275,6 +275,7 @@ class SubmissionForm(models.Model):
     sponsor_address = models.CharField(max_length=60)
     sponsor_zip_code = models.CharField(max_length=10)
     sponsor_city = models.CharField(max_length=80)
+    sponsor_country_code = models.CharField(max_length=10)
     sponsor_phone = models.CharField(max_length=30)
     sponsor_fax = models.CharField(max_length=30, blank=True)
     sponsor_email = models.EmailField()

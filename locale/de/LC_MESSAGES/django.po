@@ -791,6 +791,9 @@ msgstr "Postleitzahl"
 msgid "city"
 msgstr "Stadt"
 
+msgid "country code"
+msgstr "Länderkürzel"
+
 msgid "telephone"
 msgstr "Telefon"
 

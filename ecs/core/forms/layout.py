@@ -74,7 +74,7 @@ SUBMISSION_FORM_TABS = (
     Tab('sponsor', _('sponsor'), [
         (_('sponsor'), [
             'sponsor_name', # 1.5.1
-            'sponsor_address', 'sponsor_zip_code', 'sponsor_city', # 1.5.2
+            'sponsor_address', 'sponsor_zip_code', 'sponsor_city', 'sponsor_country_code', # 1.5.2
             'sponsor_contact_gender', 'sponsor_contact_title', 'sponsor_contact_first_name', 'sponsor_contact_last_name', # 1.5.3
             'sponsor_phone', # 1.5.4
             'sponsor_fax', # 1.5.5

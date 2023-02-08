@@ -128,6 +128,7 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('1.5.2', 'sponsor_address', _('address')),
     FieldInfo('1.5.2', 'sponsor_zip_code', None, short_label=_('postal code')),
     FieldInfo('1.5.2', 'sponsor_city', None, short_label=_('city')),
+    FieldInfo('1.5.2', 'sponsor_country_code', None, short_label=_('country code')),
     FieldInfo('1.5.4', 'sponsor_phone', _('telephone')),
     FieldInfo('1.5.5', 'sponsor_fax', _('fax')),
     FieldInfo('1.5.6', 'sponsor_email', _('e-mail')),

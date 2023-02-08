@@ -398,7 +398,7 @@ _differs = {
             'documents', 'project_title', 'eudract_number', 'sponsor_name',
             'sponsor_contact_gender', 'sponsor_contact_title',
             'sponsor_contact_first_name', 'sponsor_contact_last_name',
-            'sponsor_address', 'sponsor_zip_code', 'sponsor_city',
+            'sponsor_address', 'sponsor_zip_code', 'sponsor_city', 'sponsor_country_code',
             'sponsor_phone', 'sponsor_fax', 'sponsor_email', 'sponsor_uid',
             'invoice_name', 'invoice_contact_gender', 'invoice_contact_title',
             'invoice_contact_first_name', 'invoice_contact_last_name',
