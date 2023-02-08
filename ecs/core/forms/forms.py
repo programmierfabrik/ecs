@@ -95,7 +95,7 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
             'subject_count', 'subject_minage_unit', 'subject_minage', 'subject_maxage_unit', 'subject_maxage', 'subject_noncompetents', 'subject_noncompetent_unconscious', 'subject_noncompetent_guarded', 'subject_noncompetent_minor', 'subject_noncompetent_emergency_study', 'subject_males', 'subject_females_childbearing', 'subject_divers',
             'subject_duration', 'subject_duration_active', 'subject_duration_controls', 'subject_planned_total_duration',
 
-            'submitter_contact_gender', 'submitter_contact_title', 'submitter_contact_first_name', 'submitter_contact_last_name',
+            'submitter_contact_gender', 'submitter_contact_title', 'submitter_contact_suffix_title', 'submitter_contact_first_name', 'submitter_contact_last_name',
             'submitter_organisation', 'submitter_jobtitle', 'submitter_is_coordinator',
             'submitter_is_main_investigator', 'submitter_is_sponsor', 'submitter_is_authorized_by_sponsor', 'sponsor_name',
 

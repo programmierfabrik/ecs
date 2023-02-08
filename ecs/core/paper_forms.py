@@ -308,7 +308,8 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('8.6.3', 'study_plan_dataprotection_anonalgoritm', _('How is the anonymization done?')),
     # Name und Unterschrift der Antragstellerin/des Antragstellers
     FieldInfo('9.1', 'submitter_contact_gender', None, short_label=_('salutation')),
-    FieldInfo('9.1', 'submitter_contact_title', None, short_label=_('title')),
+    FieldInfo('9.1', 'submitter_contact_title', None, short_label=_('prefix title')),
+    FieldInfo('9.1', 'submitter_contact_suffix_title', None, short_label=_('suffix title')),
     FieldInfo('9.1', 'submitter_contact_first_name', None, short_label=_('first name')),
     FieldInfo('9.1', 'submitter_contact_last_name', None, short_label=_('last name')),
     FieldInfo(None, 'submitter_email', None, short_label=_('e-mail')),

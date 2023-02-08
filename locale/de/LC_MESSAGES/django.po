@@ -1337,8 +1337,11 @@ msgstr "Wie erfolgt die Anonymisierung?"
 msgid "salutation"
 msgstr "Anrede"
 
-msgid "title"
-msgstr "Titel"
+msgid "prefix title"
+msgstr "Vorangestellter Titel"
+
+msgid "suffix title"
+msgstr "Nachgestellter Titel"
 
 msgid "first name"
 msgstr "Vorname"
