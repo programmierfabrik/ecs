@@ -473,6 +473,7 @@ class SubmissionForm(models.Model):
     submitter = models.ForeignKey(User, null=True, related_name='submitted_submission_forms', on_delete=models.CASCADE)
     submitter_contact = NameField(required=('gender', 'first_name', 'last_name',))
     submitter_email = models.EmailField(blank=False)
+    submitter_phone_number = models.CharField(max_length=30)
     submitter_organisation = models.CharField(max_length=180)
     submitter_jobtitle = models.CharField(max_length=130)
     submitter_is_coordinator = models.BooleanField(default=False)

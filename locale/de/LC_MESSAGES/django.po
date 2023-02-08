@@ -3293,3 +3293,6 @@ msgstr "Minderjährige"
 
 msgid "noncompetent emergency_study"
 msgstr "Notfallstudien"
+
+msgid "phone number"
+msgstr "Telefonnummer"

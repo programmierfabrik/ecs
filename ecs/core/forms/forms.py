@@ -120,7 +120,7 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
             'study_plan_population_intention_to_treat', 'study_plan_population_per_protocol', 'study_plan_interim_evaluation', 'study_plan_abort_crit',
             'study_plan_planned_statalgorithm', 'study_plan_dataquality_checking', 'study_plan_datamanagement',
             'study_plan_biometric_planning', 'study_plan_statistics_implementation', 'study_plan_dataprotection_choice', 'study_plan_dataprotection_reason',
-            'study_plan_dataprotection_dvr', 'study_plan_dataprotection_anonalgoritm', 'submitter_email',
+            'study_plan_dataprotection_dvr', 'study_plan_dataprotection_anonalgoritm', 'submitter_email', 'submitter_phone_number',
         ) + AMG_FIELDS + MPG_FIELDS + INSURANCE_FIELDS
         # Change select to radio buttons
         widgets = {

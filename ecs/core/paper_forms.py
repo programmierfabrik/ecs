@@ -313,6 +313,7 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('9.1', 'submitter_contact_first_name', None, short_label=_('first name')),
     FieldInfo('9.1', 'submitter_contact_last_name', None, short_label=_('last name')),
     FieldInfo(None, 'submitter_email', None, short_label=_('e-mail')),
+    FieldInfo(None, 'submitter_phone_number', None, short_label=_('phone number')),
 
     FieldInfo('9.2', 'submitter_organisation', _('Institution / Company')),
     FieldInfo('9.3', 'submitter_jobtitle', _('position')),

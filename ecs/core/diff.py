@@ -475,7 +475,7 @@ _differs = {
             'study_plan_dataprotection_anonalgoritm',
             'submitter_contact_gender', 'submitter_contact_title', 'submitter_contact_suffix_title',
             'submitter_contact_first_name', 'submitter_contact_last_name',
-            'submitter_email', 'submitter_organisation', 'submitter_jobtitle',
+            'submitter_email', 'submitter_phone_number', 'submitter_organisation', 'submitter_jobtitle',
             'submitter_is_coordinator', 'submitter_is_main_investigator',
             'submitter_is_sponsor', 'submitter_is_authorized_by_sponsor',
             'participatingcenternonsubject_set',
