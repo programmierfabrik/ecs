@@ -1535,7 +1535,7 @@ msgid "patient information"
 msgstr "Patienteninformation"
 
 msgid "insurancecertificate"
-msgstr "Versicherungsbestätigung"
+msgstr "Versicherungsunterlagen (Polizze, Bestätigung, Bedingungen)"
 
 msgid "study protocol"
 msgstr "Studienprotokoll (Prüfplan)"
@@ -1574,10 +1574,19 @@ msgid "Manual"
 msgstr "Gebrauchsanweisung"
 
 msgid "Declaration of conformity"
-msgstr "Konformitätserklärung"
+msgstr "Konformitätserklärung (CE-Zertifizierung)"
 
 msgid "other"
 msgstr "Sonstige"
+
+msgid "gcp-certificate"
+msgstr "GCP-Zertifikat"
+
+msgid "statistic / statistic documents"
+msgstr "Statistik / Statistikunterlagen"
+
+msgid "recruitment material"
+msgstr "Rekrutierungsmaterial"
 
 msgid "Submission Form"
 msgstr "Einreichformular"

@@ -16,7 +16,7 @@ def document_types():
         Args(_("insurancecertificate"), "insurancecertificate"),
         Args(_("study protocol"), "protocol"),
         Args(_("Investigator's Brochure"), "investigatorsbrochure", is_downloadable=False),
-        Args(_("Amendment"), "amendment"),
+        Args(_("Amendment"), "amendment", is_hidden=True),
         Args(_("Curriculum Vitae (CV)"), "cv"),
         Args(_("Conflict of Interest"), "conflictofinterest"),
         Args(_("Case Report Form (CRF)"), "crf"),
@@ -28,6 +28,9 @@ def document_types():
         Args(_("Manual"), "manual"),
         Args(_("Declaration of conformity"), "conformity_declaration"),
         Args(_("other"), "other"),
+        Args(_("gcp-certificate"), "gcp_certificate"),
+        Args(_("statistic / statistic documents"), "statistics"),
+        Args(_("recruitment material"), "recruitment_material"),
 
         # internal document types; not user visible
         Args(_("Submission Form"), "submissionform", is_hidden=True),
