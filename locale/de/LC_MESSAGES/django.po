@@ -1355,19 +1355,6 @@ msgstr "Institution/ Firma"
 msgid "position"
 msgstr "Position"
 
-msgid "The submitter is a coordinating examiner (multicentric study)"
-msgstr ""
-"Antragsteller/in ist koordinierende/r Prüfer/in (multizentrische Studie)"
-
-msgid "The submitter is a principal investigator (monocentric study)"
-msgstr "Antragsteller/in ist Hauptprüfer/in (monozentrische Studie)"
-
-msgid "The submitter is a sponsor / representative of the sponsor"
-msgstr "Antragsteller/in ist Sponsor bzw. Vertreter/in des Sponsors"
-
-msgid "The submitter is a person/organization authorized by the sponsor"
-msgstr "Antragsteller/in ist eine vom Sponsor autorisierte Person/Organisation"
-
 msgid "study site"
 msgstr "Prüfzentrum"
 
