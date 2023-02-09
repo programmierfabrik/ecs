@@ -476,10 +476,6 @@ class SubmissionForm(models.Model):
     submitter_phone_number = models.CharField(max_length=30)
     submitter_organisation = models.CharField(max_length=180)
     submitter_jobtitle = models.CharField(max_length=130)
-    submitter_is_coordinator = models.BooleanField(default=False)
-    submitter_is_main_investigator = models.BooleanField(default=False)
-    submitter_is_sponsor = models.BooleanField(default=False)
-    submitter_is_authorized_by_sponsor = models.BooleanField(default=False)
     
     def save(self, **kwargs):
         if not self.presenter_id:
