@@ -1529,7 +1529,7 @@ msgid "Reopen"
 msgstr "Neu öffnen"
 
 msgid "Covering Letter"
-msgstr "Covering Letter"
+msgstr "Cover Letter"
 
 msgid "patient information"
 msgstr "Patienteninformation"
