@@ -222,6 +222,32 @@
                 }
             });
 
+            new ecs.FormFieldController({
+                fields: '#id_non_applicant_submitter_contact_gender,' +
+                        '#id_non_applicant_submitter_contact_title,' +
+                        '#id_non_applicant_submitter_contact_suffix_title,' +
+                        '#id_non_applicant_submitter_contact_first_name,' +
+                        '#id_non_applicant_submitter_contact_last_name,' +
+                        '#id_non_applicant_submitter_email,' +
+                        '#id_non_applicant_submitter_phone_number,' +
+                        '#id_non_applicant_submitter_organisation,' +
+                        '#id_non_applicant_submitter_jobtitle',
+                sources: '#id_submitter_differs_from_applicant',
+                auto: function() {
+                    var requiredFields =
+                        '#id_non_applicant_submitter_contact_gender,' +
+                        '#id_non_applicant_submitter_email,' +
+                        '#id_non_applicant_submitter_phone_number,' +
+                        '#id_non_applicant_submitter_organisation,' +
+                        '#id_non_applicant_submitter_jobtitle';
+
+                    var require = this.sources.is(':checked');
+                    $('#tabs-5 .fieldset_2').toggle(require);
+                    this.setDisabled(!require);
+                    this.requireField($(requiredFields), require);
+                }
+            });
+
             $('#save-button').click(function(ev){
                 ev.preventDefault();
                 ecs.mainForm.save();

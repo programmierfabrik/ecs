@@ -317,6 +317,17 @@ FormInfo(SubmissionForm, fields=(
 
     FieldInfo('9.2', 'submitter_organisation', _('Institution / Company')),
     FieldInfo('9.3', 'submitter_jobtitle', _('position')),
+
+    FieldInfo('9.1', 'non_applicant_submitter_contact_gender', None, short_label=_('salutation')),
+    FieldInfo('9.1', 'non_applicant_submitter_contact_title', None, short_label=_('prefix title')),
+    FieldInfo('9.1', 'non_applicant_submitter_contact_suffix_title', None, short_label=_('suffix title')),
+    FieldInfo('9.1', 'non_applicant_submitter_contact_first_name', None, short_label=_('first name')),
+    FieldInfo('9.1', 'non_applicant_submitter_contact_last_name', None, short_label=_('last name')),
+    FieldInfo(None, 'non_applicant_submitter_email', None, short_label=_('e-mail')),
+    FieldInfo(None, 'non_applicant_submitter_phone_number', None, short_label=_('phone number')),
+
+    FieldInfo('9.2', 'non_applicant_submitter_organisation', _('Institution / Company')),
+    FieldInfo('9.3', 'non_applicant_submitter_jobtitle', _('position')),
 ))
 
 

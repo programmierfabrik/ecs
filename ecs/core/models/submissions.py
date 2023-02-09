@@ -477,6 +477,12 @@ class SubmissionForm(models.Model):
     submitter_organisation = models.CharField(max_length=180)
     submitter_jobtitle = models.CharField(max_length=130)
     
+    non_applicant_submitter_contact = NameField()
+    non_applicant_submitter_email = models.EmailField(blank=True)
+    non_applicant_submitter_phone_number = models.CharField(max_length=30, blank=True)
+    non_applicant_submitter_organisation = models.CharField(max_length=180, blank=True)
+    non_applicant_submitter_jobtitle = models.CharField(max_length=130, blank=True)
+    
     def save(self, **kwargs):
         if not self.presenter_id:
             self.presenter = get_current_user()

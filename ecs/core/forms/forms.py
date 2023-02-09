@@ -52,6 +52,13 @@ INVOICE_REQUIRED_FIELDS = (
     'invoice_zip_code', 'invoice_city', 'invoice_phone', 'invoice_email',
 )
 
+NON_APPLICANT_SUBMITTER_REQUIRED_FIELDS = (
+    'non_applicant_submitter_contact_gender',
+    'non_applicant_submitter_contact_first_name', 'non_applicant_submitter_contact_last_name',
+    'non_applicant_submitter_email', 'non_applicant_submitter_phone_number',
+    'non_applicant_submitter_organisation', 'non_applicant_submitter_jobtitle',
+)
+
 class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
     substance_preexisting_clinical_tries = NullBooleanField(required=False)
     substance_p_c_t_gcp_rules = NullBooleanField(required=False)
@@ -80,6 +87,7 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
 
     # non model fields (required for validation)
     invoice_differs_from_sponsor = forms.BooleanField(required=False, label=_('The account beneficiary is not the sponsor'))
+    submitter_differs_from_applicant = forms.BooleanField(required=False, label=_('The submitter is not the applicant'))
 
     class Meta:
         model = SubmissionForm
@@ -96,8 +104,16 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
             'subject_duration', 'subject_duration_active', 'subject_duration_controls', 'subject_planned_total_duration',
 
             'submitter_contact_gender', 'submitter_contact_title', 'submitter_contact_suffix_title', 'submitter_contact_first_name', 'submitter_contact_last_name',
-            'submitter_organisation', 'submitter_jobtitle', 'sponsor_name',
+            'submitter_organisation', 'submitter_jobtitle',
 
+            'non_applicant_submitter_contact_gender', 'non_applicant_submitter_contact_title',
+            'non_applicant_submitter_contact_suffix_title',
+            'non_applicant_submitter_contact_first_name', 'non_applicant_submitter_contact_last_name',
+            'non_applicant_submitter_email', 'non_applicant_submitter_phone_number',
+            'non_applicant_submitter_organisation', 'non_applicant_submitter_jobtitle',
+            'submitter_differs_from_applicant',
+
+            'sponsor_name',
             'sponsor_contact_gender', 'sponsor_contact_title', 'sponsor_contact_suffix_title', 'sponsor_contact_first_name', 'sponsor_contact_last_name',
             'sponsor_address', 'sponsor_zip_code',
             'sponsor_city', 'sponsor_country_code', 'sponsor_phone', 'sponsor_fax', 'sponsor_email', 'sponsor_uid', 'invoice_differs_from_sponsor',
@@ -154,6 +170,9 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
 
         if cleaned_data.get('invoice_differs_from_sponsor', False):
             require_fields(self, INVOICE_REQUIRED_FIELDS)
+            
+        if cleaned_data.get('submitter_differs_from_applicant', False):
+            require_fields(self, NON_APPLICANT_SUBMITTER_REQUIRED_FIELDS)
 
         if cleaned_data.get('study_plan_interim_evaluation', False):
             require_fields(self, ('study_plan_abort_crit',))

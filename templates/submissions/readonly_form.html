@@ -89,7 +89,7 @@
                 </ul>
             </div>
             {% endif %}
-            
+
             <div id="tabs_votes" class="collapse">
                 <ul class="nav nav-tabs flex-wrap mb-3 tab_headers">
                     <li class="nav-item"><a class="nav-link" href="#published_votes_tab">{% trans "Published Votes" %}</a></li>
@@ -328,7 +328,7 @@
         {% endif %}
     </div>
     {% endfor %}
-    
+
     <div id="communication_tab" class="container collapse">
         <div data-widget-url="{% url 'communication.list_threads' submission_pk=submission.pk %}"></div>
         <a class="btn btn-outline-primary" href="{% url 'communication.new_thread' submission_pk=submission.pk %}" target="_blank">{% trans "Write a new message" %}</a>
@@ -356,7 +356,7 @@
 
 {% block jsbottom %}
     {{ block.super }}
-    <script type="text/javascript"> 
+    <script type="text/javascript">
         $(function(){
             {% if categorization_form %}
                 var input_medcat = $('#{{ categorization_form.medical_categories.id_for_label }}');
@@ -426,6 +426,9 @@
 
             if (!$('#id_invoice_differs_from_sponsor').is(':checked'))
                 $('#tabs-4 .fieldset_2').hide();
+
+            if (!$('#submitter_differs_from_applicant').is(':checked'))
+                $('#tabs-5 .fieldset_2').hide();
 
             $('#tabs_submission a.nav-link').each(function() {
                 var container = $($(this).attr('href'));

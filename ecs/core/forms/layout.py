@@ -91,10 +91,15 @@ SUBMISSION_FORM_TABS = (
         ]),
     ]),
     Tab('applicant', _('applicant'), [
-        (_('applicant'), [
+        (_('submitter'), [
             'submitter_contact_gender', 'submitter_contact_title', 'submitter_contact_suffix_title', 'submitter_contact_first_name', 'submitter_contact_last_name', 'submitter_email', 'submitter_phone_number',
-            'submitter_organisation', 'submitter_jobtitle',
+            'submitter_organisation', 'submitter_jobtitle', 'submitter_differs_from_applicant',
         ]),
+        (_('applicant'), [
+            'non_applicant_submitter_contact_gender', 'non_applicant_submitter_contact_title', 'non_applicant_submitter_contact_suffix_title',
+            'non_applicant_submitter_contact_first_name', 'non_applicant_submitter_contact_last_name', 'non_applicant_submitter_email', 'non_applicant_submitter_phone_number',
+            'non_applicant_submitter_organisation', 'non_applicant_submitter_jobtitle',
+        ])
     ]),
     Tab('amg', _('AMG'), [
         (_('drug trial'), ['eudract_number', 'pharma_checked_substance', 'pharma_reference_substance']),

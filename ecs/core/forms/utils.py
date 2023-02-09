@@ -37,6 +37,7 @@ def submission_form_to_dict(sf):
     d['ethics_commissions'] = list(sf.ethics_commissions.values_list('pk', flat=True))
     d['documents'] = list(sf.documents.values_list('pk', flat=True))
     d['invoice_differs_from_sponsor'] = bool(sf.invoice_name)
+    d['submitter_differs_from_applicant'] = bool(sf.non_applicant_submitter_email)
     d['subject_females_childbearing'] = str((
         (True, True),
         (True, False),

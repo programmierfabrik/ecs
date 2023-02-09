@@ -67,6 +67,9 @@ msgstr "EudraCT-Nr."
 msgid "applicant"
 msgstr "Antragsteller"
 
+msgid "submitter"
+msgstr "Einreicher"
+
 msgid "clinic"
 msgstr "Klinik"
 
@@ -350,6 +353,9 @@ msgstr "Ja, aber nur gebärfähige Frauen"
 
 msgid "The account beneficiary is not the sponsor"
 msgstr "Der Sponsor ist nicht der Rechnungsempfänger"
+
+msgid "The submitter is not the applicant"
+msgstr "Der Antragsteller ist nicht der Einreicher"
 
 msgid "No information given"
 msgstr "Keine Angaben"
@@ -741,7 +747,7 @@ msgid "study reference"
 msgstr "Studienbezug"
 
 msgid "number/dose"
-msgstr "Anzahl/Dosis"
+msgstr "Anzahl und Dosis"
 
 msgid "period"
 msgstr "Zeitraum"
@@ -1435,6 +1441,9 @@ msgstr "Kontaktperson"
 
 msgid "same as sponsor"
 msgstr "wie Sponsor"
+
+msgid "same as applicant"
+msgstr "wie Einreicher"
 
 msgid "XLS-Export done"
 msgstr "XLS-Export fertig"

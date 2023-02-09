@@ -377,6 +377,14 @@ class SubmissionFormDiffer(ModelDiffer):
                 fi = paper_forms.get_field_info(self.model, name, None)
                 self.label_map[name] = '{}: {} {}'.format(
                     _('sponsor'), fi.number, fi.label)
+            elif name.startswith('submitter_'):
+                fi = paper_forms.get_field_info(self.model, name, None)
+                self.label_map[name] = '{}: {} {}'.format(
+                    _('applicant'), fi.number, fi.label)
+            elif name.startswith('non_applicant_'):
+                fi = paper_forms.get_field_info(self.model, name, None)
+                self.label_map[name] = '{}: {} {}'.format(
+                    _('submitter'), fi.number, fi.label)
 
     def diff_field(self, name, old, new, **kwargs):
         if name in ('substance_registered_in_countries', 'substance_p_c_t_countries'):
@@ -476,6 +484,11 @@ _differs = {
             'submitter_contact_gender', 'submitter_contact_title', 'submitter_contact_suffix_title',
             'submitter_contact_first_name', 'submitter_contact_last_name',
             'submitter_email', 'submitter_phone_number', 'submitter_organisation', 'submitter_jobtitle',
+            'non_applicant_submitter_contact_gender', 'non_applicant_submitter_contact_title',
+            'non_applicant_submitter_contact_suffix_title',
+            'non_applicant_submitter_contact_first_name', 'non_applicant_submitter_contact_last_name',
+            'non_applicant_submitter_email', 'non_applicant_submitter_phone_number',
+            'non_applicant_submitter_organisation', 'non_applicant_submitter_jobtitle',
             'participatingcenternonsubject_set',
             'foreignparticipatingcenter_set', 'investigators', 'measures',
             'nontesteduseddrug_set', 'is_new_medtech_law'
