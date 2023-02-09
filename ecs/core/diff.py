@@ -442,7 +442,7 @@ _differs = {
             'medtech_manufacturer', 'medtech_certified_for_exact_indications',
             'medtech_certified_for_other_indications', 'medtech_ce_symbol',
             'medtech_manual_included', 'medtech_technical_safety_regulations',
-            'medtech_departure_from_regulations', 'insurance_not_required',
+            'medtech_departure_from_regulations', 'insurance_submit_later', 'insurance_not_required',
             'insurance_name', 'insurance_address', 'insurance_phone',
             'insurance_contract_number', 'insurance_validity',
             'additional_therapy_info', 'german_project_title', 'german_summary',

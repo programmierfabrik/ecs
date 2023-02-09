@@ -177,6 +177,20 @@
                 }
             });
 
+
+            new ecs.FormFieldController({
+                fields: '#id_insurance_name,' +
+                        '#id_insurance_address,' +
+                        '#id_insurance_phone,' +
+                        '#id_insurance_contract_number,' +
+                        '#id_insurance_validity,' +
+                        '#id_insurance_not_required',
+                sources: '#id_insurance_submit_later',
+                auto: function(values) {
+                    this.setDisabled(this.sources.is(':checked'));
+                }
+            });
+
             new ecs.FormFieldController({
                 fields: '#id_insurance_name,' +
                         '#id_insurance_address,' +
@@ -184,8 +198,10 @@
                         '#id_insurance_contract_number,' +
                         '#id_insurance_validity',
                 sources: '#id_insurance_not_required',
-                auto: function(values){
-                    this.setDisabled(this.sources.is(':checked'));
+                auto: function(values) {
+                    if (!this.sources.prop('disabled')) {
+                        this.setDisabled(this.sources.is(':checked'));
+                    }
                 }
             });
 

@@ -1031,6 +1031,9 @@ msgstr "Allfällige Abweichungen von den o.a. Bestimmungen (Normen)"
 msgid "No insurance is required"
 msgstr "Eine Versicherung ist nicht erforderlich"
 
+msgid "insurance will be submitted later"
+msgstr "Versicherung wird nachgereicht"
+
 msgid "insurance company"
 msgstr "Versicherungsgesellschaft"
 

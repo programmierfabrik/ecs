@@ -225,6 +225,7 @@ FormInfo(SubmissionForm, fields=(
     # 5. Angaben zur Versicherung (gemäß §32 Abs.1 Z.11 und Z.12 und Abs.2 AMG; §§47 und 48 MPG)
     # Diese Angaben müssen in der Patienten- / Probandeninformation enthalten sein!
     FieldInfo(None, 'insurance_not_required', _('No insurance is required')),
+    FieldInfo(None, 'insurance_submit_later', _('insurance will be submitted later')),
     FieldInfo('5.1.1', 'insurance_name', _('insurance company')),
     FieldInfo('5.1.2', 'insurance_address', _('address')),
     FieldInfo('5.1.3', 'insurance_phone', _('phone')),

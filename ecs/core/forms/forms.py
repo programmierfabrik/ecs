@@ -44,7 +44,7 @@ MPG_FIELDS = (
 )
 
 INSURANCE_FIELDS = (
-    'insurance_not_required', 'insurance_name', 'insurance_address', 'insurance_phone', 'insurance_contract_number', 'insurance_validity'
+    'insurance_submit_later', 'insurance_not_required', 'insurance_name', 'insurance_address', 'insurance_phone', 'insurance_contract_number', 'insurance_validity'
 )
 
 INVOICE_REQUIRED_FIELDS = (
@@ -165,7 +165,8 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
         if cleaned_data.get('project_type_medical_device', False):
             require_fields(self, MPG_FIELDS)
 
-        if any(cleaned_data.get(f, False) for f in ('project_type_medical_device_without_ce', 'project_type_reg_drug', 'project_type_non_reg_drug')):
+        if any(cleaned_data.get(f, False) for f in ('project_type_medical_device_without_ce', 'project_type_reg_drug', 'project_type_non_reg_drug'))\
+            and cleaned_data.get('insurance_submit_later', False) is not True:
             require_fields(self, INSURANCE_FIELDS)
 
         if cleaned_data.get('invoice_differs_from_sponsor', False):

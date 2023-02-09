@@ -147,7 +147,7 @@ SUBMISSION_FORM_TABS = (
     ]),
     Tab('insurance', _('insurance'), [
         (_('insurance'), [
-            'insurance_not_required',
+            'insurance_submit_later', 'insurance_not_required',
             'insurance_name', 'insurance_address', 'insurance_phone', 'insurance_contract_number', 'insurance_validity',
         ]),
     ]),
