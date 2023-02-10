@@ -114,7 +114,7 @@ def setup(subject):
 def make_cert(subject, pkcs12_file, days=None, passphrase=''):
     with _workdir() as workdir:
         with open(os.path.join(workdir, 'serial'), 'w') as f:
-            f.write('{:02x}'.format(Certificate.get_serial()))
+            f.write('{:04x}'.format(Certificate.get_serial()))
 
         key_file = os.path.join(workdir, 'key.pem')
         csr_file = os.path.join(workdir, 'x.csr')
