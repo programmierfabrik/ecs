@@ -783,10 +783,10 @@ msgid "sex of contact person"
 msgstr "Anrede der Kontaktperson"
 
 msgid "title of contact person"
-msgstr "Vorangesteller titel der Kontaktperson"
+msgstr "Vorangesteller Titel der Kontaktperson"
 
 msgid "suffix title of contact person"
-msgstr "Nachgestellter titel der Kontaktperson"
+msgstr "Nachgestellter Titel der Kontaktperson"
 
 msgid "first name of contact person"
 msgstr "Vorname der Kontaktperson"
