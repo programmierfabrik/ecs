@@ -161,7 +161,7 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('2.1.5', 'project_type_basic_research', _('Non-therapeutic biomedical research involving human subjects (basic research)')),
     FieldInfo('2.1.6', 'project_type_genetic_study', _('Genetic survey')),
     FieldInfo('2.1.7', 'project_type_misc', _('Other, please specify'), help_text=_('e.g. Dietetics, epidemiology, etc.')),
-    FieldInfo('2.1.8/9', 'project_type_education_context', _('extra information')),
+    FieldInfo('2.1.8/9/19/20/21', 'project_type_education_context', _('extra information')),
     FieldInfo('2.1.10', 'project_type_register', _('Register')),
     FieldInfo('2.1.11', 'project_type_biobank', _('Biobank')),
     FieldInfo('2.1.12', 'project_type_retrospective', _('Retrospective data analysis')),
