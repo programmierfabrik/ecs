@@ -126,7 +126,7 @@ ecs.InvestigatorFormset.prototype = {
             else
                 a.addClass('btn-outline-primary');
 
-            var org = form.find('input[name$="-organisation"]');
+            var org = form.find('textarea[name$="-organisation"]');
             org.change(function() {
                 a.text(org.val().trim() || ('Zentrum ' + (i + 1)));
             });
@@ -280,7 +280,7 @@ ecs.setupForms = function(){
 
         setup.tabController = tabController;
     }
-    
+
     ecs.setupFormFieldHelpers();
 
     return setup;
