@@ -797,7 +797,7 @@ class Investigator(models.Model):
     user = models.ForeignKey(User, null=True, related_name='investigations', on_delete=models.CASCADE)
     contact = NameField(required=('gender', 'first_name', 'last_name',))
     organisation = models.TextField()
-    phone = models.CharField(max_length=30, blank=True)
+    phone = models.CharField(max_length=30)
     mobile = models.CharField(max_length=30, blank=True)
     fax = models.CharField(max_length=30, blank=True)
     email = models.EmailField(blank=False)
