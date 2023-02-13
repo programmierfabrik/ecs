@@ -348,7 +348,7 @@ FormInfo(Investigator, fields=(
     FieldInfo('10.8', 'specialist', _('specialist for')),
     FieldInfo('10.9', 'certified', _('certified')),
     #FieldInfo('10.10', '', u'Präklinische Qualifikation'),  # TODO one is missing, this one or 10.9 - see also Bug #4737
-    FieldInfo('11.', 'subject_count', _('number of participants')),
+    FieldInfo('11.', 'subject_count', _('number of participants'), _('subject_count description')),
 ))
 
 FormInfo(InvestigatorEmployee, fields=(

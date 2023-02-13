@@ -1398,7 +1398,10 @@ msgid "certified"
 msgstr "Prüfärztekurs"
 
 msgid "number of participants"
-msgstr "Anzahl Teilnehmer/innen"
+msgstr "Teilnehmer/innen an diesem Zentrum"
+
+msgid "subject_count description"
+msgstr "Anzahl jener Personen, die in diesem Zentrum in das Forschungsvorhaben eingeschlossen werden sollen"
 
 msgid "Ms/Mr"
 msgstr "Fr/Hr"
