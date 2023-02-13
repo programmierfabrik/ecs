@@ -1368,19 +1368,19 @@ msgid "study site"
 msgstr "Prüfzentrum"
 
 msgid "principal investigator"
-msgstr "Koordinierende/r Prüfärztin/arzt"
+msgstr "Koordinierende/r Prüfer/in"
 
 msgid "salutation of the Investigator"
-msgstr "Anrede des Prüfarztes"
+msgstr "Anrede des Prüfers"
 
 msgid "title of the Investigator"
-msgstr "Titel des Prüfarztes"
+msgstr "Titel des Prüfers"
 
 msgid "first name of the Investigator"
-msgstr "Vorname des Prüfarztes"
+msgstr "Vorname des prüfers"
 
 msgid "last name of the Investigator"
-msgstr "Nachname des Prüfarztes"
+msgstr "Nachname des Prüfers"
 
 msgid "mobile"
 msgstr "\"Pieps\"/Mobil"
