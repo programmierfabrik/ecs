@@ -145,9 +145,9 @@
                             <div class="investigator {% if form.close_date %}closed{% endif %}" id="investigator{{ forloop.counter0 }}">
                                 {% if form.non_field_errors %}
                                     <div class="errors">
-                                        <ul class="errorlist">
+                                        <ul class="errorlist" style="padding: 0">
                                             {% for error in form.non_field_errors %}
-                                                <li>{{ error }}</li>
+                                                <li style="margin-left: 0">{{ error }}</li>
                                             {% endfor %}
                                         </ul>
                                     </div>
