@@ -88,7 +88,7 @@ FormInfo(Document, fields=(
 ))
 
 FormInfo(ForeignParticipatingCenter, fields=(
-    FieldInfo(None, 'name', _('name')),
+    FieldInfo(None, 'name', _('country/center')),
     FieldInfo(None, 'investigator_name', _('investigator')),
 ))
 

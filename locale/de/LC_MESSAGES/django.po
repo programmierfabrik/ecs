@@ -3307,3 +3307,6 @@ msgstr "Notfallstudien"
 
 msgid "phone number"
 msgstr "Telefonnummer"
+
+msgid "country/center"
+msgstr "Land/Prüfzentrum"
