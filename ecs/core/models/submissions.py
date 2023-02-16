@@ -845,7 +845,7 @@ class InvestigatorEmployee(models.Model):
     title = models.CharField(max_length=40, blank=True)
     firstname = models.CharField(max_length=40)
     surname = models.CharField(max_length=40)
-    organisation = models.CharField(max_length=80)
+    organisation = models.TextField()
 
     class Meta:
         ordering = ['id']
