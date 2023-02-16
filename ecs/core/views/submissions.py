@@ -755,7 +755,45 @@ def create_submission_form(request):
             formset.full_clean()        # work around django bug: full_clean does not get called in is_valid if total_form_count==0
 
         formsets_valid = all([formset.is_valid() for formset in formsets.values()]) # non-lazy validation of formsets
-        valid = form.is_valid() and formsets_valid and protocol_uploaded and not 'upload' in request.POST
+
+        investigator_employee_valid = True
+        investigatoremployee_formset = formsets.get('investigatoremployee')
+        investigators_formset = formsets.get('investigator')
+        if investigatoremployee_formset.is_valid() and investigators_formset.is_valid():
+            # validate if prüfer is mitarbeiter
+            # First group by index, so we can later check tab by tab
+            investigatoremployee_group_by_index = {}
+            for investigatoremployee in investigatoremployee_formset:
+                investigator_index = investigatoremployee.cleaned_data['investigator_index']
+                if investigatoremployee_group_by_index.get(investigator_index) is None:
+                    investigatoremployee_group_by_index[investigator_index] = []
+                investigatoremployee_group_by_index[investigator_index].append(investigatoremployee)
+            
+            # Go tab by tab (investigator) and compare the 'Prüfer' with the mitarbeiter
+            for investigator_index in investigatoremployee_group_by_index:
+                investigator = investigators_formset[investigator_index]
+                investigatoremployee = investigatoremployee_group_by_index[investigator_index]
+                investigator_data = investigator.cleaned_data
+                investigator_gender = investigator_data['contact_gender']
+                investigator_title = investigator_data['contact_title']
+                investigator_first_name = investigator_data['contact_first_name']
+                investigator_last_name = investigator_data['contact_last_name']
+                
+                for employee in investigatoremployee:
+                    employee_data = employee.cleaned_data
+                    employee_gender = employee_data['sex']
+                    employee_title = employee_data['title']
+                    employee_first_name = employee_data['firstname']
+                    employee_last_name = employee_data['surname']
+
+                    if employee_gender == investigator_gender and \
+                        employee_title == investigator_title and \
+                        employee_first_name == investigator_first_name and \
+                        employee_last_name == investigator_last_name:
+                        investigator_employee_valid = False
+                        investigator.add_error(None, 'Prüfer darf nicht bei den Mitarbeitern dabei sein')
+
+        valid = form.is_valid() and formsets_valid and investigator_employee_valid and protocol_uploaded and not 'upload' in request.POST
         if valid and submission and not notification_type and \
             not submission.current_submission_form.allows_resubmission(request.user):
 
