@@ -49,7 +49,7 @@ INSURANCE_FIELDS = (
 
 INVOICE_REQUIRED_FIELDS = (
     'invoice_name', 'invoice_contact_gender', 'invoice_contact_first_name', 'invoice_contact_last_name', 'invoice_address',
-    'invoice_zip_code', 'invoice_city', 'invoice_phone', 'invoice_email',
+    'invoice_zip_code', 'invoice_city', 'invoice_country_code', 'invoice_phone', 'invoice_email',
 )
 
 NON_APPLICANT_SUBMITTER_REQUIRED_FIELDS = (
@@ -119,7 +119,7 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
             'sponsor_city', 'sponsor_country_code', 'sponsor_phone', 'sponsor_fax', 'sponsor_email', 'sponsor_uid', 'invoice_differs_from_sponsor',
 
             'invoice_name', 'invoice_contact_gender', 'invoice_contact_title', 'invoice_contact_suffix_title', 'invoice_contact_first_name', 'invoice_contact_last_name',
-            'invoice_address', 'invoice_zip_code', 'invoice_city', 'invoice_phone', 'invoice_fax', 'invoice_email', 'invoice_uid',
+            'invoice_address', 'invoice_zip_code', 'invoice_city', 'invoice_country_code', 'invoice_phone', 'invoice_fax', 'invoice_email', 'invoice_uid',
 
             'additional_therapy_info',
             'german_summary', 'german_preclinical_results', 'german_primary_hypothesis', 'german_inclusion_exclusion_crit', 'german_ethical_info',

@@ -410,7 +410,7 @@ _differs = {
             'sponsor_phone', 'sponsor_fax', 'sponsor_email', 'sponsor_uid',
             'invoice_name', 'invoice_contact_gender', 'invoice_contact_title', 'invoice_contact_suffix_title',
             'invoice_contact_first_name', 'invoice_contact_last_name',
-            'invoice_address', 'invoice_zip_code', 'invoice_city',
+            'invoice_address', 'invoice_zip_code', 'invoice_city', 'invoice_country_code',
             'invoice_phone', 'invoice_fax', 'invoice_email', 'invoice_uid',
             'project_type_non_reg_drug', 'project_type_reg_drug',
             'project_type_reg_drug_within_indication',

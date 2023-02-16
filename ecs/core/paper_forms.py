@@ -143,6 +143,7 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('1.5.2', 'invoice_address', _('address')),
     FieldInfo('1.5.2', 'invoice_zip_code', None, short_label=_('postal code')),
     FieldInfo('1.5.2', 'invoice_city', None, short_label=_('city')),
+    FieldInfo('1.5.2', 'invoice_country_code', None, short_label=_('country code')),
     FieldInfo('1.5.4', 'invoice_phone', _('telephone')),
     FieldInfo('1.5.5', 'invoice_fax', _('fax')),
     FieldInfo('1.5.6', 'invoice_email', _('e-mail')),

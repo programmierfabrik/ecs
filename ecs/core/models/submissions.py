@@ -286,6 +286,7 @@ class SubmissionForm(models.Model):
     invoice_address = models.CharField(max_length=60, blank=True)
     invoice_zip_code = models.CharField(max_length=10, blank=True)
     invoice_city = models.CharField(max_length=80, blank=True)
+    invoice_country_code = models.CharField(max_length=10, blank=True)
     invoice_phone = models.CharField(max_length=50, blank=True)
     invoice_fax = models.CharField(max_length=45, blank=True)
     invoice_email = models.EmailField(blank=True)
