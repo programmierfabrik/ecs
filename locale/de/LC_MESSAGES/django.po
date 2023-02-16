@@ -1092,7 +1092,7 @@ msgstr "Begründung für den Einschluss von Personen aus geschützten Gruppen"
 msgid "e.g. Minor, temporary or permanent non-competent person, if applicable"
 msgstr ""
 "z.B. Minderjährige, temporär oder permanent nicht-einwilligungsfähige "
-"Personen inklusive Beschreibung des direkten Nutzen des einzelnen oder der Gruppe; wenn zutreffend"
+"Personen inklusive Beschreibung des direkten Nutzen des Einzelnen oder der Gruppe; wenn zutreffend"
 
 msgid "Description of the recruitment process"
 msgstr "Beschreibung des Rekrutierungsverfahrens"
