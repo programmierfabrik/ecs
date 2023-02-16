@@ -65,7 +65,12 @@
 {% for inv in submission_form.investigators.all %}
     <div class="pb_after"></div>
 
-    <h2 class="main_part">Teil B</h2>
+    <div class="title">
+      <div class="ec_number_right">
+          EK Nr: {{ submission_form.submission|ec_number }} Version {{ submission_form.version }}
+      </div>
+      <h1>Teil B</h1>
+    </div>
 
     {% include "submissions/pdf/part_b.html" %}
 {% endfor %}
