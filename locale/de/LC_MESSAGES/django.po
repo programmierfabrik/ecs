@@ -1535,7 +1535,7 @@ msgid "Covering Letter"
 msgstr "Cover Letter"
 
 msgid "patient information"
-msgstr "Patienteninformation"
+msgstr "Teilnehmerinformation (ICF, Kontakdtdatenliste)"
 
 msgid "insurancecertificate"
 msgstr "Versicherungsunterlagen (Polizze, Bestätigung, Bedingungen)"
