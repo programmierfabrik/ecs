@@ -753,7 +753,7 @@ msgid "period"
 msgstr "Zeitraum"
 
 msgid "total"
-msgstr "Insgesamt"
+msgstr "Insgesamt (pro Teilnehmer)"
 
 msgid "Generic Name"
 msgstr "Generic Name"
