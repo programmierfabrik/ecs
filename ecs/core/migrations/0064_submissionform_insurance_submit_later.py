@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0064_submissionform_non_applicant_submitter_contact_first_name_and_more'),
+        ('core', '0063_remove_submissionform_submitter_is_authorized_by_sponsor_and_more'),
     ]
 
     operations = [

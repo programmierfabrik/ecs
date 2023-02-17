@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0069_submissionform_invoice_country_code'),
+        ('core', '0068_submissionform_invoice_country_code'),
     ]
 
     operations = [

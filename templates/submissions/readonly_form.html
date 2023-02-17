@@ -427,9 +427,6 @@
             if (!$('#id_invoice_differs_from_sponsor').is(':checked'))
                 $('#tabs-4 .fieldset_2').hide();
 
-            if (!$('#submitter_differs_from_applicant').is(':checked'))
-                $('#tabs-5 .fieldset_2').hide();
-
             $('#tabs_submission a.nav-link').each(function() {
                 var container = $($(this).attr('href'));
                 container.find('input[type="checkbox"]:not(:checked)')

@@ -160,18 +160,6 @@
         {% endwith %}
     </tr>
     <tr>
-        <th class="text-nowrap">Antragsteller ist nicht Einreicher:</th>
-        {% with submission_form.id_non_applicant_submitter_contact as organisation %}
-            <td>
-            {% if organisation %}
-                {{ organisation }}
-            {% else %}
-                <em>{% trans "same as applicant" %}</em>
-            {% endif %}
-            </td>
-        {% endwith %}
-    </tr>
-    <tr>
         <th class="text-nowrap">Sponsor</th>
         {% with submission_form.sponsor_name as organisation %}
             <td>{{ submission_form.sponsor }}{% if organisation %} ({{ organisation }}){% endif %}</td>
