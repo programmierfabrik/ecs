@@ -865,6 +865,10 @@ msgstr ""
 msgid "extra information"
 msgstr "Zusatzinformation"
 
+msgid "extra information description"
+msgstr "Nur anzukreuzen wenn der Antrag ausschließlich die oben angegebene Abschlussarbeit zum Inhalt hat. "
+"Der/die VerfasserIn der Abschlussarbeit ist zwingend im Reiter Antragsteller anzugeben."
+
 msgid "Register"
 msgstr ""
 
