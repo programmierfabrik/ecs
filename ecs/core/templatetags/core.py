@@ -1,14 +1,13 @@
 import re
 
+from django.conf import settings
+from django.core.cache import cache
 from django.template import Library, Node, TemplateSyntaxError
 from django.utils.translation import gettext as _
-from django.core.cache import cache
-from django.conf import settings
 
 from ecs.core import paper_forms
 from ecs.core.models import Submission, AdvancedSettings, EthicsCommission
 from ecs.docstash.models import DocStash
-
 
 register = Library()
 
@@ -19,6 +18,7 @@ register.filter('multiply', lambda a, b: a * b)
 register.filter('euro', lambda val: ("€ %.2f" % float(val)).replace('.', ','))
 register.filter('is_none', lambda obj: obj is None)
 
+
 @register.filter
 def getitem(obj, name):
     try:
@@ -26,11 +26,13 @@ def getitem(obj, name):
     except KeyError:
         return None
 
+
 @register.filter
 def ec_number(submission):
     if submission:
         return submission.get_ec_number_display()
     return None
+
 
 @register.filter
 def get_field_info(formfield):
@@ -38,6 +40,7 @@ def get_field_info(formfield):
         return paper_forms.get_field_info(model=formfield.form._meta.model, name=formfield.name)
     else:
         return None
+
 
 @register.filter
 def form_value(form, fieldname):
@@ -49,7 +52,8 @@ def form_value(form, fieldname):
         return form.initial[fieldname]
     except KeyError:
         return None
-        
+
+
 @register.filter
 def simple_timedelta_format(td):
     if not td.seconds:
@@ -64,7 +68,8 @@ def simple_timedelta_format(td):
     if seconds:
         result.append("%ss" % seconds)
     return " ".join(result)
-    
+
+
 @register.filter
 def smart_truncate(s, n):
     if not s:
@@ -72,7 +77,7 @@ def smart_truncate(s, n):
     if len(s) <= n:
         return s
     return "%s …" % re.match(r'(.{,%s})\b' % (n - 2), s).group(0)
-    
+
 
 @register.filter
 def has_submissions(user):
@@ -84,13 +89,16 @@ def has_submissions(user):
         ).exists()
     )
 
+
 @register.filter
 def has_assigned_submissions(user):
     return Submission.objects.reviewed_by_user(user).exists()
 
+
 @register.filter
 def is_docstash(obj):
     return isinstance(obj, DocStash)
+
 
 @register.filter
 def yes_no_unknown(v):
@@ -100,6 +108,7 @@ def yes_no_unknown(v):
         return _('no')
     else:
         return _('Unknown')
+
 
 @register.filter
 def last_recessed_vote(top):
@@ -111,7 +120,8 @@ def last_recessed_vote(top):
 @register.filter
 def allows_amendments_by(sf, user):
     return sf.allows_amendments(user)
-    
+
+
 @register.filter
 def allows_edits_by(sf, user):
     return sf.allows_edits(user)
@@ -131,6 +141,7 @@ class BreadcrumbsNode(Node):
             crumbs.sort(key=lambda x: crumb_pks.index(x.pk))
             context[self.varname] = crumbs
         return ''
+
 
 @register.tag
 def get_breadcrumbs(parser, token):
