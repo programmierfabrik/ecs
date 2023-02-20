@@ -497,7 +497,7 @@ _differs = {
     Investigator: ModelDiffer(Investigator,
         fields=(
             'organisation', 'ethics_commission', 'main', 'contact_gender',
-            'contact_title', 'contact_first_name', 'contact_last_name', 'phone',
+            'contact_title', 'contact_suffix_title', 'contact_first_name', 'contact_last_name', 'phone',
             'mobile', 'fax', 'email', 'jus_practicandi', 'specialist',
             'certified', 'subject_count', 'user', 'employees',
         ),

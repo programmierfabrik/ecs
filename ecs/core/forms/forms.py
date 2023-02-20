@@ -256,7 +256,7 @@ class InvestigatorForm(forms.ModelForm):
     class Meta:
         model = Investigator
         fields = ('organisation', 'subject_count', 'ethics_commission', 'main',
-            'contact_gender', 'contact_title', 'contact_first_name', 'contact_last_name',
+            'contact_gender', 'contact_title', 'contact_suffix_title', 'contact_first_name', 'contact_last_name',
             'phone', 'mobile', 'fax', 'email', 'jus_practicandi', 'specialist', 'certified',)
         widgets = {
             'email': StrippedTextInput(),

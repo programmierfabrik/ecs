@@ -328,6 +328,7 @@ FormInfo(Investigator, fields=(
     FieldInfo('', 'main', _('principal investigator')),
     FieldInfo('10.1', 'contact_gender', None, short_label=_('salutation of the Investigator')),
     FieldInfo('10.1', 'contact_title', None, short_label=_('title of the Investigator')),
+    FieldInfo('10.1', 'contact_suffix_title', None, short_label=_('suffix title of the Investigator')),
     FieldInfo('10.1', 'contact_first_name', None, short_label=_('first name of the Investigator')),
     FieldInfo('10.1', 'contact_last_name', None, short_label=_('last name of the Investigator')),
     FieldInfo('10.3', 'phone', _('phone')),

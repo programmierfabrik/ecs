@@ -1385,7 +1385,10 @@ msgid "salutation of the Investigator"
 msgstr "Anrede des Prüfers"
 
 msgid "title of the Investigator"
-msgstr "Titel des Prüfers"
+msgstr "Vorangestellter Titel des Prüfers"
+
+msgid "suffix title of the Investigator"
+msgstr "Nachgestellter Titel des Prüfers"
 
 msgid "first name of the Investigator"
 msgstr "Vorname des prüfers"
