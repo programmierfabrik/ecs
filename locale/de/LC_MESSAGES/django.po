@@ -720,7 +720,11 @@ msgid "PDF-file"
 msgstr "PDF-Datei"
 
 msgid "file name"
-msgstr "Dateiname"
+msgstr "Dokumentenname"
+
+msgid "file name description"
+msgstr "Der Dokumentenname soll so gewählt werden, dass Rückschlüsse auf das Dokument möglich sind (eindeutig identifizierbare Bezeichnung!)"
+
 
 msgid "version"
 msgstr "Version"
