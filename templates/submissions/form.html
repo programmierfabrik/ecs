@@ -156,8 +156,7 @@
             });
 
             new ecs.FormFieldController({
-                fields: '#id_study_plan_dataprotection_reason,' +
-                        '#id_study_plan_dataprotection_dvr',
+                fields: '#id_study_plan_dataprotection_reason',
                 sources: '#id_study_plan_dataprotection_choice',
                 auto: function() {
                     var personal = this.sources.val() == 'personal';

@@ -137,7 +137,7 @@ SUBMISSION_FORM_TABS = (
             'study_plan_biometric_planning', 'study_plan_statistics_implementation',
         ]),
         (_('information privacy'), [
-            'study_plan_dataprotection_choice', 'study_plan_dataprotection_reason', 'study_plan_dataprotection_dvr', 'study_plan_dataprotection_anonalgoritm',
+            'study_plan_dataprotection_choice', 'study_plan_dataprotection_reason', 'study_plan_dataprotection_anonalgoritm',
         ]),
     ]),
     Tab('insurance', _('insurance'), [
