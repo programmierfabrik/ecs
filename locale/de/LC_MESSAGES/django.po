@@ -1352,7 +1352,7 @@ msgid "DPR-Nr."
 msgstr "DVR-Nummer"
 
 msgid "How is the anonymization done?"
-msgstr "Wie erfolgt die Anonymisierung?"
+msgstr "Wie erfolgt die Psuedo- oder Anonymisierung?"
 
 msgid "salutation"
 msgstr "Anrede"
