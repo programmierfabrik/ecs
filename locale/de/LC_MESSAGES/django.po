@@ -2589,7 +2589,7 @@ msgid "edit meeting"
 msgstr "Sitzung bearbeiten"
 
 msgid "Deadline for Thesis Submission"
-msgstr "Letzter Einreichtermin für Diplomarbeiten/Dissertationen"
+msgstr "Letzter Einreichtermin für Abschlussarbeiten"
 
 msgid "Deadline for Submission"
 msgstr "Letzter Einreichtermin"
