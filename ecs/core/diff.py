@@ -508,7 +508,7 @@ _differs = {
         }
     ),
     InvestigatorEmployee: ModelDiffer(InvestigatorEmployee,
-        fields=('sex', 'title', 'firstname', 'surname', 'organisation'),
+        fields=('sex', 'title', 'suffix_title', 'firstname', 'surname', 'organisation'),
         match_fields=('firstname', 'surname'),
         identify='full_name',
     ),

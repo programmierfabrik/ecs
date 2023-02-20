@@ -776,6 +776,7 @@ def create_submission_form(request):
                 investigator_data = investigator.cleaned_data
                 investigator_gender = investigator_data['contact_gender']
                 investigator_title = investigator_data['contact_title']
+                investigator_suffix_title = investigator_data['contact_suffix_title']
                 investigator_first_name = investigator_data['contact_first_name']
                 investigator_last_name = investigator_data['contact_last_name']
                 
@@ -783,11 +784,13 @@ def create_submission_form(request):
                     employee_data = employee.cleaned_data
                     employee_gender = employee_data['sex']
                     employee_title = employee_data['title']
+                    employee_suffix_title = employee_data['suffix_title']
                     employee_first_name = employee_data['firstname']
                     employee_last_name = employee_data['surname']
 
                     if employee_gender == investigator_gender and \
                         employee_title == investigator_title and \
+                        employee_suffix_title == investigator_suffix_title and \
                         employee_first_name == investigator_first_name and \
                         employee_last_name == investigator_last_name:
                         investigator_employee_valid = False

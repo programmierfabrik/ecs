@@ -344,7 +344,8 @@ FormInfo(Investigator, fields=(
 
 FormInfo(InvestigatorEmployee, fields=(
     FieldInfo(None, 'sex', _('Ms/Mr')),
-    FieldInfo(None, 'title', _('title')),
+    FieldInfo(None, 'title', _('prefix title')),
+    FieldInfo(None, 'suffix_title', _('suffix title')),
     FieldInfo(None, 'firstname', _('first name')),
     FieldInfo(None, 'surname', _('last name')),
     FieldInfo(None, 'organisation', _('Institution')),

@@ -838,6 +838,7 @@ class InvestigatorEmployee(models.Model):
 
     sex = models.CharField(max_length=1, choices=[("m", gettext_lazy("Mr")), ("f", gettext_lazy("Ms"))])
     title = models.CharField(max_length=40, blank=True)
+    suffix_title = models.CharField(max_length=40, blank=True)
     firstname = models.CharField(max_length=40)
     surname = models.CharField(max_length=40)
     organisation = models.TextField()
