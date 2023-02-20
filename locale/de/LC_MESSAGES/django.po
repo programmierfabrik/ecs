@@ -2421,6 +2421,9 @@ msgstr "Neue Meldung"
 msgid "New Meeting"
 msgstr "Neue Sitzung"
 
+msgid "Waring maintenance: begins at %(begin)s and ends at %(end)s"
+msgstr "Achtung um %(begin)s beginnt der Wartungszeitraum und endet um %(end)s!"
+
 msgid "Click here to get help."
 msgstr "Klicken Sie hier, um zur Online-Hilfe zu gelangen."
 

@@ -116,6 +116,13 @@
                     {% endif %}
                 </ul>
                 <ul class="nav navbar-nav ml-lg-auto mr-1">
+                    {% is_maintenance as is_maintenance %}
+                    {% if is_maintenance %}
+                        {% maintenance_warning as maintenance_warning %}
+                        <li class="nav-item">
+                            <span class="nav-link py-0 fa fa-wrench fa-2x text-warning" title="{{ maintenance_warning }}"></span>
+                        </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a href="/help/index.html" target="_blank" class="nav-link py-0 fa fa-question-circle-o fa-2x text-primary" title="{% trans "Click here to get help." %}"></a>
                     </li>

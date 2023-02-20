@@ -1,4 +1,5 @@
 import re
+from datetime import datetime, time
 
 from django.conf import settings
 from django.core.cache import cache
@@ -188,3 +189,21 @@ def db_setting(parser, token):
 def ec_name():
     ec = EthicsCommission.objects.get(uuid=settings.ETHICS_COMMISSION_UUID)
     return ec.name
+
+
+@register.simple_tag
+def maintenance_warning():
+    return _('Waring maintenance: begins at %(begin)s and ends at %(end)s') % {'begin': '14:00', 'end': '15:00'}
+
+
+@register.simple_tag
+def is_maintenance():
+    weekday = datetime.today().weekday()
+    # Only on fridays
+    if weekday != 4:
+        return False
+
+    begin = time(10, 00)
+    end = time(15, 00)
+    now = datetime.now().time()
+    return begin < now < end
