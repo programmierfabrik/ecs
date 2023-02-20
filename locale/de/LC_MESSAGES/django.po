@@ -937,6 +937,9 @@ msgstr "Mindestalter"
 msgid "maximum age"
 msgstr "Höchstalter"
 
+msgid "maximum age description"
+msgstr "Wenn kein Höchstalter festgelegt ist, 999 eintragen."
+
 msgid "male participants"
 msgstr "männliche Teilnehmer"
 

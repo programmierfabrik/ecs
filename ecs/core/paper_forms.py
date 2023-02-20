@@ -188,7 +188,7 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('2.10.1', 'subject_minage_unit', _('minimum age unit')),
     FieldInfo('2.10.1', 'subject_minage', _('minimum age')),
     FieldInfo('2.10.2', 'subject_maxage_unit', _('maximum age unit')),
-    FieldInfo('2.10.2', 'subject_maxage', _('maximum age')),
+    FieldInfo('2.10.2', 'subject_maxage', _('maximum age'), _('maximum age description')),
 
     FieldInfo('2.10.4', 'subject_males', _('male participants')),
     FieldInfo('2.10.4/5', 'subject_females_childbearing', _('female participants')),
