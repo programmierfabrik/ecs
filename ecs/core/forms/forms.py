@@ -335,6 +335,11 @@ class InvestigatorEmployeeForm(forms.ModelForm):
         return instance
 
 class BaseInvestigatorEmployeeFormSet(ReadonlyFormSetMixin, BaseFormSet):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.forms:
+            form.empty_permitted = False
+    
     def save(self, commit=True):
         return [
             form.save(commit=commit)
