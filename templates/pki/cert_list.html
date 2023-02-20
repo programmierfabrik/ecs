@@ -7,6 +7,10 @@
 
 {% block content %}
 <div class="container">
+    <a class="btn btn-outline-primary" href="{% url 'pki.create_cert' %}" style="margin-bottom: 1rem">
+        {% trans 'Create new certificate' %}
+    </a>
+
     <table class="table table-sm cert_list">
         <thead>
             <tr>
@@ -36,9 +40,5 @@
             {% endfor %}
         </tbody>
     </table>
-
-    <a class="btn btn-outline-primary" href="{% url 'pki.create_cert' %}">
-        {% trans 'Create new certificate' %}
-    </a>
 </div>
 {% endblock %}
