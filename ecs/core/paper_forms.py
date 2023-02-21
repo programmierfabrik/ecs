@@ -81,8 +81,8 @@ FormInfo(CenterCloseNotification, fields=(
 FormInfo(Document, fields=(
     FieldInfo(None, 'file', _('PDF-file')),
     FieldInfo(None, 'name', _('file name'), help_text=_('file name description')),
-    FieldInfo(None, 'version', _('version')),
-    FieldInfo(None, 'date', _('date of document creation')),
+    FieldInfo(None, 'version', _('version'), help_text=_('version description')),
+    FieldInfo(None, 'date', _('date of document creation'), help_text=_('date of document creation description')),
     FieldInfo(None, 'doctype', _('type')),
     FieldInfo(None, 'replaces_document', _('replace document'))
 ))

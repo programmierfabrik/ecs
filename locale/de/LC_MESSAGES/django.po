@@ -723,14 +723,20 @@ msgid "file name"
 msgstr "Dokumentenname"
 
 msgid "file name description"
-msgstr "Der Dokumentenname soll so gewählt werden, dass Rückschlüsse auf das Dokument möglich sind (eindeutig identifizierbare Bezeichnung!)"
+msgstr "Es soll ein Dokumentenname gewählt werden, der eine eindeutig identifizierbare Bezeichnung bietet und somit Rückschlüsse auf den Inhalt des Dokuments ermöglicht."
 
 
 msgid "version"
 msgstr "Version"
 
+msgid "version description"
+msgstr "Verwenden Sie die Version vom hochgeladenen Dokuments, wenn das Dokument keine Version aufweist, dann mit \"--\" versehen"
+
 msgid "date of document creation"
 msgstr "Datum der Dokumenterstellung"
+
+msgid "date of document creation description"
+msgstr "Nutzen Sie das Datum des hochgeladenen Dokuments, welches dem Erstellungsdatum entspricht."
 
 msgid "type"
 msgstr "Typ"
