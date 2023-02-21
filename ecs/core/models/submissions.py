@@ -326,6 +326,7 @@ class SubmissionForm(models.Model):
     # 2.4
     medtech_checked_product = models.TextField(blank=True)
     medtech_reference_substance = models.TextField(blank=True)
+    medtech_combination_studies = models.TextField(blank=True)
 
     # 2.5
     clinical_phase = models.CharField(max_length=10, blank=True)

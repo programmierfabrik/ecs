@@ -181,6 +181,7 @@ FormInfo(SubmissionForm, fields=(
     # 2.4 Medizinproduktestudie (wenn zutreffend)
     FieldInfo('2.4.1', 'medtech_checked_product', _('Test products(e)')),
     FieldInfo('2.4.2', 'medtech_reference_substance', _('reference product')),
+    FieldInfo('2.4.3', 'medtech_combination_studies', _('medtech_combination_studies')),
     FieldInfo('2.5', 'clinical_phase', _('Clinical Phase'), help_text=_('Necessarily indicate, in case of an AMG-study the clinical phase, in case of medical devices the most appropriate phase.')),
     FieldInfo('2.8', 'already_voted', _('There are already votes of other ethics commissions.'), help_text=_('If so, upload the votes on the documents tab')),
     FieldInfo('2.9', 'subject_count', _('Planned number of trial participants total'), help_text=_('all participating centers')),
