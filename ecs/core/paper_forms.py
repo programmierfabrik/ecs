@@ -195,7 +195,6 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('2.10.4', 'subject_divers', _('diverse participants')),
     FieldInfo('2.10.4', 'subject_females', _('female participants')),
     FieldInfo('2.10.5', 'subject_childbearing', _('women of childbearing age')),
-    FieldInfo('2.10.3', 'subject_noncompetents', _('non competent participants')),
     FieldInfo('2.10.3.1', 'subject_noncompetent_unconscious', _('noncompetent unconscious')),
     FieldInfo('2.10.3.2', 'subject_noncompetent_guarded', _('noncompetent guarded')),
     FieldInfo('2.10.3.3', 'subject_noncompetent_minor', _('noncompetent minor')),

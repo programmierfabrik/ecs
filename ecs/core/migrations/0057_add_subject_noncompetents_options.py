@@ -38,4 +38,8 @@ class Migration(migrations.Migration):
                 subject_noncompetent_unconscious     = true
             WHERE subject_noncompetents = true;
         '''),
+        migrations.RemoveField(
+            model_name='submissionform',
+            name='subject_noncompetents',
+        ),
     ]

@@ -343,7 +343,6 @@ class SubmissionForm(models.Model):
     subject_minage_unit = models.SmallIntegerField(choices=SUBMISSION_AGE_UNIT, default=SUBMISSION_AGE_UNIT_YEARS)
     subject_maxage = models.PositiveIntegerField(null=True)
     subject_maxage_unit = models.SmallIntegerField(choices=SUBMISSION_AGE_UNIT, default=SUBMISSION_AGE_UNIT_YEARS)
-    subject_noncompetents = models.BooleanField(default=False)
     subject_noncompetent_unconscious = models.BooleanField(default=False)
     subject_noncompetent_guarded = models.BooleanField(default=False)
     subject_noncompetent_minor = models.BooleanField(default=False)
