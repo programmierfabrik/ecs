@@ -18,7 +18,7 @@ from ecs.core.models import (
 from ecs.documents.models import Document, DocumentType
 from ecs.core.paper_forms import get_field_info
 
-CURRENT_SERIALIZER_VERSION = '1.4'
+CURRENT_SERIALIZER_VERSION = '1.6'
 DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S+01:00'
 DATE_FORMAT = '%Y-%m-%d'
 DATA_JSON_NAME = 'data.json'
@@ -63,6 +63,29 @@ CHANGELOG = (
     ('*', '1.4'),
     ('+', SubmissionForm, 'project_type_non_interventional_study_mpg', False),
     ('*', '1.5'),
+    ('+', SubmissionForm, 'subject_minage_unit', 4),
+    ('+', SubmissionForm, 'subject_maxage_unit', 4),
+    ('-', SubmissionForm, 'subject_noncompetents', None),
+    ('+', SubmissionForm, 'subject_noncompetent_guarded', False),
+    ('+', SubmissionForm, 'subject_noncompetent_minor', False),
+    ('+', SubmissionForm, 'subject_noncompetent_emergency_study', False),
+    ('+', SubmissionForm, 'subject_noncompetent_unconscious', False),
+    ('+', SubmissionForm, 'subject_divers', False),
+    ('+', SubmissionForm, 'sponsor_country_code', ''),
+    ('+', SubmissionForm, 'sponsor_contact_suffix_title', ''),
+    ('+', SubmissionForm, 'invoice_country_code', ''),
+    ('+', SubmissionForm, 'invoice_contact_suffix_title', ''),
+    ('+', SubmissionForm, 'submitter_contact_suffix_title', ''),
+    ('+', SubmissionForm, 'submitter_phone_number', ''),
+    ('-', SubmissionForm, 'submitter_is_authorized_by_sponsor', None),
+    ('-', SubmissionForm, 'submitter_is_coordinator', None),
+    ('-', SubmissionForm, 'submitter_is_main_investigator', None),
+    ('-', SubmissionForm, 'submitter_is_sponsor', None),
+    ('+', SubmissionForm, 'medtech_combination_studies', ''),
+    ('+', SubmissionForm, 'insurance_submit_later', False),
+    ('+', Investigator, 'contact_suffix_title', ''),
+    ('+', InvestigatorEmployee, 'suffix_title', ''),
+    ('*', '1.6'),
 )
 
 class FieldDocs(object):
