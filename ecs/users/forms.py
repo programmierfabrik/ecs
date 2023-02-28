@@ -56,7 +56,7 @@ class EmailLoginForm(forms.Form):
 
 
 class RegistrationForm(forms.Form):
-    gender = forms.ChoiceField(label=_('gender'), choices=(('f', _('Ms')), ('m', _('Mr'))))
+    gender = forms.ChoiceField(choices=UserProfile._meta.get_field('gender').choices, label=_('gender'))
     first_name = forms.CharField(label=_('First name'))
     last_name = forms.CharField(label=_('Last name'))
     email = forms.EmailField(label=_('email'))
