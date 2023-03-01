@@ -818,6 +818,7 @@ class Investigator(models.Model):
                 user.save()
                 profile = user.profile
                 profile.title = self.contact_title
+                profile.suffix_title = self.contact_suffix_title
                 profile.gender = self.contact_gender
                 profile.organisation = self.organisation
                 profile.save()
