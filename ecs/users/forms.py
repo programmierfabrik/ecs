@@ -257,7 +257,7 @@ class InvitationForm(UserDetailsForm):
     class Meta:
         model = User
         fields = (
-            'email', 'gender', 'title', 'first_name', 'last_name', 'groups',
+            'email', 'gender', 'title', 'suffix_title', 'first_name', 'last_name', 'groups',
             'task_types', 'medical_categories', 'invitation_text',
         )
 
