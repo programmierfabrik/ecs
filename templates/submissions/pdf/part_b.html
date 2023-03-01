@@ -62,9 +62,10 @@
 <table class="full_width withborders">
     <thead>
         <tr>
-            <th style="width: 8%;">Fr/Hr</th>
-            <th style="width: 15%;">Titel</th>
+            <th style="width: 7.5%;">Fr/Hr</th>
+            <th style="width: 7.5%">Vor. Titel</th>
             <th style="width: 21%;">Vorname</th>
+            <th style="width: 8%">Nach. Titel</th>
             <th style="width: 21%;">Name</th>
             <th style="width: 35%;">Institution</th>
         </tr>
@@ -75,6 +76,7 @@
                 <td>{{ emp.get_sex_display }}</td>
                 <td>{{ emp.title }}</td>
                 <td>{{ emp.firstname }}</td>
+                <td>{{ emp.suffix_title }}</td>
                 <td>{{ emp.surname }}</td>
                 <td>{{ emp.organisation }}</td>
             </tr>
