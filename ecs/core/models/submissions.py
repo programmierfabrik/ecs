@@ -494,8 +494,9 @@ class SubmissionForm(models.Model):
                         user.last_name = getattr(self, '{0}_contact_last_name'.format(x))
                         user.save()
                         profile = user.profile
-                        profile.title = getattr(self, '{0}_contact_title'.format(x)) # HALIL
-                        profile.gender = getattr(self, '{0}_contact_gender'.format(x)) or 'f'
+                        profile.title = getattr(self, '{0}_contact_title'.format(x))
+                        profile.suffix_title = getattr(self, '{0}_contact_suffix_title'.format(x))
+                        profile.gender = getattr(self, '{0}_contact_gender'.format(x))
                         profile.organisation = getattr(self, org)
                         profile.save()
                     setattr(self, x, user)
@@ -816,7 +817,7 @@ class Investigator(models.Model):
                 user.last_name = self.contact_last_name
                 user.save()
                 profile = user.profile
-                profile.title = self.contact_title # HALIL
+                profile.title = self.contact_title
                 profile.gender = self.contact_gender
                 profile.organisation = self.organisation
                 profile.save()
