@@ -852,6 +852,8 @@ class InvestigatorEmployee(models.Model):
         name = [self.firstname, self.surname]
         if self.title:
             name.insert(0, self.title)
+        if self.suffix_title:
+            name.append(self.suffix_title)
         return ' '.join(name)
 
     def __str__(self):
