@@ -718,6 +718,7 @@ def create_submission_form(request):
             'submitter_email': request.user.email,
             'submitter_contact_gender': profile.gender,
             'submitter_contact_title': profile.title,
+            'submitter_contact_suffix_title': profile.suffix_title,
             'submitter_organisation': profile.organisation,
             'submitter_jobtitle': profile.jobtitle,
         })
