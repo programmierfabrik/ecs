@@ -618,6 +618,9 @@ msgstr "Frau"
 msgid "Mr"
 msgstr "Herr"
 
+msgid "Divers"
+msgstr "Divers"
+
 msgid "Finished"
 msgstr "Beendet"
 

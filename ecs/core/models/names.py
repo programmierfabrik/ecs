@@ -39,7 +39,7 @@ class NameField(object):
         self.name = name
 
         flist = (
-            ('gender', models.CharField, {'max_length': 1, 'choices': (('f', _('Ms')), ('m', _('Mr'))), 'null': True}),
+            ('gender', models.CharField, {'max_length': 1, 'choices': (('f', _('Ms')), ('m', _('Mr')), ('d', _('Divers'))), 'null': True}),
             ('title', models.CharField, {'max_length': 30}),
             ('suffix_title', models.CharField, {'max_length': 30}),
             ('first_name', models.CharField, {'max_length': 30}),
