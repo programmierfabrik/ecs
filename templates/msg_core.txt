@@ -1,5 +1,5 @@
 {% load i18n core %}
-{% if receiver.profile.gender == 'f' %}{% blocktrans with receiver as receiver %}Dear(f) {{ receiver }}{% endblocktrans %}{% else %}{% blocktrans with receiver as receiver %}Dear(m) {{ receiver }}{% endblocktrans %}{% endif %}
+Guten Tag {{ receiver }},
 
 {% block content %}{% endblock %}
 
