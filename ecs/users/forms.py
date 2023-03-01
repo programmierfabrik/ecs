@@ -115,13 +115,14 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('gender', 'title', 'first_name', 'last_name', 'organisation', 'jobtitle',
+        fields = ('gender', 'title', 'suffix_title', 'first_name', 'last_name', 'organisation', 'jobtitle',
             'address1', 'address2', 'zip_code', 'city', 'phone', 'fax', 'iban', 'swift_bic',
             'signing_connector', 'forward_messages_after_minutes',
         )
         labels = {
             'gender': _('Gender'),
-            'title': _('Title'),
+            'title': _('prefix title'),
+            'suffix_title': _('suffix title'),
             'organisation': _('Organisation'),
             'jobtitle': _('Job Title'),
             'swift_bic': _('SWIFT-BIC'),
