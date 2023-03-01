@@ -11,7 +11,11 @@ class Name(object):
     def salutation(self):
         if not self.gender:
             return ''
-        return self.gender == 'f' and 'Frau' or 'Herr'
+        if self.gender == 'f':
+            return 'Frau'
+        if self.gender == 'm':
+            return 'Herr'
+        return ''
 
     @property
     def full_name(self):
