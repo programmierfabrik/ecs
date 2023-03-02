@@ -496,7 +496,7 @@ class SubmissionForm(models.Model):
                         profile = user.profile
                         profile.title = getattr(self, '{0}_contact_title'.format(x))
                         profile.suffix_title = getattr(self, '{0}_contact_suffix_title'.format(x))
-                        profile.gender = getattr(self, '{0}_contact_gender'.format(x))
+                        profile.gender = getattr(self, '{0}_contact_gender'.format(x)) or 'x'
                         profile.organisation = getattr(self, org)
                         profile.save()
                     setattr(self, x, user)
