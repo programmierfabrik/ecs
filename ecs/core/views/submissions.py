@@ -306,6 +306,7 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
         'temporary_auth': submission.temp_auth.order_by('end'),
         'temporary_auth_form': TemporaryAuthorizationForm(prefix='temp_auth'),
         'current_docstash': current_docstash,
+        'tags': submission.tags.all(),
     }
 
     center_close_notifications = CenterCloseNotification.objects.filter(
