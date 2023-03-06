@@ -63,6 +63,7 @@ CHANGELOG = (
     ('*', '1.4'),
     ('+', SubmissionForm, 'project_type_non_interventional_study_mpg', False),
     ('*', '1.5'),
+    ('+', SubmissionForm, 'project_type_medical_device_combination_studies', False),
     ('+', SubmissionForm, 'subject_minage_unit', 4),
     ('+', SubmissionForm, 'subject_maxage_unit', 4),
     ('-', SubmissionForm, 'subject_noncompetents', None),
