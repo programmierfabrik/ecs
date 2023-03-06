@@ -27,3 +27,7 @@ class CertForm(forms.Form):
                 self.add_error('cn', _('A certificate with this CN already exists.'))
 
         return cd
+
+
+class CertSearchForm(forms.Form):
+    cn = forms.CharField(label='CN', max_length=64, required=False)

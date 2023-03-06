@@ -7,14 +7,22 @@
 
 {% block content %}
 <div class="container">
-    <div style="margin-bottom: 1rem">
+    <div>
         <a class="btn btn-outline-primary" href="{% url 'pki.create_cert' %}">
             {% trans 'Create new certificate' %}
         </a>
-        <a class="btn btn-outline-primary" href="{% url 'pki.list_soon_to_be_expired_certs' %}">
+        <a class="btn btn-outline-primary" href="{% url 'pki.list_soon_to_be_expired_certs' %}" style="margin-left: 0.3rem">
             {% trans 'List of soon to be expired certificates' %}
         </a>
     </div>
+
+    <form action="{{ request.path }}" method="post" autocomplete="off" style="margin: 2rem 0">
+        {% csrf_token %}
+        {% for field in form %}
+            {% include "bootstrap/form_field.html" with inline=True %}
+        {% endfor %}
+        <input class="btn btn-primary" type="submit" value="{% trans 'Search' %}" />
+    </form>
 
     <table class="table table-sm cert_list">
         <thead>

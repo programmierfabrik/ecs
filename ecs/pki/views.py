@@ -4,7 +4,7 @@ import tempfile
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 
@@ -12,19 +12,28 @@ from ecs.communication.mailutils import deliver
 from ecs.core.models import AdvancedSettings
 from ecs.users.utils import user_flag_required
 
-from ecs.pki.forms import CertForm
+from ecs.pki.forms import CertForm, CertSearchForm
 from ecs.pki.models import Certificate
 
 
 @user_flag_required('is_internal')
 def cert_list(request):
+    form = CertSearchForm(request.POST or None)
+    
+    if form.is_valid():
+        cn_filter = Q(cn__icontains=form.cleaned_data.get('cn'))
+    else:
+        cn_filter = Q()
+    
     return render(request, 'pki/cert_list.html', {
         'certs': (
             Certificate.objects
             .select_related('user')
+            .filter(cn_filter)
             .annotate(is_revoked=Count('revoked_at'))
             .order_by('-created_at')
         ),
+        'form': form,
     })
 
 
