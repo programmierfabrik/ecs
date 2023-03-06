@@ -450,6 +450,9 @@ msgstr "Benutzer"
 msgid "Default Contact"
 msgstr "Standard-Empfänger"
 
+msgid "Warning Window Certificate"
+msgstr "Warnungsfenster für Zertifikate"
+
 msgid "Change Logo File"
 msgstr "Logo Ändern"
 

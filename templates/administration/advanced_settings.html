@@ -37,6 +37,7 @@
         <div class="tab-content mt-3">
             <div class="tab-pane container active" id="customization_tab">
                 {% include 'bootstrap/form_field.html' with field=form.default_contact inline=True %}
+                {% include 'bootstrap/form_field.html' with field=form.warning_window_certificate inline=True %}
                 {% include 'bootstrap/form_field.html' with field=form.logo_file inline=True %}
                 {% include 'bootstrap/form_field.html' with field=form.print_logo_file inline=True %}
                 {% include 'bootstrap/form_field.html' with field=form.display_notifications_in_protocol inline=True %}

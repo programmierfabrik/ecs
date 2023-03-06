@@ -577,7 +577,7 @@ class AdvancedSettingsForm(forms.ModelForm):
     class Meta:
         model = AdvancedSettings
         fields = (
-            'default_contact', 'display_notifications_in_protocol',
+            'default_contact', 'warning_window_certificate', 'display_notifications_in_protocol',
             'display_biased_in_amendment_answer_pdf',
             'require_internal_vote_review', 'logo_file', 'print_logo_file',
             'address', 'meeting_address', 'contact_email', 'contact_url',
@@ -586,6 +586,7 @@ class AdvancedSettingsForm(forms.ModelForm):
             'vote4_extra', 'vote5_extra', 'vote_pdf_extra',
         )
         labels = {
+            'warning_window_certificate': _('Warning Window Certificate'),
             'display_notifications_in_protocol':
                 _('Display Notifications in Protocol'),
             'display_biased_in_amendment_answer_pdf':
