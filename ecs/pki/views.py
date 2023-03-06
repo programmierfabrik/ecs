@@ -20,9 +20,9 @@ def cert_list(request):
     return render(request, 'pki/cert_list.html', {
         'certs': (
             Certificate.objects
-                .select_related('user')
-                .annotate(is_revoked=Count('revoked_at'))
-                .order_by('-created_at')
+            .select_related('user')
+            .annotate(is_revoked=Count('revoked_at'))
+            .order_by('-created_at')
         ),
     })
 
@@ -64,8 +64,8 @@ def create_cert(request):
         )
 
         deliver(user.email, subject=subject, message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            attachments=attachments, nofilter=True)
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                attachments=attachments, nofilter=True)
 
         return render(request, 'pki/cert_created.html', {
             'passphrase': passphrase,
