@@ -3332,10 +3332,10 @@ msgid "maximum age unit"
 msgstr "Höchstalter Einheit"
 
 msgid "noncompetent unconscious"
-msgstr "Bewusstlose"
+msgstr "Temporär nicht einwilligungsfähige"
 
 msgid "noncompetent guarded"
-msgstr "Besachwaltete"
+msgstr "Unter erwachsenen vertretung stehenden"
 
 msgid "noncompetent minor"
 msgstr "Minderjährige"
