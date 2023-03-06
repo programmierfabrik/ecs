@@ -9,7 +9,11 @@
 <h1 class="metadata">{{ vote }}</h1>
 <center><p><b>
 {% if vote.top %}
-    Sitzung der Ethik-Kommission am {{ vote.top.meeting.start|date:'d.m.Y' }}, {{ vote.top }}:
+    {% if vote.result == '1' or vote.result == '4' or vote.result == '5' %}
+        Votum
+    {% else %}
+        Sitzung der Ethik-Kommission am {{ vote.top.meeting.start|date:'d.m.Y' }}, {{ vote.top }}:
+    {% endif %}
 {% else %}
     {% if vote.result == '1' or vote.result == '4' %}Votum{% else %}Mitteilung{% endif %}:
 {% endif %}
@@ -74,7 +78,7 @@
             </td>
         </tr>
     </tbody>
-</table> 
+</table>
 
 <h2 class="metadata">Ergänzende Kommentare</h2>
 {% if past_votes %}
