@@ -861,6 +861,9 @@ msgstr "ohne CE-Kennzeichnung"
 msgid "Performance evaluation (in-vitro diagnostics)"
 msgstr "Leistungsbewertungsprüfung (In-vitro-Diagnostika)"
 
+msgid "Combination Study"
+msgstr "Kombinationsstudie"
+
 msgid ""
 "Non-therapeutic biomedical research involving human subjects (basic research)"
 msgstr ""

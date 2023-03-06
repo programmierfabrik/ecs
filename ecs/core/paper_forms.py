@@ -159,6 +159,7 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('2.1.4.1', 'project_type_medical_device_with_ce', _('with CE-marking')),
     FieldInfo('2.1.4.2', 'project_type_medical_device_without_ce', _('without CE-marking')),
     FieldInfo('2.1.4.3', 'project_type_medical_device_performance_evaluation', _('Performance evaluation (in-vitro diagnostics)')),
+    FieldInfo('2.1.4.4', 'project_type_medical_device_combination_studies', _('Combination Study')),
     FieldInfo('2.1.5', 'project_type_basic_research', _('Non-therapeutic biomedical research involving human subjects (basic research)')),
     FieldInfo('2.1.6', 'project_type_genetic_study', _('Genetic survey')),
     FieldInfo('2.1.7', 'project_type_misc', _('Other, please specify'), help_text=_('e.g. Dietetics, epidemiology, etc.')),

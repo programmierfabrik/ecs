@@ -48,7 +48,7 @@ SUBMISSION_FORM_TABS = (
         (_('type of project'), [
             'project_type_non_reg_drug', 'project_type_reg_drug', 'project_type_reg_drug_within_indication', 'project_type_reg_drug_not_within_indication', 'project_type_non_interventional_study',
             'project_type_medical_method', 'project_type_medical_device', 'project_type_medical_device_with_ce', 'project_type_medical_device_without_ce',
-            'project_type_medical_device_performance_evaluation', 'project_type_non_interventional_study_mpg', 'project_type_basic_research', 'project_type_genetic_study', 'project_type_register',
+            'project_type_medical_device_performance_evaluation', 'project_type_medical_device_combination_studies', 'project_type_non_interventional_study_mpg', 'project_type_basic_research', 'project_type_genetic_study', 'project_type_register',
             'project_type_biobank', 'project_type_retrospective', 'project_type_questionnaire', 'project_type_psychological_study', 'project_type_nursing_study',
             'project_type_gender_medicine',
             'submission_type', 'is_new_medtech_law',

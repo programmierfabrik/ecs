@@ -302,6 +302,7 @@ class SubmissionForm(models.Model):
     project_type_medical_device_with_ce = models.BooleanField(default=False)
     project_type_medical_device_without_ce = models.BooleanField(default=False)
     project_type_medical_device_performance_evaluation = models.BooleanField(default=False)
+    project_type_medical_device_combination_studies = models.BooleanField(default=False)
     project_type_basic_research = models.BooleanField(default=False)
     project_type_genetic_study = models.BooleanField(default=False)
     project_type_register = models.BooleanField(default=False)
