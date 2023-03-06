@@ -99,7 +99,7 @@
                 fields: '#id_project_type_medical_device',
                 disable: true,
                 sourceFieldClass: 'pl-5',
-                sources: 'input[id^=id_project_type_medical_device_]',
+                sources: 'input[id^=id_project_type_medical_device_]:not([id$=combination_studies])',
                 toggleTab: {
                     tab: setup.tabController.getTab('#tabs-7'),
                     requiredFields:
@@ -254,6 +254,17 @@
                 var isMpg = $('#id_project_type_medical_device').is(':checked');
 
                 $('#id_submission_type').prop('disabled', !(isAmg || isMpg));
+            }
+
+            $('#id_project_type_medical_device_combination_studies').parent().parent().addClass('pl-5');
+            $('#id_project_type_medical_device_combination_studies').on('change', changeEUCTIDState);
+            $('#id_project_type_medical_device').on('change', changeEUCTIDState);
+            changeEUCTIDState();
+            function changeEUCTIDState() {
+                var combinationStudiesChecked = $('#id_project_type_medical_device_combination_studies').is(':checked');
+                var mpgChecked = $('#id_project_type_medical_device').is(':checked');
+                var isChecked = combinationStudiesChecked && mpgChecked;
+                $('#id_medtech_eu_ct_id').prop('disabled', !isChecked);
             }
 
             $('.upload_container').load(
