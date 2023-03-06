@@ -32,7 +32,7 @@ def check_certificates_to_be_expired():
     for user in certificate_warning_reciever:
         send_system_message_template(
             user.email,
-            'Zertifikate, die bald ablaufen werden',
+            'Erinnerung an Zertifikatsablauf',
             'pki/warn_soon_to_be_expired_certs.txt', {
                 'user': user,
                 'certs': certs,
