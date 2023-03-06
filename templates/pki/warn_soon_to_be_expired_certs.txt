@@ -4,6 +4,6 @@
 {% block content %}
 Folgende Zertifikate laufen demnächst ab:
 {% for cert in certs %}
-    {{ cert.user }} - {{ cert.expires_at|date:'d.m.Y' }}
+    Nr. {{ cert.pk }}, {{ cert.user }} - {{ cert.expires_at|date:'d.m.Y' }}
 {% endfor %}
 {% endblock %}
