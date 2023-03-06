@@ -28,13 +28,12 @@ def check_certificates_to_be_expired():
         .order_by('expires_at')
     )
 
-    certificate_warning_reciever = User.objects.filter(groups__name='Certificate-Warning Reciever')
-    for user in certificate_warning_reciever:
+    certificate_management = User.objects.filter(groups__name='Certificate Management')
+    for user in certificate_management:
         send_system_message_template(
             user.email,
             'Erinnerung an Zertifikatsablauf',
             'pki/warn_soon_to_be_expired_certs.txt', {
-                'user': user,
                 'certs': certs,
             }
         )
