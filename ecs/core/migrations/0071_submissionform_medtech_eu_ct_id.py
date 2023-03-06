@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='submissionform',
-            name='medtech_combination_studies',
+            name='medtech_eu_ct_id',
             field=models.TextField(blank=True),
         ),
     ]

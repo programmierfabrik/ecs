@@ -927,8 +927,8 @@ msgstr "Prüfprodukt/e"
 msgid "reference product"
 msgstr "Referenzprodukt"
 
-msgid "medtech_combination_studies"
-msgstr "Kombinationsstudien"
+msgid "medtech_eu_ct_id"
+msgstr "EUCT ID"
 
 msgid "Clinical Phase"
 msgstr "Klinische Phase"

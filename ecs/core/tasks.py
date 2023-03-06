@@ -86,7 +86,7 @@ def xls_export(user_id=None, filters=None):
     sheet.write(2, 4, _('Yes') + '/' + _('No'), header)
     sheet.write(2, 5, _('Type'), header)
     sheet.write_merge(0, 2, 6, 6, _('MPG'), header)
-    sheet.write_merge(0, 2, 7, 7, _('medtech_combination_studies'), header)
+    sheet.write_merge(0, 2, 7, 7, _('medtech_eu_ct_id'), header)
     sheet.write_merge(0, 2, 8, 8, _('monocentric') + '/' + _('multicentric'),
                       header)
     sheet.write_merge(0, 2, 9, 9, _('workflow lane'), header)
@@ -182,7 +182,7 @@ def xls_export(user_id=None, filters=None):
         sheet.write(i, 5,
                     sf.get_submission_type_display() if sf.is_amg else None)
         sheet.write(i, 6, _b(sf.is_mpg))
-        sheet.write(i, 7, _b(sf.medtech_combination_studies))
+        sheet.write(i, 7, _b(sf.medtech_eu_ct_id))
         sheet.write(i, 8,
                     _('multicentric') if multicentric else _('monocentric'))
         sheet.write(i, 9, submission.get_workflow_lane_display())

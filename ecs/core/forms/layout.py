@@ -109,7 +109,7 @@ SUBMISSION_FORM_TABS = (
         ]),
     ]),
     Tab('mpg', _('MPG'), [
-        (_('Medical Device Study'), ['medtech_checked_product', 'medtech_reference_substance', 'medtech_combination_studies']),
+        (_('Medical Device Study'), ['medtech_checked_product', 'medtech_reference_substance', 'medtech_eu_ct_id']),
         (_('MPG'), [
             'medtech_product_name', 'medtech_manufacturer', 'medtech_certified_for_exact_indications', 'medtech_certified_for_other_indications',
             'medtech_ce_symbol', 'medtech_manual_included', 'medtech_technical_safety_regulations', 'medtech_departure_from_regulations',

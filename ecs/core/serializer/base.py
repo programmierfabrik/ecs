@@ -81,7 +81,7 @@ CHANGELOG = (
     ('-', SubmissionForm, 'submitter_is_coordinator', None),
     ('-', SubmissionForm, 'submitter_is_main_investigator', None),
     ('-', SubmissionForm, 'submitter_is_sponsor', None),
-    ('+', SubmissionForm, 'medtech_combination_studies', ''),
+    ('+', SubmissionForm, 'medtech_eu_ct_id', ''),
     ('+', SubmissionForm, 'insurance_submit_later', False),
     ('+', Investigator, 'contact_suffix_title', ''),
     ('+', InvestigatorEmployee, 'suffix_title', ''),

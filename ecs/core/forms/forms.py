@@ -89,7 +89,7 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
 
             'project_type_non_reg_drug', 'project_type_reg_drug', 'project_type_reg_drug_within_indication', 'project_type_reg_drug_not_within_indication',
             'project_type_medical_method', 'project_type_medical_device', 'project_type_medical_device_with_ce', 'project_type_medical_device_without_ce',
-            'project_type_medical_device_performance_evaluation', 'project_type_medical_device_combination_studies', 'medtech_combination_studies', 'project_type_non_interventional_study_mpg', 'project_type_basic_research', 'project_type_genetic_study', 'project_type_register',
+            'project_type_medical_device_performance_evaluation', 'project_type_medical_device_combination_studies', 'medtech_eu_ct_id', 'project_type_non_interventional_study_mpg', 'project_type_basic_research', 'project_type_genetic_study', 'project_type_register',
             'project_type_biobank', 'project_type_retrospective', 'project_type_questionnaire', 'project_type_psychological_study', 'project_type_education_context',
             'project_type_non_interventional_study', 'project_type_gender_medicine', 'project_type_misc', 'project_type_nursing_study',
 
@@ -150,6 +150,9 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
 
         if cleaned_data.get('project_type_medical_device', False):
             require_fields(self, MPG_FIELDS)
+        
+        if cleaned_data.get('project_type_medical_device_combination_studies', False):
+            require_fields(self, ('medtech_eu_ct_id',))
 
         if any(cleaned_data.get(f, False) for f in ('project_type_medical_device_without_ce', 'project_type_reg_drug', 'project_type_non_reg_drug'))\
             and cleaned_data.get('insurance_submit_later', False) is not True:
