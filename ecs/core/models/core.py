@@ -28,8 +28,8 @@ class MedicalCategory(models.Model):
 class AdvancedSettings(models.Model):
     default_contact = models.ForeignKey(User, on_delete=models.CASCADE)
     warning_window_certificate = models.SmallIntegerField(default=5, choices=(
-        (0, '1 Woche'), (1, '2 Wochen'), (2, '3 Wochen'), (3, '4 Wochen'),
-        (4, '5 Wochen'), (5, '6 Wochen'), (6, '7 Wochen'), (7, '8 Wochen'),
+        (1, '1 Woche'), (2, '2 Wochen'), (3, '3 Wochen'), (4, '4 Wochen'),
+        (5, '5 Wochen'), (6, '6 Wochen'), (7, '7 Wochen'), (8, '8 Wochen'),
     ))
     display_notifications_in_protocol = models.BooleanField(default=False)
     display_biased_in_amendment_answer_pdf = models.BooleanField(default=True)
