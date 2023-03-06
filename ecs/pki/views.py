@@ -1,3 +1,4 @@
+import datetime
 import tempfile
 
 from django.conf import settings
@@ -22,6 +23,22 @@ def cert_list(request):
                 .select_related('user')
                 .annotate(is_revoked=Count('revoked_at'))
                 .order_by('-created_at')
+        ),
+    })
+
+
+@user_flag_required('is_internal')
+def list_soon_to_be_expired_certs(request):
+    today = datetime.date.today()
+    today_in_6_weeks = today + datetime.timedelta(weeks=6)
+    return render(request, 'pki/cert_soon_expired_list.html', {
+        'certs': (
+            Certificate.objects
+            .select_related('user')
+            .filter(revoked_at__isnull=True)
+            .filter(expires_at__gte=today)
+            .filter(expires_at__lte=today_in_6_weeks)
+            .order_by('expires_at')
         ),
     })
 

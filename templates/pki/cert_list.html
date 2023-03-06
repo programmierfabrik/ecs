@@ -7,9 +7,14 @@
 
 {% block content %}
 <div class="container">
-    <a class="btn btn-outline-primary" href="{% url 'pki.create_cert' %}" style="margin-bottom: 1rem">
-        {% trans 'Create new certificate' %}
-    </a>
+    <div style="margin-bottom: 1rem">
+        <a class="btn btn-outline-primary" href="{% url 'pki.create_cert' %}">
+            {% trans 'Create new certificate' %}
+        </a>
+        <a class="btn btn-outline-primary" href="{% url 'pki.list_soon_to_be_expired_certs' %}">
+            {% trans 'List of soon to be expired certificates' %}
+        </a>
+    </div>
 
     <table class="table table-sm cert_list">
         <thead>

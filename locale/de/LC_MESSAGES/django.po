@@ -2893,6 +2893,9 @@ msgstr "Widerrufen"
 msgid "Create new certificate"
 msgstr "Neues Zertifikat erstellen"
 
+msgid "List of soon to be expired certificates"
+msgstr "Liste der bald ablaufenden Zertifikate"
+
 msgid "Create Certificate"
 msgstr "Zertifikat Erstellen"
 
