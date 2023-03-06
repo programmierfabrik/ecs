@@ -9,6 +9,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext as _
 
 from ecs.communication.mailutils import deliver
+from ecs.core.models import AdvancedSettings
 from ecs.users.utils import user_flag_required
 
 from ecs.pki.forms import CertForm
@@ -29,15 +30,17 @@ def cert_list(request):
 
 @user_flag_required('is_internal')
 def list_soon_to_be_expired_certs(request):
+    weeks_for_warning_window = AdvancedSettings.objects.get(pk=1).warning_window_certificate
     today = datetime.date.today()
-    today_in_6_weeks = today + datetime.timedelta(weeks=6)
+    warning_window = today + datetime.timedelta(weeks=weeks_for_warning_window)
     return render(request, 'pki/cert_soon_expired_list.html', {
+        'warning_window': weeks_for_warning_window,
         'certs': (
             Certificate.objects
             .select_related('user')
             .filter(revoked_at__isnull=True)
             .filter(expires_at__gte=today)
-            .filter(expires_at__lte=today_in_6_weeks)
+            .filter(expires_at__lte=warning_window)
             .order_by('expires_at')
         ),
     })
