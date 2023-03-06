@@ -28,8 +28,8 @@ def check_certificates_to_be_expired():
         .order_by('expires_at')
     )
 
-    certificate_management = User.objects.filter(groups__name='Certificate Management')
-    for user in certificate_management:
+    pki_management = User.objects.filter(groups__name='PKI Management')
+    for user in pki_management:
         send_system_message_template(
             user.email,
             'Erinnerung an Zertifikatsablauf',

@@ -141,7 +141,7 @@ def auth_groups():
         'Specialist',
         'Statistic Reviewer',
         'Userswitcher Target',
-        'Certificate Management',
+        'PKI Management',
     )
     for group in groups:
         Group.objects.get_or_create(name=group)
