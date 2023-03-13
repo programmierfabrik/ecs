@@ -1,0 +1,27 @@
+{% extends 'core.html' %}
+{% load i18n %}
+
+{% block headertitle %}Kliniken{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <a class="btn btn-primary mr-3" href="{% url 'core.clinic.create' %}">
+            Neue Klinik anlegen
+        </a>
+
+        {% include 'paginator.html' with page=clinics %}
+        <ul class="list-group mb-3">
+            {% for clinic in clinics %}
+                <li class="list-group-item d-block">
+                    {{ clinic.name }}
+                    {% if clinic.is_favorite %}
+                        <span class="fa fa-star" style="color: #FDDA0D; margin-left: 0.3rem"></span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+        {% include 'paginator.html' with page=clinics %}
+
+    </div>
+
+{% endblock %}
