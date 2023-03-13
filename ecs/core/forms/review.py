@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from ecs.core.forms.utils import ReadonlyFormMixin
@@ -27,8 +28,16 @@ class CategorizationForm(ReadonlyFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['medical_categories'].queryset = MedicalCategory.objects.filter(is_disabled=False).order_by('name')
-        self.fields['clinics'].queryset = Clinic.objects.filter(deactivated=False).order_by('-is_favorite', 'name')
+        if kwargs.get('readonly', None) is None:
+            clinic_filter = Q(deactivated=False)
+            medical_category_filter = Q(is_disabled=False)
+        else:
+            clinic_filter = Q()
+            medical_category_filter = Q()
+
+        self.fields['clinics'].queryset = Clinic.objects.filter(clinic_filter).order_by('-is_favorite', 'name')
+        self.fields['medical_categories'].queryset = MedicalCategory.objects.filter(medical_category_filter).order_by(
+            'name')
 
     def clean(self):
         cd = self.cleaned_data
