@@ -1,6 +1,7 @@
 from django.core.paginator import Paginator
 from django.shortcuts import render
 
+from ecs.core.forms.clinic import AdministrationFilterForm
 from ecs.core.models.clinic import Clinic
 from ecs.users.utils import user_group_required
 
@@ -8,14 +9,39 @@ from ecs.users.utils import user_group_required
 @user_group_required('EC-Executive')
 def administration(request):
     limit = 20
-    page = request.GET.get('page', 1)
 
-    paginator = Paginator(Clinic.objects.order_by("-is_favorite", "-pk"), limit, allow_empty_first_page=True)
+    filter_defaults = {
+        'page': '1',
+        'activity': 'active',
+        'keyword': '',
+    }
+
+    filterdict = request.POST or filter_defaults
+    filterform = AdministrationFilterForm(filterdict)
+    if not filterform.is_valid():
+        filterform = AdministrationFilterForm(filter_defaults)
+        filterform.is_valid()
+    
+    page = filterform.cleaned_data['page']
+    
+    activity = filterform.cleaned_data['activity']
+    clinics = Clinic.objects
+    if activity == 'active':
+        clinics = clinics.filter(deactivated=False)
+    elif activity == 'inactive':
+        clinics = clinics.filter(deactivated=True)
+
+    keyword = filterform.cleaned_data['keyword']
+    if keyword is not None and keyword is not "":
+        clinics = clinics.filter(name__icontains=keyword)
+    
+    paginator = Paginator(clinics.order_by("-is_favorite", "-pk"), limit, allow_empty_first_page=True)
     try:
         clinics = paginator.page(page)
     except:
         clinics = paginator.page(1)
 
     return render(request, 'clinic/administration.html', {
-        'clinics': clinics
+        'clinics': clinics,
+        'filterform': filterform
     })

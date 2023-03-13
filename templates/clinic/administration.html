@@ -5,9 +5,21 @@
 
 {% block content %}
     <div class="container">
-        <a class="btn btn-primary mr-3" href="{% url 'core.clinic.create' %}">
+{#        <a class="btn btn-primary mr-3" href="{% url 'core.clinic.create' %}">#}
+        <a class="btn btn-primary mr-3 mb-3" href="">
             Neue Klinik anlegen
         </a>
+
+        <form action="{{ request.path }}" method="post">
+            {% csrf_token %}
+            {% for field in filterform.visible_fields %}
+                {% include 'bootstrap/form_field.html' with inline=True %}
+            {% endfor %}
+            {% for hidden in filterform.hidden_fields %}
+                {{ hidden }}
+            {% endfor %}
+            <input class="btn btn-primary" type="submit" value="{% trans 'Search' %}"/>
+        </form>
 
         {% include 'paginator.html' with page=clinics %}
         <ul class="list-group mb-3">
