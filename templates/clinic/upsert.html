@@ -12,7 +12,9 @@
                 {% include "bootstrap/form_field.html" with inline=True %}
             {% endfor %}
             <div class="my-4">
-                <input class="btn btn-primary" type="submit" value="{% trans "Add" %}"/>
+                <input class="btn btn-primary" type="submit" value="
+                    {% if updating %} {% trans "Edit" %} {% else %} {% trans "Add" %} {% endif %}
+                "/>
             </div>
         </form>
     </div>

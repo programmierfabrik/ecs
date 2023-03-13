@@ -1,5 +1,5 @@
 from django.core.paginator import Paginator
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from ecs.core.forms.clinic import AdministrationFilterForm, ClinicForm
 from ecs.core.models.clinic import Clinic
@@ -48,37 +48,23 @@ def administration(request):
 
 
 @user_group_required('EC-Executive')
-def create_clinic(request):
-    form = ClinicForm(request.POST or None)
+def upsert_clinic(request, clinic_id=None):
+    if clinic_id:
+        instance = get_object_or_404(Clinic, pk=clinic_id)
+        updating = True
+    else:
+        instance = None
+        updating = False
 
-    if request.method == 'POST' and form.is_valid():
-        form.save()
-        return redirect('core.clinic.administration')
+    form = ClinicForm(instance=instance)
 
-    return render(request, 'clinic/create.html', {
-        'form': form
+    if request.method == 'POST':
+        form = ClinicForm(request.POST, instance=instance)
+        if form.is_valid():
+            form.save()
+            return redirect('core.clinic.administration')
+
+    return render(request, 'clinic/upsert.html', {
+        'form': form,
+        'updating': updating
     })
-
-# @user_group_required('EC-Executive')
-# def update_medical_category(request, pk):
-#     if request.method == 'POST' and request.POST:
-#         form = MedicalCategoryCreationForm(request.POST or None)
-#         if form.is_valid():
-#             name = form.data.get('name')
-#             abbrev = form.data.get('abbrev')
-#             medical_category = MedicalCategory.objects.filter(id=pk).first()
-#             is_abbrev_unique = medical_category.abbrev == abbrev or MedicalCategory.objects.filter(
-#                 abbrev=abbrev).first() is None
-#             if is_abbrev_unique:
-#                 MedicalCategory.objects.filter(id=pk).update(name=name, abbrev=abbrev)
-#                 return redirect('core.medical_category.administration')
-#     else:
-#         medical_category = MedicalCategory.objects.filter(id=pk).first()
-#         form = MedicalCategoryCreationForm({
-#             "name": medical_category.name,
-#             "abbrev": medical_category.abbrev
-#         })
-# 
-#     return render(request, 'medical_category/update.html', {
-#         'form': form
-#     })
