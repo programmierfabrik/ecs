@@ -1,7 +1,7 @@
 from django.core.paginator import Paginator
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
-from ecs.core.forms.clinic import AdministrationFilterForm
+from ecs.core.forms.clinic import AdministrationFilterForm, ClinicForm
 from ecs.core.models.clinic import Clinic
 from ecs.users.utils import user_group_required
 
@@ -21,9 +21,9 @@ def administration(request):
     if not filterform.is_valid():
         filterform = AdministrationFilterForm(filter_defaults)
         filterform.is_valid()
-    
+
     page = filterform.cleaned_data['page']
-    
+
     activity = filterform.cleaned_data['activity']
     clinics = Clinic.objects
     if activity == 'active':
@@ -34,7 +34,7 @@ def administration(request):
     keyword = filterform.cleaned_data['keyword']
     if keyword is not None and keyword is not "":
         clinics = clinics.filter(name__icontains=keyword)
-    
+
     paginator = Paginator(clinics.order_by("-is_favorite", "-pk"), limit, allow_empty_first_page=True)
     try:
         clinics = paginator.page(page)
@@ -45,3 +45,40 @@ def administration(request):
         'clinics': clinics,
         'filterform': filterform
     })
+
+
+@user_group_required('EC-Executive')
+def create_clinic(request):
+    form = ClinicForm(request.POST or None)
+
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('core.clinic.administration')
+
+    return render(request, 'clinic/create.html', {
+        'form': form
+    })
+
+# @user_group_required('EC-Executive')
+# def update_medical_category(request, pk):
+#     if request.method == 'POST' and request.POST:
+#         form = MedicalCategoryCreationForm(request.POST or None)
+#         if form.is_valid():
+#             name = form.data.get('name')
+#             abbrev = form.data.get('abbrev')
+#             medical_category = MedicalCategory.objects.filter(id=pk).first()
+#             is_abbrev_unique = medical_category.abbrev == abbrev or MedicalCategory.objects.filter(
+#                 abbrev=abbrev).first() is None
+#             if is_abbrev_unique:
+#                 MedicalCategory.objects.filter(id=pk).update(name=name, abbrev=abbrev)
+#                 return redirect('core.medical_category.administration')
+#     else:
+#         medical_category = MedicalCategory.objects.filter(id=pk).first()
+#         form = MedicalCategoryCreationForm({
+#             "name": medical_category.name,
+#             "abbrev": medical_category.abbrev
+#         })
+# 
+#     return render(request, 'medical_category/update.html', {
+#         'form': form
+#     })
