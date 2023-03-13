@@ -17,7 +17,7 @@ class AdministrationFilterForm(forms.Form):
 class ClinicForm(forms.ModelForm):
     class Meta:
         model = Clinic
-        fields = ('name', 'deactivated')
+        fields = ('name', 'email', 'deactivated')
         labels = {
             'name': 'Name',
             'deactivated': 'Deaktiviert',
