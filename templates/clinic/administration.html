@@ -24,10 +24,18 @@
         <ul class="list-group mb-3">
             {% for clinic in clinics %}
                 <li class="list-group-item d-block">
-                    {{ clinic.name }}
-                    {% if clinic.is_favorite %}
-                        <span class="fa fa-star" style="color: #FDDA0D; margin-left: 0.3rem"></span>
-                    {% endif %}
+                    <div class="d-flex flex-row justify-content-between align-items-center">
+                        <span>
+                            {{ clinic.name }}
+                            {% if clinic.is_favorite %}
+                                <span class="fa fa-star" style="color: #FDDA0D; margin-left: 0.3rem"></span>
+                            {% endif %}
+                        </span>
+                        <a class="btn btn-secondary"
+                           href="{% url 'core.clinic.update_clinic' clinic_id=clinic.id %}">
+                            {% trans 'edit' %}
+                        </a>
+                    </div>
                 </li>
             {% endfor %}
         </ul>
