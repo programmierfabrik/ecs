@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 
 from django.core.cache import cache
 from django.db import models
-from django.db.models import F, Prefetch
+from django.db.models import F, Prefetch, Q
 from django.dispatch import receiver
 from django.db.models.signals import post_delete, post_save
 from django.contrib.auth.models import User
@@ -428,8 +428,9 @@ class Meeting(models.Model):
             'meeting': self,
         })
         
-    def get_protocol_pdf(self):
-        timetable_entries = list(self.timetable_entries.all())
+    def get_protocol_pdf(self, entries_filter=None):
+        entries = self.timetable_entries.filter(entries_filter)
+        timetable_entries = list(entries)
         timetable_entries.sort(key=lambda e: e.agenda_index)
 
         tops = []
@@ -581,6 +582,38 @@ class Meeting(models.Model):
         old_val = cache.get(key)
         cache.set(key, top.pk, 60*60*24*2)
 
+    @property
+    def associated_clinics(self):
+        from ecs.core.models.clinic import Clinic
+        from ecs.core.models.submissions import Submission
+
+        clinics_id_list = self.submissions.values("clinics")
+        return Clinic.objects.filter(id__in=[c.get('clinics', None) for c in clinics_id_list]).prefetch_related(
+            Prefetch('submissions', queryset=Submission.objects.filter(meetings=self.id),
+                     to_attr='active_submissions')
+        )
+
+
+class MeetingClinicProtocol(models.Model):
+    meeting = models.ForeignKey(Meeting, related_name='clinic_protocols', on_delete=models.CASCADE)
+    clinic = models.ForeignKey('core.Clinic', related_name='clinic_protocols', on_delete=models.CASCADE)
+    protocol = models.ForeignKey(Document, null = True, on_delete = models.SET_NULL)
+    protocol_rendering_started_at = models.DateTimeField(null=True)
+
+    def get_protocol_pdf(self):
+        return self.meeting.get_protocol_pdf(Q(submission__clinics=self.clinic))
+
+    def render_protocol_pdf(self):
+        pdfdata = self.get_protocol_pdf()
+        filename = '{}-{}-protocol.pdf'.format(
+            slugify(self.meeting.title),
+            timezone.localtime(self.meeting.start).strftime('%d-%m-%Y')
+        )
+        self.protocol = Document.objects.create_from_buffer(
+            pdfdata, doctype='meeting_protocol', parent_object=self,
+            name=filename, original_file_name=filename
+        )
+        self.save(update_fields=('protocol',))
 
 @reversion.register(fields=('text',))
 class TimetableEntry(models.Model):

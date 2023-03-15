@@ -13,6 +13,7 @@ from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.db.models import Q, Max, Prefetch
 from django.http import FileResponse, HttpResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
@@ -32,7 +33,7 @@ from ecs.meetings.forms import (
     AmendmentVoteFormSet, ManualTimetableEntryCommentForm,
     ManualTimetableEntryCommentFormset,
 )
-from ecs.meetings.models import Meeting, Participation, TimetableEntry
+from ecs.meetings.models import Meeting, Participation, TimetableEntry, MeetingClinicProtocol
 from ecs.meetings.signals import on_meeting_start, on_meeting_end, on_meeting_top_jump, \
     on_meeting_date_changed
 from ecs.meetings.tasks import optimize_timetable_task
@@ -1042,11 +1043,40 @@ def edit_meeting(request, meeting_pk=None):
 @user_group_required('EC-Office')
 def list_clinics(request, meeting_pk=None):
     meeting = get_object_or_404(Meeting, pk=meeting_pk)
-    clinics_id_list = meeting.submissions.values("clinics")
-    clinics = Clinic.objects.filter(id__in=[c.get('clinics', None) for c in clinics_id_list]).prefetch_related(
-        Prefetch('submissions', queryset=Submission.objects.filter(meetings=meeting_pk), to_attr='active_submissions')
+    clinics = meeting.associated_clinics.prefetch_related(
+        Prefetch('clinic_protocols', queryset=MeetingClinicProtocol.objects.filter(meeting=meeting_pk), to_attr='clinic_protocol')
     )
     
     return render(request, 'meetings/tabs/clinics.html', {
-        'clinics': clinics
+        'clinics': clinics,
+        'meeting': meeting,
     })
+
+
+@user_group_required('EC-Office')
+def render_clinic_protocol(request, meeting_pk=None, clinic_pk=None):
+    # Get Meeting or fail
+    meeting = get_object_or_404(Meeting, pk=meeting_pk)
+    # Fetch the associated clinics based on the submissions in the meeting
+    associated_clinics = meeting.associated_clinics
+    # Get the clinic from the pool of possible clinics in this meeting
+    clinic = get_object_or_404(associated_clinics, id=clinic_pk)
+    # Get the clinic protocol or create it
+    clinic_protocol, _ = meeting.clinic_protocols.get_or_create(
+        clinic=clinic,
+        defaults={'protocol_rendering_started_at': None}
+    )
+    
+    # If a protocol is already being rendered, raise an error
+    if clinic_protocol.protocol_rendering_started_at is not None:
+        raise Http404('')
+    
+    if clinic_protocol.protocol:
+        clinic_protocol.protocol.delete()
+
+    # Start the rendering process
+    clinic_protocol.protocol_rendering_started_at = timezone.now()
+
+    from ecs.meetings.tasks import render_clinic_protocol_pdf
+    render_clinic_protocol_pdf.apply_async(kwargs={'clinic_protocol': clinic_protocol})
+    return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#clinic_tab')

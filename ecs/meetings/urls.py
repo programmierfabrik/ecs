@@ -48,5 +48,6 @@ urlpatterns = (
     path('<int:meeting_pk>/protocol/pdf/render/', views.render_protocol_pdf, name='meetings.render_protocol_pdf'),
     path('<int:meeting_pk>/protocol/pdf/', views.protocol_pdf, name='meetings.protocol_pdf'),
     path('<int:meeting_pk>/protocol/send/', views.send_protocol, name='meetings.send_protocol'),
-    path('<int:meeting_pk>/protocol/clinic/', views.list_clinics, name='meetings.list_clinics')
+    path('<int:meeting_pk>/protocol/clinic/', views.list_clinics, name='meetings.list_clinics'),
+    path('<int:meeting_pk>/protocol/clinic/pdf/render/<int:clinic_pk>/', views.render_clinic_protocol, name='meetings.render_clinic_protocol'),
 )
