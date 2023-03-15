@@ -24,10 +24,26 @@
                             <span class="fa fa-file-pdf-o"></span>
                             {% trans 'Download PDF' %}
                         </a>
-                        <a class="ml-3" href="{% url 'meetings.render_clinic_protocol' meeting_pk=meeting.id clinic_pk=clinic.id %}">
+                    {% endif %}
+
+                    {% if protocol.protocol_sent_at %}
+                        <div class="text-muted">
+                            {% trans 'Sent at' %}
+                            {{ protocol.protocol_sent_at|date:'d.m.Y H:i' }}
+                        </div>
+                    {% elif protocol.protocol_id %}
+                        <a class="ml-3"
+                           href="{% url 'meetings.render_clinic_protocol' meeting_pk=meeting.id clinic_pk=clinic.id %}">
                             <span class="fa fa-refresh"></span>
                             {% trans "Discard and rerender PDF" %}
                         </a>
+                        {% if meeting.ended %}
+                            <a class="send_emails ml-3"
+                               href="{% url 'meetings.send_clinic_protocol' meeting_pk=meeting.id protocol_pk=protocol.id %}">
+                                <span class="fa fa-paper-plane-o"></span>
+                                {% trans 'Send protocol' %}
+                            </a>
+                        {% endif %}
                     {% endif %}
                 {% endwith %}
             </div>

@@ -598,6 +598,7 @@ class MeetingClinicProtocol(models.Model):
     meeting = models.ForeignKey(Meeting, related_name='clinic_protocols', on_delete=models.CASCADE)
     clinic = models.ForeignKey('core.Clinic', related_name='clinic_protocols', on_delete=models.CASCADE)
     protocol = models.ForeignKey(Document, null = True, on_delete = models.SET_NULL)
+    protocol_sent_at = models.DateTimeField(null=True)
     protocol_rendering_started_at = models.DateTimeField(null=True)
 
     def get_protocol_pdf(self):

@@ -1063,8 +1063,7 @@ def render_clinic_protocol(request, meeting_pk=None, clinic_pk=None):
     clinic = get_object_or_404(associated_clinics, id=clinic_pk)
     # Get the clinic protocol or create it
     clinic_protocol, _ = meeting.clinic_protocols.get_or_create(
-        clinic=clinic,
-        defaults={'protocol_rendering_started_at': None}
+        clinic=clinic
     )
     
     # If a protocol is already being rendered, raise an error
@@ -1091,3 +1090,30 @@ def clinic_protocol_pdf(request, meeting_pk=None, protocol_pk=None):
     response = FileResponse(protocol.retrieve_raw(), content_type=protocol.mimetype)
     response['Content-Disposition'] = 'attachment;filename={}'.format(protocol.original_file_name)
     return response
+
+
+@user_group_required('EC-Office')
+def send_clinic_protocol(request, meeting_pk=None, protocol_pk=None):
+    meeting = get_object_or_404(Meeting, ended__isnull=False, pk=meeting_pk)
+    clinic_protocol = get_object_or_404(MeetingClinicProtocol, pk=protocol_pk, protocol_sent_at__isnull=True)
+
+    clinic_protocol.protocol_sent_at = timezone.now()
+    clinic_protocol.save(update_fields=('protocol_sent_at',))
+
+    protocol = clinic_protocol.protocol
+    protocol_pdf = protocol.retrieve_raw().read()
+    attachments = (
+        (protocol.original_file_name, protocol_pdf, 'application/pdf'),
+    )
+
+    email = clinic_protocol.clinic.email
+    htmlmail = str(
+        render_html(
+            request, 'meetings/messages/protocol.html', {'meeting': meeting, 'recipient': clinic_protocol.clinic.name}
+        )
+    )
+    deliver(email, subject=_('Meeting Protocol'), message=None,
+            message_html=htmlmail, from_email=settings.DEFAULT_FROM_EMAIL,
+            attachments=attachments)
+
+    return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#clinic_tab')
