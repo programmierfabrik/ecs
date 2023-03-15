@@ -11,19 +11,21 @@
                 </span>
             {% endfor %}
             <div>
-                {% if not clinic.clinic_protocol %}
-                    <a href="{% url 'meetings.render_clinic_protocol' meeting_pk=meeting.id clinic_pk=clinic.id %}">
-                        {% trans "Render PDF" %}
-                    </a>
-                {% elif clinic.clinic_protocol.protocol_rendering_started_at %}
-                    {% trans 'PDF is being rendered' %}
-                    <i class="fa fa-spinner fa-spin"></i>
-                {% else %}
-                    <a href="">
-                        <span class="fa fa-file-pdf-o"></span>
-                        {% trans 'Download PDF' %}
-                    </a>
-                {% endif %}
+                {% with protocol=clinic.clinic_protocol.0 %}
+                    {% if not protocol %}
+                        <a href="{% url 'meetings.render_clinic_protocol' meeting_pk=meeting.id clinic_pk=clinic.id %}">
+                            {% trans "Render PDF" %}
+                        </a>
+                    {% elif protocol.protocol_rendering_started_at %}
+                        {% trans 'PDF is being rendered' %}
+                        <i class="fa fa-spinner fa-spin"></i>
+                    {% else %}
+                        <a href="">
+                            <span class="fa fa-file-pdf-o"></span>
+                            {% trans 'Download PDF' %}
+                        </a>
+                    {% endif %}
+                {% endwith %}
             </div>
         </li>
     {% endfor %}
