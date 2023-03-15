@@ -41,6 +41,11 @@
                     <a class="nav-link" href="#protocol_tab">{% trans 'Protocol' %}</a>
                 </li>
             {% endif %}
+            {% if user|is_member_of:'EC-Office' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="#clinic_tab">Kliniken</a>
+                </li>
+            {% endif %}
         </ul>
     </div>
     {% if user|is_member_of:"EC-Office" and not meeting.ended %}
@@ -77,6 +82,11 @@
     {% if user|is_member_of:'EC-Office' and meeting.ended and not meeting.protocol_sent_at %}
         <div id="protocol_tab" class="collapse">
             <div data-widget-url="{% url 'meetings.edit_protocol' meeting_pk=meeting.pk %}"></div>
+        </div>
+    {% endif %}
+    {% if user|is_member_of:'EC-Office' %}
+        <div id="clinic_tab" class="collapse">
+            <div data-widget-url="{% url 'meetings.list_clinics' meeting_pk=meeting.pk %}"></div>
         </div>
     {% endif %}
 

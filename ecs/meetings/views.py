@@ -1,38 +1,30 @@
-from datetime import timedelta
-import zipfile
-import re
 import io
+import re
+import zipfile
 from collections import OrderedDict
+from datetime import timedelta
 
 import reversion
 from django.conf import settings
-from django.http import FileResponse, HttpResponse, Http404
-from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.contrib.auth.models import User
-from django.utils.translation import gettext as _
-from django.utils.text import slugify
-from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.db.models import Q, Max, Prefetch
-from django.contrib import messages
+from django.http import FileResponse, HttpResponse, Http404
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
+from django.utils.text import slugify
+from django.utils.translation import gettext as _
 
-from ecs.utils.viewutils import render_html, pdf_response
-from ecs.users.models import UserProfile
-from ecs.users.utils import user_flag_required, user_group_required, sudo, get_current_user
-from ecs.core.models import Submission, SubmissionForm, MedicalCategory, AdvancedSettings
-from ecs.core.models.constants import SUBMISSION_TYPE_MULTICENTRIC
 from ecs.checklists.models import Checklist, ChecklistBlueprint
-from ecs.votes.models import Vote
-from ecs.votes.forms import VoteForm, SaveVoteForm
-from ecs.tasks.models import Task
 from ecs.communication.mailutils import deliver
-from ecs.notifications.models import NotificationAnswer
-
-from ecs.meetings.tasks import optimize_timetable_task
-from ecs.meetings.signals import on_meeting_start, on_meeting_end, on_meeting_top_jump, \
-    on_meeting_date_changed
-from ecs.meetings.models import Meeting, Participation, TimetableEntry
+from ecs.communication.utils import send_system_message_template
+from ecs.core.models import Submission, SubmissionForm, MedicalCategory, AdvancedSettings, Clinic
+from ecs.core.models.constants import SUBMISSION_TYPE_MULTICENTRIC
+from ecs.documents.models import Document
+from ecs.documents.views import handle_download
+from ecs.meetings.cache import cache_meeting_page
 from ecs.meetings.forms import (
     MeetingForm, TimetableEntryForm, FreeTimetableEntryForm,
     UserConstraintFormSet, SubmissionReschedulingForm,
@@ -40,10 +32,17 @@ from ecs.meetings.forms import (
     AmendmentVoteFormSet, ManualTimetableEntryCommentForm,
     ManualTimetableEntryCommentFormset,
 )
-from ecs.communication.utils import send_system_message_template
-from ecs.documents.models import Document
-from ecs.documents.views import handle_download
-from ecs.meetings.cache import cache_meeting_page
+from ecs.meetings.models import Meeting, Participation, TimetableEntry
+from ecs.meetings.signals import on_meeting_start, on_meeting_end, on_meeting_top_jump, \
+    on_meeting_date_changed
+from ecs.meetings.tasks import optimize_timetable_task
+from ecs.notifications.models import NotificationAnswer
+from ecs.tasks.models import Task
+from ecs.users.models import UserProfile
+from ecs.users.utils import user_flag_required, user_group_required, sudo, get_current_user
+from ecs.utils.viewutils import render_html, pdf_response
+from ecs.votes.forms import VoteForm, SaveVoteForm
+from ecs.votes.models import Vote
 
 
 @user_group_required('EC-Office')
@@ -1037,4 +1036,17 @@ def edit_meeting(request, meeting_pk=None):
     return render(request, 'meetings/form.html', {
         'form': form,
         'meeting': meeting,
+    })
+
+
+@user_group_required('EC-Office')
+def list_clinics(request, meeting_pk=None):
+    meeting = get_object_or_404(Meeting, pk=meeting_pk)
+    clinics_id_list = meeting.submissions.values("clinics")
+    clinics = Clinic.objects.filter(id__in=[c.get('clinics', None) for c in clinics_id_list]).prefetch_related(
+        Prefetch('submissions', queryset=Submission.objects.filter(meetings=meeting_pk), to_attr='active_submissions')
+    )
+    
+    return render(request, 'meetings/tabs/clinics.html', {
+        'clinics': clinics
     })
