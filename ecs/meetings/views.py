@@ -1080,3 +1080,14 @@ def render_clinic_protocol(request, meeting_pk=None, clinic_pk=None):
     from ecs.meetings.tasks import render_clinic_protocol_pdf
     render_clinic_protocol_pdf.apply_async(kwargs={'clinic_protocol': clinic_protocol})
     return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#clinic_tab')
+
+
+@user_group_required('EC-Office')
+def clinic_protocol_pdf(request, meeting_pk=None, protocol_pk=None):
+    # meeting = get_object_or_404(Meeting, pk=meeting_pk)
+    clinic_protocol = get_object_or_404(MeetingClinicProtocol, pk=protocol_pk)
+
+    protocol = clinic_protocol.protocol
+    response = FileResponse(protocol.retrieve_raw(), content_type=protocol.mimetype)
+    response['Content-Disposition'] = 'attachment;filename={}'.format(protocol.original_file_name)
+    return response

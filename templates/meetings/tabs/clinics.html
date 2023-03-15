@@ -20,7 +20,7 @@
                         {% trans 'PDF is being rendered' %}
                         <i class="fa fa-spinner fa-spin"></i>
                     {% else %}
-                        <a href="">
+                        <a href="{% url 'meetings.clinic_protocol_pdf' meeting_pk=meeting.id protocol_pk=protocol.id %}">
                             <span class="fa fa-file-pdf-o"></span>
                             {% trans 'Download PDF' %}
                         </a>
