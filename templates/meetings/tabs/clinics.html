@@ -24,6 +24,10 @@
                             <span class="fa fa-file-pdf-o"></span>
                             {% trans 'Download PDF' %}
                         </a>
+                        <a class="ml-3" href="{% url 'meetings.render_clinic_protocol' meeting_pk=meeting.id clinic_pk=clinic.id %}">
+                            <span class="fa fa-refresh"></span>
+                            {% trans "Discard and rerender PDF" %}
+                        </a>
                     {% endif %}
                 {% endwith %}
             </div>
