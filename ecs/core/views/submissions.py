@@ -186,7 +186,7 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
 
     crumbs_key = 'submission_breadcrumbs-user_{0}'.format(request.user.pk)
     crumbs = cache.get(crumbs_key, [])
-    crumbs = ([submission.pk] + [pk for pk in crumbs if not pk == submission.pk])[:3]
+    crumbs = ([submission.pk] + [pk for pk in crumbs if not pk == submission.pk])[:5]
     cache.set(crumbs_key, crumbs, 60*60*24*30) # store for thirty days
 
     checklists_q = Q(last_edited_by=request.user)
