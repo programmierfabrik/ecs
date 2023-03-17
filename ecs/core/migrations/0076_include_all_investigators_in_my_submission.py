@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0074_submissionform_project_type_medical_device_combination_studies'),
+        ('core', '0075_clinic_submission_clinics'),
     ]
 
     operations = [
