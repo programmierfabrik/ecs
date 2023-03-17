@@ -10,7 +10,7 @@ class AdministrationFilterForm(forms.Form):
         ('active', _('active')),
         ('inactive', _('inactive')),
     ), label=_('Activity'))
-    keyword = forms.CharField(required=False, label="Klinik")
+    keyword = forms.CharField(required=False, label="Krankenanstalt")
     page = forms.CharField(required=False, widget=forms.HiddenInput())
 
 

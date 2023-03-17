@@ -21,7 +21,7 @@ class CategorizationForm(ReadonlyFormMixin, forms.ModelForm):
         labels = {
             'workflow_lane': _('workflow lane'),
             'medical_categories': _('medical_categories'),
-            'clinics': 'Kliniken',
+            'clinics': 'Krankenanstalten',
             'remission': _('remission'),
             'invite_primary_investigator_to_meeting': _('invite_primary_investigator_to_meeting'),
         }

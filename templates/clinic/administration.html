@@ -1,12 +1,12 @@
 {% extends 'core.html' %}
 {% load i18n %}
 
-{% block headertitle %}Kliniken{% endblock %}
+{% block headertitle %}Krankenanstalten{% endblock %}
 
 {% block content %}
     <div class="container">
         <a class="btn btn-primary mr-3 mb-3" href="{% url 'core.clinic.create_clinic' %}">
-            Neue Klinik anlegen
+            Neue Krankenanstalt anlegen
         </a>
 
         <form action="{{ request.path }}" method="post">
