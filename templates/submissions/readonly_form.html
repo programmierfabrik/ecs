@@ -39,7 +39,9 @@
 
 {% block headernav %}
   <div class="readonly">
-    <div style="margin-bottom: 1rem;">{% include 'tags/list.html' with tags=tags only %}</div>
+    {% if user.profile.is_internal %}
+        <div style="margin-bottom: 1rem;">{% include 'tags/list.html' with tags=tags only %}</div>
+    {% endif %}
     <ul class="tab_header_groups nav nav-tabs flex-wrap">
     {% block tab_header_groups %}
         <li class="nav-item"><a class="nav-link" href="#tabs_general">{% trans "General" %}</a></li>
