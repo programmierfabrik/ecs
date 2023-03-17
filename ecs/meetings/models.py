@@ -429,6 +429,8 @@ class Meeting(models.Model):
         })
         
     def get_protocol_pdf(self, entries_filter=None):
+        if entries_filter is None:
+            entries_filter = Q()
         entries = self.timetable_entries.filter(entries_filter)
         timetable_entries = list(entries)
         timetable_entries.sort(key=lambda e: e.agenda_index)
