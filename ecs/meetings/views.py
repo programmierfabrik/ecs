@@ -1106,3 +1106,19 @@ def send_submission_protocol(request, meeting_pk=None, submission_pk=None, proto
             attachments=attachments)
 
     return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#clinic_tab')
+
+
+@user_group_required('EC-Office')
+def render_all_possible_protocols(request, meeting_pk=None):
+    try:
+        # Get Meeting or fail
+        meeting = get_object_or_404(Meeting, pk=meeting_pk)
+        # Render submission that aren't currently in the render pipeline
+        submissions = meeting.submissions \
+            .filter(meeting_protocols__protocol_rendering_started_at__isnull=True) \
+            .prefetch_related('meeting_protocols')
+        for submission in submissions:
+            render_protocol_pdf_for_submission(meeting, submission)
+        return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#clinic_tab')
+    except:
+        raise Http404('')

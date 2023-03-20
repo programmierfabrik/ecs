@@ -1,5 +1,12 @@
 {% load core i18n %}
 
+<div class="d-flex mb-3">
+    <a class="btn btn-primary" href="{% url 'meetings.render_all_possible_protocols' meeting_pk=meeting.pk %}">Alle PDFs erstellen</a>
+    {% if meeting.ended %}
+        <a class="btn btn-primary ml-2" href="">Alle möglichen Protokolle verschicken</a>
+    {% endif %}
+</div>
+
 <ul class="list-group">
     {% for submission in submissions %}
         {% with clinics=submission.clinics.all %}
