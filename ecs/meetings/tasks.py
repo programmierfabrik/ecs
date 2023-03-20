@@ -121,13 +121,12 @@ def render_protocol_pdf(meeting_id=None, user_id=None):
 
 @celery_app.task
 @transaction.atomic
-def render_clinic_protocol_pdf(clinic_protocol):
-
+def render_meeting_protocol_pdf(meeting_protocol):
     try:
-        clinic_protocol.render_protocol_pdf()
+        meeting_protocol.render_protocol_pdf()
     finally:
-        clinic_protocol.protocol_rendering_started_at = None
-        clinic_protocol.save(update_fields=('protocol_rendering_started_at',))
+        meeting_protocol.protocol_rendering_started_at = None
+        meeting_protocol.save(update_fields=('protocol_rendering_started_at',))
 
 
 @celery_app.task

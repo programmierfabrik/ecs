@@ -33,10 +33,11 @@ from ecs.meetings.forms import (
     AmendmentVoteFormSet, ManualTimetableEntryCommentForm,
     ManualTimetableEntryCommentFormset,
 )
-from ecs.meetings.models import Meeting, Participation, TimetableEntry, MeetingClinicProtocol, MeetingSubmissionProtocol
+from ecs.meetings.models import Meeting, Participation, TimetableEntry, MeetingSubmissionProtocol
 from ecs.meetings.signals import on_meeting_start, on_meeting_end, on_meeting_top_jump, \
     on_meeting_date_changed
 from ecs.meetings.tasks import optimize_timetable_task
+from ecs.meetings.utils import render_protocol_pdf_for_submission
 from ecs.notifications.models import NotificationAnswer
 from ecs.tasks.models import Task
 from ecs.users.models import UserProfile
@@ -1043,11 +1044,6 @@ def edit_meeting(request, meeting_pk=None):
 @user_group_required('EC-Office')
 def list_clinics(request, meeting_pk=None):
     meeting = get_object_or_404(Meeting, pk=meeting_pk)
-    clinics = meeting.associated_clinics.prefetch_related(
-        Prefetch('clinic_protocols', queryset=MeetingClinicProtocol.objects.filter(meeting=meeting_pk),
-                 to_attr='clinic_protocol')
-    )
-
     submissions = meeting.submissions.prefetch_related(
         Prefetch(
             'meeting_protocols', to_attr='protocols',
@@ -1062,39 +1058,24 @@ def list_clinics(request, meeting_pk=None):
 
 
 @user_group_required('EC-Office')
-def render_submission_protocol(request, meeting_pk=None, submission_pk=None, clinic_pk=None):
-    # Get Meeting or fail
-    meeting = get_object_or_404(Meeting, pk=meeting_pk)
-    # Fetch the associated clinics based on the submissions in the meeting
-    associated_clinics = meeting.associated_clinics
-    # Get the clinic from the pool of possible clinics in this meeting
-    clinic = get_object_or_404(associated_clinics, id=clinic_pk)
-    # Get the clinic protocol or create it
-    clinic_protocol, _ = meeting.clinic_protocols.get_or_create(
-        clinic=clinic
-    )
-    
-    # If a protocol is already being rendered, raise an error
-    if clinic_protocol.protocol_rendering_started_at is not None:
+def render_submission_protocol(request, meeting_pk=None, submission_pk=None):
+    try:
+        # Get Meeting or fail
+        meeting = get_object_or_404(Meeting, pk=meeting_pk)
+        # Get the submission from the pool of possible submission in this meeting
+        submission = get_object_or_404(meeting.submissions, id=submission_pk)
+        render_protocol_pdf_for_submission(meeting, submission)
+        return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#clinic_tab')
+    except:
         raise Http404('')
-    
-    if clinic_protocol.protocol:
-        clinic_protocol.protocol.delete()
-
-    # Start the rendering process
-    clinic_protocol.protocol_rendering_started_at = timezone.now()
-
-    from ecs.meetings.tasks import render_clinic_protocol_pdf
-    render_clinic_protocol_pdf.apply_async(kwargs={'clinic_protocol': clinic_protocol})
-    return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#clinic_tab')
 
 
 @user_group_required('EC-Office')
-def submission_protocol_pdf(request, protocol_pk=None):
+def submission_protocol_pdf(request, meeting_pk=None, protocol_pk=None):
     # meeting = get_object_or_404(Meeting, pk=meeting_pk)
-    clinic_protocol = get_object_or_404(MeetingClinicProtocol, pk=protocol_pk)
+    meeting_protocol = get_object_or_404(MeetingSubmissionProtocol, pk=protocol_pk)
 
-    protocol = clinic_protocol.protocol
+    protocol = meeting_protocol.protocol
     response = FileResponse(protocol.retrieve_raw(), content_type=protocol.mimetype)
     response['Content-Disposition'] = 'attachment;filename={}'.format(protocol.original_file_name)
     return response

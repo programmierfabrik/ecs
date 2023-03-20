@@ -33,7 +33,7 @@
                             </div>
                         {% elif protocol.protocol_id %}
                             <a class="ml-3"
-                               href="{% url 'meetings.render_clinic_protocol' meeting_pk=meeting.id clinic_pk=clinic.id %}">
+                               href="{% url 'meetings.render_submission_protocol' meeting_pk=meeting.id submission_pk=submission.id %}">
                                 <span class="fa fa-refresh"></span>
                                 {% trans "Discard and rerender PDF" %}
                             </a>
