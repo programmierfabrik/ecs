@@ -1,5 +1,9 @@
 from django.utils import timezone
 
+from ecs import settings
+from ecs.communication.mailutils import deliver
+from ecs.utils.viewutils import render_html
+
 
 def render_protocol_pdf_for_submission(meeting, submission):
     # Get the protocol or create it
@@ -19,4 +23,25 @@ def render_protocol_pdf_for_submission(meeting, submission):
 
     from ecs.meetings.tasks import render_meeting_protocol_pdf
     render_meeting_protocol_pdf.apply_async(kwargs={'meeting_protocol': meeting_protocol})
-    # return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#clinic_tab')
+
+
+def send_submission_protocol_pdf(request, meeting, meeting_protocol):
+    meeting_protocol.protocol_sent_at = timezone.now()
+    meeting_protocol.save(update_fields=('protocol_sent_at',))
+
+    protocol = meeting_protocol.protocol
+    protocol_pdf = protocol.retrieve_raw().read()
+    attachments = (
+        (protocol.original_file_name, protocol_pdf, 'application/pdf'),
+    )
+
+    clinics = meeting_protocol.submission.clinics.all()
+    for clinic in clinics:
+        email = clinic.email
+        htmlmail = str(render_html(
+            request, 'meetings/messages/protocol.html', {'meeting': meeting, 'recipient': clinic.name}
+        ))
+        
+        deliver(email, subject='Protokollauszug', message=None,
+                message_html=htmlmail, from_email=settings.DEFAULT_FROM_EMAIL,
+                attachments=attachments)

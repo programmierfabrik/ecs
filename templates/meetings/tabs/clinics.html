@@ -1,9 +1,13 @@
 {% load core i18n %}
 
 <div class="d-flex mb-3">
-    <a class="btn btn-primary" href="{% url 'meetings.render_all_possible_protocols' meeting_pk=meeting.pk %}">Alle PDFs erstellen</a>
+    <a class="btn btn-primary" href="{% url 'meetings.render_all_possible_protocols' meeting_pk=meeting.pk %}">Alle PDFs
+        erstellen</a>
     {% if meeting.ended %}
-        <a class="btn btn-primary ml-2" href="">Alle möglichen Protokolle verschicken</a>
+        <a class="btn btn-primary ml-2"
+           href="{% url 'meetings.send_all_possible_submission_protocol' meeting_pk=meeting.pk %}">
+            Alle möglichen Protokolle verschicken
+        </a>
     {% endif %}
 </div>
 
@@ -46,7 +50,7 @@
                             </a>
                             {% if meeting.ended %}
                                 <a class="send_emails ml-3"
-                                   href="{% url 'meetings.send_clinic_protocol' meeting_pk=meeting.id protocol_pk=protocol.id %}">
+                                   href="{% url 'meetings.send_submission_protocol' meeting_pk=meeting.id submission_pk=submission.id %}">
                                     <span class="fa fa-paper-plane-o"></span>
                                     {% trans 'Send protocol' %}
                                 </a>

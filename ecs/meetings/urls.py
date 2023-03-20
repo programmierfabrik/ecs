@@ -52,5 +52,6 @@ urlpatterns = (
     path('<int:meeting_pk>/protocol/clinic/pdf/render', views.render_all_possible_protocols, name='meetings.render_all_possible_protocols'),
     path('<int:meeting_pk>/protocol/clinic/pdf/render/<int:submission_pk>/', views.render_submission_protocol, name='meetings.render_submission_protocol'),
     path('<int:meeting_pk>/protocol/clinic/pdf/<int:protocol_pk>/', views.submission_protocol_pdf, name='meetings.submission_protocol_pdf'),
+    path('<int:meeting_pk>/protocol/clinic/pdf/send/', views.send_all_possible_submission_protocol, name='meetings.send_all_possible_submission_protocol'),
     path('<int:meeting_pk>/protocol/clinic/pdf/send/<int:submission_pk>/', views.send_submission_protocol, name='meetings.send_submission_protocol'),
 )

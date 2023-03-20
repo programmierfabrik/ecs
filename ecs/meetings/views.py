@@ -37,7 +37,7 @@ from ecs.meetings.models import Meeting, Participation, TimetableEntry, MeetingS
 from ecs.meetings.signals import on_meeting_start, on_meeting_end, on_meeting_top_jump, \
     on_meeting_date_changed
 from ecs.meetings.tasks import optimize_timetable_task
-from ecs.meetings.utils import render_protocol_pdf_for_submission
+from ecs.meetings.utils import render_protocol_pdf_for_submission, send_submission_protocol_pdf
 from ecs.notifications.models import NotificationAnswer
 from ecs.tasks.models import Task
 from ecs.users.models import UserProfile
@@ -1082,29 +1082,16 @@ def submission_protocol_pdf(request, meeting_pk=None, protocol_pk=None):
 
 
 @user_group_required('EC-Office')
-def send_submission_protocol(request, meeting_pk=None, submission_pk=None, protocol_pk=None):
+def send_submission_protocol(request, meeting_pk=None, submission_pk=None):
     meeting = get_object_or_404(Meeting, ended__isnull=False, pk=meeting_pk)
-    clinic_protocol = get_object_or_404(MeetingClinicProtocol, pk=protocol_pk, protocol_sent_at__isnull=True)
-
-    clinic_protocol.protocol_sent_at = timezone.now()
-    clinic_protocol.save(update_fields=('protocol_sent_at',))
-
-    protocol = clinic_protocol.protocol
-    protocol_pdf = protocol.retrieve_raw().read()
-    attachments = (
-        (protocol.original_file_name, protocol_pdf, 'application/pdf'),
+    meeting_protocol = get_object_or_404(
+        MeetingSubmissionProtocol.objects.prefetch_related(Prefetch(
+            'submission', queryset=Submission.objects.prefetch_related('clinics')
+        )),
+        submission=submission_pk
     )
 
-    email = clinic_protocol.clinic.email
-    htmlmail = str(
-        render_html(
-            request, 'meetings/messages/protocol.html', {'meeting': meeting, 'recipient': clinic_protocol.clinic.name}
-        )
-    )
-    deliver(email, subject=_('Meeting Protocol'), message=None,
-            message_html=htmlmail, from_email=settings.DEFAULT_FROM_EMAIL,
-            attachments=attachments)
-
+    send_submission_protocol_pdf(request, meeting, meeting_protocol)
     return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#clinic_tab')
 
 
@@ -1122,3 +1109,21 @@ def render_all_possible_protocols(request, meeting_pk=None):
         return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#clinic_tab')
     except:
         raise Http404('')
+
+
+@user_group_required('EC-Office')
+def send_all_possible_submission_protocol(request, meeting_pk=None):
+    meeting = get_object_or_404(Meeting, ended__isnull=False, pk=meeting_pk)
+    submissions = meeting.submissions.values_list('pk', flat=True)
+    for submission_pk in submissions:
+        print(submission_pk)
+        meeting_protocol = get_object_or_404(
+            MeetingSubmissionProtocol.objects.prefetch_related(Prefetch(
+                'submission', queryset=Submission.objects.prefetch_related('clinics')
+            )),
+            submission=submission_pk
+        )
+
+        send_submission_protocol_pdf(request, meeting, meeting_protocol)
+
+    return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#clinic_tab')
