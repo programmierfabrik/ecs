@@ -619,28 +619,6 @@ class MeetingSubmissionProtocol(models.Model):
         self.save(update_fields=('protocol',))
     
 
-class MeetingClinicProtocol(models.Model):
-    meeting = models.ForeignKey(Meeting, related_name='clinic_protocols', on_delete=models.CASCADE)
-    clinic = models.ForeignKey('core.Clinic', related_name='clinic_protocols', on_delete=models.CASCADE)
-    protocol = models.ForeignKey(Document, null = True, on_delete = models.SET_NULL)
-    protocol_sent_at = models.DateTimeField(null=True)
-    protocol_rendering_started_at = models.DateTimeField(null=True)
-
-    def get_protocol_pdf(self):
-        return self.meeting.get_protocol_pdf(Q(submission__clinics=self.clinic))
-
-    def render_protocol_pdf(self):
-        pdfdata = self.get_protocol_pdf()
-        filename = '{}-{}-protocol.pdf'.format(
-            slugify(self.meeting.title),
-            timezone.localtime(self.meeting.start).strftime('%d-%m-%Y')
-        )
-        self.protocol = Document.objects.create_from_buffer(
-            pdfdata, doctype='meeting_protocol', parent_object=self,
-            name=filename, original_file_name=filename
-        )
-        self.save(update_fields=('protocol',))
-
 @reversion.register(fields=('text',))
 class TimetableEntry(models.Model):
     meeting = models.ForeignKey(Meeting, related_name='timetable_entries', on_delete=models.CASCADE)
