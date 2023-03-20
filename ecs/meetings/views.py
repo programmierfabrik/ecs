@@ -1042,7 +1042,7 @@ def edit_meeting(request, meeting_pk=None):
 
 
 @user_group_required('EC-Office')
-def list_clinics(request, meeting_pk=None):
+def list_submissions_protocols(request, meeting_pk=None):
     meeting = get_object_or_404(Meeting, pk=meeting_pk)
     submissions = meeting.submissions.prefetch_related(
         Prefetch(

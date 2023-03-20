@@ -86,7 +86,7 @@
     {% endif %}
     {% if user|is_member_of:'EC-Office' %}
         <div id="clinic_tab" class="collapse">
-            <div data-widget-url="{% url 'meetings.list_clinics' meeting_pk=meeting.pk %}"></div>
+            <div data-widget-url="{% url 'meetings.list_submissions_protocols' meeting_pk=meeting.pk %}"></div>
         </div>
     {% endif %}
 
