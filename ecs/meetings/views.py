@@ -1114,9 +1114,11 @@ def render_all_possible_protocols(request, meeting_pk=None):
 @user_group_required('EC-Office')
 def send_all_possible_submission_protocol(request, meeting_pk=None):
     meeting = get_object_or_404(Meeting, ended__isnull=False, pk=meeting_pk)
-    submissions = meeting.submissions.values_list('pk', flat=True)
+    submissions = meeting.submissions.filter(meeting_protocols__protocol_sent_at__isnull=True).values_list(
+        'pk', flat=True
+    )
+
     for submission_pk in submissions:
-        print(submission_pk)
         meeting_protocol = get_object_or_404(
             MeetingSubmissionProtocol.objects.prefetch_related(Prefetch(
                 'submission', queryset=Submission.objects.prefetch_related('clinics')
