@@ -7,13 +7,15 @@
     {% include 'pdf/ec_head.html' %}
     <div align="center" style="font-weight:bold;font-size:14pt;margin-bottom:0.5cm;">
     Sitzung der Ethik-Kommission am {{ meeting.start|date:'d.m.Y' }}<br />
-    Protokoll<br />
+    Protokoll{% if extraction %}auszug{% endif %}<br />
     </div>
 
-    <p>
-        Beginn: {{ meeting.started|date:'H:i' }}<br />
-        Ende: {{ meeting.ended|date:'H:i' }}
-    </p>
+    {% if not extraction %}
+        <p>
+            Beginn: {{ meeting.started|date:'H:i' }}<br />
+            Ende: {{ meeting.ended|date:'H:i' }}
+        </p>
+    {% endif %}
 
     {% if meeting.comments %}
     <p>

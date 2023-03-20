@@ -428,7 +428,7 @@ class Meeting(models.Model):
             'meeting': self,
         })
         
-    def get_protocol_pdf(self, entries_filter=None):
+    def get_protocol_pdf(self, entries_filter=None, extraction=False):
         if entries_filter is None:
             entries_filter = Q()
         entries = self.timetable_entries.filter(entries_filter)
@@ -491,6 +491,7 @@ class Meeting(models.Model):
                     .order_by('submission_forms__submission__ec_number'),
             'b1ized': b1ized,
             'answers': answers,
+            'extraction': extraction,
         })
 
     def render_protocol_pdf(self):
@@ -604,7 +605,7 @@ class MeetingSubmissionProtocol(models.Model):
     protocol_rendering_started_at = models.DateTimeField(null=True)
 
     def get_protocol_pdf(self):
-        return self.meeting.get_protocol_pdf(Q(submission=self.submission))
+        return self.meeting.get_protocol_pdf(Q(submission=self.submission), extraction=True)
 
     def render_protocol_pdf(self):
         pdfdata = self.get_protocol_pdf()
