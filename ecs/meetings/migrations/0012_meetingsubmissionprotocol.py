@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('documents', '0005_remove_documenttype_helptext'),
-        ('core', '0076_include_all_investigators_in_my_submission'),
+        ('core', '0076_clinic_submission_clinics'),
         ('meetings', '0011_auto_20170207_1818'),
     ]
 
