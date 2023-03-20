@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('documents', '0005_remove_documenttype_helptext'),
         ('core', '0076_include_all_investigators_in_my_submission'),
-        ('meetings', '0012_meetingclinicprotocol'),
+        ('meetings', '0011_auto_20170207_1818'),
     ]
 
     operations = [
