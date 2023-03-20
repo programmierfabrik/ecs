@@ -1,52 +1,64 @@
 {% load core i18n %}
 
 <ul class="list-group">
-    {% for clinic in clinics %}
-        <li class="list-group-item d-block">
-            <h4>{{ clinic.name }} ({{ clinic.active_submissions|length }})</h4>
-            {% for submission in clinic.active_submissions %}
-                <span>
-                <a href="{% url 'readonly_submission_form' submission_form_pk=submission.pk %}"
-                   target="_blank">{{ submission }}</a>{% if clinic.active_submissions|last != submission %},{% endif %}
-                </span>
-            {% endfor %}
-            <div>
-                {% with protocol=clinic.clinic_protocol.0 %}
-                    {% if not protocol %}
-                        <a href="{% url 'meetings.render_clinic_protocol' meeting_pk=meeting.id clinic_pk=clinic.id %}">
-                            {% trans "Render PDF" %}
-                        </a>
-                    {% elif protocol.protocol_rendering_started_at %}
-                        {% trans 'PDF is being rendered' %}
-                        <i class="fa fa-spinner fa-spin"></i>
-                    {% else %}
-                        <a href="{% url 'meetings.clinic_protocol_pdf' meeting_pk=meeting.id protocol_pk=protocol.id %}">
-                            <span class="fa fa-file-pdf-o"></span>
-                            {% trans 'Download PDF' %}
-                        </a>
-                    {% endif %}
-
-                    {% if protocol.protocol_sent_at %}
-                        <div class="text-muted">
-                            {% trans 'Sent at' %}
-                            {{ protocol.protocol_sent_at|date:'d.m.Y H:i' }}
-                        </div>
-                    {% elif protocol.protocol_id %}
-                        <a class="ml-3"
-                           href="{% url 'meetings.render_clinic_protocol' meeting_pk=meeting.id clinic_pk=clinic.id %}">
-                            <span class="fa fa-refresh"></span>
-                            {% trans "Discard and rerender PDF" %}
-                        </a>
-                        {% if meeting.ended %}
-                            <a class="send_emails ml-3"
-                               href="{% url 'meetings.send_clinic_protocol' meeting_pk=meeting.id protocol_pk=protocol.id %}">
-                                <span class="fa fa-paper-plane-o"></span>
-                                {% trans 'Send protocol' %}
+    {% for submission in submissions %}
+        {% with clinics=submission.clinics.all %}
+            <li class="list-group-item d-block">
+                <h4>{{ submission }} ({{ clinics|length }})</h4>
+                {% for clinic in clinics %}
+                    <span>
+                        <a href="" target="_blank">{{ clinic }}{% if clinics.last != clinic %},{% endif %}</a>
+                    </span>
+                {% endfor %}
+                <div>
+                    {% with protocol=submission.protocols.0 %}
+                        {% if not protocol %}
+                            <a href="{% url 'meetings.render_submission_protocol' meeting_pk=meeting.id submission_pk=submission.id %}">
+                                {% trans "Render PDF" %}
+                            </a>
+                        {% elif protocol.protocol_rendering_started_at %}
+                            {% trans 'PDF is being rendered' %}
+                            <i class="fa fa-spinner fa-spin"></i>
+                        {% else %}
+                            <a href="{% url 'meetings.submission_protocol_pdf' meeting_pk=meeting.id protocol_pk=protocol.id %}">
+                                <span class="fa fa-file-pdf-o"></span>
+                                {% trans 'Download PDF' %}
                             </a>
                         {% endif %}
-                    {% endif %}
-                {% endwith %}
-            </div>
-        </li>
+
+                        {% if protocol.protocol_sent_at %}
+                            <div class="text-muted">
+                                {% trans 'Sent at' %}
+                                {{ protocol.protocol_sent_at|date:'d.m.Y H:i' }}
+                            </div>
+                        {% elif protocol.protocol_id %}
+                            <a class="ml-3"
+                               href="{% url 'meetings.render_clinic_protocol' meeting_pk=meeting.id clinic_pk=clinic.id %}">
+                                <span class="fa fa-refresh"></span>
+                                {% trans "Discard and rerender PDF" %}
+                            </a>
+                            {% if meeting.ended %}
+                                <a class="send_emails ml-3"
+                                   href="{% url 'meetings.send_clinic_protocol' meeting_pk=meeting.id protocol_pk=protocol.id %}">
+                                    <span class="fa fa-paper-plane-o"></span>
+                                    {% trans 'Send protocol' %}
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            </li>
+        {% endwith %}
     {% endfor %}
+    {#    {% for clinic in clinics %}#}
+    {#        <li class="list-group-item d-block">#}
+    {#            <h4>{{ clinic.name }} ({{ clinic.active_submissions|length }})</h4>#}
+    {#            {% for submission in clinic.active_submissions %}#}
+    {#                <span>#}
+    {#                <a href="{% url 'readonly_submission_form' submission_form_pk=submission.pk %}"#}
+    {#                   target="_blank">{{ submission }}</a>{% if clinic.active_submissions|last != submission %},{% endif %}#}
+    {#                </span>#}
+    {#            {% endfor %}#}
+    {#        </li>#}
+    {#    {% endfor %}#}
 </ul>

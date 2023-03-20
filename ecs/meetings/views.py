@@ -33,7 +33,7 @@ from ecs.meetings.forms import (
     AmendmentVoteFormSet, ManualTimetableEntryCommentForm,
     ManualTimetableEntryCommentFormset,
 )
-from ecs.meetings.models import Meeting, Participation, TimetableEntry, MeetingClinicProtocol
+from ecs.meetings.models import Meeting, Participation, TimetableEntry, MeetingClinicProtocol, MeetingSubmissionProtocol
 from ecs.meetings.signals import on_meeting_start, on_meeting_end, on_meeting_top_jump, \
     on_meeting_date_changed
 from ecs.meetings.tasks import optimize_timetable_task
@@ -1044,17 +1044,25 @@ def edit_meeting(request, meeting_pk=None):
 def list_clinics(request, meeting_pk=None):
     meeting = get_object_or_404(Meeting, pk=meeting_pk)
     clinics = meeting.associated_clinics.prefetch_related(
-        Prefetch('clinic_protocols', queryset=MeetingClinicProtocol.objects.filter(meeting=meeting_pk), to_attr='clinic_protocol')
+        Prefetch('clinic_protocols', queryset=MeetingClinicProtocol.objects.filter(meeting=meeting_pk),
+                 to_attr='clinic_protocol')
     )
-    
+
+    submissions = meeting.submissions.prefetch_related(
+        Prefetch(
+            'meeting_protocols', to_attr='protocols',
+            queryset=MeetingSubmissionProtocol.objects.filter(meeting=meeting)
+        )
+    )
+
     return render(request, 'meetings/tabs/clinics.html', {
-        'clinics': clinics,
         'meeting': meeting,
+        'submissions': submissions,
     })
 
 
 @user_group_required('EC-Office')
-def render_clinic_protocol(request, meeting_pk=None, clinic_pk=None):
+def render_submission_protocol(request, meeting_pk=None, submission_pk=None, clinic_pk=None):
     # Get Meeting or fail
     meeting = get_object_or_404(Meeting, pk=meeting_pk)
     # Fetch the associated clinics based on the submissions in the meeting
@@ -1082,7 +1090,7 @@ def render_clinic_protocol(request, meeting_pk=None, clinic_pk=None):
 
 
 @user_group_required('EC-Office')
-def clinic_protocol_pdf(request, meeting_pk=None, protocol_pk=None):
+def submission_protocol_pdf(request, protocol_pk=None):
     # meeting = get_object_or_404(Meeting, pk=meeting_pk)
     clinic_protocol = get_object_or_404(MeetingClinicProtocol, pk=protocol_pk)
 
@@ -1093,7 +1101,7 @@ def clinic_protocol_pdf(request, meeting_pk=None, protocol_pk=None):
 
 
 @user_group_required('EC-Office')
-def send_clinic_protocol(request, meeting_pk=None, protocol_pk=None):
+def send_submission_protocol(request, meeting_pk=None, submission_pk=None, protocol_pk=None):
     meeting = get_object_or_404(Meeting, ended__isnull=False, pk=meeting_pk)
     clinic_protocol = get_object_or_404(MeetingClinicProtocol, pk=protocol_pk, protocol_sent_at__isnull=True)
 

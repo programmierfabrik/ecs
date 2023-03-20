@@ -49,7 +49,7 @@ urlpatterns = (
     path('<int:meeting_pk>/protocol/pdf/', views.protocol_pdf, name='meetings.protocol_pdf'),
     path('<int:meeting_pk>/protocol/send/', views.send_protocol, name='meetings.send_protocol'),
     path('<int:meeting_pk>/protocol/clinic/', views.list_clinics, name='meetings.list_clinics'),
-    path('<int:meeting_pk>/protocol/clinic/pdf/render/<int:clinic_pk>/', views.render_clinic_protocol, name='meetings.render_clinic_protocol'),
-    path('<int:meeting_pk>/protocol/clinic/pdf/<int:protocol_pk>/', views.clinic_protocol_pdf, name='meetings.clinic_protocol_pdf'),
-    path('<int:meeting_pk>/protocol/clinic/pdf/send/<int:protocol_pk>/', views.send_clinic_protocol, name='meetings.send_clinic_protocol'),
+    path('<int:meeting_pk>/protocol/clinic/pdf/render/<int:submission_pk>/', views.render_submission_protocol, name='meetings.render_submission_protocol'),
+    path('<int:meeting_pk>/protocol/clinic/pdf/<int:protocol_pk>/', views.submission_protocol_pdf, name='meetings.submission_protocol_pdf'),
+    path('<int:meeting_pk>/protocol/clinic/pdf/send/<int:submission_pk>/', views.send_submission_protocol, name='meetings.send_submission_protocol'),
 )
