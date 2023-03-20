@@ -18,7 +18,7 @@
                 <h4>{{ submission }} ({{ clinics|length }})</h4>
                 {% for clinic in clinics %}
                     <span>
-                        <a href="" target="_blank">{{ clinic }}{% if clinics.last != clinic %},{% endif %}</a>
+                        <a href="{% url 'core.clinic.update_clinic' clinic_id=clinic.id %}" target="_blank">{{ clinic }}{% if clinics.last != clinic %},{% endif %}</a>
                     </span>
                 {% endfor %}
                 <div>
@@ -61,15 +61,4 @@
             </li>
         {% endwith %}
     {% endfor %}
-    {#    {% for clinic in clinics %}#}
-    {#        <li class="list-group-item d-block">#}
-    {#            <h4>{{ clinic.name }} ({{ clinic.active_submissions|length }})</h4>#}
-    {#            {% for submission in clinic.active_submissions %}#}
-    {#                <span>#}
-    {#                <a href="{% url 'readonly_submission_form' submission_form_pk=submission.pk %}"#}
-    {#                   target="_blank">{{ submission }}</a>{% if clinic.active_submissions|last != submission %},{% endif %}#}
-    {#                </span>#}
-    {#            {% endfor %}#}
-    {#        </li>#}
-    {#    {% endfor %}#}
 </ul>
