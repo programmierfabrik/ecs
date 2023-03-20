@@ -1102,8 +1102,10 @@ def render_all_possible_protocols(request, meeting_pk=None):
         meeting = get_object_or_404(Meeting, pk=meeting_pk)
         # Render submission that aren't currently in the render pipeline
         submissions = meeting.submissions \
-            .filter(meeting_protocols__protocol_rendering_started_at__isnull=True,
-                    meeting_protocols__protocol_sent_at__isnull=True) \
+            .filter(~Q(clinics=None),
+                    meeting_protocols__protocol_rendering_started_at__isnull=True,
+                    meeting_protocols__protocol_sent_at__isnull=True,
+                    ) \
             .prefetch_related('meeting_protocols')
         for submission in submissions:
             render_protocol_pdf_for_submission(meeting, submission)
