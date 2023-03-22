@@ -199,3 +199,15 @@
         width: 400px;
     }
 }
+
+.ek-member-list {
+    #id_users {
+        label {
+            display: flex;
+            input {
+                width: auto;
+                margin-right: 0.5rem;
+            }
+        }
+    }
+}

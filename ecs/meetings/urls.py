@@ -54,4 +54,6 @@ urlpatterns = (
     path('<int:meeting_pk>/protocol/clinic/pdf/<int:protocol_pk>/', views.submission_protocol_pdf, name='meetings.submission_protocol_pdf'),
     path('<int:meeting_pk>/protocol/clinic/pdf/send/', views.send_all_possible_submission_protocol, name='meetings.send_all_possible_submission_protocol'),
     path('<int:meeting_pk>/protocol/clinic/pdf/send/<int:submission_pk>/', views.send_submission_protocol, name='meetings.send_submission_protocol'),
+
+    path('<int:meeting_pk>/ek-member/', views.list_ek_member, name='meetings.list_ek_member'),
 )

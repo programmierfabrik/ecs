@@ -31,7 +31,7 @@ from ecs.meetings.forms import (
     UserConstraintFormSet, SubmissionReschedulingForm,
     AssignedMedicalCategoryFormSet, MeetingAssistantForm, ExpeditedVoteFormSet,
     AmendmentVoteFormSet, ManualTimetableEntryCommentForm,
-    ManualTimetableEntryCommentFormset,
+    ManualTimetableEntryCommentFormset, EkMemberMarkedForm,
 )
 from ecs.meetings.models import Meeting, Participation, TimetableEntry, MeetingSubmissionProtocol
 from ecs.meetings.signals import on_meeting_start, on_meeting_end, on_meeting_top_jump, \
@@ -1132,3 +1132,14 @@ def send_all_possible_submission_protocol(request, meeting_pk=None):
         send_submission_protocol_pdf(request, meeting, meeting_protocol)
 
     return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#clinic_tab')
+
+
+@user_group_required('EC-Office')
+def list_ek_member(request, meeting_pk=None):
+    meeting = get_object_or_404(Meeting, pk=meeting_pk)
+    form = EkMemberMarkedForm(request.POST or None)
+
+    return render(request, 'meetings/tabs/ek-member.html', {
+        'form': form,
+        'meeting': meeting,
+    })

@@ -45,6 +45,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#clinic_tab">Krankenanstalten</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#ek-member_tab">EK-Mitglieder</a>
+                </li>
             {% endif %}
         </ul>
     </div>
@@ -87,6 +90,9 @@
     {% if user|is_member_of:'EC-Office' %}
         <div id="clinic_tab" class="collapse">
             <div data-widget-url="{% url 'meetings.list_submissions_protocols' meeting_pk=meeting.pk %}"></div>
+        </div>
+        <div id="ek-member_tab" class="collapse">
+            <div data-widget-url="{% url 'meetings.list_ek_member' meeting_pk=meeting.pk %}"></div>
         </div>
     {% endif %}
 
