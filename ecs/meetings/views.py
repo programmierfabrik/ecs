@@ -1136,10 +1136,24 @@ def send_all_possible_submission_protocol(request, meeting_pk=None):
 
 @user_group_required('EC-Office')
 def list_ek_member(request, meeting_pk=None):
-    meeting = get_object_or_404(Meeting, pk=meeting_pk)
+    meeting = get_object_or_404(Meeting.objects.prefetch_related('board_members'), pk=meeting_pk)
     form = EkMemberMarkedForm(request.POST or None)
+    
+    if request.method == 'POST':
+        if form.is_valid():
+            new_user_ids = set(map(int, form.cleaned_data['users']))
+            current_user_ids = set(meeting.board_members.all().values_list('id', flat=True))
+            # Get the connection that need to be deleted (current - new) -> [1, 5, 9] - [1, 5, 10, 11] = [9]
+            users_to_delete = current_user_ids.difference(new_user_ids)
+            # Get the connectionts that need to be added (new - current) -> [1, 5, 10, 11] - [1, 5, 9] = [10, 11]
+            users_to_add = new_user_ids.difference(current_user_ids)
+            # Delete and create the connectinos
+            meeting.board_members.remove(*users_to_delete)
+            meeting.board_members.add(*users_to_add)
 
-    return render(request, 'meetings/tabs/ek-member.html', {
-        'form': form,
-        'meeting': meeting,
-    })
+        return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#ek-member_tab')
+    else:
+        return render(request, 'meetings/tabs/ek-member.html', {
+            'form': form,
+            'meeting': meeting,
+        })

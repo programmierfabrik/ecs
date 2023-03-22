@@ -205,6 +205,7 @@ class Meeting(models.Model):
         null=True, on_delete=models.SET_NULL)
     expedited_reviewer_invitation_sent_at = models.DateTimeField(null=True)
     expert_assignment_user = models.ForeignKey('auth.User', null=True, on_delete=models.CASCADE)
+    board_members = models.ManyToManyField('auth.User', related_name='included_in_meetings')
 
     objects = MeetingManager()
     unfiltered = models.Manager()
