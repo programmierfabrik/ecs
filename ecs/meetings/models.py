@@ -5,7 +5,7 @@ from django.core.cache import cache
 from django.db import models
 from django.db.models import F, Prefetch, Q
 from django.dispatch import receiver
-from django.db.models.signals import post_delete, post_save
+from django.db.models.signals import post_delete, post_save, m2m_changed
 from django.contrib.auth.models import User
 from django.utils.translation import gettext, gettext_lazy as _
 from django.utils.text import slugify
@@ -22,7 +22,7 @@ from ecs.core.models.constants import (
 )
 from ecs.utils import cached_property
 from ecs.utils.viewutils import render_pdf, render_pdf_context
-from ecs.users.utils import sudo
+from ecs.users.utils import sudo, get_user
 from ecs.tasks.models import Task, TaskType
 from ecs.votes.models import Vote
 from ecs.core.models.core import AdvancedSettings
@@ -596,6 +596,54 @@ class Meeting(models.Model):
             Prefetch('submissions', queryset=Submission.objects.filter(meetings=self.id),
                      to_attr='active_submissions')
         )
+
+
+def board_members_changed(sender, **kwargs):
+    action = kwargs['action']
+    instance = kwargs['instance']
+    if action is 'post_remove':
+        # We need to remove (if possible) the tasks for these user_ids
+        user_ids_to_remove = kwargs['pk_set']
+        # Get task_type Specialist Review
+        task_type = TaskType.objects.get(is_dynamic=True, workflow_node__graph__auto_start=True, name='Specialist Review')
+
+        for submission in instance.submissions.all():
+            for user_id in user_ids_to_remove:
+                assign_to = User.objects.get(id=user_id)
+                tasks = Task.unfiltered.for_submission(submission).open().filter(task_type=task_type)
+                if not task_type.is_delegatable:
+                    tasks = tasks.filter(assigned_to=assign_to)
+
+                if tasks.exists():
+                    tasks.first().mark_deleted()
+    elif action is 'post_add':
+        # We need to generate the tasks (if possible) for these user_ids
+        user_ids_to_add = kwargs['pk_set']
+        # Get task_type Specialist Review
+        task_type = TaskType.objects.get(is_dynamic=True, workflow_node__graph__auto_start=True, name='Specialist Review')
+        
+        for submission in instance.submissions.all():
+            for user_id in user_ids_to_add:
+                assign_to = User.objects.get(id=user_id)
+                tasks = Task.unfiltered.for_submission(submission).open().filter(task_type=task_type)
+                if not task_type.is_delegatable:
+                    tasks = tasks.filter(assigned_to=assign_to)
+                # Maybe the task for this user was already created manually
+                if not tasks.exists():
+                    token = task_type.workflow_node.bind(submission.workflow.workflows[0]).receive_token(None)
+                    token.task.assign(user=assign_to)
+                    task = token.task
+                    entry = submission.timetable_entries.filter(meeting__started=None).first()
+                    if entry:
+                        entry.participations.create(user=assign_to, task=task)
+
+                    task.created_by = get_user('root@system.local')
+                    task.send_message_on_close = False
+                    task.reminder_message_timeout = None
+                    task.save()
+
+
+m2m_changed.connect(board_members_changed, sender=Meeting.board_members.through)
 
 
 class MeetingSubmissionProtocol(models.Model):
