@@ -598,10 +598,10 @@ class Meeting(models.Model):
         )
 
 
-def board_members_changed(sender, **kwargs):
+def _meeting_board_members_changed(sender, **kwargs):
     action = kwargs['action']
     instance = kwargs['instance']
-    if action is 'post_remove':
+    if action == 'post_remove':
         # We need to remove (if possible) the tasks for these user_ids
         user_ids_to_remove = kwargs['pk_set']
         # Get task_type Specialist Review
@@ -616,7 +616,7 @@ def board_members_changed(sender, **kwargs):
 
                 if tasks.exists():
                     tasks.first().mark_deleted()
-    elif action is 'post_add':
+    elif action == 'post_add':
         # We need to generate the tasks (if possible) for these user_ids
         user_ids_to_add = kwargs['pk_set']
         # Get task_type Specialist Review
@@ -643,7 +643,7 @@ def board_members_changed(sender, **kwargs):
                     task.save()
 
 
-m2m_changed.connect(board_members_changed, sender=Meeting.board_members.through)
+m2m_changed.connect(_meeting_board_members_changed, sender=Meeting.board_members.through)
 
 
 class MeetingSubmissionProtocol(models.Model):
