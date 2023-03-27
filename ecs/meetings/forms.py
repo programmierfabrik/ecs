@@ -246,8 +246,11 @@ class EkMemberMarkedForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        board_member_filter = Q(profile__is_board_member=True) | Q(profile__is_resident_member=True) | Q(
-            profile__is_omniscient_member=True)
-        self.fields['users'].choices = [(u.id, u) for u in User.objects.filter(
-            board_member_filter, is_active=True,
-            profile__user__groups__name='Specialist').prefetch_related('profile')]
+        board_member_filter = (Q(profile__is_board_member=True) |
+                               Q(profile__is_resident_member=True) |
+                               Q(profile__is_omniscient_member=True)) & Q(profile__user__groups__name='Specialist',
+                                                                          is_active=True)
+        self.fields['users'].choices = [
+            (u.id, u) for u in
+            User.objects.filter(board_member_filter).prefetch_related('profile')
+        ]

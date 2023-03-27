@@ -854,7 +854,12 @@ def _timetable_entry_post_save(sender, **kwargs):
     entry.meeting.update_assigned_categories()
 
     # Create tasks associated with Meeting.board_members
-    create_task_for_board_members(entry.submission, entry.meeting.board_members.all())
+    # We need to filter the board_members to check if they still are qualified
+    board_member_filter = (Q(profile__is_board_member=True) |
+                           Q(profile__is_resident_member=True) |
+                           Q(profile__is_omniscient_member=True)) & Q(profile__user__groups__name='Specialist',
+                                                                      is_active=True)
+    create_task_for_board_members(entry.submission, entry.meeting.board_members.filter(board_member_filter))
 
 
 class Participation(models.Model):
