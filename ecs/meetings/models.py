@@ -605,43 +605,19 @@ def _meeting_board_members_changed(sender, **kwargs):
     if action == 'post_remove':
         # We need to remove (if possible) the tasks for these user_ids
         user_ids_to_remove = kwargs['pk_set']
-        # Get task_type Specialist Review
-        task_type = TaskType.objects.get(is_dynamic=True, workflow_node__graph__auto_start=True, name='Specialist Review')
+        board_members_to_remove = User.objects.filter(id__in=user_ids_to_remove)
 
         for submission in instance.submissions.all():
-            for user_id in user_ids_to_remove:
-                assign_to = User.objects.get(id=user_id)
-                tasks = Task.unfiltered.for_submission(submission).open().filter(task_type=task_type)
-                if not task_type.is_delegatable:
-                    tasks = tasks.filter(assigned_to=assign_to)
+            remove_task_for_board_members(submission, board_members_to_remove)
 
-                if tasks.exists():
-                    tasks.first().mark_deleted()
     elif action == 'post_add':
         # We need to generate the tasks (if possible) for these user_ids
         user_ids_to_add = kwargs['pk_set']
-        # Get task_type Specialist Review
-        task_type = TaskType.objects.get(is_dynamic=True, workflow_node__graph__auto_start=True, name='Specialist Review')
-        
-        for submission in instance.submissions.all():
-            for user_id in user_ids_to_add:
-                assign_to = User.objects.get(id=user_id)
-                tasks = Task.unfiltered.for_submission(submission).open().filter(task_type=task_type)
-                if not task_type.is_delegatable:
-                    tasks = tasks.filter(assigned_to=assign_to)
-                # Maybe the task for this user was already created manually
-                if not tasks.exists():
-                    token = task_type.workflow_node.bind(submission.workflow.workflows[0]).receive_token(None)
-                    token.task.assign(user=assign_to)
-                    task = token.task
-                    entry = submission.timetable_entries.filter(meeting__started=None).first()
-                    if entry:
-                        entry.participations.create(user=assign_to, task=task)
+        board_members_to_add = User.objects.filter(id__in=user_ids_to_add)
 
-                    task.created_by = get_user('root@system.local')
-                    task.send_message_on_close = False
-                    task.reminder_message_timeout = None
-                    task.save()
+        # Create tasks for all submissions for all member        
+        for submission in instance.submissions.all():
+            create_task_for_board_members(submission, board_members_to_add)
 
 
 m2m_changed.connect(_meeting_board_members_changed, sender=Meeting.board_members.through)
@@ -869,7 +845,7 @@ def _timetable_entry_post_delete(sender, **kwargs):
     on_meeting_top_delete.send(Meeting, meeting=(entry.meeting), timetable_entry=entry)
     
     # Remove tasks associated with Meeting.board_members
-    remove_task_for_board_members(entry.submission, entry.meeting)
+    remove_task_for_board_members(entry.submission, entry.meeting.board_members.all())
 
 
 @receiver(post_save, sender=TimetableEntry)
@@ -878,7 +854,7 @@ def _timetable_entry_post_save(sender, **kwargs):
     entry.meeting.update_assigned_categories()
 
     # Create tasks associated with Meeting.board_members
-    create_task_for_board_members(entry.submission, entry.meeting)
+    create_task_for_board_members(entry.submission, entry.meeting.board_members.all())
 
 
 class Participation(models.Model):
