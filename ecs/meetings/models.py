@@ -20,6 +20,7 @@ from ecs.core.models.constants import (
     SUBMISSION_LANE_BOARD, SUBMISSION_LANE_RETROSPECTIVE_THESIS,
     SUBMISSION_LANE_EXPEDITED, SUBMISSION_LANE_LOCALEC,
 )
+from ecs.meetings.utils import create_task_for_board_members, remove_task_for_board_members
 from ecs.utils import cached_property
 from ecs.utils.viewutils import render_pdf, render_pdf_context
 from ecs.users.utils import sudo, get_user
@@ -856,6 +857,7 @@ class TimetableEntry(models.Model):
         self.meeting._clear_caches()
         self.meeting.create_specialist_reviews()
 
+
 @receiver(post_delete, sender=TimetableEntry)
 def _timetable_entry_post_delete(sender, **kwargs):
     entry = kwargs['instance']
@@ -864,12 +866,19 @@ def _timetable_entry_post_delete(sender, **kwargs):
             timetable_index__gt=entry.index)
         changed.update(timetable_index=F('timetable_index') - 1)
     entry.meeting.update_assigned_categories()
-    on_meeting_top_delete.send(Meeting, meeting=entry.meeting, timetable_entry=entry)
+    on_meeting_top_delete.send(Meeting, meeting=(entry.meeting), timetable_entry=entry)
+    
+    # Remove tasks associated with Meeting.board_members
+    remove_task_for_board_members(entry.submission, entry.meeting)
+
 
 @receiver(post_save, sender=TimetableEntry)
 def _timetable_entry_post_save(sender, **kwargs):
     entry = kwargs['instance']
     entry.meeting.update_assigned_categories()
+
+    # Create tasks associated with Meeting.board_members
+    create_task_for_board_members(entry.submission, entry.meeting)
 
 
 class Participation(models.Model):

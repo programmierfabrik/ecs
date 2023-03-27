@@ -2,6 +2,8 @@ from django.utils import timezone
 
 from ecs import settings
 from ecs.communication.mailutils import deliver
+from ecs.tasks.models import TaskType, Task
+from ecs.users.utils import get_user
 from ecs.utils.viewutils import render_html
 
 
@@ -45,3 +47,35 @@ def send_submission_protocol_pdf(request, meeting, meeting_protocol):
         deliver(email, subject='Protokollauszug', message=None,
                 message_html=htmlmail, from_email=settings.DEFAULT_FROM_EMAIL,
                 attachments=attachments)
+
+
+def create_task_for_board_members(submission, meeting):
+    task_type = TaskType.objects.get(is_dynamic=True, workflow_node__graph__auto_start=True, name='Specialist Review')
+
+    for member in meeting.board_members.all():
+        tasks = Task.unfiltered.for_submission(submission).open().filter(task_type=task_type)
+        if not task_type.is_delegatable:
+            tasks = tasks.filter(assigned_to=member)
+        # Maybe the task for this user was already created manually
+        if not tasks.exists():
+            token = task_type.workflow_node.bind(submission.workflow.workflows[0]).receive_token(None)
+            token.task.assign(user=member)
+            task = token.task
+            entry = submission.timetable_entries.filter(meeting__started=None).first()
+            if entry:
+                entry.participations.create(user=member, task=task)
+
+            task.created_by = get_user('root@system.local')
+            task.send_message_on_close = False
+            task.reminder_message_timeout = None
+            task.save()
+
+
+def remove_task_for_board_members(submission, meeting):
+    for member in meeting.board_members.all():
+        task_type = TaskType.objects.get(is_dynamic=True, workflow_node__graph__auto_start=True, name='Specialist Review')
+        tasks = Task.unfiltered.for_submission(submission).open().filter(task_type=task_type)
+        if not task_type.is_delegatable:
+            tasks = tasks.filter(assigned_to=member)
+        if tasks.exists():
+            tasks.first().mark_deleted()
