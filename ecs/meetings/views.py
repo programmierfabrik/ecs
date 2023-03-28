@@ -1154,9 +1154,7 @@ def list_ek_member(request, meeting_pk=None):
             meeting.board_members.remove(*users_to_delete)
             meeting.board_members.add(*users_to_add)
 
-        return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#ek-member_tab')
-    else:
-        return render(request, 'meetings/tabs/ek-member.html', {
-            'form': form,
-            'meeting': meeting,
-        })
+    return render(request, 'meetings/tabs/ek-member.html', {
+        'form': form,
+        'meeting': meeting,
+    })

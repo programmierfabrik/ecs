@@ -242,7 +242,7 @@ ManualTimetableEntryCommentFormset = modelformset_factory(TimetableEntry,
 
 
 class EkMemberMarkedForm(forms.Form):
-    users = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple)
+    users = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
