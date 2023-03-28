@@ -23,7 +23,7 @@ from ecs.core.models.constants import (
 from ecs.meetings.utils import create_task_for_board_members, remove_task_for_board_members
 from ecs.utils import cached_property
 from ecs.utils.viewutils import render_pdf, render_pdf_context
-from ecs.users.utils import sudo, get_user
+from ecs.users.utils import sudo, get_current_user
 from ecs.tasks.models import Task, TaskType
 from ecs.votes.models import Vote
 from ecs.core.models.core import AdvancedSettings
