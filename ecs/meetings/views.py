@@ -1066,9 +1066,10 @@ def list_submissions_protocols(request, meeting_pk=None):
         # Send all pdfs if requested
         elif 'send_all_pdfs' in request.POST:
             assert meeting.ended is not None
-            not_sent_submissions = meeting.submissions.filter(meeting_protocols__protocol_sent_at__isnull=True).values_list(
-                'pk', flat=True
-            )
+            not_sent_submissions = meeting.submissions.filter(
+                meeting_protocols__isnull=False,
+                meeting_protocols__protocol_sent_at__isnull=True
+            ).values_list('pk', flat=True)
 
             for submission_pk in not_sent_submissions:
                 meeting_protocol = get_object_or_404(
