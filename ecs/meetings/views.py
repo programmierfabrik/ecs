@@ -1044,6 +1044,45 @@ def edit_meeting(request, meeting_pk=None):
 @user_group_required('EC-Office')
 def list_submissions_protocols(request, meeting_pk=None):
     meeting = get_object_or_404(Meeting, pk=meeting_pk)
+
+    pdfs_sent_to_render = None
+    pdfs_sent_per_email = None
+    # We need this for the hot replacment.
+    if request.method == 'POST':
+        # Render all pdfs if requested
+        if 'create_all_pdfs' in request.POST:
+            # Render submission that aren't currently in the render pipeline
+            submissions_to_render = meeting.submissions \
+                .filter(~Q(clinics=None),
+                        meeting_protocols__protocol_rendering_started_at__isnull=True,
+                        meeting_protocols__protocol_sent_at__isnull=True,
+                        ) \
+                .prefetch_related('meeting_protocols')
+            for submission in submissions_to_render:
+                render_protocol_pdf_for_submission(meeting, submission)
+            
+            pdfs_sent_to_render = len(submissions_to_render)
+
+        # Send all pdfs if requested
+        elif 'send_all_pdfs' in request.POST:
+            assert meeting.ended is not None
+            not_sent_submissions = meeting.submissions.filter(meeting_protocols__protocol_sent_at__isnull=True).values_list(
+                'pk', flat=True
+            )
+
+            for submission_pk in not_sent_submissions:
+                meeting_protocol = get_object_or_404(
+                    MeetingSubmissionProtocol.objects.prefetch_related(Prefetch(
+                        'submission', queryset=Submission.objects.prefetch_related('clinics')
+                    )),
+                    submission=submission_pk
+                )
+
+                send_submission_protocol_pdf(request, meeting, meeting_protocol)
+
+            pdfs_sent_per_email = len(not_sent_submissions)
+        # Afterwards just show the list as usual
+
     submissions = meeting.submissions.prefetch_related(
         Prefetch(
             'meeting_protocols', to_attr='protocols',
@@ -1054,6 +1093,8 @@ def list_submissions_protocols(request, meeting_pk=None):
     return render(request, 'meetings/tabs/clinics.html', {
         'meeting': meeting,
         'submissions': submissions,
+        'pdfs_sent_to_render': pdfs_sent_to_render,
+        'pdfs_sent_per_email': pdfs_sent_per_email
     })
 
 
@@ -1092,45 +1133,6 @@ def send_submission_protocol(request, meeting_pk=None, submission_pk=None):
     )
 
     send_submission_protocol_pdf(request, meeting, meeting_protocol)
-    return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#clinic_tab')
-
-
-@user_group_required('EC-Office')
-def render_all_possible_protocols(request, meeting_pk=None):
-    try:
-        # Get Meeting or fail
-        meeting = get_object_or_404(Meeting, pk=meeting_pk)
-        # Render submission that aren't currently in the render pipeline
-        submissions = meeting.submissions \
-            .filter(~Q(clinics=None),
-                    meeting_protocols__protocol_rendering_started_at__isnull=True,
-                    meeting_protocols__protocol_sent_at__isnull=True,
-                    ) \
-            .prefetch_related('meeting_protocols')
-        for submission in submissions:
-            render_protocol_pdf_for_submission(meeting, submission)
-        return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#clinic_tab')
-    except:
-        raise Http404('')
-
-
-@user_group_required('EC-Office')
-def send_all_possible_submission_protocol(request, meeting_pk=None):
-    meeting = get_object_or_404(Meeting, ended__isnull=False, pk=meeting_pk)
-    submissions = meeting.submissions.filter(meeting_protocols__protocol_sent_at__isnull=True).values_list(
-        'pk', flat=True
-    )
-
-    for submission_pk in submissions:
-        meeting_protocol = get_object_or_404(
-            MeetingSubmissionProtocol.objects.prefetch_related(Prefetch(
-                'submission', queryset=Submission.objects.prefetch_related('clinics')
-            )),
-            submission=submission_pk
-        )
-
-        send_submission_protocol_pdf(request, meeting, meeting_protocol)
-
     return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#clinic_tab')
 
 
