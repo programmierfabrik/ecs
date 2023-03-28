@@ -669,6 +669,14 @@ class TimetableEntry(models.Model):
             ('meeting', 'submission'),
         )
 
+    def save(self, *args, **kwargs):
+        if self.text:
+            with reversion.create_revision():
+                reversion.set_user(get_current_user())
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
+
     @property
     def agenda_index(self):
         if not self.timetable_index is None:
