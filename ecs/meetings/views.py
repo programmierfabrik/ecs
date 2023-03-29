@@ -31,7 +31,7 @@ from ecs.meetings.forms import (
     UserConstraintFormSet, SubmissionReschedulingForm,
     AssignedMedicalCategoryFormSet, MeetingAssistantForm, ExpeditedVoteFormSet,
     AmendmentVoteFormSet, ManualTimetableEntryCommentForm,
-    ManualTimetableEntryCommentFormset, EkMemberMarkedForm,
+    ManualTimetableEntryCommentFormset, EkMemberMarkedForm, SendProtocolGroupsForm,
 )
 from ecs.meetings.models import Meeting, Participation, TimetableEntry, MeetingSubmissionProtocol
 from ecs.meetings.signals import on_meeting_start, on_meeting_end, on_meeting_top_jump, \
@@ -1038,6 +1038,45 @@ def edit_meeting(request, meeting_pk=None):
     return render(request, 'meetings/form.html', {
         'form': form,
         'meeting': meeting,
+    })
+
+
+@user_group_required('EC-Office')
+def send_protocol_custom_groups(request, meeting_pk=None):
+    meeting = get_object_or_404(Meeting, pk=meeting_pk)
+    invited_groups_id = meeting.invited_groups.all().values_list('id', flat=True)
+    form = SendProtocolGroupsForm(request.POST or None, initial={'groups': list(map(str, invited_groups_id))})
+    
+    # Invite all the users with the provided groups
+    invited_count = None
+    if request.method == 'POST' and form.is_valid():
+        group_ids = form.cleaned_data['groups']
+
+        meeting.protocol_sent_at = timezone.now()
+        attachments = (
+            (meeting.protocol.original_file_name, (meeting.protocol.retrieve_raw().read()), 'application/pdf'),
+        )
+
+        users_to_invite = User.objects.filter(groups__in=group_ids).distinct()
+        user_ids_to_inivite = []
+        for user in users_to_invite:
+            user_ids_to_inivite.append(user.id)
+            htmlmail = str(
+                render_html(request, 'meetings/messages/protocol.html', {'meeting': meeting, 'recipient': user}))
+            deliver(
+                user.email, subject=_('Meeting Protocol'), message=None,
+                message_html=htmlmail, from_email=settings.DEFAULT_FROM_EMAIL,
+                attachments=attachments
+            )
+
+        meeting.invited_users.set(user_ids_to_inivite)
+        meeting.save()
+        invited_count = len(user_ids_to_inivite)
+
+    return render(request, 'meetings/tabs/custom_protocol.html', {
+        'form': form,
+        'meeting': meeting,
+        'invited_count': invited_count,
     })
 
 

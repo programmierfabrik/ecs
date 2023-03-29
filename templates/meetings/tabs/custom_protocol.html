@@ -1,0 +1,37 @@
+{% load i18n widget_tweaks %}
+<div class="container">
+    {% if invited_count is not None %}
+        <div class="alert alert-info text-center">
+            Es wurden {{ invited_count }} Benutzer eingeladen.
+        </div>
+    {% endif %}
+    <h2>Protokoll an bestimmte Gruppen senden</h2>
+    <div class="d-flex mb-3">
+        <form id="custom_protocol_form" action="{{ request.path }}" method="post" class="w-100 open-in-widget">
+            {% csrf_token %}
+            {% for field in form %}
+                {% include 'bootstrap/form_field.html' with inline=True %}
+            {% endfor %}
+            <button type="button" class="btn btn-primary">{% trans 'Save' %}</button>
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript">
+    (function () {
+        var customProtocolForm = $('#custom_protocol_form');
+        var button = $('#custom_protocol_form button');
+        button.on('click', function () {
+            $(this).prop('disabled', true);
+            $(this).append('<span class="fa fa-spinner fa-spin ml-2"></span>');
+            customProtocolForm.submit();
+        });
+
+        {% if invited_count is not None %}
+            var widget = customProtocolForm.parents('.ecs-Widget').first();
+            console.log(widget);
+            var previous_protocol_widget = widget.prev().prev('.ecs-Widget');
+            previous_protocol_widget.remove();
+        {% endif %}
+    })();
+</script>

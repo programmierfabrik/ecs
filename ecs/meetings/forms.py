@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django import forms
 from django.forms.models import BaseModelFormSet, modelformset_factory
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
 from django.utils import timezone
@@ -242,7 +242,8 @@ ManualTimetableEntryCommentFormset = modelformset_factory(TimetableEntry,
 
 
 class EkMemberMarkedForm(forms.Form):
-    users = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, required=False)
+    users = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple(attrs={'id': 'multiple-checkbox'}),
+                                      required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -253,4 +254,22 @@ class EkMemberMarkedForm(forms.Form):
         self.fields['users'].choices = [
             (u.id, u) for u in
             User.objects.filter(board_member_filter).prefetch_related('profile')
+        ]
+
+
+class SendProtocolGroupsForm(forms.Form):
+    groups = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple(attrs={'id': 'multiple-checkbox'}),
+                                       required=True, label="Gruppen")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        Group.objects.filter()
+
+        # Signing member
+        allowed_groups = ['Meeting Protocol Receiver', 'Board Member', 'Omniscient Board Member',
+                          'Resident Board Member',
+                          'EC-Signing']
+
+        self.fields['groups'].choices = [
+            (g.id, g) for g in Group.objects.filter(name__in=allowed_groups)
         ]

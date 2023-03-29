@@ -36,12 +36,10 @@
             <li class="nav-item">
                 <a class="nav-link" href="#notifications_tab">{% trans "Notifications" %}</a>
             </li>
-            {% if user|is_member_of:'EC-Office' and meeting.ended and not meeting.protocol_sent_at %}
+            {% if user|is_member_of:'EC-Office' %}
                 <li class="nav-item">
                     <a class="nav-link" href="#protocol_tab">{% trans 'Protocol' %}</a>
                 </li>
-            {% endif %}
-            {% if user|is_member_of:'EC-Office' %}
                 <li class="nav-item">
                     <a class="nav-link" href="#clinic_tab">Krankenanstalten</a>
                 </li>
@@ -82,9 +80,13 @@
     <div id="notifications_tab" class="container collapse">
         <div data-widget-url="{% url 'meetings.notification_list' meeting_pk=meeting.pk %}"></div>
     </div>
-    {% if user|is_member_of:'EC-Office' and meeting.ended and not meeting.protocol_sent_at %}
-        <div id="protocol_tab" class="collapse">
-            <div data-widget-url="{% url 'meetings.edit_protocol' meeting_pk=meeting.pk %}"></div>
+    {% if user|is_member_of:'EC-Office' %}
+        <div id="protocol_tab" class="collapse container">
+            {% if meeting.ended and not meeting.protocol_sent_at %}
+                <div data-widget-url="{% url 'meetings.edit_protocol' meeting_pk=meeting.pk %}"></div>
+                <hr/>
+            {% endif %}
+            <div data-widget-url="{% url 'meetings.send_protocol_custom_groups' meeting_pk=meeting.pk %}"></div>
         </div>
     {% endif %}
     {% if user|is_member_of:'EC-Office' %}
