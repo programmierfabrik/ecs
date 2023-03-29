@@ -12,7 +12,21 @@
             {% for field in form %}
                 {% include 'bootstrap/form_field.html' with inline=True %}
             {% endfor %}
-            <button type="button" class="btn btn-primary">{% trans 'Save' %}</button>
+            {% if not protocol_sent %}
+                <button type="button" class="btn btn-primary">{% trans 'Save' %}</button>
+            {% else %}
+                <div class="form-group row">
+                    <label class="col-md-2 col-form-label overflow-wrap-break-word">Eingeladene Benutzer</label>
+                    <div class="col-md-10">
+                        <div class="form-control"
+                             style="display: flex; flex-wrap: wrap; column-gap: 0.5rem; row-gap: 0.2rem;">
+                            {% for user in users_to_invite %}
+                                <span>{{ user }}{% if user != users_to_invite.last %},{% endif %}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </form>
     </div>
 </div>

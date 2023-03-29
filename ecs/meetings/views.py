@@ -1043,14 +1043,19 @@ def edit_meeting(request, meeting_pk=None):
 
 @user_group_required('EC-Office')
 def send_protocol_custom_groups(request, meeting_pk=None):
-    meeting = get_object_or_404(Meeting.objects.filter(ended__isnull=False), pk=meeting_pk)
+    meeting = get_object_or_404(
+        Meeting.objects.filter(ended__isnull=False).prefetch_related('invited_users', 'invited_groups'),
+        pk=meeting_pk
+    )
     invited_groups_id = meeting.invited_groups.all().values_list('id', flat=True)
+    users_to_invite = meeting.invited_users.all()
     is_disabled = True if meeting.protocol_sent_at is not None else False
     form = SendProtocolGroupsForm(is_disabled, request.POST or None, initial={'groups': list(map(str, invited_groups_id))})
     
     # Invite all the users with the provided groups
     invited_count = None
-    if request.method == 'POST' and form.is_valid() and meeting.protocol_sent_at is None:
+    protocol_sent = meeting.protocol_sent_at is not None
+    if request.method == 'POST' and form.is_valid() and not protocol_sent:
         group_ids = form.cleaned_data['groups']
 
         meeting.protocol_sent_at = timezone.now()
@@ -1059,9 +1064,7 @@ def send_protocol_custom_groups(request, meeting_pk=None):
         )
 
         users_to_invite = User.objects.filter(groups__in=group_ids).distinct()
-        user_ids_to_inivite = []
         for user in users_to_invite:
-            user_ids_to_inivite.append(user.id)
             htmlmail = str(
                 render_html(request, 'meetings/messages/protocol.html', {'meeting': meeting, 'recipient': user}))
             deliver(
@@ -1070,16 +1073,19 @@ def send_protocol_custom_groups(request, meeting_pk=None):
                 attachments=attachments
             )
 
-        meeting.invited_users.set(user_ids_to_inivite)
+        meeting.invited_users.set(users_to_invite)
         meeting.invited_groups.set(group_ids)
         meeting.save()
-        invited_count = len(user_ids_to_inivite)
+        invited_count = len(users_to_invite)
+        protocol_sent = True
         form.set_disabled(True)
 
     return render(request, 'meetings/tabs/custom_protocol.html', {
         'form': form,
         'meeting': meeting,
         'invited_count': invited_count,
+        'users_to_invite': users_to_invite,
+        'protocol_sent': protocol_sent,
     })
 
 
