@@ -261,15 +261,18 @@ class SendProtocolGroupsForm(forms.Form):
     groups = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple(attrs={'id': 'multiple-checkbox'}),
                                        required=True, label="Gruppen")
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, is_disabled, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        Group.objects.filter()
 
         # Signing member
         allowed_groups = ['Meeting Protocol Receiver', 'Board Member', 'Omniscient Board Member',
                           'Resident Board Member',
                           'EC-Signing']
 
+        self.set_disabled(is_disabled)
         self.fields['groups'].choices = [
             (g.id, g) for g in Group.objects.filter(name__in=allowed_groups)
         ]
+
+    def set_disabled(self, is_disabled):
+        self.fields['groups'].widget.attrs['disabled'] = is_disabled

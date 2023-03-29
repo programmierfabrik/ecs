@@ -1045,7 +1045,8 @@ def edit_meeting(request, meeting_pk=None):
 def send_protocol_custom_groups(request, meeting_pk=None):
     meeting = get_object_or_404(Meeting.objects.filter(ended__isnull=False), pk=meeting_pk)
     invited_groups_id = meeting.invited_groups.all().values_list('id', flat=True)
-    form = SendProtocolGroupsForm(request.POST or None, initial={'groups': list(map(str, invited_groups_id))})
+    is_disabled = True if meeting.protocol_sent_at is not None else False
+    form = SendProtocolGroupsForm(is_disabled, request.POST or None, initial={'groups': list(map(str, invited_groups_id))})
     
     # Invite all the users with the provided groups
     invited_count = None
@@ -1073,6 +1074,7 @@ def send_protocol_custom_groups(request, meeting_pk=None):
         meeting.invited_groups.set(group_ids)
         meeting.save()
         invited_count = len(user_ids_to_inivite)
+        form.set_disabled(True)
 
     return render(request, 'meetings/tabs/custom_protocol.html', {
         'form': form,
