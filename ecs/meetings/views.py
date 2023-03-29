@@ -1043,13 +1043,13 @@ def edit_meeting(request, meeting_pk=None):
 
 @user_group_required('EC-Office')
 def send_protocol_custom_groups(request, meeting_pk=None):
-    meeting = get_object_or_404(Meeting, pk=meeting_pk)
+    meeting = get_object_or_404(Meeting.objects.filter(ended__isnull=False), pk=meeting_pk)
     invited_groups_id = meeting.invited_groups.all().values_list('id', flat=True)
     form = SendProtocolGroupsForm(request.POST or None, initial={'groups': list(map(str, invited_groups_id))})
     
     # Invite all the users with the provided groups
     invited_count = None
-    if request.method == 'POST' and form.is_valid():
+    if request.method == 'POST' and form.is_valid() and meeting.protocol_sent_at is None:
         group_ids = form.cleaned_data['groups']
 
         meeting.protocol_sent_at = timezone.now()
@@ -1070,6 +1070,7 @@ def send_protocol_custom_groups(request, meeting_pk=None):
             )
 
         meeting.invited_users.set(user_ids_to_inivite)
+        meeting.invited_groups.set(group_ids)
         meeting.save()
         invited_count = len(user_ids_to_inivite)
 
