@@ -74,8 +74,6 @@ def create_task_for_board_members(submission, board_members):
 def remove_task_for_board_members(submission, board_members):
     for member in board_members:
         task_type = TaskType.objects.get(is_dynamic=True, workflow_node__graph__auto_start=True, name='Specialist Review')
-        tasks = Task.unfiltered.for_submission(submission).open().filter(task_type=task_type)
-        if not task_type.is_delegatable:
-            tasks = tasks.filter(assigned_to=member)
+        tasks = Task.unfiltered.for_submission(submission).open().filter(task_type=task_type, assigned_to=member)
         if tasks.exists():
             tasks.first().mark_deleted()
