@@ -86,9 +86,11 @@
         <div id="protocol_tab" class="collapse container">
             {% if not meeting.protocol_sent_at %}
                 <div data-widget-url="{% url 'meetings.edit_protocol' meeting_pk=meeting.pk %}"></div>
-                <hr/>
             {% endif %}
-            <div data-widget-url="{% url 'meetings.send_protocol_custom_groups' meeting_pk=meeting.pk %}"></div>
+            {% if not meeting.protocol_sent_at and meeting.protocol %}<hr/>{% endif %}
+            {% if meeting.protocol %}
+                <div data-widget-url="{% url 'meetings.send_protocol_custom_groups' meeting_pk=meeting.pk %}"></div>
+            {% endif %}
         </div>
     {% endif %}
     {% if user|is_member_of:'EC-Office' %}
