@@ -1191,17 +1191,16 @@ def list_ek_member(request, meeting_pk=None):
     user_ids_in_meeting = meeting.board_members.all().values_list('id', flat=True)
     form = EkMemberMarkedForm(request.POST or None, initial={'users': list(map(str, user_ids_in_meeting))})
 
-    if request.method == 'POST':
-        if form.is_valid():
-            new_user_ids = set(map(int, form.cleaned_data['users']))
-            current_user_ids = set(user_ids_in_meeting)
-            # Get the connection that need to be deleted (current - new) -> [1, 5, 9] - [1, 5, 10, 11] = [9]
-            users_to_delete = current_user_ids.difference(new_user_ids)
-            # Get the connectionts that need to be added (new - current) -> [1, 5, 10, 11] - [1, 5, 9] = [10, 11]
-            users_to_add = new_user_ids.difference(current_user_ids)
-            # Delete and create the connectinos
-            meeting.board_members.remove(*users_to_delete)
-            meeting.board_members.add(*users_to_add)
+    if request.method == 'POST' and form.is_valid() and meeting.ended is None:
+        new_user_ids = set(map(int, form.cleaned_data['users']))
+        current_user_ids = set(user_ids_in_meeting)
+        # Get the connection that need to be deleted (current - new) -> [1, 5, 9] - [1, 5, 10, 11] = [9]
+        users_to_delete = current_user_ids.difference(new_user_ids)
+        # Get the connectionts that need to be added (new - current) -> [1, 5, 10, 11] - [1, 5, 9] = [10, 11]
+        users_to_add = new_user_ids.difference(current_user_ids)
+        # Delete and create the connectinos
+        meeting.board_members.remove(*users_to_delete)
+        meeting.board_members.add(*users_to_add)
 
     return render(request, 'meetings/tabs/ek-member.html', {
         'form': form,
