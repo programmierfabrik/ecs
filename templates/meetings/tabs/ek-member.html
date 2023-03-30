@@ -7,13 +7,17 @@
             {% for field in form %}
                 {% include 'bootstrap/form_field.html' with inline=True %}
             {% endfor %}
-            <button type="button" class="btn btn-primary">{% trans 'Save' %}</button>
+            {% if not meeting_ended %}
+                <button type="button" class="btn btn-primary">
+                    {% trans 'Save' %}
+                </button>
+            {% endif %}
         </form>
     </div>
 </div>
 
 <script type="text/javascript">
-    (function() {
+    (function () {
         var button = $('#ek-member-list button');
         button.on('click', function () {
             $(this).prop('disabled', true);

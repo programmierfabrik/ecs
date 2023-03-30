@@ -1190,8 +1190,11 @@ def list_ek_member(request, meeting_pk=None):
     meeting = get_object_or_404(Meeting.objects.prefetch_related('board_members'), pk=meeting_pk)
     user_ids_in_meeting = meeting.board_members.all().values_list('id', flat=True)
     form = EkMemberMarkedForm(request.POST or None, initial={'users': list(map(str, user_ids_in_meeting))})
+    meeting_ended = meeting.ended is not None
+    if meeting_ended:
+        form.fields['users'].disabled = True
 
-    if request.method == 'POST' and form.is_valid() and meeting.ended is None:
+    if request.method == 'POST' and form.is_valid() and not meeting_ended:
         new_user_ids = set(map(int, form.cleaned_data['users']))
         current_user_ids = set(user_ids_in_meeting)
         # Get the connection that need to be deleted (current - new) -> [1, 5, 9] - [1, 5, 10, 11] = [9]
@@ -1205,4 +1208,5 @@ def list_ek_member(request, meeting_pk=None):
     return render(request, 'meetings/tabs/ek-member.html', {
         'form': form,
         'meeting': meeting,
+        'meeting_ended': meeting_ended,
     })
