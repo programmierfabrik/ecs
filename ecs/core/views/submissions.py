@@ -361,7 +361,7 @@ def submission_form_pdf_debug(request, submission_form_pk=None):
     submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
     response = HttpResponse(submission_form.render_pdf(),
         content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment;filename=debug.pdf'
+    response['Content-Disposition'] = 'inline;filename=debug.pdf'
     return response
 
 
