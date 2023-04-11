@@ -736,13 +736,13 @@ msgid "version"
 msgstr "Version"
 
 msgid "version description"
-msgstr "Verwenden Sie die Version vom hochgeladenen Dokuments, wenn das Dokument keine Version aufweist, dann mit \"--\" versehen"
+msgstr "Verwenden Sie die Version des hochgeladenen Dokuments - wenn das Dokument keine Version aufweist, dann mit \"--\" eingeben"
 
 msgid "date of document creation"
 msgstr "Datum der Dokumenterstellung"
 
 msgid "date of document creation description"
-msgstr "Nutzen Sie das Datum des hochgeladenen Dokuments, welches dem Erstellungsdatum entspricht."
+msgstr "Wählen Sie hier das Datum des hochgeladenen Dokuments (Erstellungsdatum)"
 
 msgid "type"
 msgstr "Typ"
@@ -799,7 +799,7 @@ msgid "sex of contact person"
 msgstr "Anrede der Kontaktperson"
 
 msgid "title of contact person"
-msgstr "Vorangesteller Titel der Kontaktperson"
+msgstr "Vorangestellter Titel der Kontaktperson"
 
 msgid "suffix title of contact person"
 msgstr "Nachgestellter Titel der Kontaktperson"
@@ -1113,7 +1113,7 @@ msgid "ethical considerations"
 msgstr "Ethische Überlegungen"
 
 msgid "ethical considerations description"
-msgstr "Identifizieren und beschreiben Sie alle möglicherweise auftretenden Probleme. Beschreiben Sie den möglichen Wissenszuwachs, der durch die Studie erzielt werden soll, seine Bedeutung, sowie mögliche Risiken für Schädigungen oder Belastungen der Prüfungsteilnehmer*innen. Legen Sie Ihre eigene Bewertung des Nutzen/Risiko-Verhältnisses dar"
+msgstr "Identifizieren und beschreiben Sie alle möglicherweise auftretenden Probleme. Beschreiben Sie den möglichen Wissenszuwachs, der durch die Studie erzielt werden soll, seine Bedeutung, sowie mögliche Risiken für Schädigungen oder Belastungen der Prüfungsteilnehmer*innen. Legen Sie Ihre eigene Bewertung des Nutzen-Risiko-Verhältnisses dar"
 
 msgid "Justification for the inclusion of persons from protected groups"
 msgstr "Begründung für den Einschluss von Personen aus geschützten Gruppen"
@@ -1121,7 +1121,7 @@ msgstr "Begründung für den Einschluss von Personen aus geschützten Gruppen"
 msgid "e.g. Minor, temporary or permanent non-competent person, if applicable"
 msgstr ""
 "z.B. Minderjährige, temporär oder permanent nicht-einwilligungsfähige "
-"Personen inklusive Beschreibung des direkten Nutzen des Einzelnen oder der Gruppe; wenn zutreffend"
+"Personen inklusive Beschreibung des direkten Nutzens des Einzelnen oder der Gruppe; wenn zutreffend"
 
 msgid "Description of the recruitment process"
 msgstr "Beschreibung des Rekrutierungsverfahrens"
@@ -1142,7 +1142,7 @@ msgid "Risk assessment"
 msgstr "Risikoabschätzung"
 
 msgid "german_risks_info description"
-msgstr "Erläuterungen zu ethischem Nutzen Vorhersehbare Risiken der Behandlung und sonstiger Verfahren, die verwendet werden sollten (inkl. Schmerzen, Unannehmlichkeiten, Verletzung der persönlichen Integrität und Maßnahmen zur Vermeidung und/oder Versorgung von unvorhergesehenen / unerwünschten Ereignissen)"
+msgstr "Erläuterungen zu ethischem Nutzen, vorhersehbaren Risiken der Behandlung und sonstigen Verfahren, die verwendet werden sollen"
 
 msgid "Expected benefits for the included test participants"
 msgstr ""
@@ -1193,7 +1193,7 @@ msgstr ""
 "Studie eingeschlossen werden sollen"
 
 msgid "additional information on section 8, if necessary"
-msgstr "ergänzende Informationen zu Punkt 8, wenn erforderlich"
+msgstr "Optional: ergänzende Informationen zu Angaben im Reiter Biometrie, wenn erforderlich"
 
 msgid ""
 "Methods used to protect the confidentiality of the data collected, the "
@@ -1207,7 +1207,7 @@ msgid ""
 "participation in the study"
 msgstr ""
 "Plan zur Behandlung oder Versorgung nachdem die Personen ihre Teilnahme an "
-"der Studie beendet haben"
+"der Studie beendet haben (wer wird verantwortlich sein und wo)"
 
 msgid ""
 "Amount and method of compensation or remuneration to the test participants"
@@ -1286,10 +1286,10 @@ msgid "number of groups"
 msgstr "Anzahl der Gruppen"
 
 msgid "stratification"
-msgstr "Stratifizierung"
+msgstr "Stratifizierung (Kriterien)"
 
 msgid "sample frequency"
-msgstr "Messwiederholungen"
+msgstr "Messwiederholungen (Zeitpunkte)"
 
 msgid "primary objectives"
 msgstr "Hauptzielgröße"
@@ -1409,7 +1409,7 @@ msgid "suffix title of the Investigator"
 msgstr "Nachgestellter Titel des Prüfers"
 
 msgid "first name of the Investigator"
-msgstr "Vorname des prüfers"
+msgstr "Vorname des Prüfers"
 
 msgid "last name of the Investigator"
 msgstr "Nachname des Prüfers"
@@ -1567,7 +1567,7 @@ msgid "Covering Letter"
 msgstr "Cover Letter"
 
 msgid "patient information"
-msgstr "Teilnehmerinformation (ICF, Kontakdtdatenliste)"
+msgstr "Teilnehmerinformation (ICF, Kontaktdatenliste)"
 
 msgid "insurancecertificate"
 msgstr "Versicherungsunterlagen (Polizze, Bestätigung, Bedingungen)"
@@ -2029,7 +2029,7 @@ msgid "Signature Environment"
 msgstr "Signaturumgebung"
 
 msgid "localbku"
-msgstr "lokale BKU"
+msgstr "Bürgerkartenumgebung"
 
 msgid "onlinebku"
 msgstr "online BKU (veraltet)"
@@ -3305,7 +3305,7 @@ msgid "is_new_medtech_law"
 msgstr "MPG Studie nach neuem Medizinproduktegesetz"
 
 msgid "is_new_medtech_law_help"
-msgstr "Mit Stand vor Juli 2021"
+msgstr "Mit Stand nach Juli 2021"
 
 msgid "date of last modification:"
 msgstr "Datum der letzten Änderung:"
@@ -3332,10 +3332,10 @@ msgid "maximum age unit"
 msgstr "Höchstalter Einheit"
 
 msgid "noncompetent unconscious"
-msgstr "Temporär nicht einwilligungsfähige"
+msgstr "Temporär nicht einwilligungsfähige Personen"
 
 msgid "noncompetent guarded"
-msgstr "Unter erwachsenen vertretung stehenden"
+msgstr "Unter Erwachsenenvertretung stehend"
 
 msgid "noncompetent minor"
 msgstr "Minderjährige"

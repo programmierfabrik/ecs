@@ -98,7 +98,7 @@
                                 <br>
                             {% endif %}
                             {% if debug %}
-                                <a href="{% url 'core.submission.submission_form_pdf_debug' submission_form_pk=sf.pk %}">
+                                <a href="{% url 'core.submission.submission_form_pdf_debug' submission_form_pk=sf.pk %}" target="_blank">
                                     <span class="fa fa-file-pdf-o"></span>
                                     PDF Debug
                                 </a><br>

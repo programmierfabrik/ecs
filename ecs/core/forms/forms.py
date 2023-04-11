@@ -319,7 +319,7 @@ class BaseInvestigatorFormSet(ReadonlyFormSetMixin, BaseFormSet):
             raise forms.ValidationError(_('Please select exactly one primary investigator.'))
 
 InvestigatorFormSet = formset_factory(InvestigatorForm,
-    formset=BaseInvestigatorFormSet)
+    formset=BaseInvestigatorFormSet, max_num=1)
 
 class InvestigatorEmployeeForm(forms.ModelForm):
     investigator_index = forms.IntegerField(required=True, initial=0, widget=forms.HiddenInput())
@@ -350,7 +350,7 @@ class BaseInvestigatorEmployeeFormSet(ReadonlyFormSetMixin, BaseFormSet):
         ]
 
 InvestigatorEmployeeFormSet = formset_factory(InvestigatorEmployeeForm,
-    formset=BaseInvestigatorEmployeeFormSet)
+    formset=BaseInvestigatorEmployeeFormSet, max_num=0)
 
 
 _queries = {
