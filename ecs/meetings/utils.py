@@ -65,7 +65,6 @@ def create_task_for_board_members(submission, board_members):
             if entry:
                 entry.participations.create(user=member, task=task)
 
-            task.created_by = get_user('root@system.local')
             task.send_message_on_close = False
             task.reminder_message_timeout = None
             task.save()
@@ -73,7 +72,14 @@ def create_task_for_board_members(submission, board_members):
 
 def remove_task_for_board_members(submission, board_members):
     for member in board_members:
-        task_type = TaskType.objects.get(is_dynamic=True, workflow_node__graph__auto_start=True, name='Specialist Review')
-        tasks = Task.unfiltered.for_submission(submission).open().filter(task_type=task_type, assigned_to=member)
+        task_type = TaskType.objects.get(
+            is_dynamic=True, workflow_node__graph__auto_start=True,
+            name='Specialist Review'
+        )
+        tasks = Task.unfiltered.for_submission(submission).open().filter(
+            task_type=task_type, assigned_to=member,
+            created_by__isnull=True
+        )
+
         if tasks.exists():
             tasks.first().mark_deleted()
