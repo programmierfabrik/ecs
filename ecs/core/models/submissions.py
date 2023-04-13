@@ -840,7 +840,7 @@ def _post_investigator_save(sender, **kwargs):
 class InvestigatorEmployee(models.Model):
     investigator = models.ForeignKey(Investigator, related_name='employees', on_delete=models.CASCADE)
 
-    sex = models.CharField(max_length=1, choices=[("m", gettext_lazy("Mr")), ("f", gettext_lazy("Ms"))])
+    sex = models.CharField(max_length=1, choices=[("m", gettext_lazy("Mr")), ("f", gettext_lazy("Ms")), ("d", gettext_lazy("Divers"))])
     title = models.CharField(max_length=40, blank=True)
     suffix_title = models.CharField(max_length=40, blank=True)
     firstname = models.CharField(max_length=40)
