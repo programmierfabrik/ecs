@@ -261,7 +261,7 @@ class EkMemberMarkedForm(forms.Form):
 class SendProtocolGroupsForm(forms.Form):
     invite_ek_member = forms.NullBooleanField(widget=NullBooleanWidget,
                                               required=True, label='Board Member einschränken?',
-                                              help_text='Nur ausgewählte Board Member aus dem Reiter "Ek-Mitglieder" einladen')
+                                              help_text='Protokoll nur an ausgewählte Board Member aus dem Reiter "Ek-Mitglieder" schicken')
     groups = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple(attrs={'id': 'multiple-checkbox'}),
                                        required=True, label="Gruppen")
 
