@@ -2,7 +2,7 @@
 <div class="container">
     {% if invited_count is not None %}
         <div class="alert alert-info text-center">
-            Es wurden {{ invited_count }} Benutzer eingeladen.
+            Das Protokoll wurde an {{ invited_count }} Benutzer geschickt.
         </div>
     {% endif %}
     <h2>Protokoll an bestimmte Gruppen senden</h2>
@@ -16,7 +16,7 @@
                 <button type="button" class="btn btn-primary">{% trans 'Save' %}</button>
             {% else %}
                 <div class="form-group row">
-                    <label class="col-md-2 col-form-label overflow-wrap-break-word">Eingeladene Benutzer</label>
+                    <label class="col-md-2 col-form-label overflow-wrap-break-word">Protokoll verschickt an</label>
                     <div class="col-md-10">
                         <div class="form-control"
                              style="display: flex; flex-wrap: wrap; column-gap: 0.5rem; row-gap: 0.2rem;">
