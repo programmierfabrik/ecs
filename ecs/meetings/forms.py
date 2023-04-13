@@ -287,3 +287,5 @@ class SendProtocolGroupsForm(forms.Form):
 
     def set_disabled(self, is_disabled):
         self.fields['groups'].widget.attrs['disabled'] = is_disabled
+        if is_disabled:
+            del self.fields['invite_ek_member']

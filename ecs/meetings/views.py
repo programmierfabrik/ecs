@@ -1057,7 +1057,8 @@ def send_protocol_custom_groups(request, meeting_pk=None):
     invited_count = None
     protocol_sent = meeting.protocol_sent_at is not None
     if request.method == 'POST' and form.is_valid() and not protocol_sent:
-        group_ids = form.cleaned_data['groups']
+        invited_group_ids = form.cleaned_data['groups']
+        group_ids = invited_group_ids.copy()
         invite_ek_member = form.cleaned_data['invite_ek_member']
         board_member_group = next(filter(lambda group: (group[1].name == 'Board Member'), form.fields['groups'].choices), None)[1]
         if invite_ek_member and str(board_member_group.pk) in group_ids:
@@ -1082,7 +1083,7 @@ def send_protocol_custom_groups(request, meeting_pk=None):
             )
 
         meeting.invited_users.set(users_to_invite)
-        meeting.invited_groups.set(group_ids)
+        meeting.invited_groups.set(invited_group_ids)
         meeting.save()
         invited_count = len(users_to_invite)
         protocol_sent = True
