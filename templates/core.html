@@ -93,7 +93,7 @@
                                 {% trans "Meetings" %}
                             </a>
                             <div class="dropdown-menu">
-                                <a class="dropdown-item" href="{% url 'meetings.next' %}">
+                                <a class="dropdown-item" href="{% url 'meetings.next_meeting' %}">
                                     {% trans "Next Meeting" %}
                                 </a>
                                 {% if user.profile.is_internal or user.profile.is_resident_member or user.profile.is_omniscient_member %}

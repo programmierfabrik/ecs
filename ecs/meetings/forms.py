@@ -10,9 +10,10 @@ from django.contrib.contenttypes.models import ContentType
 
 from ecs.meetings.models import Meeting, TimetableEntry, Constraint, AssignedMedicalCategory, WEIGHT_CHOICES
 from ecs.core.models import Submission
-from ecs.core.forms.fields import DateTimeField, TimeField
+from ecs.core.forms.fields import DateTimeField, TimeField, NullBooleanWidget
 from ecs.tasks.models import Task
 from ecs.users.utils import sudo
+from ecs.utils.formutils import require_fields
 from ecs.votes.models import Vote
 from ecs.notifications.models import AmendmentNotification
 
@@ -258,6 +259,9 @@ class EkMemberMarkedForm(forms.Form):
 
 
 class SendProtocolGroupsForm(forms.Form):
+    invite_ek_member = forms.NullBooleanField(widget=NullBooleanWidget,
+                                              required=True, label='Board Member einschränken?',
+                                              help_text='Nur ausgewählte Board Member aus dem Reiter "Ek-Mitglieder" einladen')
     groups = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple(attrs={'id': 'multiple-checkbox'}),
                                        required=True, label="Gruppen")
 
@@ -273,6 +277,13 @@ class SendProtocolGroupsForm(forms.Form):
         self.fields['groups'].choices = [
             (g.id, g) for g in Group.objects.filter(name__in=allowed_groups)
         ]
+
+    def clean_invite_ek_member(self):
+        data = self.cleaned_data['invite_ek_member']
+        if data is None:
+            require_fields(self, ('invite_ek_member',))
+
+        return data
 
     def set_disabled(self, is_disabled):
         self.fields['groups'].widget.attrs['disabled'] = is_disabled

@@ -60,10 +60,12 @@
                 {% else %}
                     {% render_field field class+="form-control" error_class="form-control-danger" %}
                 {% endif %}
-                {% if paper_info and field_info.help_text %}
-                    <div class="form-text text-muted">
-                        {{ field_info.help_text }}
-                    </div>
+                {% if paper_info %}
+                    {% if field_info.help_text or field.help_text %}
+                        <div class="form-text text-muted">
+                            {{ field_info.help_text|default:field.help_text }}
+                        </div>
+                    {% endif %}
                 {% endif %}
             </div>
         {% endif %}

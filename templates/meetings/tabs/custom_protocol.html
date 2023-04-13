@@ -10,7 +10,7 @@
         <form id="custom_protocol_form" action="{{ request.path }}" method="post" class="w-100 open-in-widget">
             {% csrf_token %}
             {% for field in form %}
-                {% include 'bootstrap/form_field.html' with inline=True %}
+                {% include 'bootstrap/form_field.html' with inline=True paper_info=True %}
             {% endfor %}
             {% if not protocol_sent %}
                 <button type="button" class="btn btn-primary">{% trans 'Save' %}</button>

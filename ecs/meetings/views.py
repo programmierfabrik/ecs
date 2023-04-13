@@ -940,7 +940,7 @@ def timetable_htmlemailpart(request, meeting_pk=None):
     return response
 
 @user_flag_required('is_internal', 'is_board_member', 'is_resident_member', 'is_omniscient_member')
-def next(request):
+def next_meeting(request):
     try:
         meeting = Meeting.objects.next()
     except Meeting.DoesNotExist:
@@ -1049,6 +1049,7 @@ def send_protocol_custom_groups(request, meeting_pk=None):
     )
     invited_groups_id = meeting.invited_groups.all().values_list('id', flat=True)
     users_to_invite = meeting.invited_users.all()
+    board_members = meeting.board_members.all()
     is_disabled = True if meeting.protocol_sent_at is not None else False
     form = SendProtocolGroupsForm(is_disabled, request.POST or None, initial={'groups': list(map(str, invited_groups_id))})
     
@@ -1057,13 +1058,20 @@ def send_protocol_custom_groups(request, meeting_pk=None):
     protocol_sent = meeting.protocol_sent_at is not None
     if request.method == 'POST' and form.is_valid() and not protocol_sent:
         group_ids = form.cleaned_data['groups']
+        invite_ek_member = form.cleaned_data['invite_ek_member']
+        board_member_group = next(filter(lambda group: (group[1].name == 'Board Member'), form.fields['groups'].choices), None)[1]
+        if invite_ek_member and str(board_member_group.pk) in group_ids:
+            group_ids.remove(str(board_member_group.pk))
+            board_member_filter = Q(pk__in=board_members)
+        else:
+            board_member_filter = Q()
 
         meeting.protocol_sent_at = timezone.now()
         attachments = (
             (meeting.protocol.original_file_name, (meeting.protocol.retrieve_raw().read()), 'application/pdf'),
         )
 
-        users_to_invite = User.objects.filter(groups__in=group_ids).distinct()
+        users_to_invite = User.objects.filter(Q(groups__in=group_ids) | board_member_filter).distinct()
         for user in users_to_invite:
             htmlmail = str(
                 render_html(request, 'meetings/messages/protocol.html', {'meeting': meeting, 'recipient': user}))

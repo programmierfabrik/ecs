@@ -7,7 +7,7 @@ urlpatterns = (
     path('reschedule/submission/<int:submission_pk>/', views.reschedule_submission, name='meetings.reschedule_submission'),
 
     path('new/', views.create_meeting, name='meetings.create_meeting'),
-    path('next/', views.next, name='meetings.next'),
+    path('next/', views.next_meeting, name='meetings.next_meeting'),
     path('list/upcoming/', views.upcoming_meetings, name='meetings.upcoming_meetings'),
     path('list/past/', views.past_meetings, name='meetings.past_meetings'),
     path('<int:meeting_pk>/', views.meeting_details, name='meetings.meeting_details'),
