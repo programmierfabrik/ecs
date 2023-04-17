@@ -49,6 +49,7 @@ urlpatterns = (
     path('<int:meeting_pk>/protocol/pdf/', views.protocol_pdf, name='meetings.protocol_pdf'),
     path('<int:meeting_pk>/protocol/send/', views.send_protocol, name='meetings.send_protocol'),
     path('<int:meeting_pk>/protocol/send-groups/', views.send_protocol_custom_groups, name='meetings.send_protocol_custom_groups'),
+    path('<int:meeting_pk>/protocol/preview-users/', views.preview_users, name='meetings.preview_users'),
     path('<int:meeting_pk>/protocol/clinic/', views.list_submissions_protocols, name='meetings.list_submissions_protocols'),
     path('<int:meeting_pk>/protocol/clinic/pdf/render/<int:submission_pk>/', views.render_submission_protocol, name='meetings.render_submission_protocol'),
     path('<int:meeting_pk>/protocol/clinic/pdf/<int:protocol_pk>/', views.submission_protocol_pdf, name='meetings.submission_protocol_pdf'),

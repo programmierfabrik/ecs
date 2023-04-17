@@ -1095,6 +1095,24 @@ def send_protocol_custom_groups(request, meeting_pk=None):
 
 
 @user_group_required('EC-Office')
+def preview_users(request, meeting_pk=None):
+    meeting = get_object_or_404(
+        Meeting.objects.filter(ended__isnull=False, protocol_sent_at__isnull=True),
+        pk=meeting_pk
+    )
+    form = SendProtocolGroupsForm(False, request.POST or None)
+    users_to_send_protocol = []
+    if form.is_valid():
+        invite_ek_member = form.cleaned_data['invite_ek_member']
+        invited_group_ids = form.cleaned_data['groups']
+        users_to_send_protocol = get_users_for_protocol(meeting, invited_group_ids, invite_ek_member)
+
+    return render(request, 'meetings/users_to_invite.html', {
+        'users': users_to_send_protocol,
+    })
+
+
+@user_group_required('EC-Office')
 def list_submissions_protocols(request, meeting_pk=None):
     meeting = get_object_or_404(Meeting, pk=meeting_pk)
 

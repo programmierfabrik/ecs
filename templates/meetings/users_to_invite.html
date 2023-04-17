@@ -1,0 +1,8 @@
+<div>
+    {% if users|length == 0 %}
+        Keine Benutzer zum Versenden des Protokolles
+    {% endif %}
+    {% for user in users %}
+        {{ user }}{% if users.last != user %},{% endif %}
+    {% endfor %}
+</div>
