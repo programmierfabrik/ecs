@@ -101,7 +101,10 @@
                 {% if submission.resubmission_task %}
                     <div class="text-danger">
                         <span class="fa fa-exclamation-triangle"></span>
-                        {% trans "Die Studie wurde in der eingereichten Form von der Ethik-Kommission abgelehnt. Sie können die Studie neu einreichen." %}
+                        Die Studie wurde in der eingereichten Form von der Ethik-Kommission abgelehnt. Sie können die
+                        Studie <a
+                        href="{% url 'core.submission.copy_latest_submission_form' submission_pk=submission.pk %}">neu
+                        einreichen</a>.
                     </div>
                 {% endif %}
 
