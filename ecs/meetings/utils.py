@@ -1,3 +1,5 @@
+from django.contrib.auth.models import Group, User
+from django.db.models import Q
 from django.utils import timezone
 
 from ecs import settings
@@ -83,3 +85,18 @@ def remove_task_for_board_members(submission, board_members):
 
         if tasks.exists():
             tasks.first().mark_deleted()
+
+
+def get_users_for_protocol(meeting, invited_group_ids, invite_ek_member=False, board_members=None, board_member_group=None):
+    if board_members is None:
+        board_members = meeting.board_members.all()
+    if board_member_group is None:
+        board_member_group = Group.objects.get(name='Board Member')
+    
+    group_ids = invited_group_ids.copy()
+    if invite_ek_member and str(board_member_group.pk) in group_ids:
+        group_ids.remove(str(board_member_group.pk))
+        board_member_filter = Q(pk__in=board_members)
+    else:
+        board_member_filter = Q()
+    return User.objects.filter(Q(groups__in=group_ids) | board_member_filter).distinct()

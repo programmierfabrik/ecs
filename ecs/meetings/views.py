@@ -37,7 +37,8 @@ from ecs.meetings.models import Meeting, Participation, TimetableEntry, MeetingS
 from ecs.meetings.signals import on_meeting_start, on_meeting_end, on_meeting_top_jump, \
     on_meeting_date_changed
 from ecs.meetings.tasks import optimize_timetable_task
-from ecs.meetings.utils import render_protocol_pdf_for_submission, send_submission_protocol_pdf
+from ecs.meetings.utils import render_protocol_pdf_for_submission, send_submission_protocol_pdf, \
+    get_users_for_protocol
 from ecs.notifications.models import NotificationAnswer
 from ecs.tasks.models import Task
 from ecs.users.models import UserProfile
@@ -1048,32 +1049,27 @@ def send_protocol_custom_groups(request, meeting_pk=None):
         pk=meeting_pk
     )
     invited_groups_id = meeting.invited_groups.all().values_list('id', flat=True)
-    users_to_invite = meeting.invited_users.all()
-    board_members = meeting.board_members.all()
+    users_to_send_protocol = meeting.invited_users.all()
     is_disabled = True if meeting.protocol_sent_at is not None else False
     form = SendProtocolGroupsForm(is_disabled, request.POST or None, initial={'groups': list(map(str, invited_groups_id))})
-    
+
     # Invite all the users with the provided groups
     invited_count = None
     protocol_sent = meeting.protocol_sent_at is not None
     if request.method == 'POST' and form.is_valid() and not protocol_sent:
         invited_group_ids = form.cleaned_data['groups']
-        group_ids = invited_group_ids.copy()
         invite_ek_member = form.cleaned_data['invite_ek_member']
-        board_member_group = next(filter(lambda group: (group[1].name == 'Board Member'), form.fields['groups'].choices), None)[1]
-        if invite_ek_member and str(board_member_group.pk) in group_ids:
-            group_ids.remove(str(board_member_group.pk))
-            board_member_filter = Q(pk__in=board_members)
-        else:
-            board_member_filter = Q()
+        board_member_group = (
+            next(filter(lambda group: (group[1].name == 'Board Member'), form.fields['groups'].choices), None)[1])
+        users_to_send_protocol = get_users_for_protocol(meeting, invited_group_ids, invite_ek_member,
+                                                       board_member_group=board_member_group)
 
         meeting.protocol_sent_at = timezone.now()
         attachments = (
             (meeting.protocol.original_file_name, (meeting.protocol.retrieve_raw().read()), 'application/pdf'),
         )
 
-        users_to_invite = User.objects.filter(Q(groups__in=group_ids) | board_member_filter).distinct()
-        for user in users_to_invite:
+        for user in users_to_send_protocol:
             htmlmail = str(
                 render_html(request, 'meetings/messages/protocol.html', {'meeting': meeting, 'recipient': user}))
             deliver(
@@ -1082,10 +1078,10 @@ def send_protocol_custom_groups(request, meeting_pk=None):
                 attachments=attachments
             )
 
-        meeting.invited_users.set(users_to_invite)
+        meeting.invited_users.set(users_to_send_protocol)
         meeting.invited_groups.set(invited_group_ids)
         meeting.save()
-        invited_count = len(users_to_invite)
+        invited_count = len(users_to_send_protocol)
         protocol_sent = True
         form.set_disabled(True)
 
@@ -1093,7 +1089,7 @@ def send_protocol_custom_groups(request, meeting_pk=None):
         'form': form,
         'meeting': meeting,
         'invited_count': invited_count,
-        'users_to_invite': users_to_invite,
+        'users_to_invite': users_to_send_protocol,
         'protocol_sent': protocol_sent,
     })
 
