@@ -54,7 +54,7 @@ def _workdir():
                 status = 'V'
                 exp_ts = cert.expires_at.strftime('%y%m%d%H%M%SZ')
                 rev_ts = ''
-                serial = '{:02x}'.format(cert.serial)
+                serial = '{:04x}'.format(cert.serial)
                 if cert.revoked_at:
                     status = 'R'
                     rev_ts = cert.revoked_at.strftime('%y%m%d%H%M%SZ')
@@ -114,7 +114,7 @@ def setup(subject):
 def make_cert(subject, pkcs12_file, days=None, passphrase=''):
     with _workdir() as workdir:
         with open(os.path.join(workdir, 'serial'), 'w') as f:
-            f.write('{:02x}'.format(Certificate.get_serial()))
+            f.write('{:04x}'.format(Certificate.get_serial()))
 
         key_file = os.path.join(workdir, 'key.pem')
         csr_file = os.path.join(workdir, 'x.csr')
@@ -148,7 +148,7 @@ def make_cert(subject, pkcs12_file, days=None, passphrase=''):
 def gen_crl():
     with _workdir() as workdir:
         with open(os.path.join(workdir, 'crlnumber'), 'w') as f:
-            f.write('{:02x}'.format(Certificate.get_crlnumber()))
+            f.write('{:04x}'.format(Certificate.get_crlnumber()))
 
         crl_path = os.path.join(settings.ECS_CA_ROOT, 'crl.pem')
 
