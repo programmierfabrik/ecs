@@ -38,11 +38,11 @@
             <td>1.5.2 Adresse:</td>
             <td class="value">
                 {{ submission_form.sponsor_address }}<br/>
-                {{ submission_form.sponsor_zip_code }} {{ submission_form.sponsor_city }}
+                {{ submission_form.sponsor_zip_code }} {{ submission_form.sponsor_city }} {{ submission_form.sponsor_country_code }}
             </td>
             <td class="value">
                 {{ submission_form.invoice_address }}<br/>
-                {{ submission_form.invoice_zip_code }} {{ submission_form.invoice_city }}
+                {{ submission_form.invoice_zip_code }} {{ submission_form.invoice_city }} {{ submission_form.invoice_country_code }}
             </td>
         </tr>
         <tr>
@@ -64,6 +64,11 @@
             <td>1.5.6 e-mail:</td>
             <td class="value">{{ submission_form.sponsor_email }}</td>
             <td class="value">{{ submission_form.invoice_email }}</td>
+        </tr>
+        <tr>
+            <td>1.5.7 UID-Nummer:</td>
+            <td class="value">{{ submission_form.sponsor_uid }}</td>
+            <td class="value">{{ submission_form.invoice_uid }}</td>
         </tr>
         <tr>
             <td></td>

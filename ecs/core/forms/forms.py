@@ -44,13 +44,14 @@ MPG_FIELDS = (
 )
 
 INSURANCE_FIELDS = (
-    'insurance_not_required', 'insurance_name', 'insurance_address', 'insurance_phone', 'insurance_contract_number', 'insurance_validity'
+    'insurance_submit_later', 'insurance_not_required', 'insurance_name', 'insurance_address', 'insurance_phone', 'insurance_contract_number', 'insurance_validity'
 )
 
 INVOICE_REQUIRED_FIELDS = (
-    'invoice_name', 'invoice_contact_gender', 'invoice_contact_first_name', 'invoice_contact_last_name', 'invoice_address',
-    'invoice_zip_code', 'invoice_city', 'invoice_phone', 'invoice_email',
+    'invoice_name', 'invoice_address',
+    'invoice_zip_code', 'invoice_city', 'invoice_country_code', 'invoice_phone', 'invoice_email',
 )
+
 
 class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
     substance_preexisting_clinical_tries = NullBooleanField(required=False)
@@ -74,6 +75,7 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
         ('2', _('Yes, but only childbearing')),
         ('3', _('No')),
     ))
+    subject_divers = NullBooleanField()
 
     is_new_medtech_law = NullBooleanFieldNewMedtechLaw(required=False)
 
@@ -87,23 +89,23 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
 
             'project_type_non_reg_drug', 'project_type_reg_drug', 'project_type_reg_drug_within_indication', 'project_type_reg_drug_not_within_indication',
             'project_type_medical_method', 'project_type_medical_device', 'project_type_medical_device_with_ce', 'project_type_medical_device_without_ce',
-            'project_type_medical_device_performance_evaluation', 'project_type_non_interventional_study_mpg', 'project_type_basic_research', 'project_type_genetic_study', 'project_type_register',
+            'project_type_medical_device_performance_evaluation', 'project_type_medical_device_combination_studies', 'medtech_eu_ct_id', 'project_type_non_interventional_study_mpg', 'project_type_basic_research', 'project_type_genetic_study', 'project_type_register',
             'project_type_biobank', 'project_type_retrospective', 'project_type_questionnaire', 'project_type_psychological_study', 'project_type_education_context',
             'project_type_non_interventional_study', 'project_type_gender_medicine', 'project_type_misc', 'project_type_nursing_study',
 
-            'subject_count', 'subject_minage', 'subject_maxage', 'subject_noncompetents', 'subject_males', 'subject_females_childbearing',
+            'subject_count', 'subject_minage_unit', 'subject_minage', 'subject_maxage_unit', 'subject_maxage', 'subject_noncompetent_unconscious', 'subject_noncompetent_guarded', 'subject_noncompetent_minor', 'subject_noncompetent_emergency_study', 'subject_males', 'subject_females_childbearing', 'subject_divers',
             'subject_duration', 'subject_duration_active', 'subject_duration_controls', 'subject_planned_total_duration',
 
-            'submitter_contact_gender', 'submitter_contact_title', 'submitter_contact_first_name', 'submitter_contact_last_name',
-            'submitter_organisation', 'submitter_jobtitle', 'submitter_is_coordinator',
-            'submitter_is_main_investigator', 'submitter_is_sponsor', 'submitter_is_authorized_by_sponsor', 'sponsor_name',
+            'submitter_contact_gender', 'submitter_contact_title', 'submitter_contact_suffix_title', 'submitter_contact_first_name', 'submitter_contact_last_name',
+            'submitter_organisation', 'submitter_jobtitle',
 
-            'sponsor_contact_gender', 'sponsor_contact_title', 'sponsor_contact_first_name', 'sponsor_contact_last_name',
+            'sponsor_name',
+            'sponsor_contact_gender', 'sponsor_contact_title', 'sponsor_contact_suffix_title', 'sponsor_contact_first_name', 'sponsor_contact_last_name',
             'sponsor_address', 'sponsor_zip_code',
-            'sponsor_city', 'sponsor_phone', 'sponsor_fax', 'sponsor_email', 'sponsor_uid', 'invoice_differs_from_sponsor',
+            'sponsor_city', 'sponsor_country_code', 'sponsor_phone', 'sponsor_fax', 'sponsor_email', 'sponsor_uid', 'invoice_differs_from_sponsor',
 
-            'invoice_name', 'invoice_contact_gender', 'invoice_contact_title', 'invoice_contact_first_name', 'invoice_contact_last_name',
-            'invoice_address', 'invoice_zip_code', 'invoice_city', 'invoice_phone', 'invoice_fax', 'invoice_email', 'invoice_uid',
+            'invoice_name', 'invoice_contact_gender', 'invoice_contact_title', 'invoice_contact_suffix_title', 'invoice_contact_first_name', 'invoice_contact_last_name',
+            'invoice_address', 'invoice_zip_code', 'invoice_city', 'invoice_country_code', 'invoice_phone', 'invoice_fax', 'invoice_email', 'invoice_uid',
 
             'additional_therapy_info',
             'german_summary', 'german_preclinical_results', 'german_primary_hypothesis', 'german_inclusion_exclusion_crit', 'german_ethical_info',
@@ -119,8 +121,12 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
             'study_plan_population_intention_to_treat', 'study_plan_population_per_protocol', 'study_plan_interim_evaluation', 'study_plan_abort_crit',
             'study_plan_planned_statalgorithm', 'study_plan_dataquality_checking', 'study_plan_datamanagement',
             'study_plan_biometric_planning', 'study_plan_statistics_implementation', 'study_plan_dataprotection_choice', 'study_plan_dataprotection_reason',
-            'study_plan_dataprotection_dvr', 'study_plan_dataprotection_anonalgoritm', 'submitter_email',
+            'study_plan_dataprotection_anonalgoritm', 'submitter_email', 'submitter_phone_number',
         ) + AMG_FIELDS + MPG_FIELDS + INSURANCE_FIELDS
+        # Change select to radio buttons
+        widgets = {
+            'project_type_education_context': forms.RadioSelect(attrs={'class': 'radio'})
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -137,19 +143,23 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
         cleaned_data = super().clean()
         cleaned_data['project_type_reg_drug'] = any(self.cleaned_data.get(f, False) for f in ('project_type_reg_drug_within_indication', 'project_type_reg_drug_not_within_indication'))
         cleaned_data['project_type_medical_device'] = any(self.cleaned_data.get(f, False) for f in ('project_type_medical_device_with_ce', 'project_type_medical_device_without_ce', 'project_type_medical_device_performance_evaluation'))
+        cleaned_data['subject_noncompetents'] = any(self.cleaned_data.get(f, False) for f in ('subject_noncompetent_unconscious', 'subject_noncompetent_guarded', 'subject_noncompetent_minor', 'subject_noncompetent_emergency_study'))
 
         if any(cleaned_data.get(f, False) for f in ('project_type_reg_drug', 'project_type_non_reg_drug')):
             require_fields(self, AMG_REQUIRED_FIELDS)
 
         if cleaned_data.get('project_type_medical_device', False):
             require_fields(self, MPG_FIELDS)
+            if cleaned_data.get('project_type_medical_device_combination_studies', False):
+                require_fields(self, ('medtech_eu_ct_id',))
 
-        if any(cleaned_data.get(f, False) for f in ('project_type_medical_device_without_ce', 'project_type_reg_drug', 'project_type_non_reg_drug')):
+        if any(cleaned_data.get(f, False) for f in ('project_type_medical_device_without_ce', 'project_type_reg_drug', 'project_type_non_reg_drug'))\
+            and cleaned_data.get('insurance_submit_later', False) is not True:
             require_fields(self, INSURANCE_FIELDS)
 
         if cleaned_data.get('invoice_differs_from_sponsor', False):
             require_fields(self, INVOICE_REQUIRED_FIELDS)
-
+            
         if cleaned_data.get('study_plan_interim_evaluation', False):
             require_fields(self, ('study_plan_abort_crit',))
 
@@ -157,14 +167,14 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
             require_fields(self, ('study_plan_multiple_test_correction_algorithm',))
 
         if cleaned_data.get('study_plan_dataprotection_choice', 'non-personal') == 'personal':
-            require_fields(self, ('study_plan_dataprotection_reason', 'study_plan_dataprotection_dvr',))
+            require_fields(self, ('study_plan_dataprotection_reason',))
         else:
             require_fields(self, ('study_plan_dataprotection_anonalgoritm',))
 
         if cleaned_data.get('substance_preexisting_clinical_tries') == True:
             require_fields(self, ('substance_p_c_t_phase', 'substance_p_c_t_period', 'substance_p_c_t_application_type', 'substance_p_c_t_gcp_rules', 'substance_p_c_t_final_report',))
 
-        require_fields(self, ('subject_males',))
+        require_fields(self, ('subject_males', 'subject_divers',))
 
         if any(cleaned_data.get(f, False) for f in ('project_type_reg_drug', 'project_type_non_reg_drug', 'project_type_medical_device')):
             require_fields(self, ('submission_type',))
@@ -248,7 +258,7 @@ class InvestigatorForm(forms.ModelForm):
     class Meta:
         model = Investigator
         fields = ('organisation', 'subject_count', 'ethics_commission', 'main',
-            'contact_gender', 'contact_title', 'contact_first_name', 'contact_last_name',
+            'contact_gender', 'contact_title', 'contact_suffix_title', 'contact_first_name', 'contact_last_name',
             'phone', 'mobile', 'fax', 'email', 'jus_practicandi', 'specialist', 'certified',)
         widgets = {
             'email': StrippedTextInput(),
@@ -309,7 +319,7 @@ class BaseInvestigatorFormSet(ReadonlyFormSetMixin, BaseFormSet):
             raise forms.ValidationError(_('Please select exactly one primary investigator.'))
 
 InvestigatorFormSet = formset_factory(InvestigatorForm,
-    formset=BaseInvestigatorFormSet)
+    formset=BaseInvestigatorFormSet, max_num=1)
 
 class InvestigatorEmployeeForm(forms.ModelForm):
     investigator_index = forms.IntegerField(required=True, initial=0, widget=forms.HiddenInput())
@@ -327,6 +337,11 @@ class InvestigatorEmployeeForm(forms.ModelForm):
         return instance
 
 class BaseInvestigatorEmployeeFormSet(ReadonlyFormSetMixin, BaseFormSet):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.forms:
+            form.empty_permitted = False
+    
     def save(self, commit=True):
         return [
             form.save(commit=commit)
@@ -335,7 +350,7 @@ class BaseInvestigatorEmployeeFormSet(ReadonlyFormSetMixin, BaseFormSet):
         ]
 
 InvestigatorEmployeeFormSet = formset_factory(InvestigatorEmployeeForm,
-    formset=BaseInvestigatorEmployeeFormSet)
+    formset=BaseInvestigatorEmployeeFormSet, max_num=0)
 
 
 _queries = {
@@ -564,7 +579,7 @@ class AdvancedSettingsForm(forms.ModelForm):
     class Meta:
         model = AdvancedSettings
         fields = (
-            'default_contact', 'display_notifications_in_protocol',
+            'default_contact', 'warning_window_certificate', 'display_notifications_in_protocol',
             'display_biased_in_amendment_answer_pdf',
             'require_internal_vote_review', 'logo_file', 'print_logo_file',
             'address', 'meeting_address', 'contact_email', 'contact_url',
@@ -573,6 +588,7 @@ class AdvancedSettingsForm(forms.ModelForm):
             'vote4_extra', 'vote5_extra', 'vote_pdf_extra',
         )
         labels = {
+            'warning_window_certificate': _('Warning Window Certificate'),
             'display_notifications_in_protocol':
                 _('Display Notifications in Protocol'),
             'display_biased_in_amendment_answer_pdf':

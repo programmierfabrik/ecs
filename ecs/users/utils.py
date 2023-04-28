@@ -56,6 +56,8 @@ def get_full_name(user):
                 nameparts.insert(0, force_str(_('Ms.')))
             if profile.gender == 'm':
                 nameparts.insert(0, force_str(_('Mr.')))
+        if profile.suffix_title:
+            nameparts.append(profile.suffix_title)
         return ' '.join(nameparts)
     else:
         return str(user.email)

@@ -48,7 +48,7 @@ SUBMISSION_FORM_TABS = (
         (_('type of project'), [
             'project_type_non_reg_drug', 'project_type_reg_drug', 'project_type_reg_drug_within_indication', 'project_type_reg_drug_not_within_indication', 'project_type_non_interventional_study',
             'project_type_medical_method', 'project_type_medical_device', 'project_type_medical_device_with_ce', 'project_type_medical_device_without_ce',
-            'project_type_medical_device_performance_evaluation', 'project_type_non_interventional_study_mpg', 'project_type_basic_research', 'project_type_genetic_study', 'project_type_register',
+            'project_type_medical_device_performance_evaluation', 'project_type_medical_device_combination_studies', 'project_type_non_interventional_study_mpg', 'project_type_basic_research', 'project_type_genetic_study', 'project_type_register',
             'project_type_biobank', 'project_type_retrospective', 'project_type_questionnaire', 'project_type_psychological_study', 'project_type_nursing_study',
             'project_type_gender_medicine',
             'submission_type', 'is_new_medtech_law',
@@ -57,14 +57,17 @@ SUBMISSION_FORM_TABS = (
     ]),
     Tab('participants', _('participant'), [
         (_('test participant'), [
-            'subject_count', 'subject_minage', 'subject_maxage', 'subject_males', 'subject_females_childbearing',
-            'subject_noncompetents', 'subject_duration', 'subject_duration_active', 'subject_duration_controls', 'subject_planned_total_duration',
+            'subject_count', 'subject_minage_unit', 'subject_minage', 'subject_maxage_unit', 'subject_maxage', 'subject_males', 'subject_females_childbearing', 'subject_divers',
+            'subject_duration', 'subject_duration_active', 'subject_duration_controls', 'subject_planned_total_duration',
+        ]),
+        (_('non competent participants') + ' [2.10.3]', [
+            'subject_noncompetent_unconscious', 'subject_noncompetent_guarded', 'subject_noncompetent_minor', 'subject_noncompetent_emergency_study',
         ]),
     ]),
     Tab('outline', _('outline'), [
         (_('outline'), [
-            'german_project_title', 'project_title',
-            'german_summary', 'german_preclinical_results', 'german_primary_hypothesis', 'german_inclusion_exclusion_crit',
+            'german_project_title', 'project_title', 'german_summary',
+            'german_preclinical_results', 'german_primary_hypothesis', 'german_inclusion_exclusion_crit',
             'german_ethical_info', 'german_protected_subjects_info', 'german_recruitment_info', 'german_consent_info', 'german_risks_info',
             'german_benefits_info', 'german_relationship_info', 'german_concurrent_study_info', 'german_sideeffects_info',
             'german_statistical_info', 'german_dataprotection_info', 'german_aftercare_info', 'german_payment_info', 'german_abort_info', 'german_dataaccess_info',
@@ -74,8 +77,8 @@ SUBMISSION_FORM_TABS = (
     Tab('sponsor', _('sponsor'), [
         (_('sponsor'), [
             'sponsor_name', # 1.5.1
-            'sponsor_address', 'sponsor_zip_code', 'sponsor_city', # 1.5.2
-            'sponsor_contact_gender', 'sponsor_contact_title', 'sponsor_contact_first_name', 'sponsor_contact_last_name', # 1.5.3
+            'sponsor_address', 'sponsor_zip_code', 'sponsor_city', 'sponsor_country_code', # 1.5.2
+            'sponsor_contact_gender', 'sponsor_contact_title', 'sponsor_contact_suffix_title', 'sponsor_contact_first_name', 'sponsor_contact_last_name', # 1.5.3
             'sponsor_phone', # 1.5.4
             'sponsor_fax', # 1.5.5
             'sponsor_email', # 1.5.6
@@ -84,17 +87,16 @@ SUBMISSION_FORM_TABS = (
         ]),
         (_('invoice recipient'), [
             'invoice_name',
-            'invoice_address', 'invoice_zip_code', 'invoice_city',
-            'invoice_contact_gender', 'invoice_contact_title', 'invoice_contact_first_name', 'invoice_contact_last_name',
+            'invoice_address', 'invoice_zip_code', 'invoice_city', 'invoice_country_code',
+            'invoice_contact_gender', 'invoice_contact_title', 'invoice_contact_suffix_title', 'invoice_contact_first_name', 'invoice_contact_last_name',
             'invoice_phone', 'invoice_fax', 'invoice_email',
             'invoice_uid',
         ]),
     ]),
     Tab('applicant', _('applicant'), [
         (_('applicant'), [
-            'submitter_contact_gender', 'submitter_contact_title', 'submitter_contact_first_name', 'submitter_contact_last_name', 'submitter_email',
-            'submitter_organisation', 'submitter_jobtitle', 'submitter_is_coordinator', 'submitter_is_main_investigator', 'submitter_is_sponsor',
-            'submitter_is_authorized_by_sponsor',
+            'submitter_contact_gender', 'submitter_contact_title', 'submitter_contact_suffix_title', 'submitter_contact_first_name', 'submitter_contact_last_name', 'submitter_email', 'submitter_phone_number',
+            'submitter_organisation', 'submitter_jobtitle',
         ]),
     ]),
     Tab('amg', _('AMG'), [
@@ -107,7 +109,7 @@ SUBMISSION_FORM_TABS = (
         ]),
     ]),
     Tab('mpg', _('MPG'), [
-        (_('Medical Device Study'), ['medtech_checked_product', 'medtech_reference_substance']),
+        (_('Medical Device Study'), ['medtech_checked_product', 'medtech_reference_substance', 'medtech_eu_ct_id']),
         (_('MPG'), [
             'medtech_product_name', 'medtech_manufacturer', 'medtech_certified_for_exact_indications', 'medtech_certified_for_other_indications',
             'medtech_ce_symbol', 'medtech_manual_included', 'medtech_technical_safety_regulations', 'medtech_departure_from_regulations',
@@ -138,12 +140,12 @@ SUBMISSION_FORM_TABS = (
             'study_plan_biometric_planning', 'study_plan_statistics_implementation',
         ]),
         (_('information privacy'), [
-            'study_plan_dataprotection_choice', 'study_plan_dataprotection_reason', 'study_plan_dataprotection_dvr', 'study_plan_dataprotection_anonalgoritm',
+            'study_plan_dataprotection_choice', 'study_plan_dataprotection_reason', 'study_plan_dataprotection_anonalgoritm',
         ]),
     ]),
     Tab('insurance', _('insurance'), [
         (_('insurance'), [
-            'insurance_not_required',
+            'insurance_submit_later', 'insurance_not_required',
             'insurance_name', 'insurance_address', 'insurance_phone', 'insurance_contract_number', 'insurance_validity',
         ]),
     ]),

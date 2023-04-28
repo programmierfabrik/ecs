@@ -59,7 +59,7 @@ class SubmissionQuerySet(models.QuerySet):
             Q(presenter=user) |Q(susar_presenter=user) |
             Q(current_submission_form__submitter=user) |
             Q(current_submission_form__sponsor=user) |
-            Q(current_submission_form__primary_investigator__user=user)
+            Q(current_submission_form__investigators__user=user)
         )
 
     def reviewed_by_user(self, user):

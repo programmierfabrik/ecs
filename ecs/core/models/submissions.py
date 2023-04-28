@@ -1,38 +1,38 @@
 from datetime import timedelta
 
+from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models.signals import post_save
-from django.contrib.auth.models import User
 from django.dispatch import receiver
-from django.utils.translation import gettext as _, gettext_lazy
-from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
-
+from django.utils.translation import gettext as _, gettext_lazy
 from django_countries import countries
 from django_countries.fields import CountryField
 
 from ecs.authorization.managers import AuthorizationManager
-from ecs.core.models.names import NameField
 from ecs.core.models.constants import (
     MIN_EC_NUMBER, SUBMISSION_INFORMATION_PRIVACY_CHOICES, SUBMISSION_LANE_CHOICES, SUBMISSION_LANE_EXPEDITED,
     SUBMISSION_LANE_RETROSPECTIVE_THESIS, SUBMISSION_LANE_LOCALEC, SUBMISSION_LANE_BOARD,
     SUBMISSION_TYPE_CHOICES, SUBMISSION_TYPE_MONOCENTRIC, SUBMISSION_TYPE_MULTICENTRIC_LOCAL,
-    SUBMISSION_TYPE_MULTICENTRIC,
+    SUBMISSION_TYPE_MULTICENTRIC, SUBMISSION_AGE_UNIT, SUBMISSION_AGE_UNIT_YEARS, SUBMISSION_AGE_UNIT_DAYS,
+    SUBMISSION_AGE_UNIT_MONTHS, SUBMISSION_AGE_UNIT_HOURS
 )
-from ecs.votes.constants import PERMANENT_VOTE_RESULTS, RECESSED_VOTE_RESULTS
 from ecs.core.models.managers import (
     SubmissionManager, SubmissionQuerySet, InvestigatorManager,
     TemporaryAuthorizationManager,
 )
+from ecs.core.models.names import NameField
 from ecs.core.parties import get_involved_parties, get_reviewing_parties, get_presenting_parties
-from ecs.documents.models import Document
-from ecs.users.utils import get_user, create_phantom_user, sudo
 from ecs.core.signals import on_study_change
-from ecs.votes.models import Vote
+from ecs.documents.models import Document
 from ecs.notifications.models import Notification
-from ecs.users.utils import get_current_user
-from ecs.utils.viewutils import render_pdf_context
 from ecs.tasks.models import Task
+from ecs.users.utils import get_current_user
+from ecs.users.utils import get_user, create_phantom_user, sudo
+from ecs.utils.viewutils import render_pdf_context
+from ecs.votes.constants import PERMANENT_VOTE_RESULTS, RECESSED_VOTE_RESULTS
+from ecs.votes.models import Vote
 
 
 class Submission(models.Model):
@@ -271,10 +271,11 @@ class SubmissionForm(models.Model):
     # 1.5
     sponsor = models.ForeignKey(User, null=True, related_name="sponsored_submission_forms", on_delete=models.CASCADE)
     sponsor_name = models.CharField(max_length=100)
-    sponsor_contact = NameField(required=('gender', 'first_name', 'last_name',))
+    sponsor_contact = NameField()
     sponsor_address = models.CharField(max_length=60)
     sponsor_zip_code = models.CharField(max_length=10)
     sponsor_city = models.CharField(max_length=80)
+    sponsor_country_code = models.CharField(max_length=10)
     sponsor_phone = models.CharField(max_length=30)
     sponsor_fax = models.CharField(max_length=30, blank=True)
     sponsor_email = models.EmailField()
@@ -285,6 +286,7 @@ class SubmissionForm(models.Model):
     invoice_address = models.CharField(max_length=60, blank=True)
     invoice_zip_code = models.CharField(max_length=10, blank=True)
     invoice_city = models.CharField(max_length=80, blank=True)
+    invoice_country_code = models.CharField(max_length=10, blank=True)
     invoice_phone = models.CharField(max_length=50, blank=True)
     invoice_fax = models.CharField(max_length=45, blank=True)
     invoice_email = models.EmailField(blank=True)
@@ -300,13 +302,14 @@ class SubmissionForm(models.Model):
     project_type_medical_device_with_ce = models.BooleanField(default=False)
     project_type_medical_device_without_ce = models.BooleanField(default=False)
     project_type_medical_device_performance_evaluation = models.BooleanField(default=False)
+    project_type_medical_device_combination_studies = models.BooleanField(default=False)
     project_type_basic_research = models.BooleanField(default=False)
     project_type_genetic_study = models.BooleanField(default=False)
     project_type_register = models.BooleanField(default=False)
     project_type_biobank = models.BooleanField(default=False)
     project_type_retrospective = models.BooleanField(default=False)
     project_type_questionnaire = models.BooleanField(default=False)
-    project_type_education_context = models.SmallIntegerField(null=True, blank=True, choices=[(1, 'Dissertation'), (2, 'Diplomarbeit')])
+    project_type_education_context = models.SmallIntegerField(null=True, blank=True, choices=[(1, 'Dissertation'), (2, 'Diplomarbeit'), (3, 'Bachelorarbeit'), (4, 'Masterarbeit'), (5, 'PhD-Arbeit')])
     project_type_misc = models.TextField(blank=True)
     project_type_psychological_study = models.BooleanField(default=False)
     project_type_nursing_study = models.BooleanField(default=False)
@@ -324,6 +327,7 @@ class SubmissionForm(models.Model):
     # 2.4
     medtech_checked_product = models.TextField(blank=True)
     medtech_reference_substance = models.TextField(blank=True)
+    medtech_eu_ct_id = models.TextField(blank=True)
 
     # 2.5
     clinical_phase = models.CharField(max_length=10, blank=True)
@@ -337,12 +341,18 @@ class SubmissionForm(models.Model):
     subject_count = models.PositiveIntegerField()
 
     # 2.10
-    subject_minage = models.PositiveIntegerField(null=True, blank=True)
-    subject_maxage = models.PositiveIntegerField(null=True, blank=True)
-    subject_noncompetents = models.BooleanField(default=False)
+    subject_minage = models.PositiveIntegerField(null=True)
+    subject_minage_unit = models.SmallIntegerField(choices=SUBMISSION_AGE_UNIT, default=SUBMISSION_AGE_UNIT_YEARS)
+    subject_maxage = models.PositiveIntegerField(null=True)
+    subject_maxage_unit = models.SmallIntegerField(choices=SUBMISSION_AGE_UNIT, default=SUBMISSION_AGE_UNIT_YEARS)
+    subject_noncompetent_unconscious = models.BooleanField(default=False)
+    subject_noncompetent_guarded = models.BooleanField(default=False)
+    subject_noncompetent_minor = models.BooleanField(default=False)
+    subject_noncompetent_emergency_study = models.BooleanField(default=False)
     subject_males = models.BooleanField(default=False)
     subject_females = models.BooleanField(default=False)
     subject_childbearing = models.BooleanField(default=False)
+    subject_divers = models.BooleanField(default=False)
     
     # 2.11
     subject_duration = models.CharField(max_length=200)
@@ -375,6 +385,7 @@ class SubmissionForm(models.Model):
     medtech_departure_from_regulations = models.TextField(blank=True)
     
     # 5.x
+    insurance_submit_later = models.BooleanField(default=False)
     insurance_not_required = models.BooleanField(default=False)
     insurance_name = models.CharField(max_length=125, blank=True)
     insurance_address = models.CharField(max_length=80, blank=True)
@@ -403,12 +414,12 @@ class SubmissionForm(models.Model):
     german_concurrent_study_info = models.TextField()
     german_sideeffects_info = models.TextField()
     german_statistical_info = models.TextField(blank=True)
-    german_dataprotection_info = models.TextField(blank=True)
+    german_dataprotection_info = models.TextField()
     german_aftercare_info = models.TextField()
     german_payment_info = models.TextField()
     german_abort_info = models.TextField()
-    german_dataaccess_info = models.TextField(blank=True)
-    german_financing_info = models.TextField(blank=True)
+    german_dataaccess_info = models.TextField()
+    german_financing_info = models.TextField()
     german_additional_info = models.TextField(blank=True)
     
     # 8.1
@@ -465,12 +476,9 @@ class SubmissionForm(models.Model):
     submitter = models.ForeignKey(User, null=True, related_name='submitted_submission_forms', on_delete=models.CASCADE)
     submitter_contact = NameField(required=('gender', 'first_name', 'last_name',))
     submitter_email = models.EmailField(blank=False)
+    submitter_phone_number = models.CharField(max_length=30)
     submitter_organisation = models.CharField(max_length=180)
     submitter_jobtitle = models.CharField(max_length=130)
-    submitter_is_coordinator = models.BooleanField(default=False)
-    submitter_is_main_investigator = models.BooleanField(default=False)
-    submitter_is_sponsor = models.BooleanField(default=False)
-    submitter_is_authorized_by_sponsor = models.BooleanField(default=False)
     
     def save(self, **kwargs):
         if not self.presenter_id:
@@ -488,7 +496,8 @@ class SubmissionForm(models.Model):
                         user.save()
                         profile = user.profile
                         profile.title = getattr(self, '{0}_contact_title'.format(x))
-                        profile.gender = getattr(self, '{0}_contact_gender'.format(x)) or 'f'
+                        profile.suffix_title = getattr(self, '{0}_contact_suffix_title'.format(x))
+                        profile.gender = getattr(self, '{0}_contact_gender'.format(x)) or 'x'
                         profile.organisation = getattr(self, org)
                         profile.save()
                     setattr(self, x, user)
@@ -603,7 +612,18 @@ class SubmissionForm(models.Model):
     def includes_minors(self):
         if self.subject_minage is None:
             return None
-        return 0 <= self.subject_minage < 18
+        minage_in_years = 0
+        if self.subject_minage_unit == SUBMISSION_AGE_UNIT_HOURS:
+            # First map the hours to a day and divide it by 365 to get a year
+            minage_in_years = self.subject_minage / 24 / 365
+        if self.subject_minage_unit == SUBMISSION_AGE_UNIT_DAYS:
+            minage_in_years = self.subject_minage / 365
+        if self.subject_minage_unit == SUBMISSION_AGE_UNIT_MONTHS:
+            minage_in_years = self.subject_minage / 12
+        if self.subject_minage_unit == SUBMISSION_AGE_UNIT_YEARS:
+            minage_in_years = self.subject_minage
+
+        return 0 <= minage_in_years < 18
     
     @property
     def study_plan_open(self):
@@ -647,12 +667,25 @@ class SubmissionForm(models.Model):
             return None
 
     @property
-    def project_type_education_context_phd(self):
+    def project_type_education_context_dissertation(self):
         return self.project_type_education_context == 1
 
     @property
-    def project_type_education_context_master(self):
+    def project_type_education_context_thesis(self):
         return self.project_type_education_context == 2
+
+
+    @property
+    def project_type_education_context_bachelor(self):
+        return self.project_type_education_context == 3
+
+    @property
+    def project_type_education_context_master(self):
+        return self.project_type_education_context == 4
+
+    @property
+    def project_type_education_context_phd(self):
+        return self.project_type_education_context == 5
 
     @property
     def measures_study_specific(self):
@@ -760,8 +793,8 @@ class Investigator(models.Model):
 
     user = models.ForeignKey(User, null=True, related_name='investigations', on_delete=models.CASCADE)
     contact = NameField(required=('gender', 'first_name', 'last_name',))
-    organisation = models.CharField(max_length=80)
-    phone = models.CharField(max_length=30, blank=True)
+    organisation = models.TextField()
+    phone = models.CharField(max_length=30)
     mobile = models.CharField(max_length=30, blank=True)
     fax = models.CharField(max_length=30, blank=True)
     email = models.EmailField(blank=False)
@@ -786,6 +819,7 @@ class Investigator(models.Model):
                 user.save()
                 profile = user.profile
                 profile.title = self.contact_title
+                profile.suffix_title = self.contact_suffix_title
                 profile.gender = self.contact_gender
                 profile.organisation = self.organisation
                 profile.save()
@@ -805,11 +839,12 @@ def _post_investigator_save(sender, **kwargs):
 class InvestigatorEmployee(models.Model):
     investigator = models.ForeignKey(Investigator, related_name='employees', on_delete=models.CASCADE)
 
-    sex = models.CharField(max_length=1, choices=[("m", gettext_lazy("Mr")), ("f", gettext_lazy("Ms"))])
+    sex = models.CharField(max_length=1, choices=[("m", gettext_lazy("Mr")), ("f", gettext_lazy("Ms")), ("d", gettext_lazy("Divers"))])
     title = models.CharField(max_length=40, blank=True)
+    suffix_title = models.CharField(max_length=40, blank=True)
     firstname = models.CharField(max_length=40)
     surname = models.CharField(max_length=40)
-    organisation = models.CharField(max_length=80)
+    organisation = models.TextField()
 
     class Meta:
         ordering = ['id']
@@ -819,6 +854,8 @@ class InvestigatorEmployee(models.Model):
         name = [self.firstname, self.surname]
         if self.title:
             name.insert(0, self.title)
+        if self.suffix_title:
+            name.append(self.suffix_title)
         return ' '.join(name)
 
     def __str__(self):

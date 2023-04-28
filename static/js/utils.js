@@ -94,6 +94,12 @@ ecs.InvestigatorFormset.prototype = {
         this.inline_formset.forms.forEach(function(f, i){
             f.toggle(i == index);
         });
+
+        this.container.find('textarea:visible').each(function() {
+            var textarea = $(this).data('textarea');
+            if (textarea)
+                textarea.updateHeight();
+        });
     },
     add: function() {
         this.inline_formset.add(this.container);
@@ -126,7 +132,7 @@ ecs.InvestigatorFormset.prototype = {
             else
                 a.addClass('btn-outline-primary');
 
-            var org = form.find('input[name$="-organisation"]');
+            var org = form.find('textarea[name$="-organisation"]');
             org.change(function() {
                 a.text(org.val().trim() || ('Zentrum ' + (i + 1)));
             });
@@ -280,7 +286,7 @@ ecs.setupForms = function(){
 
         setup.tabController = tabController;
     }
-    
+
     ecs.setupFormFieldHelpers();
 
     return setup;

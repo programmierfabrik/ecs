@@ -377,6 +377,10 @@ class SubmissionFormDiffer(ModelDiffer):
                 fi = paper_forms.get_field_info(self.model, name, None)
                 self.label_map[name] = '{}: {} {}'.format(
                     _('sponsor'), fi.number, fi.label)
+            elif name.startswith('submitter_'):
+                fi = paper_forms.get_field_info(self.model, name, None)
+                self.label_map[name] = '{}: {} {}'.format(
+                    _('applicant'), fi.number, fi.label)
 
     def diff_field(self, name, old, new, **kwargs):
         if name in ('substance_registered_in_countries', 'substance_p_c_t_countries'):
@@ -396,13 +400,13 @@ _differs = {
     SubmissionForm: SubmissionFormDiffer(SubmissionForm,
         fields = (
             'documents', 'project_title', 'eudract_number', 'sponsor_name',
-            'sponsor_contact_gender', 'sponsor_contact_title',
+            'sponsor_contact_gender', 'sponsor_contact_title', 'sponsor_contact_suffix_title',
             'sponsor_contact_first_name', 'sponsor_contact_last_name',
-            'sponsor_address', 'sponsor_zip_code', 'sponsor_city',
+            'sponsor_address', 'sponsor_zip_code', 'sponsor_city', 'sponsor_country_code',
             'sponsor_phone', 'sponsor_fax', 'sponsor_email', 'sponsor_uid',
-            'invoice_name', 'invoice_contact_gender', 'invoice_contact_title',
+            'invoice_name', 'invoice_contact_gender', 'invoice_contact_title', 'invoice_contact_suffix_title',
             'invoice_contact_first_name', 'invoice_contact_last_name',
-            'invoice_address', 'invoice_zip_code', 'invoice_city',
+            'invoice_address', 'invoice_zip_code', 'invoice_city', 'invoice_country_code',
             'invoice_phone', 'invoice_fax', 'invoice_email', 'invoice_uid',
             'project_type_non_reg_drug', 'project_type_reg_drug',
             'project_type_reg_drug_within_indication',
@@ -411,6 +415,8 @@ _differs = {
             'project_type_medical_device_with_ce',
             'project_type_medical_device_without_ce',
             'project_type_medical_device_performance_evaluation',
+            'project_type_medical_device_combination_studies',
+            'medtech_eu_ct_id',
             'project_type_non_interventional_study_mpg', 'project_type_basic_research', 'project_type_genetic_study',
             'project_type_misc', 'project_type_education_context',
             'project_type_register', 'project_type_biobank',
@@ -421,9 +427,9 @@ _differs = {
             'pharma_checked_substance', 'pharma_reference_substance',
             'medtech_checked_product', 'medtech_reference_substance',
             'clinical_phase', 'already_voted', 'subject_count',
-            'subject_minage', 'subject_maxage', 'subject_males',
-            'subject_females_childbearing', 'subject_females',
-            'subject_childbearing', 'subject_noncompetents', 'subject_duration',
+            'subject_minage', 'subject_minage_unit', 'subject_maxage', 'subject_maxage_unit', 'subject_males',
+            'subject_females_childbearing', 'subject_females', 'subject_divers',
+            'subject_childbearing', 'subject_noncompetent_unconscious', 'subject_noncompetent_guarded', 'subject_noncompetent_minor', 'subject_noncompetent_emergency_study', 'subject_duration',
             'subject_duration_active', 'subject_duration_controls',
             'subject_planned_total_duration', 'submission_type',
             'substance_registered_in_countries',
@@ -434,7 +440,7 @@ _differs = {
             'medtech_manufacturer', 'medtech_certified_for_exact_indications',
             'medtech_certified_for_other_indications', 'medtech_ce_symbol',
             'medtech_manual_included', 'medtech_technical_safety_regulations',
-            'medtech_departure_from_regulations', 'insurance_not_required',
+            'medtech_departure_from_regulations', 'insurance_submit_later', 'insurance_not_required',
             'insurance_name', 'insurance_address', 'insurance_phone',
             'insurance_contract_number', 'insurance_validity',
             'additional_therapy_info', 'german_project_title', 'german_summary',
@@ -473,11 +479,9 @@ _differs = {
             'study_plan_dataprotection_choice',
             'study_plan_dataprotection_reason', 'study_plan_dataprotection_dvr',
             'study_plan_dataprotection_anonalgoritm',
-            'submitter_contact_gender', 'submitter_contact_title',
+            'submitter_contact_gender', 'submitter_contact_title', 'submitter_contact_suffix_title',
             'submitter_contact_first_name', 'submitter_contact_last_name',
-            'submitter_email', 'submitter_organisation', 'submitter_jobtitle',
-            'submitter_is_coordinator', 'submitter_is_main_investigator',
-            'submitter_is_sponsor', 'submitter_is_authorized_by_sponsor',
+            'submitter_email', 'submitter_phone_number', 'submitter_organisation', 'submitter_jobtitle',
             'participatingcenternonsubject_set',
             'foreignparticipatingcenter_set', 'investigators', 'measures',
             'nontesteduseddrug_set', 'is_new_medtech_law'
@@ -495,7 +499,7 @@ _differs = {
     Investigator: ModelDiffer(Investigator,
         fields=(
             'organisation', 'ethics_commission', 'main', 'contact_gender',
-            'contact_title', 'contact_first_name', 'contact_last_name', 'phone',
+            'contact_title', 'contact_suffix_title', 'contact_first_name', 'contact_last_name', 'phone',
             'mobile', 'fax', 'email', 'jus_practicandi', 'specialist',
             'certified', 'subject_count', 'user', 'employees',
         ),
@@ -506,7 +510,7 @@ _differs = {
         }
     ),
     InvestigatorEmployee: ModelDiffer(InvestigatorEmployee,
-        fields=('sex', 'title', 'firstname', 'surname', 'organisation'),
+        fields=('sex', 'title', 'suffix_title', 'firstname', 'surname', 'organisation'),
         match_fields=('firstname', 'surname'),
         identify='full_name',
     ),

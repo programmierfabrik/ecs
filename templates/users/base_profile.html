@@ -1,9 +1,7 @@
 {% load i18n %}
 <table class="table table-sm">
     <tr><th class="bg-faded">Name:</th><td class="w-100">
-        {% if profile.gender == 'f' %}Frau{% endif %}
-        {% if profile.gender == 'm' %}Herr{% endif %}
-        {{ profile.title }} {{ profile_user.first_name }} {{ profile_user.last_name }}
+        {{ profile.user }}
     </td></tr>
     <tr><th class="bg-faded">Organisation</th><td class="w-100">{{ profile.organisation }}</td></tr>
     <tr><th class="bg-faded">Position</th><td class="w-100">{{ profile.jobtitle }}</td></tr>

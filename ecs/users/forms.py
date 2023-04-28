@@ -56,7 +56,7 @@ class EmailLoginForm(forms.Form):
 
 
 class RegistrationForm(forms.Form):
-    gender = forms.ChoiceField(label=_('gender'), choices=(('f', _('Ms')), ('m', _('Mr'))))
+    gender = forms.ChoiceField(choices=UserProfile._meta.get_field('gender').choices, label=_('gender'))
     first_name = forms.CharField(label=_('First name'))
     last_name = forms.CharField(label=_('Last name'))
     email = forms.EmailField(label=_('email'))
@@ -115,13 +115,14 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('gender', 'title', 'first_name', 'last_name', 'organisation', 'jobtitle',
+        fields = ('gender', 'title', 'suffix_title', 'first_name', 'last_name', 'organisation', 'jobtitle',
             'address1', 'address2', 'zip_code', 'city', 'phone', 'fax', 'iban', 'swift_bic',
             'signing_connector', 'forward_messages_after_minutes',
         )
         labels = {
             'gender': _('Gender'),
-            'title': _('Title'),
+            'title': _('prefix title'),
+            'suffix_title': _('suffix title'),
             'organisation': _('Organisation'),
             'jobtitle': _('Job Title'),
             'swift_bic': _('SWIFT-BIC'),
@@ -167,7 +168,8 @@ class AdministrationFilterForm(forms.Form):
 
 class UserDetailsForm(forms.ModelForm):
     gender = forms.ChoiceField(choices=UserProfile._meta.get_field('gender').choices, label=_('gender'))
-    title = forms.CharField(max_length=UserProfile._meta.get_field('title').max_length, required=False, label=_('title'))
+    title = forms.CharField(max_length=UserProfile._meta.get_field('title').max_length, required=False, label=_('prefix title'))
+    suffix_title = forms.CharField(max_length=UserProfile._meta.get_field('title').max_length, required=False, label=_('suffix title'))
     first_name = forms.CharField(max_length=User._meta.get_field('first_name').max_length, label=_('First name'))
     last_name = forms.CharField(max_length=User._meta.get_field('last_name').max_length, label=_('Last name'))
     task_types = forms.ModelMultipleChoiceField(required=False,
@@ -184,7 +186,7 @@ class UserDetailsForm(forms.ModelForm):
     class Meta:
         model = User
         fields = (
-            'gender', 'title', 'first_name', 'last_name', 'groups',
+            'gender', 'title', 'suffix_title', 'first_name', 'last_name', 'groups',
             'task_types', 'medical_categories',
         )
 
@@ -195,6 +197,7 @@ class UserDetailsForm(forms.ModelForm):
             profile = self.instance.profile
             self.fields['gender'].initial = profile.gender
             self.fields['title'].initial = profile.title
+            self.fields['suffix_title'].initial = profile.suffix_title
             self.fields['task_types'].initial = (
                 self.fields['task_types'].queryset
                     .filter(workflow_node__uid__in=profile.task_uids)
@@ -239,6 +242,7 @@ class UserDetailsForm(forms.ModelForm):
         profile = user.profile
         profile.gender = self.cleaned_data['gender']
         profile.title = self.cleaned_data['title']
+        profile.suffix_title = self.cleaned_data['suffix_title']
         profile.update_flags()
         profile.task_uids = list(self.cleaned_data['task_types'].values_list(
             'workflow_node__uid', flat=True))
@@ -253,7 +257,7 @@ class InvitationForm(UserDetailsForm):
     class Meta:
         model = User
         fields = (
-            'email', 'gender', 'title', 'first_name', 'last_name', 'groups',
+            'email', 'gender', 'title', 'suffix_title', 'first_name', 'last_name', 'groups',
             'task_types', 'medical_categories', 'invitation_text',
         )
 

@@ -3,13 +3,20 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from ecs.users.utils import user_flag_required
 from ecs.boilerplate.models import Text
-from ecs.boilerplate.forms import TextForm
+from ecs.boilerplate.forms import TextForm, SearchBoilerplateForm
 
 
 @user_flag_required('is_internal')
 def list_boilerplate(request):
+    texts = Text.objects.order_by('slug')
+    form = SearchBoilerplateForm(request.POST or None)
+    if form.is_valid():
+        slug = form.cleaned_data['slug']
+        texts = texts.filter(slug__icontains=slug)
+
     return render(request, 'boilerplate/list.html', {
-        'texts': Text.objects.order_by('slug'),
+        'texts': texts,
+        'search_form': form
     })
     
 

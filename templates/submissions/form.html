@@ -50,6 +50,9 @@
         Bitte beachten Sie die
         <a href="/help/index.html">Hinweise in den Hilfeseiten</a>
     </div>
+    <div class="alert alert-info text-center">
+        Nicht relevant bei retrospektiven Datenauswertungen
+    </div>
     {{ block.super }}
 {% endblock %}
 
@@ -96,7 +99,7 @@
                 fields: '#id_project_type_medical_device',
                 disable: true,
                 sourceFieldClass: 'pl-5',
-                sources: 'input[id^=id_project_type_medical_device_]',
+                sources: 'input[id^=id_project_type_medical_device_]:not([id$=combination_studies])',
                 toggleTab: {
                     tab: setup.tabController.getTab('#tabs-7'),
                     requiredFields:
@@ -146,8 +149,7 @@
             });
 
             new ecs.FormFieldController({
-                fields: '#id_study_plan_dataprotection_reason,' +
-                        '#id_study_plan_dataprotection_dvr',
+                fields: '#id_study_plan_dataprotection_reason',
                 sources: '#id_study_plan_dataprotection_choice',
                 auto: function() {
                     var personal = this.sources.val() == 'personal';
@@ -167,6 +169,20 @@
                 }
             });
 
+
+            new ecs.FormFieldController({
+                fields: '#id_insurance_name,' +
+                        '#id_insurance_address,' +
+                        '#id_insurance_phone,' +
+                        '#id_insurance_contract_number,' +
+                        '#id_insurance_validity,' +
+                        '#id_insurance_not_required',
+                sources: '#id_insurance_submit_later',
+                auto: function(values) {
+                    this.setDisabled(this.sources.is(':checked'));
+                }
+            });
+
             new ecs.FormFieldController({
                 fields: '#id_insurance_name,' +
                         '#id_insurance_address,' +
@@ -174,8 +190,10 @@
                         '#id_insurance_contract_number,' +
                         '#id_insurance_validity',
                 sources: '#id_insurance_not_required',
-                auto: function(values){
-                    this.setDisabled(this.sources.is(':checked'));
+                auto: function(values) {
+                    if (!this.sources.prop('disabled')) {
+                        this.setDisabled(this.sources.is(':checked'));
+                    }
                 }
             });
 
@@ -185,11 +203,13 @@
                 fields: '#id_invoice_name,' +
                         '#id_invoice_contact_gender,' +
                         '#id_invoice_contact_title,' +
+                        '#id_invoice_contact_suffix_title,' +
                         '#id_invoice_contact_first_name,' +
                         '#id_invoice_contact_last_name,' +
                         '#id_invoice_address,' +
                         '#id_invoice_zip_code,' +
                         '#id_invoice_city,' +
+                        '#id_invoice_country_code,' +
                         '#id_invoice_phone,' +
                         '#id_invoice_fax,' +
                         '#id_invoice_email,' +
@@ -198,12 +218,10 @@
                 auto: function() {
                     var requiredFields =
                         '#id_invoice_name,' +
-                        '#id_invoice_contact_gender,' +
-                        '#id_invoice_contact_first_name,' +
-                        '#id_invoice_contact_last_name,' +
                         '#id_invoice_address,' +
                         '#id_invoice_zip_code,' +
                         '#id_invoice_city,' +
+                        '#id_invoice_country_code,' +
                         '#id_invoice_phone,' +
                         '#id_invoice_email';
 
@@ -236,6 +254,17 @@
                 var isMpg = $('#id_project_type_medical_device').is(':checked');
 
                 $('#id_submission_type').prop('disabled', !(isAmg || isMpg));
+            }
+
+            $('#id_project_type_medical_device_combination_studies').parent().parent().addClass('pl-5');
+            $('#id_project_type_medical_device_combination_studies').on('change', changeEUCTIDState);
+            $('#id_project_type_medical_device').on('change', changeEUCTIDState);
+            changeEUCTIDState();
+            function changeEUCTIDState() {
+                var combinationStudiesChecked = $('#id_project_type_medical_device_combination_studies').is(':checked');
+                var mpgChecked = $('#id_project_type_medical_device').is(':checked');
+                var isChecked = combinationStudiesChecked && mpgChecked;
+                $('#id_medtech_eu_ct_id').prop('disabled', !isChecked);
             }
 
             $('.upload_container').load(

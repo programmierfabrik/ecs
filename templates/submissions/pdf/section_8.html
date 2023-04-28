@@ -59,15 +59,15 @@ Die Fallzahlberechnung basiert auf (Alpha = Fehler 1. Art, Power = 1 – Beta = 
 Fehler 2. Art): </p>
 
 <p class="pbi_avoid">
-8.2.1 Alpha:  <strong> {{ submission_form.study_plan_alpha|default_if_none:"" }} </strong> 
+8.2.1 Alpha:  <strong> {{ submission_form.study_plan_alpha|default_if_none:"" }} </strong>
     {{ submission_form.study_plan_alpha_double_sided|checkbox }} zweiseitig
     {{ submission_form.study_plan_alpha_single_sided|checkbox }} einseitig
-8.2.2 Power: <strong> {{ submission_form.study_plan_power|default_if_none:"" }} </strong> 
+8.2.2 Power: <strong> {{ submission_form.study_plan_power|default_if_none:"" }} </strong>
 8.2.3 Stat.Verfahren: <strong>  {{ submission_form.study_plan_statalgorithm|default_if_none:"" }}</strong> </p>
 
 <p class="pbi_avoid">
 8.2.4 Multiples
-Testen: {{ submission_form.study_plan_multiple_test_correction_algorithm|not|checkbox }} nein 
+Testen: {{ submission_form.study_plan_multiple_test_correction_algorithm|not|checkbox }} nein
 {{ submission_form.study_plan_multiple_test_correction_algorithm|checkbox }} ja:
 Korrekturverfahren.: <strong> {{ submission_form.study_plan_multiple_test_correction_algorithm|default_if_none:"" }} </strong> </p>
 
@@ -76,17 +76,17 @@ Korrekturverfahren.: <strong> {{ submission_form.study_plan_multiple_test_corr
 (Drop-out-Quote): <strong> {{ submission_form.study_plan_dropout_ratio|default_if_none:"" }} </strong> </p>
 
 <p class="pbi_avoid">
- 8.3 Geplante statistische analyse </p>
+ 8.3 Geplante statistische Analyse </p>
 
 <p class="pbi_avoid">
- Population: {{ submission_form.study_plan_population_intention_to_treat|checkbox }} 8.3.1 Intention-to-treat 
+ Population: {{ submission_form.study_plan_population_intention_to_treat|checkbox }} 8.3.1 Intention-to-treat
 {{ submission_form.study_plan_population_per_protocol|checkbox }} 8.3.2 Per Protocol </p>
 
 <p class="pbi_avoid">
 8.3.3 Zwischenauswertung: {{ submission_form.study_plan_abort_crit|not|checkbox }} nein {{ submission_form.study_plan_abort_crit|checkbox }} ja: Abbruchkriterien: <strong> {{ submission_form.study_plan_abort_crit|default_if_none:"" }} </strong> </p>
 
 <p class="pbi_avoid border_bottom">
- 8.3.4 Geplante statistische Verfahren: 
+ 8.3.4 Geplante statistische Verfahren:
  <strong> {{ submission_form.study_plan_planned_statalgorithm|default_if_none:""|linebreaksbr }}</strong> </p>
 
 <p class="pbi_avoid">
@@ -130,8 +130,8 @@ Qualifikation)? </p>
 <p>8.6 Datenschutz </p>
 <p>
  8.6.1 Die Datenverarbeitung erfolgt <br>
- {{ submission_form.study_plan_dataprotection_none|checkbox }} a) personenbezogen 
- {{ submission_form.study_plan_dataprotection_partial|checkbox }} b) indirekt personenbezogen
+ {{ submission_form.study_plan_dataprotection_none|checkbox }} a) personenbezogen
+ {{ submission_form.study_plan_dataprotection_partial|checkbox }} b) pseudonymisiert
  {{ submission_form.study_plan_dataprotection_full|checkbox }} c) vollständig anonymisiert </p>
 
 <table class="full_width nopadding">
@@ -142,15 +142,13 @@ Qualifikation)? </p>
             </td>
             <td style="width: 85%;">
                 Begründung:<span class="value indented">{{ submission_form.study_plan_dataprotection_reason|default_if_none:"" }}</span>
-                <br>
-                DVR-Nummer: <span class="value">{{ submission_form.study_plan_dataprotection_dvr|default_if_none:"" }}</span>
             </td>
         </tr>
     </tbody>
 </table>
 
 <p>
-    8.6.3 Wenn b) oder c): Wie erfolgt die Anonymisierung?
+    8.6.3 Wenn b) oder c): Wie erfolgt die Pseudo- oder Anonymisierung?
     <div class="value">
         {{ submission_form.study_plan_dataprotection_anonalgoritm|default_if_none:""|linebreaksbr }}
     </div>

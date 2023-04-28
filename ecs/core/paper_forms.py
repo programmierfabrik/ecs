@@ -80,15 +80,15 @@ FormInfo(CenterCloseNotification, fields=(
 
 FormInfo(Document, fields=(
     FieldInfo(None, 'file', _('PDF-file')),
-    FieldInfo(None, 'original_file_name', _('file name')),
-    FieldInfo(None, 'version', _('version')),
-    FieldInfo(None, 'date', _('date of document creation')),
+    FieldInfo(None, 'name', _('file name'), help_text=_('file name description')),
+    FieldInfo(None, 'version', _('version'), help_text=_('version description')),
+    FieldInfo(None, 'date', _('date of document creation'), help_text=_('date of document creation description')),
     FieldInfo(None, 'doctype', _('type')),
     FieldInfo(None, 'replaces_document', _('replace document'))
 ))
 
 FormInfo(ForeignParticipatingCenter, fields=(
-    FieldInfo(None, 'name', _('name')),
+    FieldInfo(None, 'name', _('country/center')),
     FieldInfo(None, 'investigator_name', _('investigator')),
 ))
 
@@ -123,11 +123,13 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('1.5.1', 'sponsor_name', _('sponsor name')),
     FieldInfo('1.5.3', 'sponsor_contact_gender', _('sex of contact person')),
     FieldInfo('1.5.3', 'sponsor_contact_title', _('title of contact person')),
+    FieldInfo('1.5.3', 'sponsor_contact_suffix_title', _('suffix title of contact person')),
     FieldInfo('1.5.3', 'sponsor_contact_first_name', _('first name of contact person')),
     FieldInfo('1.5.3', 'sponsor_contact_last_name', _('last name of contact person')),
     FieldInfo('1.5.2', 'sponsor_address', _('address')),
     FieldInfo('1.5.2', 'sponsor_zip_code', None, short_label=_('postal code')),
     FieldInfo('1.5.2', 'sponsor_city', None, short_label=_('city')),
+    FieldInfo('1.5.2', 'sponsor_country_code', None, short_label=_('country code')),
     FieldInfo('1.5.4', 'sponsor_phone', _('telephone')),
     FieldInfo('1.5.5', 'sponsor_fax', _('fax')),
     FieldInfo('1.5.6', 'sponsor_email', _('e-mail')),
@@ -135,11 +137,13 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('1.5.1', 'invoice_name', _('invoice name')),
     FieldInfo('1.5.3', 'invoice_contact_gender', _('sex of contact person')),
     FieldInfo('1.5.3', 'invoice_contact_title', _('title of contact person')),
+    FieldInfo('1.5.3', 'invoice_contact_suffix_title', _('suffix title of contact person')),
     FieldInfo('1.5.3', 'invoice_contact_first_name', _('first name of contact person')),
     FieldInfo('1.5.3', 'invoice_contact_last_name', _('last name of contact person')),
     FieldInfo('1.5.2', 'invoice_address', _('address')),
     FieldInfo('1.5.2', 'invoice_zip_code', None, short_label=_('postal code')),
     FieldInfo('1.5.2', 'invoice_city', None, short_label=_('city')),
+    FieldInfo('1.5.2', 'invoice_country_code', None, short_label=_('country code')),
     FieldInfo('1.5.4', 'invoice_phone', _('telephone')),
     FieldInfo('1.5.5', 'invoice_fax', _('fax')),
     FieldInfo('1.5.6', 'invoice_email', _('e-mail')),
@@ -155,10 +159,11 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('2.1.4.1', 'project_type_medical_device_with_ce', _('with CE-marking')),
     FieldInfo('2.1.4.2', 'project_type_medical_device_without_ce', _('without CE-marking')),
     FieldInfo('2.1.4.3', 'project_type_medical_device_performance_evaluation', _('Performance evaluation (in-vitro diagnostics)')),
+    FieldInfo('2.1.4.4', 'project_type_medical_device_combination_studies', _('Combination Study')),
     FieldInfo('2.1.5', 'project_type_basic_research', _('Non-therapeutic biomedical research involving human subjects (basic research)')),
     FieldInfo('2.1.6', 'project_type_genetic_study', _('Genetic survey')),
     FieldInfo('2.1.7', 'project_type_misc', _('Other, please specify'), help_text=_('e.g. Dietetics, epidemiology, etc.')),
-    FieldInfo('2.1.8/9', 'project_type_education_context', _('Dissertation / Thesis')),
+    FieldInfo('2.1.8/9/19/20/21', 'project_type_education_context', _('extra information'), help_text=_('extra information description')),
     FieldInfo('2.1.10', 'project_type_register', _('Register')),
     FieldInfo('2.1.11', 'project_type_biobank', _('Biobank')),
     FieldInfo('2.1.12', 'project_type_retrospective', _('Retrospective data analysis')),
@@ -177,18 +182,25 @@ FormInfo(SubmissionForm, fields=(
     # 2.4 Medizinproduktestudie (wenn zutreffend)
     FieldInfo('2.4.1', 'medtech_checked_product', _('Test products(e)')),
     FieldInfo('2.4.2', 'medtech_reference_substance', _('reference product')),
+    FieldInfo('2.4.3', 'medtech_eu_ct_id', _('medtech_eu_ct_id')),
     FieldInfo('2.5', 'clinical_phase', _('Clinical Phase'), help_text=_('Necessarily indicate, in case of an AMG-study the clinical phase, in case of medical devices the most appropriate phase.')),
     FieldInfo('2.8', 'already_voted', _('There are already votes of other ethics commissions.'), help_text=_('If so, upload the votes on the documents tab')),
     FieldInfo('2.9', 'subject_count', _('Planned number of trial participants total'), help_text=_('all participating centers')),
     # 2.10 Charakterisierung der Prüfungsteilnehmer/innen
+    FieldInfo('2.10.1', 'subject_minage_unit', _('minimum age unit')),
     FieldInfo('2.10.1', 'subject_minage', _('minimum age')),
-    FieldInfo('2.10.2', 'subject_maxage', _('maximum age')),
+    FieldInfo('2.10.2', 'subject_maxage_unit', _('maximum age unit')),
+    FieldInfo('2.10.2', 'subject_maxage', _('maximum age'), _('maximum age description')),
 
     FieldInfo('2.10.4', 'subject_males', _('male participants')),
     FieldInfo('2.10.4/5', 'subject_females_childbearing', _('female participants')),
+    FieldInfo('2.10.4', 'subject_divers', _('diverse participants')),
     FieldInfo('2.10.4', 'subject_females', _('female participants')),
     FieldInfo('2.10.5', 'subject_childbearing', _('women of childbearing age')),
-    FieldInfo('2.10.3', 'subject_noncompetents', _('non competent participants'), help_text=_('non competents explanation')),
+    FieldInfo('2.10.3.1', 'subject_noncompetent_unconscious', _('noncompetent unconscious')),
+    FieldInfo('2.10.3.2', 'subject_noncompetent_guarded', _('noncompetent guarded')),
+    FieldInfo('2.10.3.3', 'subject_noncompetent_minor', _('noncompetent minor')),
+    FieldInfo('2.10.3.4', 'subject_noncompetent_emergency_study', _('noncompetent emergency_study')),
 
     FieldInfo('2.11', 'subject_duration', _('Duration of participation of the individual test participants in the study')),
     FieldInfo('2.11.1', 'subject_duration_active', _('active phase')),
@@ -215,6 +227,7 @@ FormInfo(SubmissionForm, fields=(
     # 5. Angaben zur Versicherung (gemäß §32 Abs.1 Z.11 und Z.12 und Abs.2 AMG; §§47 und 48 MPG)
     # Diese Angaben müssen in der Patienten- / Probandeninformation enthalten sein!
     FieldInfo(None, 'insurance_not_required', _('No insurance is required')),
+    FieldInfo(None, 'insurance_submit_later', _('insurance will be submitted later')),
     FieldInfo('5.1.1', 'insurance_name', _('insurance company')),
     FieldInfo('5.1.2', 'insurance_address', _('address')),
     FieldInfo('5.1.3', 'insurance_phone', _('phone')),
@@ -224,21 +237,21 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('6.3', 'additional_therapy_info', _('Additional information on study-related activities and any necessary deviations from the routine treatment')),
     # 7. Strukturierte Kurzfassung des Projektes (in deutscher Sprache, kein Verweis auf das Protokoll)
     FieldInfo('7.1', 'german_project_title', _('If original project title is not in German: German translation of the title'), short_label=_('project title (kraut-speak)')),
-    FieldInfo('7.2', 'german_summary', _('project summary'), help_text=_('Justification, relevance, design, measures and procedure')),
+    FieldInfo('7.2', 'german_summary', _('project summary')),
     FieldInfo('7.3', 'german_preclinical_results', _('Results of pre-clinical tests or justification for the waiving of pre-clinical tests')),
     FieldInfo('7.4', 'german_primary_hypothesis', _('Primary hypothesis of the study'), help_text=_('if relevant, secondary hypotheses')),
     FieldInfo('7.5', 'german_inclusion_exclusion_crit', _('Relevant in- and exclusion criteria')),
-    FieldInfo('7.6', 'german_ethical_info', _('ethical considerations')),
+    FieldInfo('7.6', 'german_ethical_info', _('ethical considerations'), help_text=_('ethical considerations description')),
     FieldInfo('7.7', 'german_protected_subjects_info', _('Justification for the inclusion of persons from protected groups'), help_text=_('e.g. Minor, temporary or permanent non-competent person, if applicable')),
-    FieldInfo('7.8', 'german_recruitment_info', _('Description of the recruitment process')),
-    FieldInfo('7.9', 'german_consent_info', _('Approach at test center(s), for informing and  obtaining an informed consent of candidates')),
-    FieldInfo('7.10', 'german_risks_info', _('Risk assessment')),
+    FieldInfo('7.8', 'german_recruitment_info', _('Description of the recruitment process'), help_text=_('german_recruitment_info description')),
+    FieldInfo('7.9', 'german_consent_info', _('Approach at test center(s), for informing and  obtaining an informed consent of candidates'), help_text=_('german_consent_info description')),
+    FieldInfo('7.10', 'german_risks_info', _('Risk assessment'), help_text=_('german_risks_info description')),
     FieldInfo('7.11', 'german_benefits_info', _('Expected benefits for the included test participants')),
     FieldInfo('7.12', 'german_relationship_info', _('Relation between subject and investigator'), help_text=_('e.g. Patient - doctor, student - teacher, employee - employer, etc.')),
     FieldInfo('7.13', 'german_concurrent_study_info', _('Procedures on the site, to determine whether a person at a time to be included in another study, participate or whether a required period of time has elapsed since a participation in another study'), help_text=_('Of particular importance when healthy volunteers are included in pharmacological studies.')),
     FieldInfo('7.14', 'german_sideeffects_info', _('Methods to identify, record, and report undesirable effects'), help_text=_('Describe when, by whom and how, for example "free" interviews and/or interviews using lists')),
     FieldInfo('7.15', 'german_statistical_info', _('Statistical considerations and reasons for the number of people who should be included in the study'), help_text=_('additional information on section 8, if necessary')),
-    FieldInfo('7.16', 'german_dataprotection_info', _('Methods used to protect the confidentiality of the data collected, the source documents and the samples'), help_text=_('additional information on section 8, if necessary')),
+    FieldInfo('7.16', 'german_dataprotection_info', _('Methods used to protect the confidentiality of the data collected, the source documents and the samples')),
     FieldInfo('7.17', 'german_aftercare_info', _('Plan for treatment or care after the person has completed their participation in the study')),
     FieldInfo('7.18', 'german_payment_info', _('Amount and method of compensation or remuneration to the test participants'), help_text=_('Description of the amount to be paid during the exam take and what, for example, Travel expenses, lost income, pain and discomfort, etc.')),
     FieldInfo('7.19', 'german_abort_info', _('Rules for the suspension or premature termination of the study at the test center, at the Member State or the entire study')),
@@ -298,18 +311,15 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('8.6.3', 'study_plan_dataprotection_anonalgoritm', _('How is the anonymization done?')),
     # Name und Unterschrift der Antragstellerin/des Antragstellers
     FieldInfo('9.1', 'submitter_contact_gender', None, short_label=_('salutation')),
-    FieldInfo('9.1', 'submitter_contact_title', None, short_label=_('title')),
+    FieldInfo('9.1', 'submitter_contact_title', None, short_label=_('prefix title')),
+    FieldInfo('9.1', 'submitter_contact_suffix_title', None, short_label=_('suffix title')),
     FieldInfo('9.1', 'submitter_contact_first_name', None, short_label=_('first name')),
     FieldInfo('9.1', 'submitter_contact_last_name', None, short_label=_('last name')),
     FieldInfo(None, 'submitter_email', None, short_label=_('e-mail')),
+    FieldInfo(None, 'submitter_phone_number', None, short_label=_('phone number')),
 
     FieldInfo('9.2', 'submitter_organisation', _('Institution / Company')),
     FieldInfo('9.3', 'submitter_jobtitle', _('position')),
-    # 9.4 Antragsteller/in ist (nur AMG-Studien)
-    FieldInfo('9.4.1', 'submitter_is_coordinator', _('The submitter is a coordinating examiner (multicentric study)')),
-    FieldInfo('9.4.2', 'submitter_is_main_investigator', _('The submitter is a principal investigator (monocentric study)')),
-    FieldInfo('9.4.3', 'submitter_is_sponsor', _('The submitter is a sponsor / representative of the sponsor')),
-    FieldInfo('9.4.4', 'submitter_is_authorized_by_sponsor', _('The submitter is a person/organization authorized by the sponsor')),
 ))
 
 
@@ -319,6 +329,7 @@ FormInfo(Investigator, fields=(
     FieldInfo('', 'main', _('principal investigator')),
     FieldInfo('10.1', 'contact_gender', None, short_label=_('salutation of the Investigator')),
     FieldInfo('10.1', 'contact_title', None, short_label=_('title of the Investigator')),
+    FieldInfo('10.1', 'contact_suffix_title', None, short_label=_('suffix title of the Investigator')),
     FieldInfo('10.1', 'contact_first_name', None, short_label=_('first name of the Investigator')),
     FieldInfo('10.1', 'contact_last_name', None, short_label=_('last name of the Investigator')),
     FieldInfo('10.3', 'phone', _('phone')),
@@ -329,12 +340,13 @@ FormInfo(Investigator, fields=(
     FieldInfo('10.8', 'specialist', _('specialist for')),
     FieldInfo('10.9', 'certified', _('certified')),
     #FieldInfo('10.10', '', u'Präklinische Qualifikation'),  # TODO one is missing, this one or 10.9 - see also Bug #4737
-    FieldInfo('11.', 'subject_count', _('number of participants')),
+    FieldInfo('11.', 'subject_count', _('number of participants'), _('subject_count description')),
 ))
 
 FormInfo(InvestigatorEmployee, fields=(
-    FieldInfo(None, 'sex', _('Ms/Mr')),
-    FieldInfo(None, 'title', _('title')),
+    FieldInfo(None, 'sex', _('salutation')),
+    FieldInfo(None, 'title', _('prefix title')),
+    FieldInfo(None, 'suffix_title', _('suffix title')),
     FieldInfo(None, 'firstname', _('first name')),
     FieldInfo(None, 'surname', _('last name')),
     FieldInfo(None, 'organisation', _('Institution')),

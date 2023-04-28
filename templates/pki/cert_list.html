@@ -7,9 +7,27 @@
 
 {% block content %}
 <div class="container">
+    <div>
+        <a class="btn btn-outline-primary" href="{% url 'pki.create_cert' %}">
+            {% trans 'Create new certificate' %}
+        </a>
+        <a class="btn btn-outline-primary" href="{% url 'pki.list_soon_to_be_expired_certs' %}" style="margin-left: 0.3rem">
+            {% trans 'List of soon to be expired certificates' %}
+        </a>
+    </div>
+
+    <form action="{{ request.path }}" method="post" autocomplete="off" style="margin: 2rem 0">
+        {% csrf_token %}
+        {% for field in form %}
+            {% include "bootstrap/form_field.html" with inline=True %}
+        {% endfor %}
+        <input class="btn btn-primary" type="submit" value="{% trans 'Search' %}" />
+    </form>
+
     <table class="table table-sm cert_list">
         <thead>
             <tr>
+                <th>Nr.</th>
                 <th>User</th>
                 <th>CN</th>
                 <th>Erstellt am</th>
@@ -20,6 +38,7 @@
         <tbody>
             {% for cert in certs %}
                 <tr class="{% if cert.revoked_at or cert.is_expired %}invalid{% endif %} {% if cert.revoked_at %}table-danger{% endif %}">
+                    <td>{{ cert.pk }}</td>
                     <td>{{ cert.user }}</td>
                     <td>{{ cert.cn }}</td>
                     <td>{{ cert.created_at|date:'d.m.Y' }}</td>
@@ -36,9 +55,5 @@
             {% endfor %}
         </tbody>
     </table>
-
-    <a class="btn btn-outline-primary" href="{% url 'pki.create_cert' %}">
-        {% trans 'Create new certificate' %}
-    </a>
 </div>
 {% endblock %}

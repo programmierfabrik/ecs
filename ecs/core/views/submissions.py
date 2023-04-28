@@ -306,6 +306,7 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
         'temporary_auth': submission.temp_auth.order_by('end'),
         'temporary_auth_form': TemporaryAuthorizationForm(prefix='temp_auth'),
         'current_docstash': current_docstash,
+        'tags': submission.tags.all(),
     }
 
     center_close_notifications = CenterCloseNotification.objects.filter(
@@ -360,7 +361,7 @@ def submission_form_pdf_debug(request, submission_form_pk=None):
     submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
     response = HttpResponse(submission_form.render_pdf(),
         content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment;filename=debug.pdf'
+    response['Content-Disposition'] = 'inline;filename=debug.pdf'
     return response
 
 
@@ -718,6 +719,7 @@ def create_submission_form(request):
             'submitter_email': request.user.email,
             'submitter_contact_gender': profile.gender,
             'submitter_contact_title': profile.title,
+            'submitter_contact_suffix_title': profile.suffix_title,
             'submitter_organisation': profile.organisation,
             'submitter_jobtitle': profile.jobtitle,
         })
@@ -755,7 +757,48 @@ def create_submission_form(request):
             formset.full_clean()        # work around django bug: full_clean does not get called in is_valid if total_form_count==0
 
         formsets_valid = all([formset.is_valid() for formset in formsets.values()]) # non-lazy validation of formsets
-        valid = form.is_valid() and formsets_valid and protocol_uploaded and not 'upload' in request.POST
+
+        investigator_employee_valid = True
+        investigatoremployee_formset = formsets.get('investigatoremployee')
+        investigators_formset = formsets.get('investigator')
+        if investigatoremployee_formset.is_valid() and investigators_formset.is_valid():
+            # validate if prüfer is mitarbeiter
+            # First group by index, so we can later check tab by tab
+            investigatoremployee_group_by_index = {}
+            for investigatoremployee in investigatoremployee_formset:
+                investigator_index = investigatoremployee.cleaned_data['investigator_index']
+                if investigatoremployee_group_by_index.get(investigator_index) is None:
+                    investigatoremployee_group_by_index[investigator_index] = []
+                investigatoremployee_group_by_index[investigator_index].append(investigatoremployee)
+            
+            # Go tab by tab (investigator) and compare the 'Prüfer' with the mitarbeiter
+            for investigator_index in investigatoremployee_group_by_index:
+                investigator = investigators_formset[investigator_index]
+                investigatoremployee = investigatoremployee_group_by_index[investigator_index]
+                investigator_data = investigator.cleaned_data
+                investigator_gender = investigator_data['contact_gender']
+                investigator_title = investigator_data['contact_title']
+                investigator_suffix_title = investigator_data['contact_suffix_title']
+                investigator_first_name = investigator_data['contact_first_name']
+                investigator_last_name = investigator_data['contact_last_name']
+                
+                for employee in investigatoremployee:
+                    employee_data = employee.cleaned_data
+                    employee_gender = employee_data['sex']
+                    employee_title = employee_data['title']
+                    employee_suffix_title = employee_data['suffix_title']
+                    employee_first_name = employee_data['firstname']
+                    employee_last_name = employee_data['surname']
+
+                    if employee_gender == investigator_gender and \
+                        employee_title == investigator_title and \
+                        employee_suffix_title == investigator_suffix_title and \
+                        employee_first_name == investigator_first_name and \
+                        employee_last_name == investigator_last_name:
+                        investigator_employee_valid = False
+                        investigator.add_error(None, 'Der Prüfer darf nicht gleichzeitig als Mitarbeiter genannt werden.')
+
+        valid = form.is_valid() and formsets_valid and investigator_employee_valid and protocol_uploaded and not 'upload' in request.POST
         if valid and submission and not notification_type and \
             not submission.current_submission_form.allows_resubmission(request.user):
 

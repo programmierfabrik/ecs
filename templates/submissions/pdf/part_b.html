@@ -1,11 +1,15 @@
 {% load core corepdf %}
 
 <p>
-    Studienkurzbezeichnung: <span class="value">{{ submission_form.project_title }}</span>
+    Projekttitel (Deutsch): <span class="value">{{ submission_form.german_project_title }}</span>
 </p>
 
 <p>
-    Zuständige Ethikkommission: <span class="value">{{ submission_form.main_ethics_commission }}</span>
+    Projekttitel (Englisch): <span class="value">{{ submission_form.project_title }}</span>
+</p>
+
+<p>
+    Zuständige Ethikkommission: <span class="value">{{ inv.ethics_commission }}</span>
 </p>
 
 <h3>10. Angaben zur Prüferin/zum Prüfer</h3>
@@ -15,8 +19,7 @@
     10.1 Name: <span class="value">{{ inv.contact }}</span>
 </p>
 
-<p class="pbi_avoid"> 10.2
-Krankenanstalt/Institut/Abteilung: <strong> {{ inv.organisation }} </strong></p>
+<p class="pbi_avoid"> 10.2 Prüfzentrum: <strong> {{ inv.organisation }} </strong></p>
 
 
 <table class="full_width withborders">
@@ -25,7 +28,7 @@ Krankenanstalt/Institut/Abteilung: <strong> {{ inv.organisation }} </strong></p>
             <th style="width: 20%;">10.3 Telefon</th>
             <th style="width: 20%;">10.4 „Pieps“/Mobil</th>
             <th style="width: 20%;">10.5 Fax</th>
-            <th style="width: 40%;">10.6 e-mail-Adresse:</th>
+            <th style="width: 40%;">10.6 E-Mail-Adresse:</th>
         </tr>
     </thead>
     <tbody>
@@ -59,9 +62,10 @@ Krankenanstalt/Institut/Abteilung: <strong> {{ inv.organisation }} </strong></p>
 <table class="full_width withborders">
     <thead>
         <tr>
-            <th style="width: 8%;">Fr/Hr</th>
-            <th style="width: 15%;">Titel</th>
+            <th style="width: 7.5%;">Fr/Hr</th>
+            <th style="width: 7.5%">Vor. Titel</th>
             <th style="width: 21%;">Vorname</th>
+            <th style="width: 8%">Nach. Titel</th>
             <th style="width: 21%;">Name</th>
             <th style="width: 35%;">Institution</th>
         </tr>
@@ -72,6 +76,7 @@ Krankenanstalt/Institut/Abteilung: <strong> {{ inv.organisation }} </strong></p>
                 <td>{{ emp.get_sex_display }}</td>
                 <td>{{ emp.title }}</td>
                 <td>{{ emp.firstname }}</td>
+                <td>{{ emp.suffix_title }}</td>
                 <td>{{ emp.surname }}</td>
                 <td>{{ emp.organisation }}</td>
             </tr>
@@ -98,15 +103,12 @@ Praxis möglich sein wird. </p>
 sind die Teile B von der Hauptprüferin/dem Hauptprüfer des
 jeweiligen Zentrums zu unterzeichnen.</em></p>
 
-<p><em>Alternativ zur Unterschrift auf
-den Teilen B können die Unterschriften der Hauptprüfer/innen auch
-auf den Unter­schriftenseiten des Protokolls oder der
-Prüfärzteverträge vorgelegt werden. Es muss jedenfalls eine
+<p><em>Es muss jedenfalls eine
 eindeutige - durch Unterschrift dokumentierte -
 Zustimmung aller Hauptprüfer/innen zum Protokoll vorliegen.</em></p>
 
-    <h3>14. Name und Unterschrift der Leiterin/des Leiters der Einrichtung bzw. des Pflegedienstes</span></h3>
-<p class="pbi_avoid"> 14.1 Name:</p>
+    <h3>14. Name und Unterschrift der Leiterin/des Leiters der Einrichtung bzw. des Pflegedienstes*</span></h3>
+<p class="pbi_avoid"><b> 14.1 Name:</b></p>
 
 <div class="signature_date">
   <span class="line">Unterschrift der Leiterin/des Leiters</span>
@@ -115,10 +117,14 @@ Zustimmung aller Hauptprüfer/innen zum Protokoll vorliegen.</em></p>
 
 <br>
 
-<p><em>*Die Unterschrift der Leiterin/des Leiters des Pflegedienstes ist für
-Pflegeforschungsprojekte und die Anwendung neuer Pflegekonzepte und -methoden
-erforderlich, ansonsten die Unterschrift der Leiterin/des Leiters der
-jeweiligen Einrichtung
-<span style="text-decoration:underline;">Einrichtung</span>: die Klinik (wenn
-gegliedert: die klinische Abteilung), die Abteilung oder die gemeinsame Einrichtung
-</em></p>
+<p>
+    Die Unterschrift der Leiterin/des Leiters des Pflegedienstes ist für Pflegeforschungsprojekte und die Anwendung neuer
+    Pflegekonzepte und -methoden erforderlich, ansonsten die Unterschrift der Leiterin/des Leiters der jeweiligen Einrichtung.
+    Einrichtung: die Klinik (wenn gegliedert: die klinische Abteilung), die Abteilung oder die gemeinsame Einrichtung.
+    <br>
+    <b>
+        Bitte beachten Sie die jeweils geltenden Vorgaben der beteiligten Ethikkommissionen
+        (z.B. gilt in OÖ nur die Unterschrift der Ärztlichen Direktion als valide!)
+    </b>
+
+</p>

@@ -67,6 +67,9 @@ msgstr "EudraCT-Nr."
 msgid "applicant"
 msgstr "Antragsteller"
 
+msgid "submitter"
+msgstr "Einreicher"
+
 msgid "clinic"
 msgstr "Klinik"
 
@@ -351,6 +354,9 @@ msgstr "Ja, aber nur gebärfähige Frauen"
 msgid "The account beneficiary is not the sponsor"
 msgstr "Der Sponsor ist nicht der Rechnungsempfänger"
 
+msgid "The submitter is not the applicant"
+msgstr "Der Antragsteller ist nicht der Einreicher"
+
 msgid "No information given"
 msgstr "Keine Angaben"
 
@@ -443,6 +449,9 @@ msgstr "Benutzer"
 
 msgid "Default Contact"
 msgstr "Standard-Empfänger"
+
+msgid "Warning Window Certificate"
+msgstr "Warnungsfenster für Zertifikate"
 
 msgid "Change Logo File"
 msgstr "Logo Ändern"
@@ -595,7 +604,7 @@ msgid "individual-related"
 msgstr "personenbezogen"
 
 msgid "implicit individual-related"
-msgstr "indirekt personenbezogen"
+msgstr "pseudonymisiert"
 
 msgid "completely anonymous"
 msgstr "vollständig anonymisiert"
@@ -611,6 +620,9 @@ msgstr "Frau"
 
 msgid "Mr"
 msgstr "Herr"
+
+msgid "Divers"
+msgstr "Divers"
 
 msgid "Finished"
 msgstr "Beendet"
@@ -714,13 +726,23 @@ msgid "PDF-file"
 msgstr "PDF-Datei"
 
 msgid "file name"
-msgstr "Dateiname"
+msgstr "Dokumentenname"
+
+msgid "file name description"
+msgstr "Es soll ein Dokumentenname gewählt werden, der eine eindeutig identifizierbare Bezeichnung bietet und somit Rückschlüsse auf den Inhalt des Dokuments ermöglicht."
+
 
 msgid "version"
 msgstr "Version"
 
+msgid "version description"
+msgstr "Verwenden Sie die Version des hochgeladenen Dokuments - wenn das Dokument keine Version aufweist, dann mit \"--\" eingeben"
+
 msgid "date of document creation"
 msgstr "Datum der Dokumenterstellung"
+
+msgid "date of document creation description"
+msgstr "Wählen Sie hier das Datum des hochgeladenen Dokuments (Erstellungsdatum)"
 
 msgid "type"
 msgstr "Typ"
@@ -741,13 +763,13 @@ msgid "study reference"
 msgstr "Studienbezug"
 
 msgid "number/dose"
-msgstr "Anzahl/Dosis"
+msgstr "Anzahl und Dosis"
 
 msgid "period"
 msgstr "Zeitraum"
 
 msgid "total"
-msgstr "Insgesamt"
+msgstr "Insgesamt (pro Teilnehmer)"
 
 msgid "Generic Name"
 msgstr "Generic Name"
@@ -777,7 +799,10 @@ msgid "sex of contact person"
 msgstr "Anrede der Kontaktperson"
 
 msgid "title of contact person"
-msgstr "Titel der Kontaktperson"
+msgstr "Vorangestellter Titel der Kontaktperson"
+
+msgid "suffix title of contact person"
+msgstr "Nachgestellter Titel der Kontaktperson"
 
 msgid "first name of contact person"
 msgstr "Vorname der Kontaktperson"
@@ -790,6 +815,9 @@ msgstr "Postleitzahl"
 
 msgid "city"
 msgstr "Stadt"
+
+msgid "country code"
+msgstr "Länderkürzel"
 
 msgid "telephone"
 msgstr "Telefon"
@@ -833,6 +861,9 @@ msgstr "ohne CE-Kennzeichnung"
 msgid "Performance evaluation (in-vitro diagnostics)"
 msgstr "Leistungsbewertungsprüfung (In-vitro-Diagnostika)"
 
+msgid "Combination Study"
+msgstr "Kombinationsstudie"
+
 msgid ""
 "Non-therapeutic biomedical research involving human subjects (basic research)"
 msgstr ""
@@ -850,8 +881,12 @@ msgstr ""
 "z.B.: immunologische Untersuchung, Epidemiologische Untersuchung, Diätetik, "
 "etc."
 
-msgid "Dissertation / Thesis"
-msgstr "Diplomarbeit / Dissertation"
+msgid "extra information"
+msgstr "Zusatzinformation"
+
+msgid "extra information description"
+msgstr "Nur anzukreuzen wenn der Antrag ausschließlich die oben angegebene Abschlussarbeit zum Inhalt hat. "
+"Der/die VerfasserIn der Abschlussarbeit ist zwingend im Reiter Antragsteller anzugeben."
 
 msgid "Register"
 msgstr ""
@@ -892,6 +927,9 @@ msgstr "Prüfprodukt/e"
 msgid "reference product"
 msgstr "Referenzprodukt"
 
+msgid "medtech_eu_ct_id"
+msgstr "EUCT ID"
+
 msgid "Clinical Phase"
 msgstr "Klinische Phase"
 
@@ -902,7 +940,7 @@ msgstr ""
 "Bei AMG-Prüfung unbedingt angeben, bei MPG die am ehesten zutreffende Phase."
 
 msgid "There are already votes of other ethics commissions."
-msgstr "Es liegen bereits Voten anderer Ethikkommissionen vor."
+msgstr "Es liegen bereits österreichische Voten anderer Ethikkommissionen vor."
 
 msgid "If so, upload the votes on the documents tab"
 msgstr "Falls ja, laden Sie die Voten über den Reiter \"Unterlagen\" hoch"
@@ -921,6 +959,9 @@ msgstr "Mindestalter"
 msgid "maximum age"
 msgstr "Höchstalter"
 
+msgid "maximum age description"
+msgstr "Wenn kein Höchstalter festgelegt ist, 999 eintragen."
+
 msgid "male participants"
 msgstr "männliche Teilnehmer"
 
@@ -930,13 +971,11 @@ msgstr "weibliche Teilnehmerinnen"
 msgid "women of childbearing age"
 msgstr "gebärfähige Frauen"
 
+msgid "diverse participants"
+msgstr "Divers"
+
 msgid "non competent participants"
 msgstr "Nicht-persönlich-Einwilligungsfähige"
-
-msgid "non competents explanation"
-msgstr ""
-"z.B. Bewusstlose, Besachwaltete, aber NICHT Minderjährige, retrospektive "
-"Beobachtungen oder Proben"
 
 msgid ""
 "Duration of participation of the individual test participants in the study"
@@ -1021,6 +1060,9 @@ msgstr "Allfällige Abweichungen von den o.a. Bestimmungen (Normen)"
 msgid "No insurance is required"
 msgstr "Eine Versicherung ist nicht erforderlich"
 
+msgid "insurance will be submitted later"
+msgstr "Versicherung wird nachgereicht"
+
 msgid "insurance company"
 msgstr "Versicherungsgesellschaft"
 
@@ -1049,10 +1091,7 @@ msgid "project title (kraut-speak)"
 msgstr "Projekttitel (deutsch)"
 
 msgid "project summary"
-msgstr "Zusammenfassung des Projektes"
-
-msgid "Justification, relevance, design, measures and procedure"
-msgstr "Rechtfertigung, Relevanz, Design, Maßnahmen und Vorgehensweise"
+msgstr "Zusammenfassung des Projektes (Rechtfertigung, Relevanz, Design, Maßnahmen und Vorgehensweise)"
 
 msgid ""
 "Results of pre-clinical tests or justification for the waiving of pre-"
@@ -1073,16 +1112,22 @@ msgstr "Relevante Ein- und Ausschlusskriterien"
 msgid "ethical considerations"
 msgstr "Ethische Überlegungen"
 
+msgid "ethical considerations description"
+msgstr "Identifizieren und beschreiben Sie alle möglicherweise auftretenden Probleme. Beschreiben Sie den möglichen Wissenszuwachs, der durch die Studie erzielt werden soll, seine Bedeutung, sowie mögliche Risiken für Schädigungen oder Belastungen der Prüfungsteilnehmer*innen. Legen Sie Ihre eigene Bewertung des Nutzen-Risiko-Verhältnisses dar"
+
 msgid "Justification for the inclusion of persons from protected groups"
 msgstr "Begründung für den Einschluss von Personen aus geschützten Gruppen"
 
 msgid "e.g. Minor, temporary or permanent non-competent person, if applicable"
 msgstr ""
 "z.B. Minderjährige, temporär oder permanent nicht-einwilligungsfähige "
-"Personen; wenn zutreffend"
+"Personen inklusive Beschreibung des direkten Nutzens des Einzelnen oder der Gruppe; wenn zutreffend"
 
 msgid "Description of the recruitment process"
 msgstr "Beschreibung des Rekrutierungsverfahrens"
+
+msgid "german_recruitment_info description"
+msgstr "Alle zur Verwendung bestimmte Materialien, zB Inserate inkl Layout müssen beigelegt werden"
 
 msgid ""
 "Approach at test center(s), for informing and  obtaining an informed consent "
@@ -1090,8 +1135,14 @@ msgid ""
 msgstr ""
 "Vorgehensweise an der Prüfstelle, zur Erlangung der informierten Einwilligung"
 
+msgid "german_consent_info description"
+msgstr "von Prüfungsteilnehmer*innen bzw. Eltern oder gesetzlichen Vertreter*innen, wenn zutreffend (wer wird informieren und wann, Erfordernis für gesetzliche Vertretung, Zeugen, etc)"
+
 msgid "Risk assessment"
 msgstr "Risikoabschätzung"
+
+msgid "german_risks_info description"
+msgstr "Erläuterungen zu ethischem Nutzen, vorhersehbaren Risiken der Behandlung und sonstigen Verfahren, die verwendet werden sollen"
 
 msgid "Expected benefits for the included test participants"
 msgstr ""
@@ -1142,7 +1193,7 @@ msgstr ""
 "Studie eingeschlossen werden sollen"
 
 msgid "additional information on section 8, if necessary"
-msgstr "ergänzende Informationen zu Punkt 8, wenn erforderlich"
+msgstr "Optional: ergänzende Informationen zu Angaben im Reiter Biometrie, wenn erforderlich"
 
 msgid ""
 "Methods used to protect the confidentiality of the data collected, the "
@@ -1156,7 +1207,7 @@ msgid ""
 "participation in the study"
 msgstr ""
 "Plan zur Behandlung oder Versorgung nachdem die Personen ihre Teilnahme an "
-"der Studie beendet haben"
+"der Studie beendet haben (wer wird verantwortlich sein und wo)"
 
 msgid ""
 "Amount and method of compensation or remuneration to the test participants"
@@ -1193,7 +1244,7 @@ msgstr ""
 "Interessen der Prüferin/des Prüfers/der Prüfer"
 
 msgid "additional information"
-msgstr "Weitere Informationen"
+msgstr "Weitere Informationen (wenn erforderlich)"
 
 msgid "Open / Blind / Double-blind"
 msgstr "Offen / Blind / Doppelblind"
@@ -1235,10 +1286,10 @@ msgid "number of groups"
 msgstr "Anzahl der Gruppen"
 
 msgid "stratification"
-msgstr "Stratifizierung"
+msgstr "Stratifizierung (Kriterien)"
 
 msgid "sample frequency"
-msgstr "Messwiederholungen"
+msgstr "Messwiederholungen (Zeitpunkte)"
 
 msgid "primary objectives"
 msgstr "Hauptzielgröße"
@@ -1319,13 +1370,16 @@ msgid "DPR-Nr."
 msgstr "DVR-Nummer"
 
 msgid "How is the anonymization done?"
-msgstr "Wie erfolgt die Anonymisierung?"
+msgstr "Wie erfolgt die Pseudo- oder Anonymisierung?"
 
 msgid "salutation"
 msgstr "Anrede"
 
-msgid "title"
-msgstr "Titel"
+msgid "prefix title"
+msgstr "Vorangestellter Titel"
+
+msgid "suffix title"
+msgstr "Nachgestellter Titel"
 
 msgid "first name"
 msgstr "Vorname"
@@ -1339,36 +1393,26 @@ msgstr "Institution/ Firma"
 msgid "position"
 msgstr "Position"
 
-msgid "The submitter is a coordinating examiner (multicentric study)"
-msgstr ""
-"Antragsteller/in ist koordinierende/r Prüfer/in (multizentrische Studie)"
-
-msgid "The submitter is a principal investigator (monocentric study)"
-msgstr "Antragsteller/in ist Hauptprüfer/in (monozentrische Studie)"
-
-msgid "The submitter is a sponsor / representative of the sponsor"
-msgstr "Antragsteller/in ist Sponsor bzw. Vertreter/in des Sponsors"
-
-msgid "The submitter is a person/organization authorized by the sponsor"
-msgstr "Antragsteller/in ist eine vom Sponsor autorisierte Person/Organisation"
-
 msgid "study site"
 msgstr "Prüfzentrum"
 
 msgid "principal investigator"
-msgstr "Koordinierende/r Prüfärztin/arzt"
+msgstr "Koordinierende/r Prüfer/in"
 
 msgid "salutation of the Investigator"
-msgstr "Anrede des Prüfarztes"
+msgstr "Anrede des Prüfers"
 
 msgid "title of the Investigator"
-msgstr "Titel des Prüfarztes"
+msgstr "Vorangestellter Titel des Prüfers"
+
+msgid "suffix title of the Investigator"
+msgstr "Nachgestellter Titel des Prüfers"
 
 msgid "first name of the Investigator"
-msgstr "Vorname des Prüfarztes"
+msgstr "Vorname des Prüfers"
 
 msgid "last name of the Investigator"
-msgstr "Nachname des Prüfarztes"
+msgstr "Nachname des Prüfers"
 
 msgid "mobile"
 msgstr "\"Pieps\"/Mobil"
@@ -1386,7 +1430,10 @@ msgid "certified"
 msgstr "Prüfärztekurs"
 
 msgid "number of participants"
-msgstr "Anzahl Teilnehmer/innen"
+msgstr "Teilnehmer/innen an diesem Zentrum"
+
+msgid "subject_count description"
+msgstr "Anzahl jener Personen, die in diesem Zentrum in das Forschungsvorhaben eingeschlossen werden sollen"
 
 msgid "Ms/Mr"
 msgstr "Fr/Hr"
@@ -1432,6 +1479,9 @@ msgstr "Kontaktperson"
 
 msgid "same as sponsor"
 msgstr "wie Sponsor"
+
+msgid "same as applicant"
+msgstr "wie Einreicher"
 
 msgid "XLS-Export done"
 msgstr "XLS-Export fertig"
@@ -1514,13 +1564,13 @@ msgid "Reopen"
 msgstr "Neu öffnen"
 
 msgid "Covering Letter"
-msgstr "Covering Letter"
+msgstr "Cover Letter"
 
 msgid "patient information"
-msgstr "Patienteninformation"
+msgstr "Teilnehmerinformation (ICF, Kontaktdatenliste)"
 
 msgid "insurancecertificate"
-msgstr "Versicherungsbestätigung"
+msgstr "Versicherungsunterlagen (Polizze, Bestätigung, Bedingungen)"
 
 msgid "study protocol"
 msgstr "Studienprotokoll (Prüfplan)"
@@ -1559,10 +1609,19 @@ msgid "Manual"
 msgstr "Gebrauchsanweisung"
 
 msgid "Declaration of conformity"
-msgstr "Konformitätserklärung"
+msgstr "Konformitätserklärung (CE-Zertifizierung)"
 
 msgid "other"
 msgstr "Sonstige"
+
+msgid "gcp-certificate"
+msgstr "GCP-Zertifikat"
+
+msgid "statistic / statistic documents"
+msgstr "Statistik / Statistikunterlagen"
+
+msgid "recruitment material"
+msgstr "Rekrutierungsmaterial"
 
 msgid "Submission Form"
 msgstr "Einreichformular"
@@ -1970,7 +2029,7 @@ msgid "Signature Environment"
 msgstr "Signaturumgebung"
 
 msgid "localbku"
-msgstr "lokale BKU"
+msgstr "Bürgerkartenumgebung"
 
 msgid "onlinebku"
 msgstr "online BKU (veraltet)"
@@ -2380,6 +2439,9 @@ msgstr "Neue Meldung"
 msgid "New Meeting"
 msgstr "Neue Sitzung"
 
+msgid "Waring maintenance: begins at %(begin)s and ends at %(end)s"
+msgstr "Achtung um %(begin)s beginnt der Wartungszeitraum und endet um %(end)s!"
+
 msgid "Click here to get help."
 msgstr "Klicken Sie hier, um zur Online-Hilfe zu gelangen."
 
@@ -2548,7 +2610,7 @@ msgid "edit meeting"
 msgstr "Sitzung bearbeiten"
 
 msgid "Deadline for Thesis Submission"
-msgstr "Letzter Einreichtermin für Diplomarbeiten/Dissertationen"
+msgstr "Letzter Einreichtermin für Abschlussarbeiten"
 
 msgid "Deadline for Submission"
 msgstr "Letzter Einreichtermin"
@@ -2836,6 +2898,9 @@ msgstr "Widerrufen"
 
 msgid "Create new certificate"
 msgstr "Neues Zertifikat erstellen"
+
+msgid "List of soon to be expired certificates"
+msgstr "Liste der bald ablaufenden Zertifikate"
 
 msgid "Create Certificate"
 msgstr "Zertifikat Erstellen"
@@ -3240,10 +3305,46 @@ msgid "is_new_medtech_law"
 msgstr "MPG Studie nach neuem Medizinproduktegesetz"
 
 msgid "is_new_medtech_law_help"
-msgstr "Mit Stand vor Juli 2021"
+msgstr "Mit Stand nach Juli 2021"
 
 msgid "date of last modification:"
 msgstr "Datum der letzten Änderung:"
 
 msgid "project_type_non_interventional_study_mpg"
 msgstr "Nicht-interventionelle Studie - nur gem. Medizinprodukterecht"
+
+msgid "hours"
+msgstr "Stunden"
+
+msgid "days"
+msgstr "Tage"
+
+msgid "months"
+msgstr "Monate"
+
+msgid "years"
+msgstr "Jahre"
+
+msgid "minimum age unit"
+msgstr "Mindestalter Einheit"
+
+msgid "maximum age unit"
+msgstr "Höchstalter Einheit"
+
+msgid "noncompetent unconscious"
+msgstr "Temporär nicht einwilligungsfähige Personen"
+
+msgid "noncompetent guarded"
+msgstr "Unter Erwachsenenvertretung stehend"
+
+msgid "noncompetent minor"
+msgstr "Minderjährige"
+
+msgid "noncompetent emergency_study"
+msgstr "Notfallstudien"
+
+msgid "phone number"
+msgstr "Telefonnummer"
+
+msgid "country/center"
+msgstr "Land/Prüfzentrum"

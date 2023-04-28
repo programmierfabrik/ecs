@@ -3,6 +3,7 @@ ul.errorlist {
     list-style-type: none;
     margin: 0 !important;
 }
+
 .errorlist li {
     display: inline-block;
     color: red;
@@ -21,7 +22,7 @@ ul.errorlist {
     input[type=submit].hidden {
         display: none;
     }
-    
+
     table td li {
         margin: 0px;
         float: none;
@@ -50,8 +51,10 @@ ul.errorlist {
                 margin-bottom: 2px;
                 font-weight: normal;
             }
+
             select {
                 max-width: 100%;
+
                 option {
                     overflow: hidden;
                     white-space: nowrap;
@@ -77,5 +80,14 @@ table.inline_formset {
 }
 
 .overflow-wrap-break-word {
-    overflow-wrap:break-word;
+    overflow-wrap: break-word;
+}
+
+.radio > div label {
+    display: flex;
+
+    input {
+        flex: 0;
+        margin-right: 1rem;
+    }
 }

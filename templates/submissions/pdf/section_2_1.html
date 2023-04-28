@@ -34,6 +34,8 @@
                 {{ submission_form.project_type_medical_device_without_ce|checkbox }} 2.1.4.2 ohne CE-Kennzeichnung
                 <br/>
                 {{ submission_form.project_type_medical_device_performance_evaluation|checkbox }} 2.1.4.3 Leistungsbewertungsprüfung (In-vitro-Diagnostika)
+                <br/>
+                {{ submission_form.project_type_medical_device_combination_studies|checkbox }} 2.1.4.4 Kombinationsstudie
             </div>
 
             <p class="border_bottom">{{ submission_form.project_type_non_interventional_study_mpg|checkbox }} 2.1.18 <strong>Nicht-interventionelle Studie</strong> – nur gem. Medizinprodukterecht</p>
@@ -60,9 +62,13 @@
             spezifizieren:</p>
             <p class="value">{{ submission_form.project_type_misc|default_if_none:""|linebreaksbr }}</p>
 
-            <p class="border_bottom"><strong>Zusatzinformation:</strong>
-            {{ submission_form.project_type_education_context_phd|checkbox }} 2.1.8 <strong>Dissertation</strong>
-            {{ submission_form.project_type_education_context_master|checkbox }} 2.1.9 <strong>Diplomarbeit</strong></p>
+            <p class="border_bottom"><strong>Zusatzinformation:</strong><br>
+                {{ submission_form.project_type_education_context_dissertation|checkbox }} 2.1.8 <strong>Dissertation</strong>&nbsp;
+                {{ submission_form.project_type_education_context_thesis|checkbox }} 2.1.9 <strong>Diplomarbeit</strong><br>
+                {{ submission_form.project_type_education_context_bachelor|checkbox }} 2.1.19 <strong>Bachelorarbeit</strong>
+                {{ submission_form.project_type_education_context_master|checkbox }} 2.1.20 <strong>Masterarbeit</strong>&nbsp;
+                {{ submission_form.project_type_education_context_phd|checkbox }} 2.1.21 <strong>PhD-Arbeit</strong>
+            </p>
 
             </td>
         </tr>

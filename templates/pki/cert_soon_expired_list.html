@@ -1,0 +1,38 @@
+{% extends 'core.html' %}
+{% load i18n userutils %}
+
+{% block htmltitle %}{% trans "PKI" %} | {{ block.super }}{% endblock %}
+
+{% block headertitle %}{% trans "PKI" %}{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <a href="{% url 'pki.cert_list' %}">
+            <span class="fa fa-backward"></span>
+            {% trans "Back to the certificate list" %}
+        </a>
+
+        <h3 style="margin: 1rem 0;">Folgende Zertifikate laufen in den nächsten {{ warning_window }} Wochen ab:</h3>
+
+        <table class="table table-sm cert_list">
+            <thead>
+            <tr>
+                <th>User</th>
+                <th>CN</th>
+                <th>Erstellt am</th>
+                <th>Gültig bis</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for cert in certs %}
+                <tr>
+                    <td>{{ cert.user }}</td>
+                    <td>{{ cert.cn }}</td>
+                    <td>{{ cert.created_at|date:'d.m.Y' }}</td>
+                    <td>{{ cert.expires_at|date:'d.m.Y' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

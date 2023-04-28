@@ -39,7 +39,7 @@
 </p>
 
 <p>
-    2.6 Nehmen andere Zentren an der Studie teil: 
+    2.6 Nehmen andere Zentren an der Studie teil:
     {% with multicentric=submission_form.is_multicentric %}
         {{ multicentric|checkbox }} ja
         {{ multicentric|not|checkbox }} nein.
@@ -84,7 +84,7 @@
 </p>
 
 <p class="border_bottom">
-    2.9 Geplante Anzahl der Prüfungsteilnehmer/innen gesamt (<span class="underline">Dies bezieht sich auf alle teilnehmenden Zentren</span>): 
+    2.9 Geplante Anzahl der Prüfungsteilnehmer/innen gesamt (<span class="underline">Dies bezieht sich auf alle teilnehmenden Zentren</span>):
     <span class="value">{{ submission_form.subject_count }}</span>
 </p>
 
@@ -95,22 +95,51 @@
         <p>
             <span>
                 2.10.1 Mindestalter:
-                <span class="value"> {{ submission_form.subject_minage|default_if_none:'-' }} </span>
+                <span class="value">
+                    {% if submission_form.subject_minage is None %}
+                        -
+                    {% else %}
+                        {{ submission_form.subject_minage }} {{ submission_form.subject_minage_unit|age_unit }}
+                    {% endif %}
+                </span>
             </span>
             <span class="indented">
                 2.10.2 Höchstalter:
-                <span class="value"> {{ submission_form.subject_maxage|default_if_none:'-' }} </span>
+                <span class="value">
+                    {% if submission_form.subject_maxage is None %}
+                        -
+                    {% else %}
+                        {{ submission_form.subject_maxage }} {{ submission_form.subject_maxage_unit|age_unit }}
+                    {% endif %}
+                </span>
             </span>
         </p>
 
         <p>
-            2.10.3 Sind auch nicht persönlich Einwilligungsfähige einschließbar?
-            {{ submission_form.subject_noncompetents|checkbox }} ja 
-            {{ submission_form.subject_noncompetents|not|checkbox }} nein
+            2.10.3.1 Sind auch temporär nicht einwilligungsfähige Personen einschließbar?
+            {{ submission_form.subject_noncompetent_unconscious|checkbox }} ja
+            {{ submission_form.subject_noncompetent_unconscious|not|checkbox }} nein
+        </p>
+        <p>
+            2.10.3.2 Sind auch unter Erwachsenenvertretung stehende einschließbar?
+            {{ submission_form.subject_noncompetent_guarded|checkbox }} ja
+            {{ submission_form.subject_noncompetent_guarded|not|checkbox }} nein
+        </p>
+        <p>
+            2.10.3.3 Sind auch Minderjährige einschließbar?
+            {{ submission_form.subject_noncompetent_minor|checkbox }} ja
+            {{ submission_form.subject_noncompetent_minor|not|checkbox }} nein
+        </p>
+        <p>
+            2.10.3.4 Sind auch Nofallpatienten einschließbar?
+            {{ submission_form.subject_noncompetent_emergency_study|checkbox }} ja
+            {{ submission_form.subject_noncompetent_emergency_study|not|checkbox }} nein
         </p>
 
         <p>
             2.10.4 Einschließbar sind
+            {{ submission_form.subject_divers|checkbox }}
+            <span class="underline">Divers</span>,
             {% if submission_form.subject_childbearing %}
                 {{ True|checkbox }}
             {% else %}
@@ -121,7 +150,7 @@
         </p>
 
         <p>
-            2.10.5 Sind gebärfähige Frauen einschließbar? (Bei Studien nach AMG/MPG ist bei Einschluss gebärfähiger  Frauen ein monatlicher Schwangerschaftstest erforderlich)
+            2.10.5 Sind gebärfähige Frauen einschließbar?
             <div class="indented">
                 {% if submission_form.subject_females %}
                     {{ submission_form.subject_childbearing|checkbox }} ja

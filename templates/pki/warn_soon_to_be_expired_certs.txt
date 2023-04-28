@@ -1,0 +1,9 @@
+{% extends 'msg_core.txt' %}
+{% load i18n %}
+
+{% block content %}
+Folgende Zertifikate laufen demnächst ab:
+{% for cert in certs %}
+    Nr. {{ cert.pk }}, {{ cert.user }} - {{ cert.expires_at|date:'d.m.Y' }}
+{% endfor %}
+{% endblock %}

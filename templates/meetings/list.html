@@ -13,24 +13,24 @@
     <table class="table table-sm">
         <colgroup>
             <col style="width: 50%;">
-            <col>
-            <col>
-            <col>
-            <col>
             <col style="width: 10%;">
+            <col>
+            <col>
+            <col>
+            <col>
             <col style="width: 5%;">
             <col style="width: 5%;">
         </colgroup>
         <thead>
             <tr>
                 <th>{% trans 'Title' %}</th>
+                <th>{% trans 'Scheduled for' %}</th>
                 <th class="text-center pr-3" colspan="2">
                     {% trans 'Deadline for Thesis Submission' %}
                 </th>
                 <th class="text-center" colspan="2">
                     {% trans 'Deadline for Submission' %}
                 </th>
-                <th>{% trans 'Scheduled for' %}</th>
                 <th>{% trans 'Start' %}</th>
                 <th>{% trans 'End' %}</th>
             </tr>
@@ -43,6 +43,9 @@
                         {{ meeting.title }}
                     </a>
                 </td>
+                <td class="pr-3">
+                    {{ meeting.start|date:'d.m.Y' }}
+                </td>
                 <td class="text-right px-3">
                     {{ meeting.deadline_diplomathesis|date:'d.m.Y' }}
                 </td>
@@ -54,9 +57,6 @@
                 </td>
                 <td class="px-3">
                     {{ meeting.deadline|date:'H:i' }}
-                </td>
-                <td class="pr-3">
-                    {{ meeting.start|date:'d.m.Y' }}
                 </td>
                 <td class="pr-3">
                     {{ meeting.start|date:'H:i' }}
