@@ -2823,6 +2823,9 @@ msgstr "Sehr geehrter %(receiver)s!"
 msgid "Submit"
 msgstr "Einreichen"
 
+msgid "Validate and submit"
+msgstr "Validieren und einreichen"
+
 msgid "old"
 msgstr "alt"
 
