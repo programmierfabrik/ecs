@@ -198,6 +198,9 @@ msgstr "Bitte um Begutachtung"
 msgid "Publish"
 msgstr "Veröffentlichen"
 
+msgid "Publish internal"
+msgstr "Intern veröffentlichen"
+
 msgid "Send back to external Reviewer"
 msgstr "Zurück zum Gutachter"
 

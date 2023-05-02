@@ -44,6 +44,7 @@ CHECKLIST_STATUS_CHOICES = (
     ('new', gettext_lazy('New')),
     ('completed', gettext_lazy('Completed')),
     ('review_ok', gettext_lazy('Review OK')),
+    ('review_ok_internal', gettext_lazy('Review OK internal')),
     ('review_fail', gettext_lazy('Review Failed')),
     ('dropped', gettext_lazy('Dropped')),
 )
@@ -52,7 +53,7 @@ class Checklist(models.Model):
     blueprint = models.ForeignKey(ChecklistBlueprint, related_name='checklists', on_delete=models.CASCADE)
     submission = models.ForeignKey('core.Submission', related_name='checklists', null=True, on_delete=models.CASCADE)
     user = models.ForeignKey('auth.user', on_delete=models.CASCADE)
-    status = models.CharField(max_length=15, default='new', choices=CHECKLIST_STATUS_CHOICES)
+    status = models.CharField(max_length=18, default='new', choices=CHECKLIST_STATUS_CHOICES)
     pdf_document = models.OneToOneField(Document, related_name="checklist", null=True, on_delete=models.CASCADE)
     last_edited_by = models.ForeignKey('auth.user', related_name='edited_checklists', on_delete=models.CASCADE)
 
