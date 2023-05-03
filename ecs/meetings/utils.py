@@ -5,7 +5,6 @@ from django.utils import timezone
 from ecs import settings
 from ecs.communication.mailutils import deliver
 from ecs.tasks.models import TaskType, Task
-from ecs.users.utils import get_user
 from ecs.utils.viewutils import render_html
 
 
@@ -54,7 +53,9 @@ def send_submission_protocol_pdf(request, meeting, meeting_protocol):
 def create_task_for_board_members(submission, board_members):
     task_type = TaskType.objects.get(is_dynamic=True, workflow_node__graph__auto_start=True, name='Specialist Review')
 
-    for member in board_members:
+    # From the board_members that were selected in the ui "board_members" remove the biased ones for the given submission
+    board_members_to_add = board_members.filter(~Q(id__in=submission.biased_board_members.all()))
+    for member in board_members_to_add:
         tasks = Task.unfiltered.for_submission(submission).open().filter(task_type=task_type)
         if not task_type.is_delegatable:
             tasks = tasks.filter(assigned_to=member)
