@@ -3,5 +3,5 @@
 
 {% block content %}
 Ihre Einreichung {{ submission|ec_number }} "{{ submission.project_title_display }}" kann in der vorliegenden Form nicht angenommen werden.
-Kontrollieren Sie Ihren Nachrichteneingang für nähere Angaben. Sie können die Studie im System unter Studien → Meine Studien → {{ submission|ec_number }} neu einrechen.
+Kontrollieren Sie Ihren Nachrichteneingang für nähere Angaben. Sie können die Studie im System unter Studien → Meine Studien → {{ submission|ec_number }} bearbeiten und dann erneut einreichen.
 {% endblock %}
