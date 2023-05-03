@@ -32,7 +32,7 @@ def administration(request):
         clinics = clinics.filter(deactivated=True)
 
     keyword = filterform.cleaned_data['keyword']
-    if keyword is not None and keyword is not "":
+    if keyword is not None and keyword != "":
         clinics = clinics.filter(name__icontains=keyword)
 
     paginator = Paginator(clinics.order_by("-is_favorite", "-pk"), limit, allow_empty_first_page=True)
