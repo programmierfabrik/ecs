@@ -153,8 +153,6 @@ ecs.InlineFormSet.prototype = {
     },
     add: function(container){
         var newForm = this.template.clone(true, true);
-        console.log(this.template);
-        console.log(newForm);
         var index = this.forms.length;
         this.updateIndex(newForm, index);
         this.setupForm(newForm);
