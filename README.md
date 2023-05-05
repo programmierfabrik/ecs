@@ -18,12 +18,6 @@ gettext
 libpq-dev
 ```
 
-MacOS (incomplete):
-
-```
-gettext
-```
-
 Start the development database:
 
 ```shell
@@ -63,8 +57,3 @@ ssh ecs@example.com cat ./deployment/data/ecs/dump/ecs.pgdump.gz | \
   gzip -d | \
   docker exec -i test-ecs pg_restore -U test-ecs -1 --format=custom --schema=public --no-owner --dbname=test-ecs
 ```
-
-
-## TODO:
-
-* Barcode on every pdf page when generating a pdf
