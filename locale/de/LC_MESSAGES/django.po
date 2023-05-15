@@ -940,7 +940,7 @@ msgstr ""
 "Bei AMG-Prüfung unbedingt angeben, bei MPG die am ehesten zutreffende Phase."
 
 msgid "There are already votes of other ethics commissions."
-msgstr "Es liegen bereits österreichische Voten anderer Ethikkommissionen vor."
+msgstr "Es liegen bereits Voten anderer österreichischer Ethik-Kommissionen vor."
 
 msgid "If so, upload the votes on the documents tab"
 msgstr "Falls ja, laden Sie die Voten über den Reiter \"Unterlagen\" hoch"
