@@ -138,7 +138,11 @@
 
         <p>
             2.10.4 Einschließbar sind
-            {{ submission_form.subject_divers|checkbox }}
+            {% if submission_form.subject_divers == 1 %}
+                {{ True|checkbox }}
+            {% else %}
+                {{ False|checkbox }}
+            {% endif %}
             <span class="underline">Divers</span>,
             {% if submission_form.subject_childbearing %}
                 {{ True|checkbox }}

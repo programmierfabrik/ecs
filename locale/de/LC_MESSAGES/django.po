@@ -3348,3 +3348,6 @@ msgstr "Telefonnummer"
 
 msgid "country/center"
 msgstr "Land/Prüfzentrum"
+
+msgid "undefined"
+msgstr "Nicht definiert"

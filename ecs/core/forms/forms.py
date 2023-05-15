@@ -75,7 +75,6 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
         ('2', _('Yes, but only childbearing')),
         ('3', _('No')),
     ))
-    subject_divers = NullBooleanField()
 
     is_new_medtech_law = NullBooleanFieldNewMedtechLaw(required=False)
 
