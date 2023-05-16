@@ -5,11 +5,13 @@
 
 {% block htmltitle %}{% trans "Dashboard" %} | {{ block.super }}{% endblock %}
 
-{% block headertitle %}{% trans "Dashboard" %}{% endblock %}
-      
+{% block headertitle_class %}d-none{% endblock %}
+
 {% block content %}
-    <div class="clearfix">
-        <div class="dashboard_widget half {% if user.profile.show_task_widget %}float-left{% else %}mx-auto{% endif %}" data-widget-url="{% url 'communication.dashboard_widget' %}">
+    <div class="clearfix" style="padding: 0 8px">
+        <div
+            class="dashboard_widget half {% if user.profile.show_task_widget %}float-left left{% else %}mx-auto{% endif %}"
+            data-widget-url="{% url 'communication.dashboard_widget' %}">
         </div>
         {% if user.profile.show_task_widget %}
             <div data-widget-url="{% url 'tasks.my_tasks' %}">
@@ -24,4 +26,3 @@
         ecs.setupWidgets();
     </script>
 {% endblock %}
-
