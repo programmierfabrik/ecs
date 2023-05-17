@@ -943,7 +943,7 @@ msgstr ""
 "Bei AMG-Prüfung unbedingt angeben, bei MPG die am ehesten zutreffende Phase."
 
 msgid "There are already votes of other ethics commissions."
-msgstr "Es liegen bereits österreichische Voten anderer Ethikkommissionen vor."
+msgstr "Es liegen bereits Voten anderer österreichischer Ethik-Kommissionen vor."
 
 msgid "If so, upload the votes on the documents tab"
 msgstr "Falls ja, laden Sie die Voten über den Reiter \"Unterlagen\" hoch"
@@ -1373,7 +1373,7 @@ msgid "DPR-Nr."
 msgstr "DVR-Nummer"
 
 msgid "How is the anonymization done?"
-msgstr "Wie erfolgt die Pseudo- oder Anonymisierung?"
+msgstr "Wie erfolgt die Pseudonymisierung oder Anonymisierung?"
 
 msgid "salutation"
 msgstr "Anrede"
@@ -3354,3 +3354,6 @@ msgstr "Telefonnummer"
 
 msgid "country/center"
 msgstr "Land/Prüfzentrum"
+
+msgid "undefined"
+msgstr "Nicht definiert"

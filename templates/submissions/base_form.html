@@ -47,6 +47,9 @@
                             </div>
                         </div>
                         {% endif %}
+                    <div class="alert alert-info text-center mt-3">
+                        Ausschließlich in deutscher Sprache auszufüllen, außer Projekttitel (englisch) [1.1]. Verweise auf Studienunterlagen sind nicht zulässig.
+                    </div>
                     {% if tab.slug == 'key_data' %}
                         {% if not readonly %}
                             <div class="alert alert-warning text-center mt-3">
@@ -103,13 +106,6 @@
                         <div class="alert alert-info text-center mt-3">
                             Bitte beachten Sie die Vorgaben zur Versicherung laut unserer Homepage.
                         </div>
-
-                    {% elif tab.slug == 'outline' %}
-
-                        <div class="alert alert-info text-center mt-3">
-                            Ausschließlich in deutscher Sprache auszufüllen, keine Verweise auf Studienunterlagen zulässig, außer Projekttitel (englisch) [1.1]
-                        </div>
-
                     {% elif tab.slug == 'documents' %}
 
                         {% if not readonly %}

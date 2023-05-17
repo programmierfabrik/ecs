@@ -1,5 +1,4 @@
 .dashboard_widget {
-    padding: 0 0.5em;
     border-radius: 5px;
 
     &.half {
@@ -10,5 +9,13 @@
 @media (min-width: 768px) {
     .dashboard_widget.half {
         width: 50%;
+
+        &.left {
+            padding-right: 0.5rem;
+        }
+
+        &.right {
+            padding-left: 0.5rem;
+        }
     }
 }

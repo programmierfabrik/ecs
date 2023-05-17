@@ -3,7 +3,7 @@
 {% for checklist, answers in checklist_summary %}
     <div class="mb-4">
         <h4 class="checklist">
-            {{ checklist.blueprint.name }}:
+            {% trans checklist.blueprint.name %}:
             {{ checklist.last_edited_by|formal_name }}
         </h4>
         {% for answer in answers %}

@@ -57,7 +57,7 @@ SUBMISSION_FORM_TABS = (
     ]),
     Tab('participants', _('participant'), [
         (_('test participant'), [
-            'subject_count', 'subject_minage_unit', 'subject_minage', 'subject_maxage_unit', 'subject_maxage', 'subject_males', 'subject_females_childbearing', 'subject_divers',
+            'subject_count', 'subject_minage', 'subject_minage_unit', 'subject_maxage', 'subject_maxage_unit', 'subject_males', 'subject_females_childbearing', 'subject_divers',
             'subject_duration', 'subject_duration_active', 'subject_duration_controls', 'subject_planned_total_duration',
         ]),
         (_('non competent participants') + ' [2.10.3]', [
