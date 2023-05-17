@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0075_include_all_investigators_in_my_submission'),
+        ('core', '0077_alter_submissionform_subject_divers'),
     ]
 
     operations = [
