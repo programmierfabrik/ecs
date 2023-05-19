@@ -1,6 +1,6 @@
 {% extends 'shell.html' %}
 {% load compress i18n static widget_tweaks %}
-{% load alert communication core scratchpad userswitcher userutils %}
+{% load alert communication core scratchpad userswitcher userutils version_tag %}
 
 {% block htmlcss %}
     {{ block.super }}
@@ -196,9 +196,9 @@
                     </div>
                 </form>
             </div>
-            <div class="clearfix">
+            <div class="d-flex">
                 {% userswitcher %}
-                <small class="float-right">
+                <small class="ml-auto">
                     {% if user.profile.is_internal %}
                         {% get_breadcrumbs as crumbs %}
                         {% if crumbs %}
@@ -209,6 +209,7 @@
                             {% endfor %}
                         {% endif %}
                     {% endif %}
+                    {% current_version %}
                 </small>
             </div>
         </div>

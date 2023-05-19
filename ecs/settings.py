@@ -11,6 +11,8 @@ PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if os.getenv('ECS_SETTINGS'):
     exec(os.getenv('ECS_SETTINGS'))
 
+ECS_VERSION = 'v2.2.1'
+
 # absolute URL prefix w/out trailing slash
 if os.getenv('ECS_DOMAIN'):
     DOMAIN = os.getenv('ECS_DOMAIN')
