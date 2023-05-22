@@ -57,4 +57,5 @@ urlpatterns = (
 
     path('<int:meeting_pk>/ek-member/', views.list_ek_member, name='meetings.list_ek_member'),
     path('<int:meeting_pk>/documents/', views.list_documents, name='meetings.list_documents'),
+    path('<int:meeting_pk>/documents/<int:document_pk>', views.download_meeting_documents, name='meetings.download_meeting_documents'),
 )

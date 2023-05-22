@@ -23,13 +23,12 @@
                 <td>{{ document.date }}</td>
                 <td>
                     <div class="d-flex justify-content-end">
-                        <button type="button" class="btn btn-outline-primary" style="background-color: transparent"
-                                title="Dokument herunterladen">
-                            <span class="fa fa-download text-primary"></span>
-                        </button>
-                        <button type="button" class="btn btn-outline-danger" style="background-color: transparent"
-                                title="Dokument löschen">
-                            <span class="fa fa-trash-o text-danger"></span>
+                        <a href="{% url 'meetings.download_meeting_documents' meeting_pk=meeting.pk document_pk=document.pk %}"
+                           class="btn btn-primary mr-1" title="Dokument herunterladen">
+                            <span class="fa fa-download"></span>
+                        </a>
+                        <button type="button" class="btn btn-danger" title="Dokument löschen">
+                            <span class="fa fa-trash"></span>
                         </button>
                     </div>
                 </td>
