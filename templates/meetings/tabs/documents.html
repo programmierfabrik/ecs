@@ -1,0 +1,70 @@
+{% load core i18n widget_tweaks %}
+
+<div class="container">
+    <form id="drop-zone" action="{{ request.path }}" method="POST" enctype="multipart/form-data"
+          class="open-in-widget p-5 mb-3 rounded text-center" style="border: dashed 2px #bbb;">
+        {% csrf_token %}
+
+        {#          <input hidden type="file" multiple />#}
+        <div class="display-4 mb-1" style="font-size: 2rem">Dokument hierher ziehen</div>
+        <div class="mb-1">oder...</div>
+        <input type="file" multiple hidden id="files" name="new_meeting_documents">
+        <button id="files-button" type="button" class="btn btn-outline-primary">Dokument auswählen</button>
+    </form>
+    <table class="table">
+        <tr>
+            <th>Dokumentenname</th>
+            <th>Hochgeladen am</th>
+            <th></th>
+        </tr>
+        {% for document in meeting.documents.all %}
+            <tr>
+                <td>{{ document.name }}</td>
+                <td>{{ document.date }}</td>
+                <td>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-outline-primary" style="background-color: transparent"
+                                title="Dokument herunterladen">
+                            <span class="fa fa-download text-primary"></span>
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" style="background-color: transparent"
+                                title="Dokument löschen">
+                            <span class="fa fa-trash-o text-danger"></span>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<script type="text/javascript">
+    (function () {
+        let files = $('#files');
+        $('#files-button').on('click', function () {
+            files.click();
+        });
+
+        // Used code from here:
+        // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/File_drag_and_drop
+        let dropZone = $('#drop-zone');
+        dropZone.on('dragover', function (event) {
+            event.preventDefault();
+        });
+        dropZone.on('drop', function (event) {
+            event.preventDefault();
+            files.get(0).files = event.originalEvent.dataTransfer.files;
+            uploadFiles();
+        });
+
+        files.on('change', function (event) {
+            uploadFiles();
+        });
+
+        function uploadFiles() {
+            console.log("sending form...");
+            console.log(files.get(0).files);
+            dropZone.submit();
+        }
+    })();
+</script>

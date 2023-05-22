@@ -209,6 +209,7 @@ class Meeting(models.Model):
     board_members = models.ManyToManyField('auth.User', related_name='included_in_meetings')
     invited_users = models.ManyToManyField('auth.User', related_name='invited_to_meetings')
     invited_groups = models.ManyToManyField('auth.Group', related_name='invited_to_meetings')
+    documents = models.ManyToManyField('documents.Document', related_name='related_meeting_documents')
 
     objects = MeetingManager()
     unfiltered = models.Manager()

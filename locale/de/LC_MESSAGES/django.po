@@ -1657,6 +1657,9 @@ msgstr "Sitzungsprotokoll"
 msgid "Meeting ZIP"
 msgstr "Sitzungen"
 
+msgid "Meeting Document"
+msgstr "Begleitende Sitzungsunterlagen"
+
 msgid "no file"
 msgstr "keine Datei"
 

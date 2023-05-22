@@ -1285,3 +1285,19 @@ def list_ek_member(request, meeting_pk=None):
         'meeting': meeting,
         'meeting_ended': meeting_ended,
     })
+
+
+@user_group_required('EC-Office', 'EC-Executive')
+def list_documents(request, meeting_pk=None):
+    meeting = get_object_or_404(Meeting.objects.prefetch_related('board_members'), pk=meeting_pk)
+
+    if 'new_meeting_documents' in request.FILES:
+        for file in request.FILES.getlist('new_meeting_documents'):
+            meeting.documents.add(Document.objects.create_from_buffer(
+                file.read(), doctype='meeting_documents', parent_object=meeting,
+                stamp_on_download=False, mimetype=file.content_type, name=file.name)
+            )
+
+    return render(request, 'meetings/tabs/documents.html', {
+        'meeting': meeting,
+    })
