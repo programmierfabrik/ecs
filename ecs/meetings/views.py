@@ -33,7 +33,7 @@ from ecs.meetings.forms import (
     AmendmentVoteFormSet, ManualTimetableEntryCommentForm,
     ManualTimetableEntryCommentFormset, EkMemberMarkedForm, SendProtocolGroupsForm,
 )
-from ecs.meetings.models import Meeting, Participation, TimetableEntry, MeetingSubmissionProtocol
+from ecs.meetings.models import Meeting, Participation, TimetableEntry, MeetingSubmissionProtocol, MeetingDocument
 from ecs.meetings.signals import on_meeting_start, on_meeting_end, on_meeting_top_jump, \
     on_meeting_date_changed
 from ecs.meetings.tasks import optimize_timetable_task
@@ -1293,13 +1293,17 @@ def list_documents(request, meeting_pk=None):
 
     if 'new_meeting_documents' in request.FILES:
         for file in request.FILES.getlist('new_meeting_documents'):
-            meeting.documents.add(Document.objects.create_from_buffer(
-                file.read(), doctype='meeting_documents', parent_object=meeting,
-                stamp_on_download=False, mimetype=file.content_type, name=file.name)
+            document = Document.objects.create_from_buffer(
+                file.read(), doctype='meeting_documents',
+                parent_object=meeting, stamp_on_download=False,
+                mimetype=file.content_type, name=file.name
             )
+            meeting_document = MeetingDocument(meeting=meeting, document=document, uploaded_by=request.user)
+            meeting_document.save()
 
     return render(request, 'meetings/tabs/documents.html', {
         'meeting': meeting,
+        'meeting_documents': meeting.meetingdocument_set.all()
     })
 
 

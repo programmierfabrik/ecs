@@ -15,15 +15,17 @@
         <tr>
             <th>Dokumentenname</th>
             <th>Hochgeladen am</th>
+            <th>Hochgeladen von</th>
             <th></th>
         </tr>
-        {% for document in meeting.documents.all %}
+        {% for meeting_document in meeting_documents %}
             <tr>
-                <td>{{ document.name }}</td>
-                <td>{{ document.date }}</td>
+                <td>{{ meeting_document.document.name }}</td>
+                <td>{{ meeting_document.document.date }}</td>
+                <td>{{ meeting_document.uploaded_by }}</td>
                 <td>
                     <div class="d-flex justify-content-end">
-                        <a href="{% url 'meetings.download_meeting_documents' meeting_pk=meeting.pk document_pk=document.pk %}"
+                        <a href="{% url 'meetings.download_meeting_documents' meeting_pk=meeting.pk document_pk=meeting_document.document.pk %}"
                            class="btn btn-primary mr-1" title="Dokument herunterladen">
                             <span class="fa fa-download"></span>
                         </a>

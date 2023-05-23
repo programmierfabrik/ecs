@@ -209,7 +209,7 @@ class Meeting(models.Model):
     board_members = models.ManyToManyField('auth.User', related_name='included_in_meetings')
     invited_users = models.ManyToManyField('auth.User', related_name='invited_to_meetings')
     invited_groups = models.ManyToManyField('auth.Group', related_name='invited_to_meetings')
-    documents = models.ManyToManyField('documents.Document', related_name='related_meeting_documents')
+    documents = models.ManyToManyField('documents.Document', through='MeetingDocument')
 
     objects = MeetingManager()
     unfiltered = models.Manager()
@@ -625,6 +625,11 @@ def _meeting_board_members_changed(sender, **kwargs):
 
 m2m_changed.connect(_meeting_board_members_changed, sender=Meeting.board_members.through)
 
+
+class MeetingDocument(models.Model):
+    meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE)
+    document = models.ForeignKey(Document, on_delete=models.CASCADE)
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
 class MeetingSubmissionProtocol(models.Model):
     meeting = models.ForeignKey(Meeting, related_name='meeting_protocols', on_delete=models.CASCADE)
