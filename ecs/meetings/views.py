@@ -1307,6 +1307,7 @@ def list_documents(request, meeting_pk=None):
     })
 
 
+@user_group_required('EC-Office', 'EC-Executive')
 def download_meeting_documents(request, meeting_pk=None, document_pk=None):
     doc = get_object_or_404(
         Document,
@@ -1318,3 +1319,17 @@ def download_meeting_documents(request, meeting_pk=None, document_pk=None):
     response = FileResponse(doc.retrieve_raw(), content_type=doc.mimetype)
     response['Content-Disposition'] = 'attachment;filename={}'.format(doc.get_filename())
     return response
+
+
+@user_group_required('EC-Office', 'EC-Executive')
+def delete_meeting_documents(request, meeting_pk=None, meeting_document_pk=None):
+    meeting_document = get_object_or_404(
+        MeetingDocument,
+        pk=meeting_document_pk,
+        document__content_type=ContentType.objects.get_for_model(Meeting),
+        document__object_id=meeting_pk,
+    )
+
+    meeting_document.document.delete()
+    meeting_document.delete()
+    return HttpResponse(status=204)

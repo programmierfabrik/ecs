@@ -5,7 +5,6 @@
           class="open-in-widget p-5 mb-3 rounded text-center" style="border: dashed 2px #bbb;">
         {% csrf_token %}
 
-        {#          <input hidden type="file" multiple />#}
         <div class="display-4 mb-1" style="font-size: 2rem">Dokument hierher ziehen</div>
         <div class="mb-1">oder...</div>
         <input type="file" multiple hidden id="files" name="new_meeting_documents">
@@ -29,9 +28,17 @@
                            class="btn btn-primary mr-1" title="Dokument herunterladen">
                             <span class="fa fa-download"></span>
                         </a>
-                        <button type="button" class="btn btn-danger" title="Dokument löschen">
-                            <span class="fa fa-trash"></span>
-                        </button>
+                        <form
+                            action="{% url 'meetings.delete_meeting_documents' meeting_pk=meeting.pk meeting_document_pk=meeting_document.pk %}"
+                            method="post">
+                            {% csrf_token %}
+                            <button
+                                type="button"
+                                class="btn btn-danger delete_button" title="Dokument löschen"
+                                data-file-name="{{ meeting_document.document.name }}">
+                                <span class="fa fa-trash"></span>
+                            </button>
+                        </form>
                     </div>
                 </td>
             </tr>
@@ -63,9 +70,34 @@
         });
 
         function uploadFiles() {
-            console.log("sending form...");
-            console.log(files.get(0).files);
             dropZone.submit();
         }
+
+        $('.delete_button').on('click', function (event) {
+            console.log(123);
+            event.preventDefault();
+            var form = $(this).parent("form");
+            var fileName = $(this).data('file-name');
+            var url = form.attr('action');
+
+            ecs.confirm({
+                question: 'Wollen sie wirklich ' + fileName + ' löschen?',
+                ok: '{{ _("Yes")|escapejs }}',
+                cancel: '{{ _("No")|escapejs }}',
+                success: function () {
+                    this.request = $.ajax({
+                        url: url,
+                        method: 'post',
+                        data: new FormData(form[0]),
+                        processData: false,
+                        contentType: false,
+                        context: this,
+                        success: function (data) {
+                            dropZone.parents('.ecs-Widget').data('widget').load();
+                        }
+                    });
+                }
+            });
+        });
     })();
 </script>
