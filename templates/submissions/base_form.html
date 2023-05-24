@@ -47,9 +47,12 @@
                             </div>
                         </div>
                         {% endif %}
-                    <div class="alert alert-info text-center mt-3">
-                        Ausschließlich in deutscher Sprache auszufüllen, außer Projekttitel (englisch) [1.1]. Verweise auf Studienunterlagen sind nicht zulässig.
-                    </div>
+                    {% if not readonly %}
+                        <div class="alert alert-info text-center mt-3">
+                            Ausschließlich in deutscher Sprache auszufüllen, außer Projekttitel (englisch) [1.1].
+                            Verweise auf Studienunterlagen sind nicht zulässig.
+                        </div>
+                    {% endif %}
                     {% if tab.slug == 'key_data' %}
                         {% if not readonly %}
                             <div class="alert alert-warning text-center mt-3">
