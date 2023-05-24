@@ -796,7 +796,7 @@ def create_submission_form(request):
                         employee_first_name == investigator_first_name and \
                         employee_last_name == investigator_last_name:
                         investigator_employee_valid = False
-                        investigator.add_error(None, 'Der Prüfer darf nicht gleichzeitig als Mitarbeiter genannt werden.')
+                        investigators_formset.non_form_errors().append('Der Prüfer darf nicht gleichzeitig als Mitarbeiter genannt werden.')
 
         valid = form.is_valid() and formsets_valid and investigator_employee_valid and protocol_uploaded and not 'upload' in request.POST
         if valid and submission and not notification_type and \

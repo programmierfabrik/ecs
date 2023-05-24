@@ -1,6 +1,6 @@
 {% extends 'shell.html' %}
 {% load compress i18n static widget_tweaks %}
-{% load alert communication core scratchpad userswitcher userutils date_time_changed_tag %}
+{% load alert communication core scratchpad userswitcher userutils %}
 
 {% block htmlcss %}
     {{ block.super }}
@@ -21,7 +21,7 @@
 
 {% block htmlbody %}
 <div class="content-container">
-    <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
+    <nav class="navbar navbar-toggleable-md navbar-light bg-faded" style="padding: 6px 23px">
         <button class="navbar-toggler navbar-toggler-right" data-toggle="collapse" data-target="#navbarcontent">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -206,14 +206,12 @@
                             {% endfor %}
                         {% endif %}
                     {% endif %}
-                    {% trans 'date of last modification:' %}
-                    {% date_time_changed %}
                 </small>
             </div>
         </div>
     </nav>
 
-    <div id="header" class="bg-faded px-3 pb-3 pt-1">
+    <div id="header" class="bg-faded px-3 pb-3 pt-1 {% if not request.task_management.form %}{% block headertitle_class %}{% endblock %}{% endif %}">
         <h1 id="headertitle" class="text-truncate m-0" tabindex="-1">
             {% block headertitle %}{% endblock %}
         </h1>

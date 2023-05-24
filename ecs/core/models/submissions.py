@@ -16,7 +16,7 @@ from ecs.core.models.constants import (
     SUBMISSION_LANE_RETROSPECTIVE_THESIS, SUBMISSION_LANE_LOCALEC, SUBMISSION_LANE_BOARD,
     SUBMISSION_TYPE_CHOICES, SUBMISSION_TYPE_MONOCENTRIC, SUBMISSION_TYPE_MULTICENTRIC_LOCAL,
     SUBMISSION_TYPE_MULTICENTRIC, SUBMISSION_AGE_UNIT, SUBMISSION_AGE_UNIT_YEARS, SUBMISSION_AGE_UNIT_DAYS,
-    SUBMISSION_AGE_UNIT_MONTHS, SUBMISSION_AGE_UNIT_HOURS
+    SUBMISSION_AGE_UNIT_MONTHS, SUBMISSION_AGE_UNIT_HOURS, SUBMISSION_DIVERS_CHOICES, SUBMISSION_DIVERS_UNDEFINED
 )
 from ecs.core.models.managers import (
     SubmissionManager, SubmissionQuerySet, InvestigatorManager,
@@ -352,8 +352,8 @@ class SubmissionForm(models.Model):
     subject_males = models.BooleanField(default=False)
     subject_females = models.BooleanField(default=False)
     subject_childbearing = models.BooleanField(default=False)
-    subject_divers = models.BooleanField(default=False)
-    
+    subject_divers = models.SmallIntegerField(choices=SUBMISSION_DIVERS_CHOICES, default=SUBMISSION_DIVERS_UNDEFINED)
+
     # 2.11
     subject_duration = models.CharField(max_length=200)
     subject_duration_active = models.CharField(max_length=200)

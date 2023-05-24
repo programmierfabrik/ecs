@@ -83,6 +83,12 @@
                 {% endif %}
             </div>
             <input type="submit" value="Login" id="login_button" class="btn btn-primary btn-block mt-3" {% if not request.ua.is_supported or request.ua.is_crawler %}style="display:none;"{% endif %} />
+            <div class="alert alert-warning text-center mt-3">
+                ACHTUNG! Es wird darauf hingewiesen, dass es aufgrund von derzeit durchführenden ECS-Updates zu
+                Änderungen
+                bei den eingereichten Anträgen kommen kann und zusätzliche Felder zu befüllen sind - Bitte um
+                Kenntnisnahme!
+            </div>
             <input type="hidden" name="next" value="{{ next }}" />
             {% if form.non_field_errors %}
                 <div class="alert alert-danger mt-3 mb-0">
