@@ -2,6 +2,7 @@ import datetime
 
 from django import forms
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
@@ -71,22 +72,18 @@ class AutocompleteModelChoiceField(forms.ChoiceField):
         kwargs['widget'] = self.Widget(self)
         self.queryset_name = queryset_name
         self.queryset = queryset
-        self.valid_choices = queryset
         super().__init__(**kwargs)
 
     def clean(self, value):
         if value is None:
-            return ''
+            raise ValidationError('Das Feld darf nicht leer sein!')
         value = super().clean(value)
         return User.objects.get(id=value)
 
     def valid_value(self, value):
         """Check to see if the provided value is a valid choice."""
-        text_value = str(value)
-        for choice in self.valid_choices:
-            if str(choice.pk) == text_value:
-                return True
-        return False
+        first = self.queryset.all().filter(pk=value).first()
+        return first is not None
 
     class Widget(forms.Select):
         def __init__(self, field):
