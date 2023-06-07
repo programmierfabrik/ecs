@@ -1514,7 +1514,7 @@ msgid "Changes to study EC-Nr. {ec_number}"
 msgstr "Änderungen an Studie EK-Nr. {ec_number}"
 
 msgid "Submission not accepted"
-msgstr "Einreichung nicht akzeptiert"
+msgstr "Einreichung nicht angenommen"
 
 msgid "Comment"
 msgstr "Kommentar"
