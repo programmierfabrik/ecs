@@ -1116,7 +1116,7 @@ msgid "ethical considerations"
 msgstr "Ethische Überlegungen"
 
 msgid "ethical considerations description"
-msgstr "Identifizieren und beschreiben Sie alle möglicherweise auftretenden Probleme. Beschreiben Sie den möglichen Wissenszuwachs, der durch die Studie erzielt werden soll, seine Bedeutung, sowie mögliche Risiken für Schädigungen oder Belastungen der Prüfungsteilnehmer*innen. Legen Sie Ihre eigene Bewertung des Nutzen-Risiko-Verhältnisses dar"
+msgstr "Identifizieren und beschreiben Sie alle möglicherweise auftretenden Probleme. Beschreiben Sie den möglichen Wissenszuwachs, der durch die Studie erzielt werden soll, seine Bedeutung, sowie mögliche Risiken für Schädigungen oder Belastungen der Prüfungsteilnehmer/innen. Legen Sie Ihre eigene Bewertung des Nutzen-Risiko-Verhältnisses dar"
 
 msgid "Justification for the inclusion of persons from protected groups"
 msgstr "Begründung für den Einschluss von Personen aus geschützten Gruppen"
@@ -1139,7 +1139,7 @@ msgstr ""
 "Vorgehensweise an der Prüfstelle, zur Erlangung der informierten Einwilligung"
 
 msgid "german_consent_info description"
-msgstr "von Prüfungsteilnehmer*innen bzw. Eltern oder gesetzlichen Vertreter*innen, wenn zutreffend (wer wird informieren und wann, Erfordernis für gesetzliche Vertretung, Zeugen, etc)"
+msgstr "von Prüfungsteilnehmer/innen bzw. Eltern oder gesetzlichen Vertreter/innen, wenn zutreffend (wer wird informieren und wann, Erfordernis für gesetzliche Vertretung, Zeugen, etc)"
 
 msgid "Risk assessment"
 msgstr "Risikoabschätzung"
