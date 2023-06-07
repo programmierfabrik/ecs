@@ -49,7 +49,7 @@
                     <span class="bold">Sponsor/CRO:</span> {{ submission.current_submission_form.sponsor_name }}<br />
                     <span class="bold">Einreichendes Institut:</span> {{ submission.current_submission_form.submitter_organisation }}<br />
                     <span class="bold">Projekttitel:</span> {{ submission.project_title_display }}<br />
-                    {% include 'meetings/pdf/protocol_submission.html' %}
+                    {% include 'meetings/pdf/protocol_submission.html' with extraction=extraction %}
                 {% else %}
                     <span class="bold">{{ top.title|default:'<i>No title.</i>' }}</span><br />
                     {% if top.text %}
