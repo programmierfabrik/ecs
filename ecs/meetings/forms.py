@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django import forms
 from django.forms.models import BaseModelFormSet, modelformset_factory
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
 from django.utils import timezone
@@ -10,9 +10,10 @@ from django.contrib.contenttypes.models import ContentType
 
 from ecs.meetings.models import Meeting, TimetableEntry, Constraint, AssignedMedicalCategory, WEIGHT_CHOICES
 from ecs.core.models import Submission
-from ecs.core.forms.fields import DateTimeField, TimeField
+from ecs.core.forms.fields import DateTimeField, TimeField, NullBooleanWidget
 from ecs.tasks.models import Task
 from ecs.users.utils import sudo
+from ecs.utils.formutils import require_fields
 from ecs.votes.models import Vote
 from ecs.notifications.models import AmendmentNotification
 
@@ -239,3 +240,52 @@ class ManualTimetableEntryCommentForm(forms.ModelForm):
 
 ManualTimetableEntryCommentFormset = modelformset_factory(TimetableEntry,
     form=ManualTimetableEntryCommentForm, extra=0)
+
+
+class EkMemberMarkedForm(forms.Form):
+    users = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple(attrs={'id': 'multiple-checkbox'}),
+                                      required=False, label='Mitglieder')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        board_member_filter = (Q(profile__is_board_member=True) |
+                               Q(profile__is_resident_member=True) |
+                               Q(profile__is_omniscient_member=True)) & Q(profile__user__groups__name='Specialist',
+                                                                          is_active=True)
+        self.fields['users'].choices = [
+            (u.id, u) for u in
+            User.objects.filter(board_member_filter).prefetch_related('profile')
+        ]
+
+
+class SendProtocolGroupsForm(forms.Form):
+    invite_ek_member = forms.NullBooleanField(widget=NullBooleanWidget,
+                                              required=True, label='Board Member einschränken?',
+                                              help_text='Protokoll nur an ausgewählte Board Member aus dem Reiter "Ek-Mitglieder" schicken')
+    groups = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple(attrs={'id': 'multiple-checkbox'}),
+                                       required=True, label="Gruppen")
+
+    def __init__(self, is_disabled, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Signing member
+        allowed_groups = ['Meeting Protocol Receiver', 'Board Member', 'Omniscient Board Member',
+                          'Resident Board Member',
+                          'EC-Signing']
+
+        self.set_disabled(is_disabled)
+        self.fields['groups'].choices = [
+            (g.id, g) for g in Group.objects.filter(name__in=allowed_groups)
+        ]
+
+    def clean_invite_ek_member(self):
+        data = self.cleaned_data['invite_ek_member']
+        if data is None:
+            require_fields(self, ('invite_ek_member',))
+
+        return data
+
+    def set_disabled(self, is_disabled):
+        self.fields['groups'].widget.attrs['disabled'] = is_disabled
+        if is_disabled:
+            del self.fields['invite_ek_member']

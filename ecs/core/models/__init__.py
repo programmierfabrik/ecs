@@ -6,3 +6,4 @@ from ecs.core.models.submissions import (
     TemporaryAuthorization,
 )
 from ecs.core.models.comments import Comment
+from ecs.core.models.clinic import Clinic

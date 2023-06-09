@@ -40,7 +40,7 @@
                         <div class="upload_container"></div>
                     </div>
                 {% endif %}
-                
+
                 {% if tab.slug == 'changes' %}
                     <div class="field">
                         {% if notification_type.includes_diff %}
@@ -65,7 +65,7 @@
                         {% endif %}
                     </div>
                 {% endif %}
-                
+
                 {% for legend, fields in tab.fieldsets %}
                     <div class="fieldset_{{ forloop.counter }}">
                         {% if legend %}
@@ -92,7 +92,7 @@
     <script type="text/javascript">
         $(function(){
             ecs.setupForms();
-            
+
             $('.diff-toggles button').click(function(ev) {
                 ev.preventDefault();
 
@@ -125,7 +125,7 @@
 
             function loadSubmissionFormData(pks) {
                 submissionDataDisplay.load(
-                    '{% url 'notifications.subimssion_data_for_notification' %}',
+                    '{% url 'notifications.submission_data_for_notification' %}',
                     'submission_form=' + pks.join('&submission_form=')
                 );
             }

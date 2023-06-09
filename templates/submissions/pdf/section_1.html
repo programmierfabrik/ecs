@@ -41,8 +41,11 @@
                 {{ submission_form.sponsor_country_code }}, {{ submission_form.sponsor_zip_code }} {{ submission_form.sponsor_city }}
             </td>
             <td class="value">
-                {{ submission_form.invoice_address }}<br/>
-                {{ submission_form.invoice_country_code }}, {{ submission_form.invoice_zip_code }} {{ submission_form.invoice_city }}
+                {% if invoice_address %}
+                    {{ submission_form.invoice_address }}<br/>
+                    {{ submission_form.invoice_country_code }}, {{ submission_form.invoice_zip_code }}
+                    {{ submission_form.invoice_city }}
+                {% endif %}
             </td>
         </tr>
         <tr>

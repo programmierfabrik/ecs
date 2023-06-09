@@ -198,6 +198,9 @@ msgstr "Bitte um Begutachtung"
 msgid "Publish"
 msgstr "Veröffentlichen"
 
+msgid "Publish internal"
+msgstr "Intern veröffentlichen"
+
 msgid "Send back to external Reviewer"
 msgstr "Zurück zum Gutachter"
 
@@ -960,7 +963,7 @@ msgid "maximum age"
 msgstr "Höchstalter"
 
 msgid "maximum age description"
-msgstr "Wenn kein Höchstalter festgelegt ist, 999 eintragen."
+msgstr "Wenn kein Höchstalter festgelegt ist: 999 eintragen."
 
 msgid "male participants"
 msgstr "männliche Teilnehmer"
@@ -1113,7 +1116,7 @@ msgid "ethical considerations"
 msgstr "Ethische Überlegungen"
 
 msgid "ethical considerations description"
-msgstr "Identifizieren und beschreiben Sie alle möglicherweise auftretenden Probleme. Beschreiben Sie den möglichen Wissenszuwachs, der durch die Studie erzielt werden soll, seine Bedeutung, sowie mögliche Risiken für Schädigungen oder Belastungen der Prüfungsteilnehmer*innen. Legen Sie Ihre eigene Bewertung des Nutzen-Risiko-Verhältnisses dar"
+msgstr "Identifizieren und beschreiben Sie alle möglicherweise auftretenden Probleme. Beschreiben Sie den möglichen Wissenszuwachs, der durch die Studie erzielt werden soll, seine Bedeutung, sowie mögliche Risiken für Schädigungen oder Belastungen der Prüfungsteilnehmer/innen. Legen Sie Ihre eigene Bewertung des Nutzen-Risiko-Verhältnisses dar"
 
 msgid "Justification for the inclusion of persons from protected groups"
 msgstr "Begründung für den Einschluss von Personen aus geschützten Gruppen"
@@ -1136,7 +1139,7 @@ msgstr ""
 "Vorgehensweise an der Prüfstelle, zur Erlangung der informierten Einwilligung"
 
 msgid "german_consent_info description"
-msgstr "von Prüfungsteilnehmer*innen bzw. Eltern oder gesetzlichen Vertreter*innen, wenn zutreffend (wer wird informieren und wann, Erfordernis für gesetzliche Vertretung, Zeugen, etc)"
+msgstr "von Prüfungsteilnehmer/innen bzw. Eltern oder gesetzlichen Vertreter/innen, wenn zutreffend (wer wird informieren und wann, Erfordernis für gesetzliche Vertretung, Zeugen, etc)"
 
 msgid "Risk assessment"
 msgstr "Risikoabschätzung"
@@ -1511,7 +1514,7 @@ msgid "Changes to study EC-Nr. {ec_number}"
 msgstr "Änderungen an Studie EK-Nr. {ec_number}"
 
 msgid "Submission not accepted"
-msgstr "Einreichung nicht akzeptiert"
+msgstr "Einreichung nicht angenommen"
 
 msgid "Comment"
 msgstr "Kommentar"
@@ -1653,6 +1656,9 @@ msgstr "Sitzungsprotokoll"
 #| msgid "Meetings"
 msgid "Meeting ZIP"
 msgstr "Sitzungen"
+
+msgid "Meeting Document"
+msgstr "Begleitende Sitzungsunterlagen"
 
 msgid "no file"
 msgstr "keine Datei"
@@ -2440,7 +2446,7 @@ msgid "New Meeting"
 msgstr "Neue Sitzung"
 
 msgid "Waring maintenance: begins at %(begin)s and ends at %(end)s"
-msgstr "Achtung um %(begin)s beginnt der Wartungszeitraum und endet um %(end)s!"
+msgstr "Achtung! Der Wartungszeitraum beginnt um %(begin)s und endet um %(end)s. Bitte denken Sie daran, Ihre Arbeit zu speichern, da während der Wartungsarbeiten möglicherweise Daten verloren gehen können."
 
 msgid "Click here to get help."
 msgstr "Klicken Sie hier, um zur Online-Hilfe zu gelangen."
@@ -2819,6 +2825,9 @@ msgstr "Sehr geehrter %(receiver)s!"
 
 msgid "Submit"
 msgstr "Einreichen"
+
+msgid "Validation and submit"
+msgstr "Validierung und einreichen"
 
 msgid "old"
 msgstr "alt"

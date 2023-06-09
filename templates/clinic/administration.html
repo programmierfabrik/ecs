@@ -1,0 +1,46 @@
+{% extends 'core.html' %}
+{% load i18n %}
+
+{% block headertitle %}Krankenanstalten{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <a class="btn btn-primary mr-3 mb-3" href="{% url 'core.clinic.create_clinic' %}">
+            Neue Krankenanstalt anlegen
+        </a>
+
+        <form action="{{ request.path }}" method="post">
+            {% csrf_token %}
+            {% for field in filterform.visible_fields %}
+                {% include 'bootstrap/form_field.html' with inline=True %}
+            {% endfor %}
+            {% for hidden in filterform.hidden_fields %}
+                {{ hidden }}
+            {% endfor %}
+            <input class="btn btn-primary" type="submit" value="{% trans 'Search' %}"/>
+        </form>
+
+        {% include 'paginator.html' with page=clinics %}
+        <ul class="list-group mb-3">
+            {% for clinic in clinics %}
+                <li class="list-group-item d-block {% if clinic.deactivated %}list-group-item-danger{% endif %}">
+                    <div class="d-flex flex-row justify-content-between align-items-center">
+                        <span>
+                            {{ clinic.name }}
+                            {% if clinic.is_favorite %}
+                                <span class="fa fa-star" style="color: #FDDA0D; margin-left: 0.3rem"></span>
+                            {% endif %}
+                        </span>
+                        <a class="btn btn-secondary"
+                           href="{% url 'core.clinic.update_clinic' clinic_id=clinic.id %}">
+                            {% trans 'edit' %}
+                        </a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+        {% include 'paginator.html' with page=clinics %}
+
+    </div>
+
+{% endblock %}

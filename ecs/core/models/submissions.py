@@ -38,6 +38,7 @@ from ecs.votes.models import Vote
 class Submission(models.Model):
     ec_number = models.PositiveIntegerField(unique=True, db_index=True)
     medical_categories = models.ManyToManyField('core.MedicalCategory', related_name='submissions', blank=True)
+    clinics = models.ManyToManyField('core.Clinic', related_name='submissions', blank=True)
     workflow_lane = models.SmallIntegerField(null=True, choices=SUBMISSION_LANE_CHOICES, db_index=True)
     remission = models.BooleanField(default=False)
     biased_board_members = models.ManyToManyField(User, blank=True, related_name='biased_for_submissions')

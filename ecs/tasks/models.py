@@ -67,7 +67,6 @@ class TaskQuerySet(models.QuerySet):
         return self.exclude(task_type__workflow_node__uid__in=(
             'resubmission',
             'b2_resubmission',
-            'paper_submission_review',
         ))
 
     def for_submissions(self, submissions):

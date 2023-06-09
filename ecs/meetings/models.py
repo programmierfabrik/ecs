@@ -3,9 +3,9 @@ from datetime import timedelta, datetime
 
 from django.core.cache import cache
 from django.db import models
-from django.db.models import F, Prefetch
+from django.db.models import F, Prefetch, Q
 from django.dispatch import receiver
-from django.db.models.signals import post_delete, post_save
+from django.db.models.signals import post_delete, post_save, m2m_changed
 from django.contrib.auth.models import User
 from django.utils.translation import gettext, gettext_lazy as _
 from django.utils.text import slugify
@@ -20,9 +20,10 @@ from ecs.core.models.constants import (
     SUBMISSION_LANE_BOARD, SUBMISSION_LANE_RETROSPECTIVE_THESIS,
     SUBMISSION_LANE_EXPEDITED, SUBMISSION_LANE_LOCALEC,
 )
+from ecs.meetings.utils import create_task_for_board_members, remove_task_for_board_members
 from ecs.utils import cached_property
 from ecs.utils.viewutils import render_pdf, render_pdf_context
-from ecs.users.utils import sudo
+from ecs.users.utils import sudo, get_current_user
 from ecs.tasks.models import Task, TaskType
 from ecs.votes.models import Vote
 from ecs.core.models.core import AdvancedSettings
@@ -205,6 +206,10 @@ class Meeting(models.Model):
         null=True, on_delete=models.SET_NULL)
     expedited_reviewer_invitation_sent_at = models.DateTimeField(null=True)
     expert_assignment_user = models.ForeignKey('auth.User', null=True, on_delete=models.CASCADE)
+    board_members = models.ManyToManyField('auth.User', related_name='included_in_meetings')
+    invited_users = models.ManyToManyField('auth.User', related_name='invited_to_meetings')
+    invited_groups = models.ManyToManyField('auth.Group', related_name='invited_to_meetings')
+    documents = models.ManyToManyField('documents.Document', through='MeetingDocument')
 
     objects = MeetingManager()
     unfiltered = models.Manager()
@@ -428,8 +433,11 @@ class Meeting(models.Model):
             'meeting': self,
         })
         
-    def get_protocol_pdf(self):
-        timetable_entries = list(self.timetable_entries.all())
+    def get_protocol_pdf(self, entries_filter=None, extraction=False):
+        if entries_filter is None:
+            entries_filter = Q()
+        entries = self.timetable_entries.filter(entries_filter)
+        timetable_entries = list(entries)
         timetable_entries.sort(key=lambda e: e.agenda_index)
 
         tops = []
@@ -488,6 +496,7 @@ class Meeting(models.Model):
                     .order_by('submission_forms__submission__ec_number'),
             'b1ized': b1ized,
             'answers': answers,
+            'extraction': extraction,
         })
 
     def render_protocol_pdf(self):
@@ -581,6 +590,69 @@ class Meeting(models.Model):
         old_val = cache.get(key)
         cache.set(key, top.pk, 60*60*24*2)
 
+    @property
+    def associated_clinics(self):
+        from ecs.core.models.clinic import Clinic
+        from ecs.core.models.submissions import Submission
+
+        clinics_id_list = self.submissions.values("clinics")
+        return Clinic.objects.filter(id__in=[c.get('clinics', None) for c in clinics_id_list]).prefetch_related(
+            Prefetch('submissions', queryset=Submission.objects.filter(meetings=self.id),
+                     to_attr='active_submissions')
+        )
+
+
+def _meeting_board_members_changed(sender, **kwargs):
+    action = kwargs['action']
+    instance = kwargs['instance']
+    if action == 'post_remove':
+        # We need to remove (if possible) the tasks for these user_ids
+        user_ids_to_remove = kwargs['pk_set']
+        board_members_to_remove = User.objects.filter(id__in=user_ids_to_remove)
+
+        for submission in instance.submissions.all():
+            remove_task_for_board_members(submission, board_members_to_remove)
+
+    elif action == 'post_add':
+        # We need to generate the tasks (if possible) for these user_ids
+        user_ids_to_add = kwargs['pk_set']
+        board_members_to_add = User.objects.filter(id__in=user_ids_to_add)
+
+        # Create tasks for all submissions for all member        
+        for submission in instance.submissions.all():
+            create_task_for_board_members(submission, board_members_to_add)
+
+
+m2m_changed.connect(_meeting_board_members_changed, sender=Meeting.board_members.through)
+
+
+class MeetingDocument(models.Model):
+    meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE)
+    document = models.ForeignKey(Document, on_delete=models.CASCADE)
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
+
+class MeetingSubmissionProtocol(models.Model):
+    meeting = models.ForeignKey(Meeting, related_name='meeting_protocols', on_delete=models.CASCADE)
+    submission = models.ForeignKey('core.Submission', related_name='meeting_protocols', on_delete=models.CASCADE)
+    protocol = models.ForeignKey(Document, null = True, on_delete = models.SET_NULL)
+    protocol_sent_at = models.DateTimeField(null=True)
+    protocol_rendering_started_at = models.DateTimeField(null=True)
+
+    def get_protocol_pdf(self):
+        return self.meeting.get_protocol_pdf(Q(submission=self.submission), extraction=True)
+
+    def render_protocol_pdf(self):
+        pdfdata = self.get_protocol_pdf()
+        filename = '{}-{}-protocol.pdf'.format(
+            slugify(self.meeting.title),
+            timezone.localtime(self.meeting.start).strftime('%d-%m-%Y')
+        )
+        self.protocol = Document.objects.create_from_buffer(
+            pdfdata, doctype='meeting_protocol', parent_object=self,
+            name=filename, original_file_name=filename
+        )
+        self.save(update_fields=('protocol',))
+    
 
 @reversion.register(fields=('text',))
 class TimetableEntry(models.Model):
@@ -604,6 +676,14 @@ class TimetableEntry(models.Model):
 
             ('meeting', 'submission'),
         )
+
+    def save(self, *args, **kwargs):
+        if self.text:
+            with reversion.create_revision():
+                reversion.set_user(get_current_user())
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
 
     @property
     def agenda_index(self):
@@ -769,6 +849,7 @@ class TimetableEntry(models.Model):
         self.meeting._clear_caches()
         self.meeting.create_specialist_reviews()
 
+
 @receiver(post_delete, sender=TimetableEntry)
 def _timetable_entry_post_delete(sender, **kwargs):
     entry = kwargs['instance']
@@ -777,12 +858,26 @@ def _timetable_entry_post_delete(sender, **kwargs):
             timetable_index__gt=entry.index)
         changed.update(timetable_index=F('timetable_index') - 1)
     entry.meeting.update_assigned_categories()
-    on_meeting_top_delete.send(Meeting, meeting=entry.meeting, timetable_entry=entry)
+    on_meeting_top_delete.send(Meeting, meeting=(entry.meeting), timetable_entry=entry)
+    
+    # Remove tasks associated with Meeting.board_members
+    remove_task_for_board_members(entry.submission, entry.meeting.board_members.all())
+
 
 @receiver(post_save, sender=TimetableEntry)
 def _timetable_entry_post_save(sender, **kwargs):
     entry = kwargs['instance']
     entry.meeting.update_assigned_categories()
+
+    # only handle entries about submission and only when moving (creating) one.
+    if kwargs.get('created', False) and entry.submission:
+        # Create tasks associated with Meeting.board_members
+        # We need to filter the board_members to check if they still are qualified
+        board_member_filter = (Q(profile__is_board_member=True) |
+                               Q(profile__is_resident_member=True) |
+                               Q(profile__is_omniscient_member=True)) & Q(profile__user__groups__name='Specialist',
+                                                                          is_active=True)
+        create_task_for_board_members(entry.submission, entry.meeting.board_members.filter(board_member_filter))
 
 
 class Participation(models.Model):

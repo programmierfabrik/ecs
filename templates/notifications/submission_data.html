@@ -8,6 +8,7 @@
                 <th>EudraCT-Nr.</th>
                 <th>Ethik-Kommission</th>
                 <th>Prüfer</th>
+                <th>Tags</th>
             </tr>
         </thead>
         <tbody>
@@ -29,6 +30,9 @@
                         </td>
                         <td>
                             {{ submission.primary_investigator.contact }}
+                        </td>
+                        <td>
+                            {% include 'tags/list.html' with tags=submission.tags.all only %}
                         </td>
                     </tr>
                 {% endwith %}

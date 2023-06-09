@@ -1,0 +1,103 @@
+{% load core i18n widget_tweaks %}
+
+<div class="container">
+    <form id="drop-zone" action="{{ request.path }}" method="POST" enctype="multipart/form-data"
+          class="open-in-widget p-5 mb-3 rounded text-center" style="border: dashed 2px #bbb;">
+        {% csrf_token %}
+
+        <div class="display-4 mb-1" style="font-size: 2rem">Dokument hierher ziehen</div>
+        <div class="mb-1">oder...</div>
+        <input type="file" multiple hidden id="files" name="new_meeting_documents">
+        <button id="files-button" type="button" class="btn btn-outline-primary">Dokument auswählen</button>
+    </form>
+    <table class="table">
+        <tr>
+            <th>Dokumentenname</th>
+            <th>Hochgeladen am</th>
+            <th>Hochgeladen von</th>
+            <th></th>
+        </tr>
+        {% for meeting_document in meeting_documents %}
+            <tr>
+                <td>{{ meeting_document.document.name }}</td>
+                <td>{{ meeting_document.document.date }}</td>
+                <td>{{ meeting_document.uploaded_by }}</td>
+                <td>
+                    <div class="d-flex justify-content-end">
+                        <a href="{% url 'meetings.download_meeting_documents' meeting_pk=meeting.pk document_pk=meeting_document.document.pk %}"
+                           class="btn btn-primary mr-1" title="Dokument herunterladen">
+                            <span class="fa fa-download"></span>
+                        </a>
+                        <form
+                            action="{% url 'meetings.delete_meeting_documents' meeting_pk=meeting.pk meeting_document_pk=meeting_document.pk %}"
+                            method="post">
+                            {% csrf_token %}
+                            <button
+                                type="button"
+                                class="btn btn-danger delete_button" title="Dokument löschen"
+                                data-file-name="{{ meeting_document.document.name }}">
+                                <span class="fa fa-trash"></span>
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<script type="text/javascript">
+    (function () {
+        let files = $('#files');
+        $('#files-button').on('click', function () {
+            files.click();
+        });
+
+        // Used code from here:
+        // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/File_drag_and_drop
+        let dropZone = $('#drop-zone');
+        dropZone.on('dragover', function (event) {
+            event.preventDefault();
+        });
+        dropZone.on('drop', function (event) {
+            event.preventDefault();
+            files.get(0).files = event.originalEvent.dataTransfer.files;
+            uploadFiles();
+        });
+
+        files.on('change', function (event) {
+            uploadFiles();
+        });
+
+        function uploadFiles() {
+            dropZone.submit();
+        }
+
+        $('.delete_button').on('click', function (event) {
+            console.log(123);
+            event.preventDefault();
+            var form = $(this).parent("form");
+            var fileName = $(this).data('file-name');
+            var url = form.attr('action');
+
+            ecs.confirm({
+                question: 'Wollen sie wirklich ' + fileName + ' löschen?',
+                ok: '{{ _("Yes")|escapejs }}',
+                cancel: '{{ _("No")|escapejs }}',
+                success: function () {
+                    this.request = $.ajax({
+                        url: url,
+                        method: 'post',
+                        data: new FormData(form[0]),
+                        processData: false,
+                        contentType: false,
+                        context: this,
+                        success: function (data) {
+                            dropZone.parents('.ecs-Widget').data('widget').load();
+                        }
+                    });
+                }
+            });
+        });
+    })();
+</script>

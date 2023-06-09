@@ -42,6 +42,7 @@ def document_types():
         Args(_("Checklist Payment"), "checklist_payment", is_hidden=True),
         Args(_("Meeting Protocol"), "meeting_protocol", is_hidden=True),
         Args(_("Meeting ZIP"), "meeting_zip", is_hidden=True),
+        Args(_("Meeting Document"), "meeting_documents", is_hidden=True),
     )
 
     for args in names:

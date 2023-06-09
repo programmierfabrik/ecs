@@ -37,7 +37,7 @@ def task_backlog(request, submission_pk=None):
             Task.objects.for_submission(submission)
                 .select_related('task_type', 'task_type__group', 'assigned_to',
                     'assigned_to__profile', 'medical_category')
-                .order_by('created_at')
+                .order_by('-created_at')
         )
 
     return render(request, 'tasks/log.html', {

@@ -28,6 +28,7 @@ ecs.InlineFormSet = function(containers, options) {
     this.template.find('textarea').html('');
     this.template.find('.NullBooleanField > select').val(1);
     this.template.find('span.errors').remove();
+    this.template.find('input[type=checkbox]').prop('checked', false);
 
     this.isTable = containers.is('table');
     containers.each((function(i, el) {
@@ -124,9 +125,9 @@ ecs.InlineFormSet.prototype = {
             if ($('#id_' + name + '-id').val()) {
                 var delName = name + '-DELETE';
                 var checkbox = $('<input>', {
-                    type: 'checkbox', 
-                    style: 'display:none', 
-                    name: delName, 
+                    type: 'checkbox',
+                    style: 'display:none',
+                    name: delName,
                     id: 'id_' + delName,
                     checked: 'checked'
                 });

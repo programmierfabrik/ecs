@@ -85,7 +85,7 @@ class NotificationFormTest(LoginTestCase):
         notification_type, _ = NotificationType.objects.get_or_create(name='foo notif')
         notification = Notification.objects.create(type=notification_type)
         submission_form = create_submission_form()
-        response = self.client.get(reverse('notifications.subimssion_data_for_notification'), {'submission_form': submission_form.pk})
+        response = self.client.get(reverse('notifications.submission_data_for_notification'), {'submission_form': submission_form.pk})
         self.assertEqual(response.status_code, 200)
 
     def test_notification_pdf(self):

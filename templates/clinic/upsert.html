@@ -1,0 +1,29 @@
+{% extends 'core.html' %}
+{% load core i18n %}
+
+{% block headertitle %}Krankenanstalten{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <form action="" method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                {% include "bootstrap/form_field.html" with inline=True %}
+            {% endfor %}
+            <div class="my-4">
+                <input class="btn btn-primary" type="submit" value="
+                    {% if updating %} {% trans "Edit" %} {% else %} {% trans "Add" %} {% endif %}
+                "/>
+            </div>
+        </form>
+    </div>
+
+{% endblock %}
+
+{% block jsbottom %}
+    {{ block.super }}
+    <script type="text/javascript">
+        new ecs.textarea.TextArea($('#{{ form.name.id_for_label }}'));
+    </script>
+{% endblock %}

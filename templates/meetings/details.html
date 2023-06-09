@@ -36,11 +36,25 @@
             <li class="nav-item">
                 <a class="nav-link" href="#notifications_tab">{% trans "Notifications" %}</a>
             </li>
-            {% if user|is_member_of:'EC-Office' and meeting.ended and not meeting.protocol_sent_at %}
+            {% if user|is_member_of:'EC-Office' %}
+                {% if meeting.ended %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#protocol_tab">{% trans 'Protocol' %}</a>
+                    </li>
+                {% endif %}
                 <li class="nav-item">
-                    <a class="nav-link" href="#protocol_tab">{% trans 'Protocol' %}</a>
+                    <a class="nav-link" href="#clinic_tab">Krankenanstalten</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#ek-member_tab">EK-Mitglieder</a>
                 </li>
             {% endif %}
+            {% if user|is_member_of:"EC-Office" or user|is_member_of:"EC-Executive" %}
+                <li class="nav-item">
+                    <a class="nav-link" href="#documents_tab">Begleitende Sitzungsunterlagen</a>
+                </li>
+            {% endif %}
+
         </ul>
     </div>
     {% if user|is_member_of:"EC-Office" and not meeting.ended %}
@@ -74,9 +88,29 @@
     <div id="notifications_tab" class="container collapse">
         <div data-widget-url="{% url 'meetings.notification_list' meeting_pk=meeting.pk %}"></div>
     </div>
-    {% if user|is_member_of:'EC-Office' and meeting.ended and not meeting.protocol_sent_at %}
-        <div id="protocol_tab" class="collapse">
-            <div data-widget-url="{% url 'meetings.edit_protocol' meeting_pk=meeting.pk %}"></div>
+    {% if user|is_member_of:'EC-Office' and meeting.ended %}
+        <div id="protocol_tab" class="collapse container">
+            {% if not meeting.protocol_sent_at %}
+                <div data-widget-url="{% url 'meetings.edit_protocol' meeting_pk=meeting.pk %}"></div>
+            {% endif %}
+            {% if not meeting.protocol_sent_at and meeting.protocol %}<hr/>{% endif %}
+            {% if meeting.protocol %}
+                <div data-widget-url="{% url 'meetings.send_protocol_custom_groups' meeting_pk=meeting.pk %}"></div>
+            {% endif %}
+        </div>
+    {% endif %}
+    {% if user|is_member_of:'EC-Office' %}
+        <div id="clinic_tab" class="collapse">
+            <div data-widget-url="{% url 'meetings.list_submissions_protocols' meeting_pk=meeting.pk %}"></div>
+        </div>
+        <div id="ek-member_tab" class="collapse">
+            <div data-widget-url="{% url 'meetings.list_ek_member' meeting_pk=meeting.pk %}"></div>
+        </div>
+    {% endif %}
+
+    {% if user|is_member_of:"EC-Office" or user|is_member_of:"EC-Executive" %}
+        <div id="documents_tab" class="collapse">
+            <div data-widget-url="{% url 'meetings.list_documents' meeting_pk=meeting.pk %}"></div>
         </div>
     {% endif %}
 

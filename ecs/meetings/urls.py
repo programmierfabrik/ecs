@@ -7,7 +7,7 @@ urlpatterns = (
     path('reschedule/submission/<int:submission_pk>/', views.reschedule_submission, name='meetings.reschedule_submission'),
 
     path('new/', views.create_meeting, name='meetings.create_meeting'),
-    path('next/', views.next, name='meetings.next'),
+    path('next/', views.next_meeting, name='meetings.next_meeting'),
     path('list/upcoming/', views.upcoming_meetings, name='meetings.upcoming_meetings'),
     path('list/past/', views.past_meetings, name='meetings.past_meetings'),
     path('<int:meeting_pk>/', views.meeting_details, name='meetings.meeting_details'),
@@ -48,4 +48,15 @@ urlpatterns = (
     path('<int:meeting_pk>/protocol/pdf/render/', views.render_protocol_pdf, name='meetings.render_protocol_pdf'),
     path('<int:meeting_pk>/protocol/pdf/', views.protocol_pdf, name='meetings.protocol_pdf'),
     path('<int:meeting_pk>/protocol/send/', views.send_protocol, name='meetings.send_protocol'),
+    path('<int:meeting_pk>/protocol/send-groups/', views.send_protocol_custom_groups, name='meetings.send_protocol_custom_groups'),
+    path('<int:meeting_pk>/protocol/preview-users/', views.preview_users, name='meetings.preview_users'),
+    path('<int:meeting_pk>/protocol/clinic/', views.list_submissions_protocols, name='meetings.list_submissions_protocols'),
+    path('<int:meeting_pk>/protocol/clinic/pdf/render/<int:submission_pk>/', views.render_submission_protocol, name='meetings.render_submission_protocol'),
+    path('<int:meeting_pk>/protocol/clinic/pdf/<int:protocol_pk>/', views.submission_protocol_pdf, name='meetings.submission_protocol_pdf'),
+    path('<int:meeting_pk>/protocol/clinic/pdf/send/<int:submission_pk>/', views.send_submission_protocol, name='meetings.send_submission_protocol'),
+
+    path('<int:meeting_pk>/ek-member/', views.list_ek_member, name='meetings.list_ek_member'),
+    path('<int:meeting_pk>/documents/', views.list_documents, name='meetings.list_documents'),
+    path('<int:meeting_pk>/documents/<int:document_pk>', views.download_meeting_documents, name='meetings.download_meeting_documents'),
+    path('<int:meeting_pk>/documents/delete/<int:meeting_document_pk>', views.delete_meeting_documents, name='meetings.delete_meeting_documents'),
 )

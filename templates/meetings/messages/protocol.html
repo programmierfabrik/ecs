@@ -3,11 +3,12 @@
 <body>
 {% block content %}
     <p>
-        Guten Tag {{ recipient }},
+        Guten Tag,
         <br/>
         <br/>
         <br/>
-        Anbei senden wir Ihnen das Protokoll der Sitzung vom {{ meeting.start|date:'d.m.Y' }}.<br/>
+        Anbei senden wir Ihnen den Protokollauszug der Studie {{ submission }} aus der Sitzung
+        vom {{ meeting.start|date:'d.m.Y' }}.<br>
         <br/>
         <br/>
         {% db_setting 'signature_block' as signature_block %}

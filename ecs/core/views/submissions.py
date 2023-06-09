@@ -186,14 +186,24 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
 
     crumbs_key = 'submission_breadcrumbs-user_{0}'.format(request.user.pk)
     crumbs = cache.get(crumbs_key, [])
-    crumbs = ([submission.pk] + [pk for pk in crumbs if not pk == submission.pk])[:3]
+    crumbs = ([submission.pk] + [pk for pk in crumbs if not pk == submission.pk])[:5]
     cache.set(crumbs_key, crumbs, 60*60*24*30) # store for thirty days
 
     checklists_q = Q(last_edited_by=request.user)
     if request.user.profile.is_internal:
-        checklists_q |= Q(status__in=['completed', 'review_ok'])
+        checklists_q |= Q(status__in=['completed', 'review_ok', 'review_ok_internal'])
     else:
-        checklists_q |= Q(status__in=['completed', 'review_ok']) & ~(Q(blueprint__slug='external_review') & ~Q(status='review_ok'))
+        presenting_parties = [
+            submission.presenter_id, submission.susar_presenter_id,
+            submission_form.submitter_id, submission_form.sponsor_id,
+            *(inv.user_id for inv in submission_form.investigators.all())
+        ]
+        allowed_status = ['completed', 'review_ok']
+        external_review_allowed_status = ['review_ok']
+        if request.user.id not in presenting_parties:
+            allowed_status.append('review_ok_internal')
+            external_review_allowed_status.append('review_ok_internal')
+        checklists_q |= Q(status__in=allowed_status) & ~(Q(blueprint__slug='external_review') & ~Q(status__in=external_review_allowed_status))
     checklists = submission.checklists.filter(checklists_q).order_by('blueprint__name')
 
     checklist_reviews = []
@@ -796,7 +806,7 @@ def create_submission_form(request):
                         employee_first_name == investigator_first_name and \
                         employee_last_name == investigator_last_name:
                         investigator_employee_valid = False
-                        investigators_formset.non_form_errors().append('Der Prüfer darf nicht gleichzeitig als Mitarbeiter genannt werden.')
+                        investigators_formset.non_form_errors().append('Prüfer/in darf nicht gleichzeitig als Mitarbeiter/in genannt werden.')
 
         valid = form.is_valid() and formsets_valid and investigator_employee_valid and protocol_uploaded and not 'upload' in request.POST
         if valid and submission and not notification_type and \

@@ -18,12 +18,6 @@ gettext
 libpq-dev
 ```
 
-MacOS (incomplete):
-
-```
-gettext
-```
-
 Start the development database:
 
 ```shell
@@ -37,7 +31,7 @@ pipenv run ./manage.py migrate
 pipenv run ./manage.py bootstrap
 ```
 
-Or you can use your Jetbrains based IDE to run any tasks (migrate, bootstrap, ...) with `Ctrl+Alt+R` or `⌥ R`.
+Or you can use your Jetbrains based IDE to run any tasks (migrate, bootstrap, ...) with `Ctrl+Alt+R`.
 Here you can type `migrate` and `bootstrap`.
 
 Finally, start the server with
@@ -50,7 +44,8 @@ or in your Jetbrains based IDE with the `run` or (preferably) `debug` button.
 
 ### Download database from production
 
-Be sure that the database is empty (no migrations or data). If it is not empty just `docker-compose down && docker-compose up -d`.
+Be sure that the database is empty (no migrations or data). If it is not empty
+just `docker-compose down && docker-compose up -d`.
 
 ```shell
 ssh root@example.com cat /data/ecs-pgdump/ecs.pgdump.gz | \
@@ -63,8 +58,3 @@ ssh ecs@example.com cat ./deployment/data/ecs/dump/ecs.pgdump.gz | \
   gzip -d | \
   docker exec -i test-ecs pg_restore -U test-ecs -1 --format=custom --schema=public --no-owner --dbname=test-ecs
 ```
-
-
-## TODO:
-
-* Barcode on every pdf page when generating a pdf

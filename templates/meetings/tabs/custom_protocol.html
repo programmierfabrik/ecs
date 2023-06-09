@@ -1,0 +1,77 @@
+{% load i18n widget_tweaks %}
+<div class="container">
+    {% if invited_count is not None %}
+        <div class="alert alert-info text-center">
+            Das Protokoll wurde an {{ invited_count }} Benutzer geschickt.
+        </div>
+    {% endif %}
+    <h2>Protokoll an bestimmte Gruppen senden</h2>
+    <div class="d-flex mb-3">
+        <form id="custom_protocol_form" action="{{ request.path }}" method="post" class="w-100 open-in-widget">
+            {% csrf_token %}
+            {% for field in form %}
+                {% include 'bootstrap/form_field.html' with inline=True paper_info=True %}
+            {% endfor %}
+            {% if not protocol_sent %}
+                <div class="form-group row">
+                    <label class="col-md-2 col-form-label overflow-wrap-break-word">
+                        Betroffenen Benutzer
+                    </label>
+                    <div class="col-md-10">
+                        <div id="user-list" class="form-control"
+                             data-widget-url="{% url 'meetings.preview_users' meeting_pk=meeting.pk %}"
+                             style="display: flex; flex-wrap: wrap; column-gap: 0.5rem; row-gap: 0.2rem;">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-primary">{% trans 'Send protocol' %}</button>
+            {% else %}
+                <div class="form-group row">
+                    <label class="col-md-2 col-form-label overflow-wrap-break-word">Protokoll verschickt an</label>
+                    <div class="col-md-10">
+                        <div class="form-control"
+                             style="display: flex; flex-wrap: wrap; column-gap: 0.5rem; row-gap: 0.2rem;">
+                            {% if users_to_invite|length == 0 %}
+                                Das Protokoll wurde an niemanden versendet
+                            {% endif %}
+                            {% for user in users_to_invite %}
+                                <span>{{ user }}{% if user != users_to_invite.last %},{% endif %}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript">
+    (function () {
+        var customProtocolForm = $('#custom_protocol_form');
+        var button = $('#custom_protocol_form button');
+        button.on('click', function () {
+            $(this).prop('disabled', true);
+            $(this).append('<span class="fa fa-spinner fa-spin ml-2"></span>');
+            customProtocolForm.submit();
+        });
+
+        {% if not protocol_sent %}
+            var usersList = $('#user-list');
+            var options = {
+                url: usersList.data('widgetUrl')
+            }
+            var ecsWidget = new ecs.Widget(usersList, options);
+
+            $("#custom_protocol_form").find("select, input").change(function () {
+                ecsWidget.load(ecsWidget.url, customProtocolForm);
+            });
+        {% endif %}
+
+        {% if invited_count is not None %}
+            var widget = customProtocolForm.parents('.ecs-Widget').first();
+            var previous_protocol_widget = widget.prev().prev('.ecs-Widget');
+            previous_protocol_widget.remove();
+        {% endif %}
+    })();
+</script>

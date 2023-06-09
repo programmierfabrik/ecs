@@ -199,3 +199,13 @@
         width: 400px;
     }
 }
+
+#multiple-checkbox {
+    label {
+        display: flex;
+        input {
+            width: auto;
+            margin-right: 0.5rem;
+        }
+    }
+}

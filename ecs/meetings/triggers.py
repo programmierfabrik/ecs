@@ -3,6 +3,7 @@ from django.dispatch import receiver
 from ecs.meetings import signals
 from ecs.meetings.cache import flush_meeting_page_cache
 from ecs.meetings.models import Participation
+from ecs.meetings.utils import remove_task_for_board_members
 from ecs.votes.models import Vote
 from ecs.workflow.signals import token_marked_deleted
 
@@ -45,6 +46,12 @@ def on_meeting_end(sender, **kwargs):
         # FOR UPDATE is not allowed with DISTINCT clause
         top.is_open = False
         top.save()
+
+    # Remove (close) all the remaining tasks for the given board member
+    submissions = meeting.submissions.all()
+    board_members = meeting.board_members.all()
+    for submission in submissions:
+        remove_task_for_board_members(submission, board_members)
 
     _flush_cache(meeting)
 
