@@ -5,6 +5,7 @@ on:
     branches-ignore:
       - master
     tags:
+      - *
 
 env:
   REGISTRY: ghcr.io
