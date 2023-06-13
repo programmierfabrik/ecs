@@ -67,19 +67,28 @@ class NullBooleanFieldNewMedtechLaw(forms.NullBooleanField):
         super().__init__(*args, **kwargs)
 
 
-class AutocompleteModelChoiceField(forms.ModelChoiceField):
+class AutocompleteModelChoiceField(forms.ChoiceField):
     def __init__(self, queryset_name, queryset, **kwargs):
         kwargs['widget'] = self.Widget(self)
         self.queryset_name = queryset_name
         self.queryset = queryset
-        super().__init__(queryset, **kwargs)
+        super().__init__(**kwargs)
 
     def clean(self, value):
-        if value is None or value is '':
+        if value is None or value == '':
             if self.required:
                 raise ValidationError('Das Feld darf nicht leer sein!')
             return None
-        return super().clean(value)
+        value = super().clean(value)
+        return User.objects.get(id=value)
+
+    def valid_value(self, value):
+        """Check to see if the provided value is a valid choice."""
+        if not self.required:
+            return True
+
+        first = self.queryset.all().filter(pk=value).first()
+        return first is not None
 
     class Widget(forms.Select):
         def __init__(self, field):
