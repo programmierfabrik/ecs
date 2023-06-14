@@ -1317,7 +1317,7 @@ def download_meeting_documents(request, meeting_pk=None, document_pk=None):
     )
 
     response = FileResponse(doc.retrieve_raw(), content_type=doc.mimetype)
-    response['Content-Disposition'] = 'attachment;filename={}'.format(doc.get_filename())
+    response['Content-Disposition'] = 'attachment;filename={}'.format(doc.name)
     return response
 
 
