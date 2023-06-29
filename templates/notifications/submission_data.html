@@ -8,7 +8,9 @@
                 <th>EudraCT-Nr.</th>
                 <th>Ethik-Kommission</th>
                 <th>Prüfer</th>
-                <th>Tags</th>
+                {% if user.profile.is_internal %}
+                    <th>Tags</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -31,9 +33,11 @@
                         <td>
                             {{ submission.primary_investigator.contact }}
                         </td>
-                        <td>
-                            {% include 'tags/list.html' with tags=submission.tags.all only %}
-                        </td>
+                        {% if user.profile.is_internal %}
+                            <td>
+                                {% include 'tags/list.html' with tags=submission.tags.all only %}
+                            </td>
+                        {% endif %}
                     </tr>
                 {% endwith %}
             {% endfor %}
