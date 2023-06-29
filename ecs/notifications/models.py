@@ -203,6 +203,14 @@ class NotificationAnswer(models.Model):
     objects = AuthorizationManager()
     unfiltered = models.Manager()
 
+    def save(self, *args, **kwargs):
+        if self.text:
+            with reversion.create_revision():
+                reversion.set_user(get_current_user())
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
+
     @property
     def version_number(self):
         return Version.objects.get_for_object(self).count()

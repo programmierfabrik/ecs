@@ -66,6 +66,14 @@ class Vote(models.Model):
             return '{} {}'.format(name, ec_number)
         return '{} ID {}'.format(name, self.pk)
 
+    def save(self, *args, **kwargs):
+        if self.result or self.text:
+            with reversion.create_revision():
+                reversion.set_user(get_current_user())
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
+
     def publish(self):
         assert self.published_at is None
         with reversion.create_revision():
