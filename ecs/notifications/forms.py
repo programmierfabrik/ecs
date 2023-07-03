@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from ecs.notifications.models import NotificationAnswer
+from ecs.notifications.models import NotificationAnswer, CTISTransitionNotification
 from ecs.core.models import Submission, SubmissionForm, Investigator
 from ecs.users.utils import get_current_user
 from ecs.utils.formutils import require_fields
@@ -150,3 +150,42 @@ class AmendmentNotificationForm(NotificationForm):
             'submission_forms', 'old_submission_form', 'new_submission_form',
             'diff', 'is_substantial', 'meeting', 'needs_signature',
         )
+
+
+class CTISTransitionNotificationForm(NotificationForm):
+    submission_forms = forms.ModelChoiceField(queryset=SubmissionForm.objects.all(), label=_('Study'))
+    eu_ct_number = forms.CharField(widget=forms.TextInput, label='EU-CT-Nummer')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        queryset = get_usable_submission_forms().filter(
+            submission__presenter=get_current_user(), submission__is_finished=False
+        )
+        self.fields['submission_forms'] = forms.ModelChoiceField(queryset=queryset, label=_('Study'))
+        if queryset.count() == 1:
+            self.fields['submission_forms'].initial = queryset.first()
+
+    def clean_submission_forms(self):
+        submission_forms = self.cleaned_data['submission_forms']
+
+        if submission_forms is not None:
+            return [submission_forms]
+        return []
+    
+    def save(self, commit=True):
+        instance = super().save(commit=commit)
+
+        if commit:
+            instance.submission_forms.set(self.cleaned_data['submission_forms'])
+        else:
+            old_save_m2m = self.save_m2m
+            def _save_m2m(self):
+                old_save_m2m()
+                instance.submission_forms.set(self.cleaned_data['submission_forms'])
+            self.save_m2m = types.MethodType(_save_m2m, self)
+
+        return instance
+
+    class Meta:
+        model = CTISTransitionNotification
+        fields = ('submission_forms', 'comments', 'eu_ct_number',)

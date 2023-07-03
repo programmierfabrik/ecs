@@ -4,7 +4,7 @@ from ecs.notifications.forms import (
     NotificationForm, ProgressReportNotificationForm,
     CompletionReportNotificationForm, SingleStudyNotificationForm,
     AmendmentNotificationForm, SafetyNotificationForm,
-    CenterCloseNotificationForm,
+    CenterCloseNotificationForm, CTISTransitionNotificationForm,
 )
 
 
@@ -245,6 +245,14 @@ NOTIFICATION_FORM_TABS[CenterCloseNotificationForm] = [
         ]),
     ]),
     Tab('documents', _('documents'), []),
+]
+
+NOTIFICATION_FORM_TABS[CTISTransitionNotificationForm] = [
+    Tab('general_information', _('General information'), [
+        (_('General information'), [
+            'submission_forms', 'comments', 'eu_ct_number',
+        ]),
+    ]),
 ]
 
 def get_notification_form_tabs(form_cls):

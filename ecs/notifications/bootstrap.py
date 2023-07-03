@@ -66,6 +66,16 @@ def notification_types():
             finishes_study = False,
             position = 5,
         ),
+        dict(
+            name = "In das CTIS Transitieren",
+            form = "ecs.notifications.forms.CTISTransitionNotificationForm",
+            default_response = "Die Kommission nimmt diese Transition ohne Einspruch zur Kenntnis.",
+            includes_diff = False,
+            grants_vote_extension = False,
+            is_rejectable = True,
+            finishes_study = True,
+            position = 5,
+        ),
     )
 
     objs = set()

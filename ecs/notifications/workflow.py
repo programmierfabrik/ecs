@@ -9,7 +9,7 @@ from ecs.meetings.signals import on_meeting_start, on_meeting_end
 from ecs.notifications.models import (
     Notification, CompletionReportNotification, ProgressReportNotification,
     SafetyNotification, CenterCloseNotification, AmendmentNotification,
-    NOTIFICATION_MODELS,
+    NOTIFICATION_MODELS, CTISTransitionNotification,
 )
 
 
@@ -23,7 +23,9 @@ def is_susar(wf):
 
 @guard(model=Notification)
 def is_report(wf):
-    return CompletionReportNotification.objects.filter(pk=wf.data.pk).exists() or ProgressReportNotification.objects.filter(pk=wf.data.pk).exists()
+    return CompletionReportNotification.objects.filter(pk=wf.data.pk).exists() \
+        or ProgressReportNotification.objects.filter(pk=wf.data.pk).exists() \
+        or CTISTransitionNotification.objects.filter(pk=wf.data.pk).exists()
 
 @guard(model=Notification)
 def is_center_close(wf):

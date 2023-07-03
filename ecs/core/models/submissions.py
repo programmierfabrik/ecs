@@ -49,6 +49,8 @@ class Submission(models.Model):
     is_finished = models.BooleanField(default=False)
     is_expired = models.BooleanField(default=False)
 
+    ctis_transition = models.BooleanField(default=False)
+
     presenter = models.ForeignKey(User, related_name='presented_submissions', on_delete=models.CASCADE)
     susar_presenter = models.ForeignKey(User, related_name='susar_presented_submissions', on_delete=models.CASCADE)
 
@@ -127,6 +129,8 @@ class Submission(models.Model):
     @property
     def lifecycle_phase(self):
         if self.is_finished:
+            if self.ctis_transition:
+                return 'Transitiert'
             return _('Finished')
         elif self.is_expired:
             if self.is_localec:
@@ -183,9 +187,10 @@ class Submission(models.Model):
     def __str__(self):
         return self.get_ec_number_display()
 
-    def finish(self):
+    def finish(self, ctis_transition):
         self.is_finished = True
-        self.save(update_fields=('is_finished',))
+        self.ctis_transition = ctis_transition
+        self.save(update_fields=('is_finished', 'ctis_transition',))
 
         Task.unfiltered.for_submission(self).filter(
             task_type__is_dynamic=True).open().mark_deleted()
