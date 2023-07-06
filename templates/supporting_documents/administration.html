@@ -1,0 +1,72 @@
+{% extends 'core.html' %}
+{% load i18n %}
+
+{% block headertitle %}Unterstützende Dokumente{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <a class="btn btn-primary mr-3 mb-3" href="{% url 'core.supporting_documents.create' %}">
+            Neues Dokument hochladen
+        </a>
+
+        <form action="{{ request.path }}" method="post">
+            {% csrf_token %}
+            {% for field in filterform.visible_fields %}
+                {% include 'bootstrap/form_field.html' with inline=True %}
+            {% endfor %}
+            {% for hidden in filterform.hidden_fields %}
+                {{ hidden }}
+            {% endfor %}
+            <input class="btn btn-primary" type="submit" value="{% trans 'Search' %}"/>
+        </form>
+
+        {% include 'paginator.html' with page=supporting_documents %}
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">Dateiname</th>
+                <th scope="col">Aufgaben</th>
+                <th scope="col"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for supporting_document in supporting_documents %}
+                <tr>
+                    <td>{{ supporting_document.document.name }}</td>
+                    <td style="font-size: 16px">
+                        {% for task in supporting_document.tasks.all %}
+                            <span class="badge badge-primary">{{ task }}</span>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <div class="d-flex justify-content-end">
+                            <a href="" class="btn btn-warning">Ersetzen</a>
+                            <a href="" class="btn btn-danger ml-2">Löschen</a>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {#        <ul class="list-group mb-3">#}
+        {#            {% for supporting_document in supporting_documents %}#}
+        {#                <li class="list-group-item d-block">#}
+        {#                    <div class="d-flex flex-row justify-content-between align-items-center">#}
+        {#                        <span>#}
+        {#                            {{ supporting_document.document.name }}#}
+        {#                        </span>#}
+        {#                        <a class="btn btn-secondary" href="">{% trans 'edit' %}</a>#}
+        {#                    </div>#}
+        {#                </li>#}
+        {#            {% endfor %}#}
+        {#        </ul>#}
+        {% include 'paginator.html' with page=clinics %}
+    </div>
+{% endblock %}
+
+{% block jsbottom %}
+    {{ block.super }}
+    <script type="text/javascript">
+        $('#{{ filterform.tasks.id_for_label }}').select2({placeholder: null});
+    </script>
+{% endblock %}
