@@ -7,3 +7,4 @@ from ecs.core.models.submissions import (
 )
 from ecs.core.models.comments import Comment
 from ecs.core.models.clinic import Clinic
+from ecs.core.models.supporting_documents import SupportingDocument
