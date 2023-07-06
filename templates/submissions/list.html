@@ -155,9 +155,11 @@
                 });
             {% endif %}
 
-	    $('#submission_list_filter').find('input, select').change(function() {
-		ecs.stopPageLoad();
-		form.submit();
+	    $('#submission_list_filter').find('input, select').change(function(e) {
+            if (!$(this).hasClass('select2-search__field')) {
+                ecs.stopPageLoad();
+                form.submit();
+            }
 	    });
 
 	    $('a.delete_docstash').click(function(ev) {
