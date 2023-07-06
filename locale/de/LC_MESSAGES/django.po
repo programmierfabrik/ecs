@@ -1660,6 +1660,9 @@ msgstr "Sitzungen"
 msgid "Meeting Document"
 msgstr "Begleitende Sitzungsunterlagen"
 
+msgid "Supporting Document"
+msgstr "Unterstützende Dokumente"
+
 msgid "no file"
 msgstr "keine Datei"
 
