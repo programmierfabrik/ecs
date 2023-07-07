@@ -20,6 +20,12 @@ class SupportingDocumentsForm(forms.ModelForm):
     ).order_by('workflow_node__uid'), label=_('Task Type'))
     file = forms.FileField()
     
+    def __init__(self, *args, **kwargs):
+        replace = kwargs.pop('replace', False)
+        super().__init__(*args, **kwargs)
+        if replace:
+            self.fields['file'].required = False
+    
     def save(self, commit=True):
         instance = super().save(commit=False)
         file = self.cleaned_data['file']

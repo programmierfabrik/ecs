@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from ecs.core.forms.supporting_documents import SupportingDocumentsForm, SupportingDocumentsAdministrationFilterForm
 from ecs.core.models import SupportingDocument
+from ecs.documents.models import Document
 from ecs.tasks.models import TaskType
 from ecs.users.utils import user_group_required
 
@@ -76,3 +77,32 @@ def download(request, pk):
     response = FileResponse(document.retrieve_raw(), content_type=document.mimetype)
     response['Content-Disposition'] = 'attachment;filename={}'.format(document.name)
     return response
+
+@user_group_required('Supporting Documents')
+def update(request, pk):
+    supporting_document = get_object_or_404(SupportingDocument, pk=pk)
+    if request.method == "POST":
+        form = SupportingDocumentsForm(request.POST, request.FILES, replace=True)
+        if form.is_valid():
+            # Only set the file if a file exists
+            file = form.cleaned_data['file']
+            if file:
+                # Delete the previous file
+                supporting_document.document.delete()
+                # Set the new file
+                supporting_document.document = Document.objects.create_from_buffer(
+                    file.read(), doctype='supporting_documents',
+                    stamp_on_download=False, mimetype=file.content_type, name=file.name
+                )
+            # Set the tasks everytime we replace
+            supporting_document.tasks.set(form.cleaned_data['tasks'])
+            supporting_document.save()
+            return redirect('core.supporting_documents.administration')
+    else:
+        form = SupportingDocumentsForm(replace=True, instance=supporting_document)
+        form.fields['file'].required = False
+
+    return render(request, 'supporting_documents/create.html', {
+        'form': form,
+        'updating': True,
+    })

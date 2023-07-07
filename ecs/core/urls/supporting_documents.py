@@ -7,4 +7,5 @@ urlpatterns = (
     path('create/', views.create, name='core.supporting_documents.create'),
     path('delete/<int:pk>/', views.delete, name='core.supporting_documents.delete'),
     path('download/<int:pk>/', views.download, name='core.supporting_documents.download'),
+    path('update/<int:pk>/', views.update, name='core.supporting_documents.update'),
 )
