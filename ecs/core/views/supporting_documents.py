@@ -1,5 +1,6 @@
 from django.core.paginator import Paginator
-from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
 
 from ecs.core.forms.supporting_documents import SupportingDocumentsForm, SupportingDocumentsAdministrationFilterForm
 from ecs.core.models import SupportingDocument
@@ -59,3 +60,10 @@ def create(request):
     return render(request, 'supporting_documents/create.html', {
         'form': form,
     })
+
+@user_group_required('Supporting Documents')
+def delete(request, pk):
+    supporting_document = get_object_or_404(SupportingDocument, pk=pk)
+    supporting_document.document.delete()
+    supporting_document.delete()
+    return HttpResponse('')

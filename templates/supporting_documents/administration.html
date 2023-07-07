@@ -40,27 +40,25 @@
                     </td>
                     <td>
                         <div class="d-flex justify-content-end">
-                            <a href="" class="btn btn-warning">Ersetzen</a>
-                            <a href="" class="btn btn-danger ml-2">Löschen</a>
+                            <a href="" class="btn btn-primary mr-1" title="Dokument herunterladen">
+                                <span class="fa fa-download"></span>
+                            </a>
+                            <form action="{% url 'core.supporting_documents.delete' pk=supporting_document.pk %}" method="post">
+                                {% csrf_token %}
+                                <button
+                                    type="button"
+                                    class="btn btn-danger delete_button" title="Dokument löschen"
+                                    data-file-name="{{ supporting_document.document.name }}">
+                                    <span class="fa fa-trash"></span>
+                                </button>
+                            </form>
                         </div>
                     </td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
-        {#        <ul class="list-group mb-3">#}
-        {#            {% for supporting_document in supporting_documents %}#}
-        {#                <li class="list-group-item d-block">#}
-        {#                    <div class="d-flex flex-row justify-content-between align-items-center">#}
-        {#                        <span>#}
-        {#                            {{ supporting_document.document.name }}#}
-        {#                        </span>#}
-        {#                        <a class="btn btn-secondary" href="">{% trans 'edit' %}</a>#}
-        {#                    </div>#}
-        {#                </li>#}
-        {#            {% endfor %}#}
-        {#        </ul>#}
-        {% include 'paginator.html' with page=clinics %}
+        {% include 'paginator.html' with page=supporting_documents %}
     </div>
 {% endblock %}
 
@@ -68,5 +66,32 @@
     {{ block.super }}
     <script type="text/javascript">
         $('#{{ filterform.tasks.id_for_label }}').select2({placeholder: null});
+
+        $('.delete_button').on('click', function (event) {
+            event.preventDefault();
+            var form = $(this).parent("form");
+            var fileName = $(this).data('file-name');
+            var url = form.attr('action');
+            var tr = $(this).parents("tr");
+
+            ecs.confirm({
+                question: 'Wollen sie wirklich ' + fileName + ' löschen?',
+                ok: '{{ _("Yes")|escapejs }}',
+                cancel: '{{ _("No")|escapejs }}',
+                success: function () {
+                    this.request = $.ajax({
+                        url: url,
+                        method: 'post',
+                        data: new FormData(form[0]),
+                        processData: false,
+                        contentType: false,
+                        context: this,
+                        success: function (data) {
+                            tr.remove();
+                        }
+                    });
+                }
+            });
+        });
     </script>
 {% endblock %}
