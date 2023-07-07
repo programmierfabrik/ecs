@@ -40,7 +40,7 @@
                     </td>
                     <td>
                         <div class="d-flex justify-content-end">
-                            <a href="" class="btn btn-primary mr-1" title="Dokument herunterladen">
+                            <a href="{% url 'core.supporting_documents.download' pk=supporting_document.pk %}" class="btn btn-primary mr-1" title="Dokument herunterladen">
                                 <span class="fa fa-download"></span>
                             </a>
                             <form action="{% url 'core.supporting_documents.delete' pk=supporting_document.pk %}" method="post">

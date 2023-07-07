@@ -1,5 +1,5 @@
 from django.core.paginator import Paginator
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from ecs.core.forms.supporting_documents import SupportingDocumentsForm, SupportingDocumentsAdministrationFilterForm
@@ -67,3 +67,12 @@ def delete(request, pk):
     supporting_document.document.delete()
     supporting_document.delete()
     return HttpResponse(status=204)
+
+@user_group_required('Supporting Documents')
+def download(request, pk):
+    supporting_document = get_object_or_404(SupportingDocument, pk=pk)
+
+    document = supporting_document.document
+    response = FileResponse(document.retrieve_raw(), content_type=document.mimetype)
+    response['Content-Disposition'] = 'attachment;filename={}'.format(document.name)
+    return response
