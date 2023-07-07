@@ -66,4 +66,4 @@ def delete(request, pk):
     supporting_document = get_object_or_404(SupportingDocument, pk=pk)
     supporting_document.document.delete()
     supporting_document.delete()
-    return HttpResponse('')
+    return HttpResponse(status=204)
