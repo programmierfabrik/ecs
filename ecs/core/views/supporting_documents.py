@@ -110,3 +110,29 @@ def update(request, pk):
         'form': form,
         'updating': True,
     })
+
+
+def download_without_role(request, pk):
+    allowed_task_names = []
+    for group in request.user.groups.all():
+        name = group.name
+        if name == 'External Reviewer':
+            allowed_task_names.append('External Review')
+        elif name == 'GCP Reviewer':
+            allowed_task_names.append('GCP Review')
+        elif name == 'Insurance Reviewer':
+            allowed_task_names.append('Insurance Review')
+        elif name == 'EC-Office':
+            allowed_task_names.append('Legal and Patient Review')
+        elif name == 'Specialist':
+            allowed_task_names.append('Specialist Review')
+        elif name == 'Statistic Reviewer':
+            allowed_task_names.append('Statistical Review')
+
+    task_types = TaskType.objects.filter(is_dynamic=True, workflow_node__graph__auto_start=True,
+                                 name__in=allowed_task_names).order_by('workflow_node__uid')
+    supporting_document = get_object_or_404(SupportingDocument.objects.filter(pk=pk, tasks__in=task_types).distinct())
+    document = supporting_document.document
+    response = FileResponse(document.retrieve_raw(), content_type=document.mimetype)
+    response['Content-Disposition'] = 'attachment;filename={}'.format(document.name)
+    return response

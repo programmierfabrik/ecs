@@ -10,7 +10,9 @@
             <ul class="list-group mb-3">
                 {% for supporting_document in supporting_documents %}
                     <li class="list-group-item d-block">
-                        {{ supporting_document.document.name }}
+                        <a target="_blank" href="{% url 'core.supporting_documents.download_without_role' pk=supporting_document.pk %}">
+                            {{ supporting_document.document.name }}
+                        </a>
                     </li>
                 {% endfor %}
             </ul>
@@ -43,7 +45,8 @@
             {% if formset.readonly %}
                 <div>
                     {% url 'core.field_history' model_name='checklist_answer' pk=form.instance.pk as history_url %}
-                    <a class="fa fa-2x fa-history" href="javascript:void(ecs.fieldhistory.show('{{ history_url }}'))"></a>
+                    <a class="fa fa-2x fa-history"
+                       href="javascript:void(ecs.fieldhistory.show('{{ history_url }}'))"></a>
                 </div>
             {% endif %}
             {% render_field form.comment class+="form-control" placeholder=form.comment.label %}
