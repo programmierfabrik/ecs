@@ -42,11 +42,12 @@ def administration(request):
         supporting_documents = paginator.page(page)
     except:
         supporting_documents = paginator.page(1)
- 
+
     return render(request, 'supporting_documents/administration.html', {
         'supporting_documents': supporting_documents,
         'filterform': filterform
     })
+
 
 @user_group_required('Supporting Documents')
 def create(request):
@@ -62,12 +63,14 @@ def create(request):
         'form': form,
     })
 
+
 @user_group_required('Supporting Documents')
 def delete(request, pk):
     supporting_document = get_object_or_404(SupportingDocument, pk=pk)
     supporting_document.document.delete()
     supporting_document.delete()
     return HttpResponse(status=204)
+
 
 @user_group_required('Supporting Documents')
 def download(request, pk):
@@ -77,6 +80,7 @@ def download(request, pk):
     response = FileResponse(document.retrieve_raw(), content_type=document.mimetype)
     response['Content-Disposition'] = 'attachment;filename={}'.format(document.name)
     return response
+
 
 @user_group_required('Supporting Documents')
 def update(request, pk):
