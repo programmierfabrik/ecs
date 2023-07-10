@@ -4,6 +4,18 @@
     <form action="{{ request.path }}" method="post" class="bound_to_task">
     {% csrf_token %}
     {{ formset.management_form }}
+    {% if supporting_documents %}
+        <div>
+            <h3>Unterstützende Dokumente</h3>
+            <ul class="list-group mb-3">
+                {% for supporting_document in supporting_documents %}
+                    <li class="list-group-item d-block">
+                        {{ supporting_document.document.name }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
 {% endif %}
 
 {% for form in formset %}
