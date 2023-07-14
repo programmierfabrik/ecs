@@ -6,8 +6,6 @@ Die {% ec_name %} bittet Sie um ein Gutachten zur Studie {{ submission|ec_number
 
 Das Projekt wird in der Sitzung vom {{ meeting.start|date:'d.m.Y' }} behandelt.
 
-Für Ihre Bemühungen erhalten Sie ein Anerkennungshonorar.
-
 Bitte teilen Sie uns so bald wie möglich mit, ob Sie die Begutachtung durchführen werden. Im Falle Ihrer Absage bitten wir Sie um Vorschläge anderer geeigneter Gutachter.
 
 Um Ihr Gutachten zu erstellen, klicken Sie auf den folgenden Link:
