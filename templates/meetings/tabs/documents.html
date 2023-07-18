@@ -1,21 +1,25 @@
 {% load core i18n widget_tweaks %}
 
 <div class="container">
-    <form id="drop-zone" action="{{ request.path }}" method="POST" enctype="multipart/form-data"
-          class="open-in-widget p-5 mb-3 rounded text-center" style="border: dashed 2px #bbb;">
-        {% csrf_token %}
+    {% if user.profile.is_internal %}
+        <form id="drop-zone" action="{{ request.path }}" method="POST" enctype="multipart/form-data"
+              class="open-in-widget p-5 mb-3 rounded text-center" style="border: dashed 2px #bbb;">
+            {% csrf_token %}
 
-        <div class="display-4 mb-1" style="font-size: 2rem">Dokument hierher ziehen</div>
-        <div class="mb-1">oder...</div>
-        <input type="file" multiple hidden id="files" name="new_meeting_documents">
-        <button id="files-button" type="button" class="btn btn-outline-primary">Dokument auswählen</button>
-    </form>
+            <div class="display-4 mb-1" style="font-size: 2rem">Dokument hierher ziehen</div>
+            <div class="mb-1">oder...</div>
+            <input type="file" multiple hidden id="files" name="new_meeting_documents">
+            <button id="files-button" type="button" class="btn btn-outline-primary">Dokument auswählen</button>
+        </form>
+    {% endif %}
     <table class="table">
         <tr>
             <th>Dokumentenname</th>
             <th>Hochgeladen am</th>
             <th>Hochgeladen von</th>
-            <th>Board Member einsicht</th>
+            {% if user.profile.is_internal %}
+                <th>Board Member einsicht</th>
+            {% endif %}
             <th></th>
         </tr>
         {% for meeting_document in meeting_documents %}
@@ -23,30 +27,34 @@
                 <td>{{ meeting_document.document.name }}</td>
                 <td>{{ meeting_document.document.date }}</td>
                 <td>{{ meeting_document.uploaded_by }}</td>
-                <td>
-                    <form
-                        action="{% url 'meetings.toggle_visiblity_for_member' meeting_pk=meeting.pk meeting_document_pk=meeting_document.pk %}">
-                        {% csrf_token %}
-                        <input type="checkbox" class="toggle-member">
-                    </form>
-                </td>
+                {% if user.profile.is_internal %}
+                    <td>
+                        <form
+                            action="{% url 'meetings.toggle_visiblity_for_member' meeting_pk=meeting.pk meeting_document_pk=meeting_document.pk %}">
+                            {% csrf_token %}
+                            <input type="checkbox" class="toggle-member">
+                        </form>
+                    </td>
+                {% endif %}
                 <td>
                     <div class="d-flex justify-content-end">
                         <a href="{% url 'meetings.download_meeting_documents' meeting_pk=meeting.pk document_pk=meeting_document.document.pk %}"
                            class="btn btn-primary mr-1" title="Dokument herunterladen">
                             <span class="fa fa-download"></span>
                         </a>
-                        <form
-                            action="{% url 'meetings.delete_meeting_documents' meeting_pk=meeting.pk meeting_document_pk=meeting_document.pk %}"
-                            method="post">
-                            {% csrf_token %}
-                            <button
-                                type="button"
-                                class="btn btn-danger delete_button" title="Dokument löschen"
-                                data-file-name="{{ meeting_document.document.name }}">
-                                <span class="fa fa-trash"></span>
-                            </button>
-                        </form>
+                        {% if user.profile.is_internal %}
+                            <form
+                                action="{% url 'meetings.delete_meeting_documents' meeting_pk=meeting.pk meeting_document_pk=meeting_document.pk %}"
+                                method="post">
+                                {% csrf_token %}
+                                <button
+                                    type="button"
+                                    class="btn btn-danger delete_button" title="Dokument löschen"
+                                    data-file-name="{{ meeting_document.document.name }}">
+                                    <span class="fa fa-trash"></span>
+                                </button>
+                            </form>
+                        {% endif %}
                     </div>
                 </td>
             </tr>

@@ -1287,7 +1287,7 @@ def list_ek_member(request, meeting_pk=None):
     })
 
 
-@user_group_required('EC-Office', 'EC-Executive')
+@user_group_required('EC-Office', 'EC-Executive', 'Board Member', 'Omniscient Board Member', 'Resident Board Member')
 def list_documents(request, meeting_pk=None):
     meeting = get_object_or_404(Meeting.objects.prefetch_related('board_members'), pk=meeting_pk)
 
@@ -1301,9 +1301,14 @@ def list_documents(request, meeting_pk=None):
             meeting_document = MeetingDocument(meeting=meeting, document=document, uploaded_by=request.user)
             meeting_document.save()
 
+    if request.user.profile.is_internal:
+        meeting_documents = meeting.meetingdocument_set.all()
+    else:
+        meeting_documents = meeting.meetingdocument_set.filter(board_member_insight=True)
+
     return render(request, 'meetings/tabs/documents.html', {
         'meeting': meeting,
-        'meeting_documents': meeting.meetingdocument_set.all()
+        'meeting_documents': meeting_documents
     })
 
 

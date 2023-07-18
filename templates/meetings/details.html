@@ -49,7 +49,7 @@
                     <a class="nav-link" href="#ek-member_tab">EK-Mitglieder</a>
                 </li>
             {% endif %}
-            {% if user|is_member_of:"EC-Office" or user|is_member_of:"EC-Executive" %}
+            {% if user|is_member_of:"EC-Office" or user|is_member_of:"EC-Executive" or user|is_member_of:"Board Member" or user|is_member_of:"Omniscient Board Member" or user|is_member_of:"Resident Board Member" %}
                 <li class="nav-item">
                     <a class="nav-link" href="#documents_tab">Begleitende Sitzungsunterlagen</a>
                 </li>
@@ -108,7 +108,7 @@
         </div>
     {% endif %}
 
-    {% if user|is_member_of:"EC-Office" or user|is_member_of:"EC-Executive" %}
+    {% if user|is_member_of:"EC-Office" or user|is_member_of:"EC-Executive" or user|is_member_of:"Board Member" or user|is_member_of:"Omniscient Board Member" or user|is_member_of:"Resident Board Member" %}
         <div id="documents_tab" class="collapse">
             <div data-widget-url="{% url 'meetings.list_documents' meeting_pk=meeting.pk %}"></div>
         </div>
