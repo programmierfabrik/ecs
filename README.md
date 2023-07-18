@@ -52,3 +52,13 @@ ssh ecs@example.com cat ./deployment/data/ecs/dump/ecs.pgdump.gz | \
   gzip -d | \
   docker exec -i test-ecs pg_restore -U test-ecs -1 --format=custom --schema=public --no-owner --dbname=test-ecs
 ```
+
+### Dump dev and restore
+
+```shell
+docker exec test-ecs pg_dump -U test-ecs -Fc -Z0 > /tmp/ecs.dump
+```
+
+```shell
+docker exec -i test-ecs pg_restore -U test-ecs -1 --format=custom --schema=public --no-owner --dbname=test-ecs < /tmp/ecs.dump
+```
