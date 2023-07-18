@@ -48,12 +48,6 @@ Be sure that the database is empty (no migrations or data). If it is not empty
 just `docker-compose down && docker-compose up -d`.
 
 ```shell
-ssh root@example.com cat /data/ecs-pgdump/ecs.pgdump.gz | \
-  gzip -d | \
-  docker exec -i test-ecs pg_restore -U test-ecs -1 --format=custom --schema=public --no-owner --dbname=test-ecs
-```
-
-```shell
 ssh ecs@example.com cat ./deployment/data/ecs/dump/ecs.pgdump.gz | \
   gzip -d | \
   docker exec -i test-ecs pg_restore -U test-ecs -1 --format=custom --schema=public --no-owner --dbname=test-ecs
