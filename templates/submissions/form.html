@@ -40,6 +40,7 @@
     <form action="" method="post" enctype="multipart/form-data" class="form_main" novalidate>
         {% csrf_token %}
         {{ block.super }}
+        <input type="submit" name="save" value="save" class="hidden" />
         <input type="submit" name="validate" value="validate" class="hidden" />
         <input type="submit" name="submit" value="submit" class="hidden" />
     </form>
@@ -279,7 +280,7 @@
             $('.upload_container').load(
                 '{% url 'core.submission.upload_document_for_submission' docstash_key=request.docstash.key %}');
 
-            {% if valid %}
+            {% if valid and not save %}
                 ecs.confirm({
                     question: '{% if notification_type %}{% trans "You filled out the form correctly. Do you want to create a notification now?" %}{% else %}{% trans "You filled out the form correctly. Do want to submit the study?" %}{% endif %}',
                     ok: '{% if notification_type %}{{ _("Create Notification")|escapejs }}{% else %}{{ _("Submit")|escapejs }}{% endif %}',

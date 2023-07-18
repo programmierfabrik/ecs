@@ -763,6 +763,7 @@ def create_submission_form(request):
         submission = None
 
     valid = False
+    save = False
 
     if request.method == 'POST':
         submit = request.POST.get('submit', False)
@@ -776,7 +777,7 @@ def create_submission_form(request):
         request.docstash.POST = request.POST
         request.docstash.save()
 
-        if save or autosave:
+        if autosave:
             return HttpResponse('save successfull')
 
         for name, formset in formsets.items():
@@ -831,7 +832,7 @@ def create_submission_form(request):
             messages.error(request,
                 _("This form can't be submitted at the moment."))
             valid = False
-
+        
         if submit and valid:
             if not submission:
                 submission = Submission.objects.create()
@@ -880,6 +881,7 @@ def create_submission_form(request):
         'form': form,
         'tabs': SUBMISSION_FORM_TABS,
         'valid': valid,
+        'save': save,
         'submission': submission,
         'notification_type': notification_type,
         'protocol_uploaded': protocol_uploaded,
