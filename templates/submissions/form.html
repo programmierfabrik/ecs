@@ -21,7 +21,7 @@
 {% block submission_action_buttons %}
     <li class="nav-item ml-auto">
         <small class="mr-3 text-muted last_save">&nbsp;</small>
-        <a href="" id="save-button" class="btn btn-secondary">{% trans "Just Save" %}</a>
+        <a href="" id="save-button" class="btn btn-secondary">{% trans "Save" %}</a>
         <a href="" id="submit-button" class="btn btn-primary">
             {% if submission and submission.current_submission_form %}
                 {% if notification_type %}
@@ -30,7 +30,7 @@
                     {% trans "Resubmit" %}
                 {% endif %}
             {% else %}
-                {% trans "Validation and submit" %}
+                {% trans "Submit" %}
             {% endif %}
         </a>
     </li>

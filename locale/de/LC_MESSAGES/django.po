@@ -2826,9 +2826,6 @@ msgstr "Sehr geehrter %(receiver)s!"
 msgid "Submit"
 msgstr "Einreichen"
 
-msgid "Validation and submit"
-msgstr "Validierung und einreichen"
-
 msgid "old"
 msgstr "alt"
 
@@ -3009,9 +3006,6 @@ msgstr "Abgeschlossene TOPs"
 
 msgid "Export"
 msgstr "Export"
-
-msgid "Just Save"
-msgstr "Nur Speichern"
 
 msgid "Submit Amendment"
 msgstr "Änderungen absenden"
