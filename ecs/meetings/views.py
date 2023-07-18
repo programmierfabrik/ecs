@@ -1308,6 +1308,22 @@ def list_documents(request, meeting_pk=None):
 
 
 @user_group_required('EC-Office', 'EC-Executive')
+def toggle_visiblity_for_member(request, meeting_pk=None, meeting_document_pk=None):
+    meeting_document = get_object_or_404(
+        MeetingDocument,
+        pk=meeting_document_pk,
+        document__content_type=ContentType.objects.get_for_model(Meeting),
+        document__object_id=meeting_pk,
+    )
+
+    # Toggle visibility
+    meeting_document.board_member_insight = not meeting_document.board_member_insight
+    meeting_document.save(update_fields=['board_member_insight'])
+
+    return HttpResponse(status=204)
+
+
+@user_group_required('EC-Office', 'EC-Executive')
 def download_meeting_documents(request, meeting_pk=None, document_pk=None):
     doc = get_object_or_404(
         Document,

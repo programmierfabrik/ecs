@@ -15,6 +15,7 @@
             <th>Dokumentenname</th>
             <th>Hochgeladen am</th>
             <th>Hochgeladen von</th>
+            <th>Board Member einsicht</th>
             <th></th>
         </tr>
         {% for meeting_document in meeting_documents %}
@@ -22,6 +23,13 @@
                 <td>{{ meeting_document.document.name }}</td>
                 <td>{{ meeting_document.document.date }}</td>
                 <td>{{ meeting_document.uploaded_by }}</td>
+                <td>
+                    <form
+                        action="{% url 'meetings.toggle_visiblity_for_member' meeting_pk=meeting.pk meeting_document_pk=meeting_document.pk %}">
+                        {% csrf_token %}
+                        <input type="checkbox" class="toggle-member">
+                    </form>
+                </td>
                 <td>
                     <div class="d-flex justify-content-end">
                         <a href="{% url 'meetings.download_meeting_documents' meeting_pk=meeting.pk document_pk=meeting_document.document.pk %}"
@@ -74,7 +82,6 @@
         }
 
         $('.delete_button').on('click', function (event) {
-            console.log(123);
             event.preventDefault();
             var form = $(this).parent("form");
             var fileName = $(this).data('file-name');
@@ -96,6 +103,25 @@
                             dropZone.parents('.ecs-Widget').data('widget').load();
                         }
                     });
+                }
+            });
+        });
+
+        $('.toggle-member').on('change', function (event) {
+            var form = $(this).parent("form");
+            var url = form.attr('action');
+            var checkbox = $(this);
+            checkbox.prop("disabled", true);
+
+            this.request = $.ajax({
+                url: url,
+                method: 'post',
+                data: new FormData(form[0]),
+                processData: false,
+                contentType: false,
+                context: this,
+                success: function (data) {
+                    checkbox.prop("disabled", false);
                 }
             });
         });

@@ -630,6 +630,7 @@ class MeetingDocument(models.Model):
     meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE)
     document = models.ForeignKey(Document, on_delete=models.CASCADE)
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    board_member_insight = models.BooleanField(default=False)
 
 class MeetingSubmissionProtocol(models.Model):
     meeting = models.ForeignKey(Meeting, related_name='meeting_protocols', on_delete=models.CASCADE)
