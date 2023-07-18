@@ -232,6 +232,15 @@
                 }
             });
 
+            new ecs.FormFieldController({
+                fields: '#id_subject_maxage,' +
+                    '#id_subject_maxage_unit',
+                sources: '#id_subject_maxage_not_defined',
+                auto: function (values) {
+                    this.setDisabled(this.sources.is(':checked'));
+                }
+            });
+
             $('#save-button').click(function(ev){
                 ev.preventDefault();
                 ecs.mainForm.save();

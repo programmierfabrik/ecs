@@ -87,6 +87,8 @@ CHANGELOG = (
     ('+', Investigator, 'contact_suffix_title', ''),
     ('+', InvestigatorEmployee, 'suffix_title', ''),
     ('*', '1.6'),
+    ('+', SubmissionForm, 'subject_maxage_not_defined', False),
+    ('*', '1.7'),
 )
 
 class FieldDocs(object):
