@@ -32,7 +32,7 @@
                         <form
                             action="{% url 'meetings.toggle_visiblity_for_member' meeting_pk=meeting.pk meeting_document_pk=meeting_document.pk %}">
                             {% csrf_token %}
-                            <input type="checkbox" class="toggle-member">
+                            <input type="checkbox" class="toggle-member" {% if meeting_document.board_member_insight %}checked{% endif %}>
                         </form>
                     </td>
                 {% endif %}
