@@ -158,11 +158,11 @@
                                         Krankenanstaltverwaltung
                                     </a>
                                 {% endif %}
-                                {% if user|is_member_of:'Supporting Documents' %}
-                                    <a class="dropdown-item" href="{% url 'core.supporting_documents.administration' %}">
-                                        Unterstzütende Dokumente
-                                    </a>
-                                {% endif %}
+{#                                {% if user|is_member_of:'Supporting Documents' %}#}
+{#                                    <a class="dropdown-item" href="{% url 'core.supporting_documents.administration' %}">#}
+{#                                        Unterstzütende Dokumente#}
+{#                                    </a>#}
+{#                                {% endif %}#}
                                 <a class="dropdown-item" href="{% url 'statistics.stats' %}">
                                     {% trans 'Statistics' %}
                                 </a>
