@@ -38,7 +38,7 @@
                 {% endif %}
                 <td>
                     <div class="d-flex justify-content-end">
-                        <a href="{% url 'meetings.download_meeting_documents' meeting_pk=meeting.pk document_pk=meeting_document.document.pk %}"
+                        <a href="{% url 'meetings.download_meeting_documents' meeting_pk=meeting.pk meeting_document_pk=meeting_document.pk %}"
                            class="btn btn-primary mr-1" title="Dokument herunterladen">
                             <span class="fa fa-download"></span>
                         </a>

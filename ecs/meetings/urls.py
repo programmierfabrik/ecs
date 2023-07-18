@@ -57,7 +57,7 @@ urlpatterns = (
 
     path('<int:meeting_pk>/ek-member/', views.list_ek_member, name='meetings.list_ek_member'),
     path('<int:meeting_pk>/documents/', views.list_documents, name='meetings.list_documents'),
-    path('<int:meeting_pk>/documents/<int:document_pk>', views.download_meeting_documents, name='meetings.download_meeting_documents'),
+    path('<int:meeting_pk>/documents/<int:meeting_document_pk>', views.download_meeting_documents, name='meetings.download_meeting_documents'),
     path('<int:meeting_pk>/documents/delete/<int:meeting_document_pk>', views.delete_meeting_documents, name='meetings.delete_meeting_documents'),
     path('<int:meeting_pk>/documents/toggle/<int:meeting_document_pk>', views.toggle_visiblity_for_member, name='meetings.toggle_visiblity_for_member'),
 )
