@@ -101,4 +101,4 @@ def get_users_for_protocol(meeting, invited_group_ids, invite_ek_member=False, b
         board_member_filter = Q(pk__in=board_members)
     else:
         board_member_filter = Q()
-    return User.objects.filter(Q(groups__in=group_ids) | board_member_filter).distinct()
+    return User.objects.filter((Q(groups__in=group_ids) | board_member_filter) & Q(is_active=True)).distinct()
