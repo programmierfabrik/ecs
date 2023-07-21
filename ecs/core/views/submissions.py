@@ -833,6 +833,9 @@ def create_submission_form(request):
                 _("This form can't be submitted at the moment."))
             valid = False
         
+        if not valid:
+            save = True
+        
         if submit and valid:
             if not submission:
                 submission = Submission.objects.create()

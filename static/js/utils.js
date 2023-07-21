@@ -397,3 +397,46 @@ ecs.stopPageLoad = function() {
         try { document.execCommand('Stop'); } catch(e){};
     }
 };
+
+ecs.openSnackbar = function (status, message, duration) {
+    var snackbar = document.createElement("div");
+    snackbar.classList.add("slick-snackbar", "show", status);
+
+    var closeButton = document.createElement("button");
+    closeButton.classList.add("fa", "fa-close", "close");
+    closeButton.onclick = function () {
+        snackbar.remove();
+    };
+
+    var iconClass = "";
+    switch (status) {
+        case "success":
+            iconClass = "fa-check-circle";
+            break;
+        case "error":
+            iconClass = "fa-exclamation-circle";
+            break;
+        case "warning":
+            iconClass = "fa-exclamation-triangle";
+            break;
+    }
+
+    var icon = document.createElement("span");
+    icon.classList.add("fa", "fa-2x", iconClass, "mr-2");
+
+    var messageElement = document.createElement("span");
+    messageElement.classList.add("mr-3", "ml-2");
+    messageElement.textContent = message;
+
+    snackbar.append(closeButton, icon, messageElement);
+    document.body.appendChild(snackbar);
+
+    setTimeout(function () {
+        snackbar.classList.remove("show");
+        snackbar.classList.add("remove");
+
+        setTimeout(function () {
+            snackbar.remove();
+        }, 500);
+    }, duration);
+};
