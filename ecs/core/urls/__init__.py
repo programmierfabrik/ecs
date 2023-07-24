@@ -17,5 +17,5 @@ urlpatterns = (
     path('catalog/', include('ecs.core.urls.catalog')),
     path('medical-category/', include('ecs.core.urls.medical_category')),
     path('clinic/', include('ecs.core.urls.clinic')),
-    # path('supporting_documents/', include('ecs.core.urls.supporting_documents')),
+    path('supporting_documents/', include('ecs.core.urls.supporting_documents')),
 )
