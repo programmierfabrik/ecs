@@ -4,25 +4,6 @@
     <form action="{{ request.path }}" method="post" class="bound_to_task">
     {% csrf_token %}
     {{ formset.management_form }}
-{#    {% if supporting_documents %}#}
-{#        <div>#}
-{#            <h3>Unterstützende Dokumente</h3>#}
-{#            <ul class="list-group">#}
-{#                {% for supporting_document in supporting_documents %}#}
-{#                    <li class="list-group-item d-block">#}
-{#                        <a target="_blank"#}
-{#                           href="{% url 'core.supporting_documents.download_without_role' pk=supporting_document.pk %}">#}
-{#                            {{ supporting_document.document.name }}#}
-{#                        </a>#}
-{#                    </li>#}
-{#                {% endfor %}#}
-{#            </ul>#}
-{#            <span class="font-italic">#}
-{#                Diese Dokumente sind nicht zu bewerten und dienen einzig und allein als Unterstützung für die Bewertung.#}
-{#            </span>#}
-{#            <hr style="margin-top: 2rem; margin-bottom: 2rem" />#}
-{#        </div>#}
-{#    {% endif %}#}
 {% endif %}
 
 {% for form in formset %}
