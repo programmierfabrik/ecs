@@ -582,22 +582,6 @@ def checklist_review(request, submission_form_pk=None, blueprint_pk=None):
         prefix='checklist{}'.format(checklist.id),
         queryset=checklist.answers.order_by('question__index'))
 
-    # if blueprint.slug == 'external_review':
-    #     supporting_documents = SupportingDocument.objects.filter(tasks__name='External Review')
-    # elif blueprint.slug == 'gcp_review':
-    #     supporting_documents = SupportingDocument.objects.filter(tasks__name='GCP Review')
-    # elif blueprint.slug == 'insurance_review':
-    #     supporting_documents = SupportingDocument.objects.filter(tasks__name='Insurance Review')
-    # elif blueprint.slug == 'legal_review':
-    #     supporting_documents = SupportingDocument.objects.filter(tasks__name='Legal and Patient Review')
-    # elif blueprint.slug == 'specialist_review':
-    #     supporting_documents = SupportingDocument.objects.filter(tasks__name='Specialist Review')
-    # elif blueprint.slug == 'statistic_review':
-    #     supporting_documents = SupportingDocument.objects.filter(tasks__name='Statistical Review')
-    # else:
-    #     supporting_documents = None
-    # 
-    # extra_context = {'supporting_documents': supporting_documents}
     extra_context = {}
 
     if request.method == 'POST' and formset.is_valid():
