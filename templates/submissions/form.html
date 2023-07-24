@@ -281,7 +281,7 @@
                 '{% url 'core.submission.upload_document_for_submission' docstash_key=request.docstash.key %}');
 
             {% if save %}
-                ecs.openSnackbar('success', 'Änderungen gespeichert', 3000);
+                ecs.openSnackbar({% if not valid %}'error'{% else %}'success'{% endif %}, 'Änderungen gespeichert{% if not valid %}\r\nPflichtangaben fehlen{% endif %}', 3000);
             {% elif valid %}
                 ecs.confirm({
                     question: '{% if notification_type %}{% trans "You filled out the form correctly. Do you want to create a notification now?" %}{% else %}{% trans "You filled out the form correctly. Do want to submit the study?" %}{% endif %}',
@@ -310,6 +310,17 @@
                         ecs.mainForm.submit('submit');
                     }
                 });
+            {% elif validate %}
+                var modal = ecs.popup();
+                modal.find('.modal-content').html([
+                    '<div class="modal-body text-danger">' +
+                    '<h3>Pflichtangaben fehlen</h3>' +
+                    '<ol class="m-0"><li>Dieses PopUp-Fenster „Schließen“</li><li>Vervollständigen Sie die Angaben</li><li>Button „Einreichen“ neuerlich drücken</li></ol>' +
+                    '</div>',
+                    '<div class="modal-footer">',
+                    '    <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>',
+                    '</div>'
+                ].join('\n'));
             {% endif %}
         });
     </script>

@@ -424,8 +424,9 @@ ecs.openSnackbar = function (status, message, duration) {
     var icon = document.createElement("span");
     icon.classList.add("fa", "fa-2x", iconClass, "mr-2");
 
-    var messageElement = document.createElement("span");
+    var messageElement = document.createElement("div");
     messageElement.classList.add("mr-3", "ml-2");
+    messageElement.style.whiteSpace = "pre-line";
     messageElement.textContent = message;
 
     snackbar.append(closeButton, icon, messageElement);

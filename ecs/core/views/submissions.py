@@ -748,11 +748,13 @@ def create_submission_form(request):
 
     valid = False
     save = False
+    validate = False
 
     if request.method == 'POST':
         submit = request.POST.get('submit', False)
         save = request.POST.get('save', False)
         autosave = request.POST.get('autosave', False)
+        validate = request.POST.get('validate', False)
 
         request.docstash.name = (
             request.POST.get('german_project_title') or
@@ -817,9 +819,6 @@ def create_submission_form(request):
                 _("This form can't be submitted at the moment."))
             valid = False
         
-        if not valid:
-            save = True
-        
         if submit and valid:
             if not submission:
                 submission = Submission.objects.create()
@@ -869,6 +868,7 @@ def create_submission_form(request):
         'tabs': SUBMISSION_FORM_TABS,
         'valid': valid,
         'save': save,
+        'validate': validate,
         'submission': submission,
         'notification_type': notification_type,
         'protocol_uploaded': protocol_uploaded,
