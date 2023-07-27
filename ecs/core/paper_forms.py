@@ -189,7 +189,7 @@ FormInfo(SubmissionForm, fields=(
     # 2.10 Charakterisierung der Prüfungsteilnehmer/innen
     FieldInfo('2.10.1', 'subject_minage_unit', _('minimum age unit')),
     FieldInfo('2.10.1', 'subject_minage', _('minimum age')),
-    FieldInfo(None, 'subject_maxage_not_defined', 'Kein Höchstalter definiert'),
+    FieldInfo(None, 'subject_maxage_not_defined', 'Kein Höchstalter im Protokoll definiert'),
     FieldInfo('2.10.2', 'subject_maxage_unit', _('maximum age unit')),
     FieldInfo('2.10.2', 'subject_maxage', _('maximum age')),
 
