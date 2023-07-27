@@ -154,7 +154,7 @@ class AmendmentNotificationForm(NotificationForm):
 
 class CTISTransitionNotificationForm(NotificationForm):
     submission_forms = forms.ModelChoiceField(queryset=SubmissionForm.objects.all(), label=_('Study'))
-    eu_ct_number = forms.CharField(widget=forms.TextInput, label='EU-CT-Nummer')
+    eu_ct_number = forms.CharField(widget=forms.TextInput, label='EU CT Nummer')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
