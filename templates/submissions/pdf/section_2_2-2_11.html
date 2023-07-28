@@ -106,8 +106,8 @@
             <span class="indented">
                 2.10.2 Höchstalter:
                 <span class="value">
-                    {% if submission_form.subject_maxage is None %}
-                        -
+                    {% if submission_form.subject_maxage_not_defined %}
+                        Im Protokoll nicht definiert
                     {% else %}
                         {{ submission_form.subject_maxage }} {{ submission_form.subject_maxage_unit|age_unit }}
                     {% endif %}

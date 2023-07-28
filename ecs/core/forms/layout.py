@@ -4,7 +4,7 @@ from ecs.notifications.forms import (
     NotificationForm, ProgressReportNotificationForm,
     CompletionReportNotificationForm, SingleStudyNotificationForm,
     AmendmentNotificationForm, SafetyNotificationForm,
-    CenterCloseNotificationForm,
+    CenterCloseNotificationForm, CTISTransitionNotificationForm,
 )
 
 
@@ -57,7 +57,7 @@ SUBMISSION_FORM_TABS = (
     ]),
     Tab('participants', _('participant'), [
         (_('test participant'), [
-            'subject_count', 'subject_minage', 'subject_minage_unit', 'subject_maxage', 'subject_maxage_unit', 'subject_males', 'subject_females_childbearing', 'subject_divers',
+            'subject_count', 'subject_minage', 'subject_minage_unit', 'subject_maxage_not_defined', 'subject_maxage', 'subject_maxage_unit', 'subject_males', 'subject_females_childbearing', 'subject_divers',
             'subject_duration', 'subject_duration_active', 'subject_duration_controls', 'subject_planned_total_duration',
         ]),
         (_('non competent participants') + ' [2.10.3]', [
@@ -245,6 +245,14 @@ NOTIFICATION_FORM_TABS[CenterCloseNotificationForm] = [
         ]),
     ]),
     Tab('documents', _('documents'), []),
+]
+
+NOTIFICATION_FORM_TABS[CTISTransitionNotificationForm] = [
+    Tab('general_information', _('General information'), [
+        (_('General information'), [
+            'submission_forms', 'comments', 'eu_ct_number',
+        ]),
+    ]),
 ]
 
 def get_notification_form_tabs(form_cls):

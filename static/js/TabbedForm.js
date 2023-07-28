@@ -44,7 +44,11 @@ ecs.TabbedForm.prototype = {
         });
     },
     save: function() {
-        this._save('save');
+        // Old save:
+        // this._save('save');
+
+        // New save (with validation):
+        this.submit('save');
     },
     autosave: function() {
         if (this.autosaveDisabled || this.autosave_xhr ||

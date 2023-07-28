@@ -962,9 +962,6 @@ msgstr "Mindestalter"
 msgid "maximum age"
 msgstr "Höchstalter"
 
-msgid "maximum age description"
-msgstr "Wenn kein Höchstalter festgelegt ist: 999 eintragen."
-
 msgid "male participants"
 msgstr "männliche Teilnehmer"
 
@@ -1659,6 +1656,9 @@ msgstr "Sitzungen"
 
 msgid "Meeting Document"
 msgstr "Begleitende Sitzungsunterlagen"
+
+msgid "Supporting Document"
+msgstr "Unterstützende Dokumente"
 
 msgid "no file"
 msgstr "keine Datei"
@@ -2826,9 +2826,6 @@ msgstr "Sehr geehrter %(receiver)s!"
 msgid "Submit"
 msgstr "Einreichen"
 
-msgid "Validation and submit"
-msgstr "Validierung und einreichen"
-
 msgid "old"
 msgstr "alt"
 
@@ -3009,9 +3006,6 @@ msgstr "Abgeschlossene TOPs"
 
 msgid "Export"
 msgstr "Export"
-
-msgid "Just Save"
-msgstr "Nur Speichern"
 
 msgid "Submit Amendment"
 msgstr "Änderungen absenden"

@@ -610,7 +610,8 @@ def _meeting_board_members_changed(sender, **kwargs):
         user_ids_to_remove = kwargs['pk_set']
         board_members_to_remove = User.objects.filter(id__in=user_ids_to_remove)
 
-        for submission in instance.submissions.all():
+        # workflow_lane=SUBMISSION_LANE_BOARD equivalent to submission.is_regular
+        for submission in instance.submissions.filter(workflow_lane=SUBMISSION_LANE_BOARD):
             remove_task_for_board_members(submission, board_members_to_remove)
 
     elif action == 'post_add':
@@ -619,7 +620,7 @@ def _meeting_board_members_changed(sender, **kwargs):
         board_members_to_add = User.objects.filter(id__in=user_ids_to_add)
 
         # Create tasks for all submissions for all member        
-        for submission in instance.submissions.all():
+        for submission in instance.submissions.filter(workflow_lane=SUBMISSION_LANE_BOARD):
             create_task_for_board_members(submission, board_members_to_add)
 
 
@@ -630,6 +631,7 @@ class MeetingDocument(models.Model):
     meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE)
     document = models.ForeignKey(Document, on_delete=models.CASCADE)
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    board_member_insight = models.BooleanField(default=False)
 
 class MeetingSubmissionProtocol(models.Model):
     meeting = models.ForeignKey(Meeting, related_name='meeting_protocols', on_delete=models.CASCADE)
@@ -870,7 +872,7 @@ def _timetable_entry_post_save(sender, **kwargs):
     entry.meeting.update_assigned_categories()
 
     # only handle entries about submission and only when moving (creating) one.
-    if kwargs.get('created', False) and entry.submission:
+    if kwargs.get('created', False) and entry.submission and entry.submission.is_regular:
         # Create tasks associated with Meeting.board_members
         # We need to filter the board_members to check if they still are qualified
         board_member_filter = (Q(profile__is_board_member=True) |

@@ -179,6 +179,8 @@ class AmendmentNotification(DiffNotification, Notification):
         self.meeting = meeting
         self.save()
 
+class CTISTransitionNotification(Notification):
+    eu_ct_number = models.TextField()
 
 class SafetyNotification(Notification):
     safety_type = models.CharField(max_length=6, db_index=True, choices=SAFETY_TYPE_CHOICES, verbose_name=_('Type'))
@@ -250,19 +252,22 @@ class NotificationAnswer(models.Model):
             except AmendmentNotification.DoesNotExist:
                 assert False, "we should never get here"
         
-        extend, finish = False, False
+        extend, finish, ctis_transition = False, False, False
         if not self.is_rejected:
             if self.notification.type.grants_vote_extension:
                 extend = True
             if self.notification.type.finishes_study:
                 finish = True
+                # Small hack. Use the form name to distinguish between finished study and ctis transition.
+                if self.notification.type.form.endswith('CTISTransitionNotificationForm'):
+                    ctis_transition = True
 
         for submission in Submission.objects.filter(forms__in=self.notification.submission_forms.values('pk').query):
             if extend:
                 for vote in submission.votes.positive().permanent():
                     vote.extend()
             if finish:
-                submission.finish()
+                submission.finish(ctis_transition)
             presenting_parties = submission.current_submission_form.get_presenting_parties()
             _ = gettext
             presenting_parties.send_message(
@@ -278,5 +283,5 @@ class NotificationAnswer(models.Model):
 
 NOTIFICATION_MODELS = (
     Notification, CompletionReportNotification, ProgressReportNotification,
-    AmendmentNotification, SafetyNotification, CenterCloseNotification,
+    AmendmentNotification, SafetyNotification, CenterCloseNotification, CTISTransitionNotification
 )

@@ -138,3 +138,67 @@ nav.navbar .navbar-brand img {
 .task_back_log tr.task:not(.text-muted):not(.deleted) {
     font-weight:bold;
 }
+
+.slick-snackbar {
+    min-width: 250px;
+    border-radius: 4px;
+    padding: 1.2rem;
+    position: fixed;
+    z-index: 100;
+    right: 30px;
+    top: 30px;
+    display: flex;
+    align-items: center;
+}
+
+.slick-snackbar.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.slick-snackbar.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.slick-snackbar.warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.slick-snackbar.show {
+    animation: fadein 0.5s;
+    opacity: 0.9;
+}
+
+.slick-snackbar.remove {
+    animation: fadeout 0.5s;
+    opacity: 0;
+}
+
+@keyframes fadein {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 0.9;
+    }
+}
+
+@keyframes fadeout {
+    from {
+        opacity: 0.9;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+.close {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    font-size: 16px;
+}

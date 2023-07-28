@@ -2,18 +2,18 @@
 
 <div class="card card-block mt-3" id="headerworkflow">
     <form class="clearfix" action="{{ request.path }}" method="post">
-	{% csrf_token %}
+        {% csrf_token %}
 
-	{% if form.errors.post_data %}
-	    <div class="text-danger">
-		Füllen Sie alle benötigten Felder aus um diese Aufgabe abschließen zu können.
-	    </div>
-	{% endif %}
-	{% if form.errors.action %}
-	    <div class="text-danger">
-		Bitte wählen Sie eine Aktion aus.
-	    </div>
-	{% endif %}
+        {% if form.errors.post_data %}
+            <div class="text-danger">
+                Füllen Sie alle benötigten Felder aus um diese Aufgabe abschließen zu können.
+            </div>
+        {% endif %}
+        {% if form.errors.action %}
+            <div class="text-danger">
+                Bitte wählen Sie eine Aktion aus.
+            </div>
+        {% endif %}
 
         <div class="d-flex align-items-baseline flex-row">
             <h4 class="card-title m-0 mr-auto">
@@ -25,7 +25,8 @@
                     <div class="input-group">
                         {{ form.assign_to|add_class:'form-control' }}
                         <div class="input-group-btn">
-                            <button class="btn btn-secondary" type="submit" name="task_management-action" value="delegate">
+                            <button class="btn btn-secondary" type="submit" name="task_management-action"
+                                    value="delegate">
                                 {% trans 'Delegate' %}
                             </button>
                         </div>
@@ -40,7 +41,8 @@
                     </button>
                 {% else %}
                     {% for val, label, style in form.task.choices %}
-                        <button class="btn btn-{{ style }}" type="submit" name="task_management-action" value="complete_{{ forloop.counter0 }}">
+                        <button class="btn btn-{{ style }}" type="submit" name="task_management-action"
+                                value="complete_{{ forloop.counter0 }}">
                             {{ label }}
                         </button>
                     {% endfor %}
@@ -49,7 +51,30 @@
                 <input class="btn btn-secondary" hidden type="submit" name="task_management-save" value="Nur Speichern">
             </div>
         </div>
+        {% if supporting_documents %}
+            <div class="mt-2">
+                <a class="btn btn-outline-primary dropdown-toggle" role="button" data-toggle="collapse"
+                   href="#supporting_documents_list"
+                   aria-expanded="false" aria-controls="supporting_documents_list">
+                    Unterstützende Dokumente
+                </a>
 
-	{{ form.post_data }}
+                <div class="collapse mt-3" id="supporting_documents_list">
+                    <span class="font-italic">Diese Dokumente sind nicht zu bewerten und dienen einzig und allein als Unterstützung für die Bewertung.</span>
+                    <ul class="list-group">
+                        {% for supporting_document in supporting_documents %}
+                            <li class="list-group-item d-block">
+                                <a target="_blank"
+                                   href="{% url 'core.supporting_documents.download_without_role' pk=supporting_document.pk %}">
+                                    {{ supporting_document.document.name }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+
+        {{ form.post_data }}
     </form>
 </div>

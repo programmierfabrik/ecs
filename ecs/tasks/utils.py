@@ -6,6 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from django.core.exceptions import PermissionDenied
 
+from ecs.core.models import SupportingDocument
 from ecs.tasks.models import Task
 from ecs.tasks.forms import ManageTaskForm
 from ecs.users.utils import sudo
@@ -58,8 +59,11 @@ class TaskManagementData(object):
         self.submit = 'task_management-action' in self.POST
         self.save = self.POST.get('task_management-save')
 
-        if request.method == 'POST' and not self.task is None:
-            if self.submit or self.save:
+        task = self.task
+        if not task is None:
+            self.supporting_documents = SupportingDocument.objects.filter(tasks__name=task.task_type.name).order_by('-pk')
+            
+            if request.method == 'POST' and (self.submit or self.save):
                 post_data = self.POST.get('task_management-post_data', '')
                 # QueryDict only reliably works with bytestrings, so we encode `post_data` again (see #2978).
                 request.POST = QueryDict(post_data.encode('utf-8'), encoding='utf-8')

@@ -1287,7 +1287,7 @@ def list_ek_member(request, meeting_pk=None):
     })
 
 
-@user_group_required('EC-Office', 'EC-Executive')
+@user_group_required('EC-Office', 'EC-Executive', 'Board Member', 'Omniscient Board Member', 'Resident Board Member')
 def list_documents(request, meeting_pk=None):
     meeting = get_object_or_404(Meeting.objects.prefetch_related('board_members'), pk=meeting_pk)
 
@@ -1301,20 +1301,46 @@ def list_documents(request, meeting_pk=None):
             meeting_document = MeetingDocument(meeting=meeting, document=document, uploaded_by=request.user)
             meeting_document.save()
 
+    if request.user.profile.is_internal:
+        meeting_documents = meeting.meetingdocument_set.all()
+    else:
+        meeting_documents = meeting.meetingdocument_set.filter(board_member_insight=True)
+
     return render(request, 'meetings/tabs/documents.html', {
         'meeting': meeting,
-        'meeting_documents': meeting.meetingdocument_set.all()
+        'meeting_documents': meeting_documents
     })
 
 
 @user_group_required('EC-Office', 'EC-Executive')
-def download_meeting_documents(request, meeting_pk=None, document_pk=None):
-    doc = get_object_or_404(
-        Document,
-        pk=document_pk,
-        content_type=ContentType.objects.get_for_model(Meeting),
-        object_id=meeting_pk,
+def toggle_visiblity_for_member(request, meeting_pk=None, meeting_document_pk=None):
+    meeting_document = get_object_or_404(
+        MeetingDocument,
+        pk=meeting_document_pk,
+        document__content_type=ContentType.objects.get_for_model(Meeting),
+        document__object_id=meeting_pk,
     )
+
+    # Toggle visibility
+    meeting_document.board_member_insight = not meeting_document.board_member_insight
+    meeting_document.save(update_fields=['board_member_insight'])
+
+    return HttpResponse(status=204)
+
+
+@user_group_required('EC-Office', 'EC-Executive', 'Board Member', 'Omniscient Board Member', 'Resident Board Member')
+def download_meeting_documents(request, meeting_pk=None, meeting_document_pk=None):
+    query_arguments = {
+        'pk': meeting_document_pk,
+        'document__content_type': ContentType.objects.get_for_model(Meeting),
+        'document__object_id': meeting_pk,
+    }
+    # If the user is not Office or Executive only query for documents that have board_member_insight set to true
+    if not request.user.profile.is_internal:
+        query_arguments['board_member_insight'] = True
+
+    meeting_document = get_object_or_404(MeetingDocument, **query_arguments)
+    doc = meeting_document.document
 
     response = FileResponse(doc.retrieve_raw(), content_type=doc.mimetype)
     response['Content-Disposition'] = 'attachment;filename={}'.format(doc.name)

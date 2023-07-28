@@ -11,7 +11,11 @@
     <small title="{{ submission.project_title_display }}">
         {{ submission.project_title_display }}
         {% if submission.is_finished %}
-            ({% trans 'finished' %})
+            {% if submission.ctis_transition %}
+                (transitiert)
+            {% else %}
+                ({% trans 'finished' %})
+            {% endif %}
         {% endif %}
     </small>
 {% endblock %}

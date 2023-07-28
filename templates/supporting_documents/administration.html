@@ -1,0 +1,103 @@
+{% extends 'core.html' %}
+{% load i18n %}
+
+{% block headertitle %}Unterstützende Dokumente{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <a class="btn btn-primary mr-3 mb-3" href="{% url 'core.supporting_documents.create' %}">
+            Neues Dokument hochladen
+        </a>
+
+        <form action="{{ request.path }}" method="post">
+            {% csrf_token %}
+            {% for field in filterform.visible_fields %}
+                {% include 'bootstrap/form_field.html' with inline=True %}
+            {% endfor %}
+            {% for hidden in filterform.hidden_fields %}
+                {{ hidden }}
+            {% endfor %}
+            <input class="btn btn-primary" type="submit" value="{% trans 'Search' %}"/>
+        </form>
+
+        {% include 'paginator.html' with page=supporting_documents %}
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">Dateiname</th>
+                <th scope="col">Aufgaben</th>
+                <th scope="col"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for supporting_document in supporting_documents %}
+                <tr>
+                    <td>{{ supporting_document.document.name }}</td>
+                    <td style="font-size: 16px">
+                        {% for task in supporting_document.tasks.all %}
+                            <span class="badge badge-primary">{{ task }}</span>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <div class="d-flex justify-content-end">
+                            <a href="{% url 'core.supporting_documents.update' pk=supporting_document.pk %}"
+                               class="btn btn-info mr-1" title="Dokument aktualisieren">
+                                <span class="fa fa-refresh"></span>
+                            </a>
+                            <a href="{% url 'core.supporting_documents.download' pk=supporting_document.pk %}"
+                               class="btn btn-primary mr-1" title="Dokument herunterladen">
+                                <span class="fa fa-download"></span>
+                            </a>
+                            <form action="{% url 'core.supporting_documents.delete' pk=supporting_document.pk %}"
+                                  method="post">
+                                {% csrf_token %}
+                                <button
+                                    type="button"
+                                    class="btn btn-danger delete_button" title="Dokument löschen"
+                                    data-file-name="{{ supporting_document.document.name }}">
+                                    <span class="fa fa-trash"></span>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% include 'paginator.html' with page=supporting_documents %}
+    </div>
+{% endblock %}
+
+{% block jsbottom %}
+    {{ block.super }}
+    <script type="text/javascript">
+        $('#{{ filterform.tasks.id_for_label }}').select2({placeholder: null});
+
+        $('.delete_button').on('click', function (event) {
+            event.preventDefault();
+            var form = $(this).parent("form");
+            var fileName = $(this).data('file-name');
+            var url = form.attr('action');
+            var tr = $(this).parents("tr");
+
+            ecs.confirm({
+                question: 'Wollen sie wirklich ' + fileName + ' löschen?',
+                ok: '{{ _("Yes")|escapejs }}',
+                cancel: '{{ _("No")|escapejs }}',
+                success: function () {
+                    this.request = $.ajax({
+                        url: url,
+                        method: 'post',
+                        data: new FormData(form[0]),
+                        processData: false,
+                        contentType: false,
+                        context: this,
+                        success: function (data) {
+                            tr.remove();
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}
