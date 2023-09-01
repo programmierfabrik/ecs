@@ -1,5 +1,16 @@
 {% load humanize core communication i18n %}
 
+<div class="mb-3">
+    <span class="fa fa-info text-info"></span>
+    {% if show_system_messages %}
+        {% trans 'System messages are shown.' %}
+        <a href="{{ request.path }}" class="open-in-widget">{% trans 'Hide system messages' %}</a>
+    {% else %}
+        {% trans 'System messages are hidden.' %}
+        <a href="{{ request.path }}?show_system_messages=show_system_messages" class="open-in-widget">{% trans 'Show system messages' %}</a>
+    {% endif %}
+</div>
+
 {% for thread in threads %}
 <div class="communication_thread my-3">
     <h4>{{ thread.subject }} ({{ thread.sender }} &lt;-&gt; {{ thread.receiver }})</h4>
@@ -30,17 +41,6 @@
     <em>{% trans 'No messages yet!' %}</em>
 </div>
 {% endfor %}
-
-<div class="mb-3">
-    <span class="fa fa-info text-info"></span>
-    {% if show_system_messages %}
-        {% trans 'System messages are shown.' %}
-        <a href="{{ request.path }}" class="open-in-widget">{% trans 'Hide system messages' %}</a>
-    {% else %}
-        {% trans 'System messages are hidden.' %}
-        <a href="{{ request.path }}?show_system_messages=show_system_messages" class="open-in-widget">{% trans 'Show system messages' %}</a>
-    {% endif %}
-</div>
 
 <script type="text/javascript">
     $(function(){
