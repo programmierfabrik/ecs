@@ -351,10 +351,10 @@
         </div>
         {% if user.profile.is_internal %}
             <div id="workflow_log" class="collapse">
-                <div data-widget-url="{% url 'tasks.task_backlog' submission_pk=submission.pk %}"></div>
                 {% if submission.allows_dynamic_task_creation %}
                     <div class="container mt-4" data-widget-url="{% url 'checklists.create_task' submission_pk=submission.pk %}"></div>
                 {% endif %}
+                <div data-widget-url="{% url 'tasks.task_backlog' submission_pk=submission.pk %}"></div>
             </div>
         {% endif %}
     {% endif %}

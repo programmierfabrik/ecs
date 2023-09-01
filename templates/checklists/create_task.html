@@ -28,7 +28,7 @@
         });
 
         {% if created %}
-            var task_widget = widget.prev('.ecs-Widget');
+            var task_widget = widget.next('.ecs-Widget');
             task_widget.data('widget').load(task_widget.data('widget-url'));
 
             var categorization_widget = $('#categorization_tab .ecs-Widget');
