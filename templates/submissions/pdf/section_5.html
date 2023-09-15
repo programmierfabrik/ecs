@@ -1,9 +1,11 @@
 {% load core corepdf %}
 
 <p>
-    5.1 Eine Versicherung ist erforderlich: 
-    {{ submission_form.insurance_name|checkbox }} ja 
-    {{ submission_form.insurance_name|not|checkbox }} nein. Wenn <strong>ja</strong>: 
+    5.1 Eine Versicherung ist erforderlich:
+    {% with insurance=submission_form.insurance_name|default:submission_form.insurance_submit_later %}
+        {{ insurance|checkbox }} ja
+        {{ insurance|not|checkbox }} nein. Wenn <strong>ja</strong>:
+    {% endwith %}
 </p>
 
 <table class="full_width nopadding">
