@@ -42,7 +42,7 @@ def send_submission_protocol_pdf(request, meeting, meeting_protocol):
     for clinic in clinics:
         email = clinic.email
         htmlmail = str(render_html(
-            request, 'meetings/messages/protocol.html',
+            request, 'meetings/messages/protocol-clinic.html',
             {'meeting': meeting, 'recipient': clinic.name, 'submission': meeting_protocol.submission}
         ))
 
