@@ -11,3 +11,5 @@ services:
       - "5432:5432"
     command: postgres -c jit=off
     shm_size: 1024mb
+    volumes:
+      - /tmp/ecs-database:/var/lib/postgresql/data
