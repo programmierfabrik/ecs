@@ -205,6 +205,7 @@ class Meeting(models.Model):
     documents_zip = models.ForeignKey(Document, related_name='zip_for_meeting',
         null=True, on_delete=models.SET_NULL)
     expedited_reviewer_invitation_sent_at = models.DateTimeField(null=True)
+    meeting_link = models.URLField(max_length = 200, default='')
     expert_assignment_user = models.ForeignKey('auth.User', null=True, on_delete=models.CASCADE)
     board_members = models.ManyToManyField('auth.User', related_name='included_in_meetings')
     invited_users = models.ManyToManyField('auth.User', related_name='invited_to_meetings')
