@@ -60,6 +60,10 @@
         </tr>
     {% endif %}
     <tr>
+        <th>Sitzungs-Link</th>
+        <td><a href="{{ meeting.meeting_link }}" target="_blank">{{ meeting.meeting_link }}</a></td>
+    </tr>
+    <tr>
         <th>{% trans "Status" %}</th>
         <td colspan="2">
             {% if meeting.started and meeting.ended %}

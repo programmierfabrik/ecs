@@ -25,12 +25,13 @@ class MeetingForm(forms.ModelForm):
         label=_('deadline thesis'))
     deadline_expedited_review = DateTimeField(initial=timezone.now,
         required=False, label=_('Expedited Reviewer Invitations'))
+    meeting_link = forms.URLField(label='Sitzungs-Link', required=False)
 
     class Meta:
         model = Meeting
         fields = (
             'start', 'title', 'deadline', 'deadline_diplomathesis',
-            'deadline_expedited_review',
+            'deadline_expedited_review', 'meeting_link'
         )
         labels = {
             'title': _('title'),
