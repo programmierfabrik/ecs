@@ -19,7 +19,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext as _
 
 from ecs.checklists.models import Checklist, ChecklistBlueprint
-from ecs.communication.mailutils import deliver
+from ecs.communication.mailutils import deliver, generate_ics_file
 from ecs.communication.utils import send_system_message_template
 from ecs.core.models import Submission, SubmissionForm, MedicalCategory, AdvancedSettings, Clinic
 from ecs.core.models.constants import SUBMISSION_TYPE_MULTICENTRIC
@@ -830,29 +830,39 @@ def send_agenda_to_board(request, meeting_pk=None):
         timezone.localtime(meeting.start).strftime('%d.%m.%Y'))
     reply_to = AdvancedSettings.objects.get().contact_email
 
+    meeting_address = AdvancedSettings.objects.get().meeting_address
+    meeting_link = meeting.meeting_link
+    event_description = f'Sitzungs-Link: {meeting_link}' if meeting_link and len(meeting_link) > 0 else ''
+    event_name = 'ECS Sitzung'
+
     users = User.objects.filter(meeting_participations__entry__meeting=meeting).distinct()
     for user in users:
         timeframe = meeting._get_timeframe_for_user(user)
         if timeframe is None:
             continue
         start, end = timeframe
+        
+        ics_file = generate_ics_file(user.email, event_name, event_description, meeting_address, start, end)
+        
         htmlmail = str(render_html(request, \
                                    'meetings/messages/boardmember_invitation.html', \
                                    {'meeting': meeting, 'start': start, 'end': end, 'recipient': user}))
         deliver(user.email, subject=subject, message=None,
                 message_html=htmlmail, from_email=settings.DEFAULT_FROM_EMAIL,
                 rfc2822_headers={"Reply-To": reply_to},
-                attachments=attachments)
+                attachments=(*attachments, ('ECS_Sitzung.ics', ics_file, 'text/calendar')))
 
     for user in User.objects.filter(groups__name__in=settings.ECS_MEETING_AGENDA_RECEIVER_GROUPS):
         start, end = meeting.start, meeting.end
+        ics_file = generate_ics_file(user.email, event_name, event_description, meeting_address, start, end)
+
         htmlmail = str(render_html(request, \
                                    'meetings/messages/resident_boardmember_invitation.html', \
                                    {'meeting': meeting, 'recipient': user}))
         deliver(user.email, subject=subject, message=None,
                 message_html=htmlmail, from_email=settings.DEFAULT_FROM_EMAIL,
                 rfc2822_headers={"Reply-To": reply_to},
-                attachments=attachments)
+                attachments=(*attachments, ('ECS_Sitzung.ics', ics_file, 'text/calendar')))
 
     tops_with_primary_investigator = meeting.timetable_entries.filter(
         submission__invite_primary_investigator_to_meeting=True,
@@ -861,7 +871,7 @@ def send_agenda_to_board(request, meeting_pk=None):
         sf = top.submission.current_submission_form
         for u in {sf.primary_investigator.user, sf.presenter, sf.submitter, sf.sponsor}:
             send_system_message_template(u, subject, 'meetings/messages/primary_investigator_invitation.txt',
-                                         {'top': top}, submission=top.submission)
+                                         {'top': top, 'meeting_link': meeting_link}, submission=top.submission)
 
     meeting.agenda_sent_at = timezone.now()
     meeting.save()
