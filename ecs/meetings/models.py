@@ -864,7 +864,8 @@ def _timetable_entry_post_delete(sender, **kwargs):
     on_meeting_top_delete.send(Meeting, meeting=(entry.meeting), timetable_entry=entry)
     
     # Remove tasks associated with Meeting.board_members
-    remove_task_for_board_members(entry.submission, entry.meeting.board_members.all())
+    if entry.submission:
+        remove_task_for_board_members(entry.submission, entry.meeting.board_members.all())
 
 
 @receiver(post_save, sender=TimetableEntry)
