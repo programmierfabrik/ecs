@@ -1253,7 +1253,8 @@ def send_submission_protocol(request, meeting_pk=None, submission_pk=None):
         MeetingSubmissionProtocol.objects.prefetch_related(Prefetch(
             'submission', queryset=Submission.objects.prefetch_related('clinics')
         )),
-        submission=submission_pk
+        submission=submission_pk,
+        meeting=meeting
     )
 
     send_submission_protocol_pdf(request, meeting, meeting_protocol)
