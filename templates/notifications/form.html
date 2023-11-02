@@ -111,6 +111,10 @@
             });
             $('#submit-button').click(function(ev){
                 ev.preventDefault();
+                var isFormValid = $('.form_main.notifications')[0].checkValidity();
+                if (isFormValid) {
+                    $(this).addClass('disabled');
+                }
                 ecs.mainForm.submit('submit');
             });
 
