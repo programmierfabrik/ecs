@@ -706,6 +706,17 @@ def meeting_assistant_other_tops(request, meeting_pk=None):
 
 
 @user_group_required('EC-Office')
+def edit_notification_answer(request, meeting_pk=None, notification_pk=None):
+    meeting = get_object_or_404(Meeting, pk=meeting_pk, started__isnull=False)
+    notification = get_object_or_404(NotificationAnswer, pk=notification_pk)
+    if request.POST:
+        notification.text = request.POST.get('new-answer')
+        notification.save()
+        return HttpResponse(status=204)
+
+    return HttpResponse(status=400)
+
+@user_group_required('EC-Office')
 def meeting_assistant_top(request, meeting_pk=None, top_pk=None):
     meeting = get_object_or_404(Meeting, pk=meeting_pk, started__isnull=False)
     top = get_object_or_404(meeting.timetable_entries, pk=top_pk)
