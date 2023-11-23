@@ -38,7 +38,8 @@ urlpatterns = (
     path('<int:meeting_pk>/assistant/quickjump/', views.meeting_assistant_quickjump, name='meetings.meeting_assistant_quickjump'),
     path('<int:meeting_pk>/assistant/comments/', views.meeting_assistant_comments, name='meetings.meeting_assistant_comments'),
     path('<int:meeting_pk>/assistant/other_tops/', views.meeting_assistant_other_tops, name='meetings.meeting_assistant_other_tops'),
-    path('<int:meeting_pk>/assistant/<int:notification_pk>/notification-answer/', views.edit_notification_answer, name='meetings.edit_notification_answer'),
+    path('<int:meeting_pk>/assistant/<int:notification_pk>/notification-text/', views.edit_notification_text, name='meetings.edit_notification_answer'),
+    path('<int:meeting_pk>/assistant/<int:vote_pk>/vote-text/', views.edit_vote_text, name='meetings.edit_vote_text'),
 
     path('<int:meeting_pk>/agenda/pdf/', views.agenda_pdf, name='meetings.agenda_pdf'),
     path('<int:meeting_pk>/agenda/send/', views.send_agenda_to_board, name='meetings.send_agenda_to_board'),

@@ -109,9 +109,9 @@
                                     {{ sf.german_project_title|default:sf.project_title }}
                                 {% endwith %}
                             </div>
-                            <span class="fa fa-pencil fa-2x text-primary answer-edit-btn ml-4" style="cursor: pointer"
-                                  data-answer="{{ form.instance.answer.text }}"
-                                  data-answer-id="{{ form.instance.answer.pk }}"
+                            <span class="fa fa-pencil fa-2x text-primary text-edit-btn ml-4" style="cursor: pointer"
+                                  data-text="{{ form.instance.answer.text }}"
+                                  data-text-id="{{ form.instance.answer.pk }}"
                                   data-title="{{ form.instance.new_submission_form.submission.get_ec_number_display }}">
                             </span>
                         </div>
@@ -141,17 +141,17 @@
             btn.prop('disabled', '');
         });
 
-        $('.answer-edit-btn').click(function (ev) {
+        $('.text-edit-btn').click(function (ev) {
             var modal = ecs.popup({
                 backdrop: 'static',
                 keyboard: false
             });
             var token = "{{ csrf_token }}";
             var title = $(this).data("title");
-            var answer = $(this).data("answer");
-            var id = $(this).data("answer-id");
+            var text = $(this).data("text");
+            var id = $(this).data("text-id");
             var meetingId = "{{ meeting.pk }}";
-            var answerP = $(this).parent().nextUntil("p").last().next();
+            var textP = $(this).parent().nextUntil("p").last().next();
 
             modal.find('.modal-dialog').addClass('modal-lg');
             modal.find('.modal-content').html('\
@@ -159,7 +159,7 @@
                     <h3 class="modal-title">' + title + '</h3>\
                 </div>\
                 <div class="modal-body text-center">\
-                    <textarea name="comments" cols="40" rows="10" class="form-control" required="">' + answer + '</textarea>\
+                    <textarea name="comments" cols="40" rows="10" class="form-control" required="">' + text + '</textarea>\
                 </div>\
                 <div class="modal-footer">\
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>\
@@ -167,18 +167,18 @@
                 </div>\
             ');
             modal.on('click', '.save', function () {
-                var newAnswer = modal.find("textarea").val();
-                var newAnswerHtml = modal.find("textarea").val().replace("\n", "<br />", "g");
+                var newText = modal.find("textarea").val();
+                var newTextHtml = modal.find("textarea").val().replace("\n", "<br />", "g");
                 var xhr = new XMLHttpRequest();
                 var formData = new FormData();
-                formData.append('new-answer', newAnswer);
+                formData.append('new-text', newText);
 
-                xhr.open('POST', '/meeting/' + meetingId + '/assistant/' + id + '/notification-answer/', true);
+                xhr.open('POST', '/meeting/' + meetingId + '/assistant/' + id + '/notification-text/', true);
                 xhr.setRequestHeader('X-CSRFToken', token);
 
                 xhr.onload = function () {
                     if (xhr.status >= 200 && xhr.status < 300) {
-                        answerP.html(newAnswerHtml);
+                        textP.html(newTextHtml);
                     }
                     modal.modal('toggle');
                 };
