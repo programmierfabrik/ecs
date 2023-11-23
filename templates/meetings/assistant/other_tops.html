@@ -112,7 +112,8 @@
                             <span class="fa fa-pencil fa-2x text-primary text-edit-btn ml-4" style="cursor: pointer"
                                   data-text="{{ form.instance.answer.text }}"
                                   data-text-id="{{ form.instance.answer.pk }}"
-                                  data-title="{{ form.instance.new_submission_form.submission.get_ec_number_display }}">
+                                  data-title="{{ form.instance.new_submission_form.submission.get_ec_number_display }}"
+                                    data-type="notification">
                             </span>
                         </div>
 
@@ -150,6 +151,7 @@
             var title = $(this).data("title");
             var text = $(this).data("text");
             var id = $(this).data("text-id");
+            var type = $(this).data("type");
             var meetingId = "{{ meeting.pk }}";
             var textP = $(this).parent().nextUntil("p").last().next();
 
@@ -168,12 +170,12 @@
             ');
             modal.on('click', '.save', function () {
                 var newText = modal.find("textarea").val();
-                var newTextHtml = modal.find("textarea").val().replace("\n", "<br />", "g");
+                var newTextHtml = modal.find("textarea").val().replace(/\n/g, "<br />");
                 var xhr = new XMLHttpRequest();
                 var formData = new FormData();
                 formData.append('new-text', newText);
 
-                xhr.open('POST', '/meeting/' + meetingId + '/assistant/' + id + '/notification-text/', true);
+                xhr.open('POST', '/meeting/' + meetingId + '/assistant/' + id + '/' + type + '-text/', true);
                 xhr.setRequestHeader('X-CSRFToken', token);
 
                 xhr.onload = function () {
