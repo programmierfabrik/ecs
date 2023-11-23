@@ -2,7 +2,8 @@
 {% load core i18n %}
 
 {% block meeting_assistant_body %}
-    <form action="{% url 'meetings.meeting_assistant_other_tops' meeting_pk=meeting.pk %}" method="post" class="open-in-widget">
+        <form action="{% url 'meetings.meeting_assistant_other_tops' meeting_pk=meeting.pk %}" method="post"
+          class="open-in-widget">
         {% csrf_token %}
 
         {{ thesis_vote_formset.management_form }}
@@ -15,12 +16,12 @@
         {% if retrospective_thesis_entries %}
             <h4>{% trans "Approved" %}</h4>
             <ul class="list-group mb-3">
-            {% for entry in retrospective_thesis_entries %}
-                <li class="list-group-item d-block">
-                    {{ entry.submission|ec_number }}
-                    {{ entry.submission.project_title_display }}
-                </li>
-            {% endfor %}
+                {% for entry in retrospective_thesis_entries %}
+                    <li class="list-group-item d-block">
+                        {{ entry.submission|ec_number }}
+                        {{ entry.submission.project_title_display }}
+                    </li>
+                {% endfor %}
             </ul>
         {% endif %}
 
@@ -36,12 +37,12 @@
         {% if expedited_entries %}
             <h4>{% trans "Approved" %}</h4>
             <ul class="list-group mb-3">
-            {% for entry in expedited_entries %}
-                <li class="list-group-item d-block">
-                    {{ entry.submission|ec_number }}
-                    {{ entry.submission.project_title_display }}
-                </li>
-            {% endfor %}
+                {% for entry in expedited_entries %}
+                    <li class="list-group-item d-block">
+                        {{ entry.submission|ec_number }}
+                        {{ entry.submission.project_title_display }}
+                    </li>
+                {% endfor %}
             </ul>
         {% endif %}
 
@@ -58,12 +59,12 @@
         {% if localec_entries %}
             <h4>{% trans "Approved" %}</h4>
             <ul class="list-group mb-3">
-            {% for entry in localec_entries %}
-                <li class="list-group-item d-block">
-                    {{ entry.submission|ec_number }}
-                    {{ entry.submission.project_title_display }}
-                </li>
-            {% endfor %}
+                {% for entry in localec_entries %}
+                    <li class="list-group-item d-block">
+                        {{ entry.submission|ec_number }}
+                        {{ entry.submission.project_title_display }}
+                    </li>
+                {% endfor %}
             </ul>
         {% endif %}
 
@@ -134,7 +135,7 @@
     </form>
 
     <script type="text/javascript">
-        $('#other_tops_save_button').click(function(ev) {
+        $('#other_tops_save_button').click(function (ev) {
             var btn = $(this);
             btn.html('<span class="fa fa-spinner fa-spin"></span>');
             btn.prop('disabled', '');
