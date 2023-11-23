@@ -716,6 +716,19 @@ def edit_notification_text(request, meeting_pk=None, notification_pk=None):
 
     return HttpResponse(status=400)
 
+
+@user_group_required('EC-Office')
+def edit_vote_text(request, meeting_pk=None, vote_pk=None):
+    meeting = get_object_or_404(Meeting, pk=meeting_pk, started__isnull=False)
+    vote = get_object_or_404(Vote, pk=vote_pk)
+    if request.POST:
+        vote.text = request.POST.get('new-text')
+        vote.save()
+        return HttpResponse(status=204)
+
+    return HttpResponse(status=400)
+
+
 @user_group_required('EC-Office')
 def meeting_assistant_top(request, meeting_pk=None, top_pk=None):
     meeting = get_object_or_404(Meeting, pk=meeting_pk, started__isnull=False)
