@@ -198,6 +198,7 @@ class NotificationAnswer(models.Model):
     is_valid = models.BooleanField(default=True)
     is_final_version = models.BooleanField(default=False, verbose_name=_('Proofread'))
     is_rejected = models.BooleanField(default=False, verbose_name=_('rate negative'))
+    is_withdrawn = models.BooleanField(default=False)
     pdf_document = models.OneToOneField(Document, related_name='_notification_answer', null=True, on_delete=models.CASCADE)
     signed_at = models.DateTimeField(null=True)
     published_at = models.DateTimeField(null=True)
@@ -245,12 +246,16 @@ class NotificationAnswer(models.Model):
             self.published_at = timezone.now()
             self.save()
         
-        if not self.is_rejected and self.notification.type.includes_diff:
-            try:
-                notification = AmendmentNotification.objects.get(pk=self.notification.pk)
-                notification.apply()
-            except AmendmentNotification.DoesNotExist:
-                assert False, "we should never get here"
+        if self.notification.type.includes_diff:
+                try:
+                    notification = AmendmentNotification.objects.get(pk=self.notification.pk)
+                    if not self.is_rejected:
+                        notification.apply()
+                    elif self.is_rejected and self.is_withdrawn:
+                        notification.new_submission_form.is_withdrawn = True
+                        notification.new_submission_form.save(update_fields=['is_withdrawn'])
+                except AmendmentNotification.DoesNotExist:
+                    assert False, "we should never get here"
         
         extend, finish, ctis_transition = False, False, False
         if not self.is_rejected:
