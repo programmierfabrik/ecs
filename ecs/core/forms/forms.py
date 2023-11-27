@@ -587,8 +587,8 @@ class AdvancedSettingsForm(forms.ModelForm):
         fields = (
             'default_contact', 'warning_window_certificate', 'display_notifications_in_protocol',
             'display_biased_in_amendment_answer_pdf',
-            'require_internal_vote_review', 'logo_file', 'print_logo_file',
-            'address', 'meeting_address', 'contact_email', 'contact_url',
+            'require_internal_vote_review', 'display_amendment_in_meeting_for_board_member', 
+            'logo_file', 'print_logo_file', 'address', 'meeting_address', 'contact_email', 'contact_url',
             'member_list_url', 'signature_block',
             'vote1_extra', 'vote2_extra', 'vote3a_extra', 'vote3b_extra',
             'vote4_extra', 'vote5_extra', 'vote_pdf_extra',
@@ -600,6 +600,7 @@ class AdvancedSettingsForm(forms.ModelForm):
             'display_biased_in_amendment_answer_pdf':
                 _('Display biased board member in amendment answer PDF'),
             'require_internal_vote_review': _('Require internal vote review'),
+            'display_amendment_in_meeting_for_board_member': 'Amendments für Board Member in der Sitzung anzeigen',
             'address': _('address'),
             'meeting_address': _('Meeting Address'),
             'contact_email': _('Contact Email'),
