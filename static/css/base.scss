@@ -47,3 +47,7 @@ select:not(.form-control) {
 .pre {
     white-space: pre-wrap;
 }
+
+.table-danger-withdrawn {
+    background-color: rgba(255, 122, 122, 0.63);
+}
