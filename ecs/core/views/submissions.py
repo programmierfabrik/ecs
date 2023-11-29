@@ -328,7 +328,7 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
     ).values('organisation', 'ethics_commission_id', 'close_date')
     for form in formsets['investigator']:
         for n in center_close_notifications:
-            if n['organisation'] == form.initial['organisation'] and \
+            if n['organisation'].strip() == form.initial['organisation'].strip() and \
                 n['ethics_commission_id'] == form.initial['ethics_commission']:
                 form.close_date = n['close_date']
                 break
