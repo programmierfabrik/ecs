@@ -33,15 +33,15 @@ if os.getenv('ECS_PROD', 'false').lower() == 'true':
     PDFAS_SERVICE = ABSOLUTE_URL_PREFIX + '/pdf-as-web/'
     SECURE_PROXY_SSL = True
     DEBUG = False
-    SMTPD_ADDRESS = ('0.0.0.0', 25)
 # Default development settings
 else:
     # PDF Signing will use fake signing if PDFAS_SERVICE is "mock:"
     PDFAS_SERVICE = 'mock:'
     DEBUG = True
-    SMTPD_ADDRESS = ('127.0.0.1', 8025)
+    EMAIL_HOST = 'localhost'
+    EMAIL_PORT = 1025
 
-if os.getenv('ECS_EMAIL_ENABLED', '').lower() == 'true':
+if os.getenv('ECS_EMAIL_ENABLED', 'true').lower() == 'true':
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
