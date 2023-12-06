@@ -324,6 +324,14 @@ class BaseInvestigatorFormSet(ReadonlyFormSetMixin, BaseFormSet):
         elif not len([f for f in self.forms[:self.total_form_count()] if f.cleaned_data.get('main', False)]) == 1:
             raise forms.ValidationError(_('Please select exactly one primary investigator.'))
 
+    def add_fields(self, form, index):
+        super().add_fields(form, index)
+        # save the formset in the 'nested' property
+        form.nested = InvestigatorEmployeeFormSet(
+            prefix='%s-employee' % form.prefix,
+            extra=1
+        )
+
 InvestigatorFormSet = formset_factory(InvestigatorForm,
     formset=BaseInvestigatorFormSet, max_num=1)
 

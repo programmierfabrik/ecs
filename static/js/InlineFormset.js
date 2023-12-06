@@ -6,7 +6,8 @@ ecs.InlineFormSet = function(containers, options) {
         prefix: null,
         addButton: true,
         removeButton: true,
-        canDelete: false
+        canDelete: false,
+        indexRegex: /-.+?-/
     }, options);
 
     this.forms = containers.find(this.options.formSelector)
@@ -101,6 +102,7 @@ ecs.InlineFormSet.prototype = {
         }
     },
     updateIndex: function(form, index){
+        var indexRegex = this.options.indexRegex;
         form.find('input, select, textarea, label')
             .not(form.find('.inline_formset input, .inline_formset select,' +
                 '.inline_formset textarea, .inline_formset label'))
@@ -110,7 +112,7 @@ ecs.InlineFormSet.prototype = {
                 ['id', 'name', 'for'].forEach(function(f) {
                     var val = el.attr(f);
                     if (val)
-                        el.attr(f, val.replace(/-.+?-/, '-' + index + '-'));
+                        el.attr(f, val.replace(indexRegex, '-' + index + '-'));
                 });
             });
 

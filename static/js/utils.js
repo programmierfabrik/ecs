@@ -72,17 +72,21 @@ ecs.InvestigatorFormset = function(container, readonly) {
         return;
 
     /*** read/write ***/
-
-    this.employee_formset = new ecs.InlineFormSet('.investigatoremployee_formset', {
-        prefix: 'investigatoremployee',
-        onFormAdded: (function(form, index) {
-            for (var i = 0; i < this.inline_formset.forms.length; i++) {
-                if (this.inline_formset.forms[i].has(form).length) {
-                    form.find('input[name$=-investigator_index]').val(i);
-                    break;
-                }
+    this.employee_formsets = [];
+    var employee_formsets = this.employee_formsets;
+    this.container.find("[class*='investigatoremployee_formset']").each(function () {
+        var classList = $(this).attr("class").split(/\s+/);
+        for (var i = 0; i < classList.length; i++) {
+            var clazz = classList[i];
+            if (clazz.startsWith('investigatoremployee_formset')) {
+                var inlineFormSet = new ecs.InlineFormSet('.' + clazz, {
+                    prefix: 'employee',
+                    indexRegex: /-__prefix__-/
+                });
+                employee_formsets.push(inlineFormSet);
             }
-        }).bind(this)
+        }
+
     });
 };
 ecs.InvestigatorFormset.prototype = {
