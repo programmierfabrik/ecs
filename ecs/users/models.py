@@ -33,7 +33,7 @@ class UserProfile(models.Model):
     gender = models.CharField(max_length=1, choices=(('f', _('Ms')), ('m', _('Mr')), ('d', _('Divers'))))
     title = models.CharField(max_length=30, blank=True)
     suffix_title = models.CharField(max_length=30, blank=True)
-    organisation = models.CharField(max_length=180, blank=True)
+    organisation = models.TextField(blank=True)
     jobtitle = models.CharField(max_length=130, blank=True)
     swift_bic = models.CharField(max_length=11, blank=True)
     iban = models.CharField(max_length=40, blank=True)

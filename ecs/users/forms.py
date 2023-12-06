@@ -135,6 +135,9 @@ class ProfileForm(forms.ModelForm):
             'fax': _('Fax'),
             'signing_connector': _('Signature Environment'),
         }
+        widgets = {
+            'organisation': forms.TextInput()
+        }
 
 
 class AdministrationFilterForm(forms.Form):
