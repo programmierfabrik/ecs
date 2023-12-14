@@ -857,7 +857,7 @@ def send_agenda_to_board(request, meeting_pk=None):
     meeting_address = AdvancedSettings.objects.get().meeting_address
     meeting_link = meeting.meeting_link
     event_description = f'Sitzungs-Link: {meeting_link}' if meeting_link and len(meeting_link) > 0 else ''
-    event_name = 'ECS Sitzung'
+    event_name = 'ECS - ' + meeting.title
 
     users = User.objects.filter(meeting_participations__entry__meeting=meeting).distinct()
     for user in users:
