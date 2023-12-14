@@ -7,9 +7,6 @@ Ihre Studie "{{ submission.project_title_display }}" ({{ submission|ec_number }}
 Ort der Sitzung:
 {% db_setting 'meeting_address' as db_setting_meeting_address %}
 {{ db_setting_meeting_address }}
-{% if meeting_link and meeting_link|length > 0  %}
-Link zur Sitzung:
-{{ meeting_link }}
-{% endif %}
+
 Die Anwesenheit des Prüfers (oder seines Vertreters) ist unbedingt erforderlich; der Sponsor hat das Recht, ebenfalls an der Diskussion des Projektes teilzunehmen.
 {% endblock %}

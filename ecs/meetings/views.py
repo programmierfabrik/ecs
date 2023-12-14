@@ -895,7 +895,7 @@ def send_agenda_to_board(request, meeting_pk=None):
         sf = top.submission.current_submission_form
         for u in {sf.primary_investigator.user, sf.presenter, sf.submitter, sf.sponsor}:
             send_system_message_template(u, subject, 'meetings/messages/primary_investigator_invitation.txt',
-                                         {'top': top, 'meeting_link': meeting_link}, submission=top.submission)
+                                         {'top': top}, submission=top.submission)
 
     meeting.agenda_sent_at = timezone.now()
     meeting.save()
