@@ -303,12 +303,22 @@ class SusarPresenterChangeForm(forms.Form):
                 label=_('Susar Presenter'))
 
 class BaseInvestigatorFormSet(ReadonlyFormSetMixin, BaseFormSet):
-    def save(self, commit=True):
-        return [
-            form.save(commit=commit)
-            for form in self.forms[:self.total_form_count()]
-            if form.is_valid() and form.has_changed()
-        ]
+    def __init__(self, data, **kwargs):
+        super().__init__(data, **kwargs)
+
+        employee_kwargs = dict(kwargs)
+        del employee_kwargs['prefix']
+        del employee_kwargs['initial']
+        extra = employee_kwargs.pop('extra', None)
+        for form in self.forms:
+            initial = form.initial.pop('employees') if form.initial else None
+            form.nested = InvestigatorEmployeeFormSet(
+                data,
+                prefix='%s-employee' % form.prefix,
+                extra=extra if extra else 1,
+                initial=initial,
+                **employee_kwargs
+            )
 
     def clean(self):
         super().clean()
@@ -324,30 +334,26 @@ class BaseInvestigatorFormSet(ReadonlyFormSetMixin, BaseFormSet):
         elif not len([f for f in self.forms[:self.total_form_count()] if f.cleaned_data.get('main', False)]) == 1:
             raise forms.ValidationError(_('Please select exactly one primary investigator.'))
 
-    def add_fields(self, form, index):
-        super().add_fields(form, index)
-        # save the formset in the 'nested' property
-        form.nested = InvestigatorEmployeeFormSet(
-            prefix='%s-employee' % form.prefix,
-            extra=1
-        )
+    def is_valid(self):
+        result = super().is_valid()
+
+        # Validate the nested formsets
+        for form in self.forms:
+            result = result and form.nested.is_valid()
+
+        return result
+
 
 InvestigatorFormSet = formset_factory(InvestigatorForm,
     formset=BaseInvestigatorFormSet, max_num=1)
 
 class InvestigatorEmployeeForm(forms.ModelForm):
-    investigator_index = forms.IntegerField(required=True, initial=0, widget=forms.HiddenInput())
-
     class Meta:
         model = InvestigatorEmployee
         exclude = ('investigator',)
 
-    def has_changed(self):
-        return bool(set(self.changed_data) - set(('investigator_index',)))
-
     def save(self, commit=True):
         instance = super(InvestigatorEmployeeForm, self).save(commit=commit)
-        instance.investigator_index = self.cleaned_data['investigator_index']
         return instance
 
 class BaseInvestigatorEmployeeFormSet(ReadonlyFormSetMixin, BaseFormSet):
@@ -355,13 +361,6 @@ class BaseInvestigatorEmployeeFormSet(ReadonlyFormSetMixin, BaseFormSet):
         super().__init__(*args, **kwargs)
         for form in self.forms:
             form.empty_permitted = False
-    
-    def save(self, commit=True):
-        return [
-            form.save(commit=commit)
-            for form in self.forms[:self.total_form_count()]
-            if form.is_valid() and form.has_changed()
-        ]
 
 InvestigatorEmployeeFormSet = formset_factory(InvestigatorEmployeeForm,
     formset=BaseInvestigatorEmployeeFormSet, max_num=0)

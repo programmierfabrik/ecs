@@ -41,6 +41,8 @@ ecs.setupFormFieldHelpers = function(context){
 ecs.InvestigatorFormset = function(container, readonly) {
     this.container = container;
     this.readonly = readonly;
+    var _this = this;
+    this.employeeTrTemplate = container.find('.investigatoremployee .form.template').first().clone(true, true);
 
     this.inline_formset = new ecs.InlineFormSet(this.container, {
         prefix: 'investigator',
@@ -48,11 +50,44 @@ ecs.InvestigatorFormset = function(container, readonly) {
         addButton: false,
         removeButton: false,
         onFormAdded: (function(form, index) {
-            form.find('.investigatoremployee_formset tbody').html('');
-            this.employee_formset.addContainer(form.find('.investigatoremployee_formset'));
+            form.find('.investigatoremployee tbody').html('');
+            // Set the new id with the proper index
+            form.attr("id", "investigator" + index);
+
+            var investigatorEmployee = form.find(".investigatoremployee").first();
+            investigatorEmployee.removeClass(function (index, className) {
+                // Split the class names into an array
+                var classNames = className.split(' ');
+
+                // Filter the array to keep only classes starting with "investigatoremployee_formset"
+                var filteredClasses = classNames.filter(function (name) {
+                    return name.indexOf("investigatoremployee_formset") == 0;
+                });
+
+                // Join the remaining classes and return them
+                return filteredClasses.join(' ');
+            });
+            investigatorEmployee.addClass("investigatoremployee_formset" + index);
+
+            investigatorEmployee.find('tbody').append(_this.employeeTrTemplate.clone(true, true));
+            form.find('input, select, textarea, label')
+                .not(form.find('.inline_formset input, .inline_formset select, .inline_formset textarea, .inline_formset label'))
+                .each(function () {
+                    var el = $(this);
+
+                    ['id', 'name', 'for'].forEach(function (f) {
+                        var val = el.attr(f);
+                        if (val) {
+                            el.attr(f, val.replace(/-\d-/, "-" + index + "-"));
+                        }
+                    });
+                });
+            form.find('#id_investigator-' + index + '-employee-TOTAL_FORMS').val(0)
+            form.find('#id_investigator-' + index + '-employee-INITIAL_FORMS').val(0)
+
+            _this.initEmployee(form);
         }).bind(this),
         onFormRemoved: (function(form, index) {
-            this.employee_formset.removeContainer(form.find('.investigatoremployee_formset'));
             this.generateJumpList();
 
             var form_count = this.inline_formset.forms.length;
@@ -72,21 +107,10 @@ ecs.InvestigatorFormset = function(container, readonly) {
         return;
 
     /*** read/write ***/
-    this.employee_formsets = [];
-    var employee_formsets = this.employee_formsets;
-    this.container.find("[class*='investigatoremployee_formset']").each(function () {
-        var classList = $(this).attr("class").split(/\s+/);
-        for (var i = 0; i < classList.length; i++) {
-            var clazz = classList[i];
-            if (clazz.startsWith('investigatoremployee_formset')) {
-                var inlineFormSet = new ecs.InlineFormSet('.' + clazz, {
-                    prefix: 'employee',
-                    indexRegex: /-__prefix__-/
-                });
-                employee_formsets.push(inlineFormSet);
-            }
-        }
 
+    // go over all formsets
+    this.container.find(".investigator").each(function () {
+        _this.initEmployee($(this));
     });
 };
 ecs.InvestigatorFormset.prototype = {
@@ -167,6 +191,33 @@ ecs.InvestigatorFormset.prototype = {
                 }).bind(this)
             });
             ul.append(li);
+        }
+    },
+    initEmployee: function (container) {
+        var investigatorEmployee = container.find(".investigatoremployee").first();
+        var parentParentId = investigatorEmployee.parent().parent().attr("id");
+        var investiagtorNumber = parentParentId.charAt(parentParentId.length - 1);
+
+        var classList = investigatorEmployee.attr("class").split(/\s+/);
+        // We know that this is the table we are searching for. now get the correct class, so we have our index.
+        for (var i = 0; i < classList.length; i++) {
+            var clazz = classList[i];
+            if (clazz.startsWith('investigatoremployee_formset')) {
+                var inlineFormSet = new ecs.InlineFormSet('.' + clazz, {
+                    prefix: 'investigator-' + investiagtorNumber + '-employee',
+                    indexRegex: /-(__prefix__|employee-\d)-/,
+                    computeIndexReplaceValue: function(options) {
+                        var index = options.index;
+                        var val = options.val;
+
+                        if (val.includes('__prefix__')) {
+                            return '-' + index + '-';
+                        } else {
+                            return '-employee-' + index + '-';
+                        }
+                    }
+                });
+            }
         }
     }
 };

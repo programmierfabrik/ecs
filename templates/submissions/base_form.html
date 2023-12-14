@@ -176,6 +176,7 @@
                                         Verantwortliche Mitarbeiter/innen an der klinischen Studie (an Ihrer Prüfstelle)
                                     </h4>
                                     {% with investigatoremployee_formset=form.nested %}
+                                        {{ investigatoremployee_formset.management_form }}
                                         {% if investigatoremployee_formset.non_form_errors %}
                                             <div class="errors">
                                                 <ul class="errorlist">
@@ -187,7 +188,7 @@
                                         {% endif %}
 
                                         {# XXX: reuse forms/tables/inline_formset.html (FMD2) #}
-                                        <table class="table table-sm investigatoremployee_formset{{ investigator_index }}">
+                                        <table class="table table-sm investigatoremployee investigatoremployee_formset{{ investigator_index }}">
                                             <thead>
                                             <tr>
                                                 <th></th>
@@ -232,11 +233,9 @@
                                                 {% endwith %}
                                             {% endif %}
                                             {% for form in investigatoremployee_formset.forms %}
-                                                {% if form|form_value:'investigator_index'|default:0|add:0 == investigator_index %}
                                                     <tr class="form">
                                                         {% include "forms/tables/row.html" %}
                                                     </tr>
-                                                {% endif %}
                                             {% endfor%}
                                             </tbody>
                                         </table>
