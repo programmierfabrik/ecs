@@ -341,6 +341,32 @@ class BaseInvestigatorFormSet(ReadonlyFormSetMixin, BaseFormSet):
         for form in self.forms:
             result = result and form.nested.is_valid()
 
+        if result is False:
+            return result
+
+        # validate if prüfer is mitarbeiter
+        for form in self.forms:
+            investigator_data = form.cleaned_data
+            investigator_gender = investigator_data['contact_gender']
+            investigator_title = investigator_data['contact_title']
+            investigator_suffix_title = investigator_data['contact_suffix_title']
+            investigator_first_name = investigator_data['contact_first_name']
+            investigator_last_name = investigator_data['contact_last_name']
+
+            for employee in form.nested.cleaned_data:
+                employee_gender = employee['sex']
+                employee_title = employee['title']
+                employee_suffix_title = employee['suffix_title']
+                employee_first_name = employee['firstname']
+                employee_last_name = employee['surname']
+
+                if employee_gender == investigator_gender and \
+                    employee_title == investigator_title and \
+                    employee_suffix_title == investigator_suffix_title and \
+                    employee_first_name == investigator_first_name and \
+                    employee_last_name == investigator_last_name:
+                    self.non_form_errors().append('Prüfer/in darf nicht gleichzeitig als Mitarbeiter/in genannt werden.')
+
         return result
 
 
