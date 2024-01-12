@@ -73,7 +73,6 @@ def get_submission_formsets(data=None, initial=None, readonly=False):
         ('participatingcenternonsubject', ParticipatingCenterNonSubjectFormSet),
         ('foreignparticipatingcenter', ForeignParticipatingCenterFormSet),
         ('investigator', InvestigatorFormSet),
-        ('investigatoremployee', InvestigatorEmployeeFormSet),
     ]
     formsets = {}
     for name, formset_cls in formset_classes:
@@ -95,7 +94,6 @@ def get_submission_formsets_initial(instance):
         ('nontesteduseddrug', lambda sf: sf.nontesteduseddrug_set.all()),
         ('participatingcenternonsubject', lambda sf: sf.participatingcenternonsubject_set.all()),
         ('foreignparticipatingcenter', lambda sf: sf.foreignparticipatingcenter_set.all()),
-        ('investigator', lambda sf: sf.investigators.all()),
     ]
     formsets = {}
     for name, initial in formset_initializers:
@@ -104,14 +102,17 @@ def get_submission_formsets_initial(instance):
             for obj in initial(instance).order_by('id')
         ]
 
-    initial = []
-    if instance:
-        for index, investigator in enumerate(instance.investigators.order_by('id')):
-            for employee in investigator.employees.order_by('id'):
-                employee_dict = model_to_dict(employee, exclude=('id', 'investigator'))
-                employee_dict['investigator_index'] = index
-                initial.append(employee_dict)
-    formsets['investigatoremployee'] = initial
+    investigator_list = []
+    for investigator in instance.investigators.prefetch_related('employees').order_by('id'):
+        investigator_dict = model_to_dict(investigator, exclude=['id'])
+
+        # Convert the related employees to dictionaries
+        employees_list = [model_to_dict(employee, exclude=['id']) for employee in investigator.employees.all()]
+
+        investigator_dict['employees'] = employees_list
+        investigator_list.append(investigator_dict)
+    formsets['investigator'] = investigator_list
+
     return formsets
 
 
@@ -771,47 +772,10 @@ def create_submission_form(request):
 
         formsets_valid = all([formset.is_valid() for formset in formsets.values()]) # non-lazy validation of formsets
 
-        investigator_employee_valid = True
-        investigatoremployee_formset = formsets.get('investigatoremployee')
-        investigators_formset = formsets.get('investigator')
-        if investigatoremployee_formset.is_valid() and investigators_formset.is_valid():
-            # validate if prüfer is mitarbeiter
-            # First group by index, so we can later check tab by tab
-            investigatoremployee_group_by_index = {}
-            for investigatoremployee in investigatoremployee_formset:
-                investigator_index = investigatoremployee.cleaned_data['investigator_index']
-                if investigatoremployee_group_by_index.get(investigator_index) is None:
-                    investigatoremployee_group_by_index[investigator_index] = []
-                investigatoremployee_group_by_index[investigator_index].append(investigatoremployee)
-            
-            # Go tab by tab (investigator) and compare the 'Prüfer' with the mitarbeiter
-            for investigator_index in investigatoremployee_group_by_index:
-                investigator = investigators_formset[investigator_index]
-                investigatoremployee = investigatoremployee_group_by_index[investigator_index]
-                investigator_data = investigator.cleaned_data
-                investigator_gender = investigator_data['contact_gender']
-                investigator_title = investigator_data['contact_title']
-                investigator_suffix_title = investigator_data['contact_suffix_title']
-                investigator_first_name = investigator_data['contact_first_name']
-                investigator_last_name = investigator_data['contact_last_name']
-                
-                for employee in investigatoremployee:
-                    employee_data = employee.cleaned_data
-                    employee_gender = employee_data['sex']
-                    employee_title = employee_data['title']
-                    employee_suffix_title = employee_data['suffix_title']
-                    employee_first_name = employee_data['firstname']
-                    employee_last_name = employee_data['surname']
+        investigator_formset = formsets.get('investigator')
+        investigators_valid = investigator_formset.is_valid()
 
-                    if employee_gender == investigator_gender and \
-                        employee_title == investigator_title and \
-                        employee_suffix_title == investigator_suffix_title and \
-                        employee_first_name == investigator_first_name and \
-                        employee_last_name == investigator_last_name:
-                        investigator_employee_valid = False
-                        investigators_formset.non_form_errors().append('Prüfer/in darf nicht gleichzeitig als Mitarbeiter/in genannt werden.')
-
-        valid = form.is_valid() and formsets_valid and investigator_employee_valid and protocol_uploaded and not 'upload' in request.POST
+        valid = form.is_valid() and formsets_valid and investigators_valid and protocol_uploaded and not 'upload' in request.POST
         if valid and submission and not notification_type and \
             not submission.current_submission_form.allows_resubmission(request.user):
 
@@ -833,17 +797,18 @@ def create_submission_form(request):
                 doc.parent_object = submission_form
                 doc.save()
             submission_form.documents.set(documents)
-        
-            investigators = formsets.pop('investigator').save(commit=False)
-            employees = formsets.pop('investigatoremployee').save(commit=False)
-            for investigator in investigators:
+
+            formsets.pop('investigator')
+            # validate investigator_formset and nested
+            for investigator_form in investigator_formset.forms:
+                investigator = investigator_form.save(commit=False)
                 investigator.submission_form = submission_form
                 investigator.save()
-            for employee in employees:
-                if employee.investigator_index >= len(investigators):
-                    continue
-                employee.investigator = investigators[employee.investigator_index]
-                employee.save()
+                investigatoremployee_formset = investigator_form.nested
+                for employee_form in investigatoremployee_formset.forms:
+                    employee = employee_form.save(commit=False)
+                    employee.investigator = investigator
+                    employee.save() 
 
             for formset in formsets.values():
                 for instance in formset.save(commit=False):

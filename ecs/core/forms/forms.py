@@ -303,12 +303,22 @@ class SusarPresenterChangeForm(forms.Form):
                 label=_('Susar Presenter'))
 
 class BaseInvestigatorFormSet(ReadonlyFormSetMixin, BaseFormSet):
-    def save(self, commit=True):
-        return [
-            form.save(commit=commit)
-            for form in self.forms[:self.total_form_count()]
-            if form.is_valid() and form.has_changed()
-        ]
+    def __init__(self, data, **kwargs):
+        super().__init__(data, **kwargs)
+
+        employee_kwargs = dict(kwargs)
+        del employee_kwargs['prefix']
+        del employee_kwargs['initial']
+        extra = employee_kwargs.pop('extra', None)
+        for form in self.forms:
+            initial = form.initial.pop('employees') if form.initial else None
+            form.nested = InvestigatorEmployeeFormSet(
+                data,
+                prefix='%s-employee' % form.prefix,
+                extra=extra if extra else 1,
+                initial=initial,
+                **employee_kwargs
+            )
 
     def clean(self):
         super().clean()
@@ -324,22 +334,52 @@ class BaseInvestigatorFormSet(ReadonlyFormSetMixin, BaseFormSet):
         elif not len([f for f in self.forms[:self.total_form_count()] if f.cleaned_data.get('main', False)]) == 1:
             raise forms.ValidationError(_('Please select exactly one primary investigator.'))
 
+    def is_valid(self):
+        result = super().is_valid()
+
+        # Validate the nested formsets
+        for form in self.forms:
+            result = result and form.nested.is_valid()
+
+        if result is False:
+            return result
+
+        # validate if prüfer is mitarbeiter
+        for form in self.forms:
+            investigator_data = form.cleaned_data
+            investigator_gender = investigator_data['contact_gender']
+            investigator_title = investigator_data['contact_title']
+            investigator_suffix_title = investigator_data['contact_suffix_title']
+            investigator_first_name = investigator_data['contact_first_name']
+            investigator_last_name = investigator_data['contact_last_name']
+
+            for employee in form.nested.cleaned_data:
+                employee_gender = employee['sex']
+                employee_title = employee['title']
+                employee_suffix_title = employee['suffix_title']
+                employee_first_name = employee['firstname']
+                employee_last_name = employee['surname']
+
+                if employee_gender == investigator_gender and \
+                    employee_title == investigator_title and \
+                    employee_suffix_title == investigator_suffix_title and \
+                    employee_first_name == investigator_first_name and \
+                    employee_last_name == investigator_last_name:
+                    self.non_form_errors().append('Prüfer/in darf nicht gleichzeitig als Mitarbeiter/in genannt werden.')
+
+        return result
+
+
 InvestigatorFormSet = formset_factory(InvestigatorForm,
     formset=BaseInvestigatorFormSet, max_num=1)
 
 class InvestigatorEmployeeForm(forms.ModelForm):
-    investigator_index = forms.IntegerField(required=True, initial=0, widget=forms.HiddenInput())
-
     class Meta:
         model = InvestigatorEmployee
         exclude = ('investigator',)
 
-    def has_changed(self):
-        return bool(set(self.changed_data) - set(('investigator_index',)))
-
     def save(self, commit=True):
         instance = super(InvestigatorEmployeeForm, self).save(commit=commit)
-        instance.investigator_index = self.cleaned_data['investigator_index']
         return instance
 
 class BaseInvestigatorEmployeeFormSet(ReadonlyFormSetMixin, BaseFormSet):
@@ -347,13 +387,6 @@ class BaseInvestigatorEmployeeFormSet(ReadonlyFormSetMixin, BaseFormSet):
         super().__init__(*args, **kwargs)
         for form in self.forms:
             form.empty_permitted = False
-    
-    def save(self, commit=True):
-        return [
-            form.save(commit=commit)
-            for form in self.forms[:self.total_form_count()]
-            if form.is_valid() and form.has_changed()
-        ]
 
 InvestigatorEmployeeFormSet = formset_factory(InvestigatorEmployeeForm,
     formset=BaseInvestigatorEmployeeFormSet, max_num=0)
