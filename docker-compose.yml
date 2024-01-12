@@ -12,4 +12,11 @@ services:
     command: postgres -c jit=off
     shm_size: 1024mb
     volumes:
-      - /tmp/ecs-database:/var/lib/postgresql/data
+      - ./data/postgres:/var/lib/postgresql/data
+
+  mailpit:
+      container_name: test-ecs-mailpit
+      image: axllent/mailpit:v1.9
+      ports:
+        - "8025:8025"
+        - "1025:1025"

@@ -67,6 +67,10 @@ class Submission(models.Model):
         return self.forms.all().order_by('-pk')[0]
 
     @property
+    def submission_form_to_copy(self):
+        return self.forms.all().filter(is_withdrawn=False).order_by('-pk').first()
+
+    @property
     def is_expedited(self):
         return self.workflow_lane == SUBMISSION_LANE_EXPEDITED
 
@@ -265,7 +269,8 @@ class SubmissionForm(models.Model):
     submission_type = models.SmallIntegerField(null=True, blank=True, choices=SUBMISSION_TYPE_CHOICES)
     presenter = models.ForeignKey(User, related_name='presented_submission_forms', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+    is_withdrawn = models.BooleanField(default=False)
+
     # denormalization
     primary_investigator = models.OneToOneField('core.Investigator', null=True, on_delete=models.CASCADE)
 

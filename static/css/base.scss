@@ -43,3 +43,11 @@ textarea:not(.form-control),
 select:not(.form-control) {
     border: 1px solid #b7b7b7;
 }
+
+.pre {
+    white-space: pre-wrap;
+}
+
+.table-danger-withdrawn {
+    background-color: rgba(255, 122, 122, 0.63);
+}

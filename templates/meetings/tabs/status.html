@@ -295,7 +295,8 @@
     <p class="list-group-item-text">
         {% for amendment in substantial_amendments %}
             {% with submission=amendment.get_submission %}
-                {% if user.profile.is_internal %}
+                {% db_setting 'display_amendment_in_meeting_for_board_member' as display_amendment %}
+                {% if user.profile.is_internal or display_amendment %}
                     <a href="{% url 'notifications.view_notification' notification_pk=amendment.pk %}" target="_blank">
                         {{ submission.get_ec_number_display }}
                     </a>{% if not forloop.last %}, {% endif %}

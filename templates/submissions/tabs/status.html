@@ -52,7 +52,7 @@
                 {% endif %}
                 {% with submission.newest_submission_form as newest_form %}
                     {% for sf in submission_forms %}
-                    <tr class="{% if not sf.is_acknowledged %}table-danger{% elif sf == submission.current_submission_form %}table-info{% endif %} {% if forloop.counter0 > current_form_idx %}collapse{% endif %}">
+                    <tr class="{% if not sf.is_acknowledged %}table-danger{% if sf.is_withdrawn %}-withdrawn{% endif %}{% elif sf == submission.current_submission_form %}table-info{% endif %} {% if forloop.counter0 > current_form_idx %}collapse{% endif %}">
                         <td>{{ forloop.revcounter }}</td>
                         <td>{{ sf.presenter }}</td>
                         <td>{{ sf.created_at|date:'d.m.Y, H:i' }} Uhr</td>

@@ -20,6 +20,11 @@
         Ort der Sitzung:<br/>
         {% db_setting 'meeting_address' as address %}
         {{ address|linebreaksbr }}<br/>
+        {% if meeting.meeting_link and meeting.meeting_link|length > 0  %}
+        <br/>
+        Link zur Sitzung:<br/>
+        <a href="{{ meeting.meeting_link }}">{{ meeting.meeting_link }}</a><br/>
+        {% endif %}
         <br/>
         Bitte bestätigen Sie unbedingt Ihre Teilnahme (auch wenn Sie sich zu einem früheren Zeitpunkt bereits gemeldet
         haben).<br/>

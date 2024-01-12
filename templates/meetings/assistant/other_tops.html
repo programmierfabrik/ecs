@@ -2,7 +2,8 @@
 {% load core i18n %}
 
 {% block meeting_assistant_body %}
-    <form action="{% url 'meetings.meeting_assistant_other_tops' meeting_pk=meeting.pk %}" method="post" class="open-in-widget">
+    <form action="{% url 'meetings.meeting_assistant_other_tops' meeting_pk=meeting.pk %}" method="post"
+          class="open-in-widget">
         {% csrf_token %}
 
         {{ thesis_vote_formset.management_form }}
@@ -15,12 +16,12 @@
         {% if retrospective_thesis_entries %}
             <h4>{% trans "Approved" %}</h4>
             <ul class="list-group mb-3">
-            {% for entry in retrospective_thesis_entries %}
-                <li class="list-group-item d-block">
-                    {{ entry.submission|ec_number }}
-                    {{ entry.submission.project_title_display }}
-                </li>
-            {% endfor %}
+                {% for entry in retrospective_thesis_entries %}
+                    <li class="list-group-item d-block">
+                        {{ entry.submission|ec_number }}
+                        {{ entry.submission.project_title_display }}
+                    </li>
+                {% endfor %}
             </ul>
         {% endif %}
 
@@ -36,12 +37,12 @@
         {% if expedited_entries %}
             <h4>{% trans "Approved" %}</h4>
             <ul class="list-group mb-3">
-            {% for entry in expedited_entries %}
-                <li class="list-group-item d-block">
-                    {{ entry.submission|ec_number }}
-                    {{ entry.submission.project_title_display }}
-                </li>
-            {% endfor %}
+                {% for entry in expedited_entries %}
+                    <li class="list-group-item d-block">
+                        {{ entry.submission|ec_number }}
+                        {{ entry.submission.project_title_display }}
+                    </li>
+                {% endfor %}
             </ul>
         {% endif %}
 
@@ -58,12 +59,12 @@
         {% if localec_entries %}
             <h4>{% trans "Approved" %}</h4>
             <ul class="list-group mb-3">
-            {% for entry in localec_entries %}
-                <li class="list-group-item d-block">
-                    {{ entry.submission|ec_number }}
-                    {{ entry.submission.project_title_display }}
-                </li>
-            {% endfor %}
+                {% for entry in localec_entries %}
+                    <li class="list-group-item d-block">
+                        {{ entry.submission|ec_number }}
+                        {{ entry.submission.project_title_display }}
+                    </li>
+                {% endfor %}
             </ul>
         {% endif %}
 
@@ -96,19 +97,31 @@
             <ul class="list-group mb-3">
                 {% for form in amendment_vote_formset.forms %}
                     <li class="list-group-item d-block {% if form.instance.answer.is_rejected %}text-danger{% endif %}">
-                        {% for hidden in form.hidden_fields %}
-                            {{ hidden }}
-                        {% endfor %}
-                        {{ form.accept_prepared_answer }}
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                {% for hidden in form.hidden_fields %}
+                                    {{ hidden }}
+                                {% endfor %}
+                                {{ form.accept_prepared_answer }}
 
-                        {% with sf=form.instance.new_submission_form %}
-                            {{ sf.submission.get_ec_number_display }}
-                            {{ sf.german_project_title|default:sf.project_title }}
-                        {% endwith %}
+                                {% with sf=form.instance.new_submission_form %}
+                                    {{ sf.submission.get_ec_number_display }}
+                                    {{ sf.german_project_title|default:sf.project_title }}
+                                {% endwith %}
+                            </div>
+                            <span class="fa fa-pencil fa-2x text-primary text-edit-btn ml-4" style="cursor: pointer"
+                                  data-text-id="{{ form.instance.answer.pk }}"
+                                  data-title="{{ form.instance.new_submission_form.submission.get_ec_number_display }}"
+                                  data-type="notification">
+                            </span>
+                        </div>
+
+
                         {% with answer=form.instance.answer %}
-                            {% trans 'Reject' %}: {{ answer.is_rejected|yesno }}
+                            <b>{% trans 'Reject' %}</b>: {{ answer.is_rejected|yesno }}
+                            <hr/>
                             {% if answer.text %}
-                                <p>{{ answer.text|linebreaksbr }}</p>
+                                <p class="pre">{{ answer.text }}</p>
                             {% endif %}
                         {% endwith %}
                     </li>
@@ -122,10 +135,60 @@
     </form>
 
     <script type="text/javascript">
-        $('#other_tops_save_button').click(function(ev) {
+        $('#other_tops_save_button').click(function (ev) {
             var btn = $(this);
             btn.html('<span class="fa fa-spinner fa-spin"></span>');
             btn.prop('disabled', '');
+        });
+
+        $('.text-edit-btn').click(function (ev) {
+            var modal = ecs.popup({
+                backdrop: 'static',
+                keyboard: false
+            });
+            var token = "{{ csrf_token }}";
+            var title = $(this).data("title");
+            var textP = $(this).parent().nextUntil("p").last().next();
+            var text = textP.text();
+            var id = $(this).data("text-id");
+            var type = $(this).data("type");
+            var meetingId = "{{ meeting.pk }}";
+
+            modal.find('.modal-dialog').addClass('modal-lg');
+            modal.find('.modal-content').html('\
+                <div class="modal-header">\
+                    <h3 class="modal-title">' + title + '</h3>\
+                </div>\
+                <div class="modal-body text-center">\
+                    <textarea cols="40" rows="10" class="form-control" required="">' + text + '</textarea>\
+                </div>\
+                <div class="modal-footer">\
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>\
+                    <button type="button" class="btn btn-primary save">Speichern</button>\
+                </div>\
+            ');
+            modal.on('click', '.save', function () {
+                var newText = modal.find("textarea").val();
+                var xhr = new XMLHttpRequest();
+                var formData = new FormData();
+                formData.append('new-text', newText);
+
+                xhr.open('POST', '/meeting/' + meetingId + '/assistant/' + id + '/' + type + '-text/', true);
+                xhr.setRequestHeader('X-CSRFToken', token);
+
+                xhr.onload = function () {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        textP.html(newText);
+                    }
+                    modal.modal('toggle');
+                };
+
+                if (text == newText) {
+                    modal.modal('toggle');
+                } else {
+                    xhr.send(formData);
+                }
+            });
         });
     </script>
 {% endblock %}

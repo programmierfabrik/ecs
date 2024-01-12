@@ -1,6 +1,36 @@
 {% extends 'notifications/view/base.html' %}
 {% load i18n notifications %}
 
+{% block previous_comments %}
+    {% with notification.amendmentnotification.previous_amendments as previous_amendments %}
+        {% if previous_amendments %}
+            <tr>
+                <th></th>
+                <td>
+                    {% for amendment in previous_amendments %}
+                        <div class="px-2 pt-2">
+                            <h5>
+                                <a data-toggle="collapse" href="#comment-{{ forloop.counter }}" role="button">
+                                    {{ amendment.timestamp|date:'d.m.Y' }}
+                                    <strong>{{ amendment.short_name }}</strong>
+                                </a>
+                            </h5>
+                            <div class="collapse{% if forloop.last %} show{% endif %}"
+                                 id="comment-{{ forloop.counter }}">
+                                {{ amendment.comments|linebreaksbr }}
+                                {{ amendment.is_rejected }}
+                            </div>
+                            {% if not forloop.last %}
+                                <hr/>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endif %}
+    {% endwith %}
+{% endblock %}
+
 {% block table_rows %}
     {{ block.super }}
     {% with notification.amendmentnotification as notification %}

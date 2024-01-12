@@ -42,6 +42,9 @@
                 <th class="text-nowrap">Begründung/Stellungnahme/Mitteilung</th>
                 <td>{{ notification.comments|linebreaksbr }}</td>
             </tr>
+            {% block previous_comments %}
+                {{ block.super }}
+            {% endblock %}
             {% if documents %}
             <tr>
                 <th class="text-nowrap">Unterlagen</th>

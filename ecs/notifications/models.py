@@ -2,6 +2,7 @@ from importlib import import_module
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext
 from django.template import loader
@@ -178,6 +179,37 @@ class AmendmentNotification(DiffNotification, Notification):
         meeting = Meeting.objects.filter(started=None).order_by('start').first()
         self.meeting = meeting
         self.save()
+        
+    @property
+    def previous_amendments(self):
+        submission = self.old_submission_form.submission
+        # Filter for only Amendment
+        base_query = submission.notifications.filter(type__includes_diff=True)
+
+        # First get the latest notification where the answer is is_valid = True
+        first_notification_with_valid_answer = base_query.order_by('-pk').filter(Q(answer__is_rejected=False) | Q(answer__is_withdrawn=True), pk__lt=self.pk).first()
+        
+        # If the first_notification_with_valid_answer is equal to self that means the amendment was verified without any rejection
+        if first_notification_with_valid_answer == self:
+            return []
+        
+        # If no valid amendment exists that means the submission is trying to submit its first valid amendment
+        # get the very first notification for the submission:
+        if first_notification_with_valid_answer is None:
+            first_amendment = base_query.order_by('pk').first()
+            # this time we need to include the bottom since it is part of the amendment process
+            bottom_range_filter = Q(id__gte=first_amendment.pk)
+        else:
+            bottom_range_filter = Q(id__gt=first_notification_with_valid_answer.pk)
+
+        # let's say we have a list like this (+ representing is_valid and - not is_valid):
+        # + / -
+        # - (n times)
+        # + / - / ~
+        # we will select all the ids between the first (the current notification) and the last positive answer
+        # (if there is even one refere to previous if for this edge case)
+        # This will be our previous comments
+        return base_query.order_by('-pk').filter(bottom_range_filter, id__lt=self.pk)
 
 class CTISTransitionNotification(Notification):
     eu_ct_number = models.TextField()
@@ -198,6 +230,7 @@ class NotificationAnswer(models.Model):
     is_valid = models.BooleanField(default=True)
     is_final_version = models.BooleanField(default=False, verbose_name=_('Proofread'))
     is_rejected = models.BooleanField(default=False, verbose_name=_('rate negative'))
+    is_withdrawn = models.BooleanField(default=False)
     pdf_document = models.OneToOneField(Document, related_name='_notification_answer', null=True, on_delete=models.CASCADE)
     signed_at = models.DateTimeField(null=True)
     published_at = models.DateTimeField(null=True)
@@ -245,12 +278,16 @@ class NotificationAnswer(models.Model):
             self.published_at = timezone.now()
             self.save()
         
-        if not self.is_rejected and self.notification.type.includes_diff:
-            try:
-                notification = AmendmentNotification.objects.get(pk=self.notification.pk)
-                notification.apply()
-            except AmendmentNotification.DoesNotExist:
-                assert False, "we should never get here"
+        if self.notification.type.includes_diff:
+                try:
+                    notification = AmendmentNotification.objects.get(pk=self.notification.pk)
+                    if not self.is_rejected:
+                        notification.apply()
+                    elif self.is_rejected and self.is_withdrawn:
+                        notification.new_submission_form.is_withdrawn = True
+                        notification.new_submission_form.save(update_fields=['is_withdrawn'])
+                except AmendmentNotification.DoesNotExist:
+                    assert False, "we should never get here"
         
         extend, finish, ctis_transition = False, False, False
         if not self.is_rejected:

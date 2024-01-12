@@ -166,7 +166,7 @@ def copy_submission_form(request, submission_form_pk=None, notification_type_pk=
 
 def copy_latest_submission_form(request, submission_pk=None, **kwargs):
     submission = get_object_or_404(Submission, pk=submission_pk)
-    kwargs['submission_form_pk'] = submission.newest_submission_form.pk
+    kwargs['submission_form_pk'] = submission.submission_form_to_copy.pk
     return redirect(copy_submission_form, **kwargs)
 
 

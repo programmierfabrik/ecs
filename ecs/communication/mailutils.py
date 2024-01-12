@@ -2,6 +2,7 @@ import html
 import re
 import textwrap
 
+import pytz
 from django.conf import settings
 from django.core import mail
 from django.core.mail import EmailMessage, EmailMultiAlternatives, make_msgid
@@ -76,3 +77,28 @@ def deliver_to_recipient(recipient, subject, message, from_email,
     connection.send_messages([msg])
 
     return (msgid, msg.message(),)
+
+
+def generate_ics_file(user_email, event_name, event_description, location, start_datetime, end_datetime):
+    proid = f"Ethic Committee System {settings.ECS_VERSION}"
+    vienna_timezone = pytz.timezone('Europe/Vienna')
+
+    dt_format = '%Y%m%dT%H%M%S'
+    start_datetime_formatted = start_datetime.astimezone(vienna_timezone).strftime(dt_format)
+    end_datetime_formatted = end_datetime.astimezone(vienna_timezone).strftime(dt_format)
+
+    ics_content = f"BEGIN:VCALENDAR\n" \
+                  f"VERSION:2.0\n" \
+                  f"PRODID:-//{proid}//EN\n" \
+                  f"BEGIN:VEVENT\n" \
+                  f"UID:{user_email}\n" \
+                  f"SUMMARY:{event_name}\n" \
+                  f"DESCRIPTION:{event_description}\n" \
+                  f"LOCATION:{location}\n" \
+                  f"DTSTAMP:{start_datetime_formatted}\n" \
+                  f"DTSTART:{start_datetime_formatted}\n" \
+                  f"DTEND:{end_datetime_formatted}\n" \
+                  f"END:VEVENT\n" \
+                  f"END:VCALENDAR"
+
+    return bytes(ics_content, 'utf-8')
