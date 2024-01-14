@@ -311,7 +311,7 @@ class BaseInvestigatorFormSet(ReadonlyFormSetMixin, BaseFormSet):
         del employee_kwargs['initial']
         extra = employee_kwargs.pop('extra', None)
         for form in self.forms:
-            initial = form.initial.pop('employees') if form.initial else None
+            initial = form.initial.pop('employees', None) if form.initial else None
             form.nested = InvestigatorEmployeeFormSet(
                 data,
                 prefix='%s-employee' % form.prefix,
