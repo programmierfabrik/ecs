@@ -26,7 +26,7 @@ ETHICS_COMMISSION_UUID = os.getenv('ECS_COMMISSION_UUID', 'ecececececececececece
 ECS_REQUIRE_CLIENT_CERTS = os.getenv('ECS_REQUIRE_CLIENT_CERTS', '').lower() == 'true'
 ECS_USERSWITCHER_ENABLED = os.getenv('ECS_USERSWITCHER_ENABLED', 'true').lower() == 'true'
 
-ALLOWED_HOSTS = [DOMAIN]
+ALLOWED_HOSTS = [DOMAIN, 'ecs.web']
 
 # Production settings
 if os.getenv('ECS_PROD', 'false').lower() == 'true':
