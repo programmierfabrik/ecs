@@ -33,6 +33,7 @@ urlpatterns = [
     path('statistics/', include('ecs.statistics.urls')),
     path('tags/', include('ecs.tags.urls')),
     path('', include('ecs.pki.urls')),
+    path('', include('django_prometheus.urls')),
     path('i18n/', include('django.conf.urls.i18n')),
     re_path('static/(?P<path>.*)$', forceauth.exempt(serve), {'document_root': settings.STATIC_ROOT}),
     re_path(r'^(?P<path>favicon\.ico)$', serve, {'document_root': settings.STATIC_ROOT}),

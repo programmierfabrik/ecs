@@ -29,6 +29,7 @@ redis = "==4.3.*"
 hiredis = "==2.0.*"
 reportlab = "==3.6.*"
 qrcode = "==7.3.*"
+django-prometheus = "==2.3.*"
 
 [dev-packages]
 

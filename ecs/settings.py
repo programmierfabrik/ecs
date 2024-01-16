@@ -79,7 +79,7 @@ if os.getenv('DATABASE_URL'):
 else:
     DATABASES['default'] = {
         'NAME': 'test-ecs',
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django_prometheus.db.backends.postgresql',
         'USER': 'test-ecs',
         'PASSWORD': 'test-ecs',
         'HOST': 'localhost',
@@ -165,6 +165,7 @@ TEMPLATES = [
 ]
 
 MIDDLEWARE = (
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -190,6 +191,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'django_prometheus',
 
     'compressor',
     'reversion',
@@ -357,7 +359,7 @@ else:
     CELERY_TASK_ALWAYS_EAGER = True
     CACHES = {
         'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'BACKEND': 'django_prometheus.cache.backends.locmem.LocMemCache',
         },
     }
 
@@ -418,6 +420,8 @@ if os.getenv('ECS_SENTRY_DSN', '') != '':
 
 if not ECS_USERSWITCHER_ENABLED:
     MIDDLEWARE = tuple(item for item in MIDDLEWARE if item != 'ecs.userswitcher.middleware.UserSwitcherMiddleware')
+
+MIDDLEWARE += ('django_prometheus.middleware.PrometheusAfterMiddleware',)
 
 # django rosetta activation
 if 'ECS_WORDING' in locals() and ECS_WORDING:

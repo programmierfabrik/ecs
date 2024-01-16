@@ -11,6 +11,8 @@ def exempt(view):
 
 class ForceAuth(MiddlewareMixin):
     def process_view(self, request, view, args, kwargs):
+        if request.path == '/metrics':
+            return None
         if not getattr(view, '_forceauth_exempt', False) and request.user.is_anonymous:
             return redirect(settings.LOGIN_URL + '?next=%s' % request.path)
 
