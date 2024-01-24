@@ -1,4 +1,5 @@
 import logging
+import re
 from datetime import timedelta
 from functools import reduce
 
@@ -319,6 +320,18 @@ class BaseInvestigatorFormSet(ReadonlyFormSetMixin, BaseFormSet):
                 initial=initial,
                 **employee_kwargs
             )
+            
+            # This should stay just a few months since with new form this problem won't appear
+            if form.nested.data:
+                _mutable = form.nested.data._mutable
+                form.nested.data._mutable = True
+    
+                for k, v in form.nested.data.items():
+                    result = re.search(r"investigator-(\d+)-employee-INITIAL_FORMS", k)
+                    if result and form.nested.data[result.string] in ('', 0, None):
+                        form.nested.data[result.string] = len(form.nested)
+    
+                form.nested.data._mutable = _mutable
 
     def clean(self):
         super().clean()
