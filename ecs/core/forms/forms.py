@@ -330,6 +330,10 @@ class BaseInvestigatorFormSet(ReadonlyFormSetMixin, BaseFormSet):
                     result = re.search(r"investigator-(\d+)-employee-INITIAL_FORMS", k)
                     if result and form.nested.data[result.string] in ('', 0, None):
                         form.nested.data[result.string] = len(form.nested)
+
+                    result2 = re.search(r"investigator-(\d+)-employee-TOTAL_FORMS", k)
+                    if result2 and form.nested.data[result2.string] in ('', 0, None):
+                        form.nested.data[result2.string] = len(form.nested)
     
                 form.nested.data._mutable = _mutable
 
