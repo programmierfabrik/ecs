@@ -29,12 +29,12 @@ class RejectableNotificationAnswerForm(NotificationAnswerForm):
 class AmendmentAnswerForm(RejectableNotificationAnswerForm):
     is_substantial = forms.BooleanField(required=False, label=_('Substantial'))
     needs_signature = forms.BooleanField(required=False, label=_('Needs signature'))
-    is_withdrawn = forms.BooleanField(required=False, label='Zurückzogen')
+    is_withdrawn = forms.BooleanField(required=False, label='Zurückgezogen')
 
     class Meta:
         model = NotificationAnswer
         fields = (
-            'is_rejected', 'is_final_version', 'is_substantial', 'is_withdrawn',
+            'is_rejected', 'is_withdrawn', 'is_final_version', 'is_substantial',
             'needs_signature', 'text',
         )
 
