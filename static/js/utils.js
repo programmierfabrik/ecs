@@ -196,7 +196,10 @@ ecs.InvestigatorFormset.prototype = {
     initEmployee: function (container) {
         var investigatorEmployee = container.find(".investigatoremployee").first();
         var parentParentId = investigatorEmployee.parent().parent().attr("id");
-        var investiagtorNumber = parentParentId.charAt(parentParentId.length - 1);
+        // Use regex to extract the number part
+        var match = parentParentId.match(/investigator(\d+)/);
+        // Check if there is a match and extract the number part
+        var investiagtorNumber = match ? parseInt(match[1]) : null;
 
         var classList = investigatorEmployee.attr("class").split(/\s+/);
         // We know that this is the table we are searching for. now get the correct class, so we have our index.
