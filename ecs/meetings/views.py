@@ -859,22 +859,26 @@ def send_agenda_to_board(request, meeting_pk=None):
     event_description = f'Sitzungs-Link: {meeting_link}' if meeting_link and len(meeting_link) > 0 else ''
     event_name = 'ECS - ' + meeting.title
 
-    users = User.objects.filter(meeting_participations__entry__meeting=meeting).distinct()
+    rounded_end = meeting.end + timedelta(minutes=30 - (meeting.end.minute % 30))
+    rounded_end = rounded_end.replace(second=0, microsecond=0)
+    users = User.objects.filter(meeting_participations__entry__meeting=meeting).prefetch_related('profile').distinct()
     for user in users:
         timeframe = meeting._get_timeframe_for_user(user)
         if timeframe is None:
             continue
         start, end = timeframe
-        
-        ics_file = generate_ics_file(user.email, event_name, event_description, meeting_address, start, end)
-        
+        boardmember_attachments = attachments[:]
+        if user.profile.is_board_member:
+            ics_file = generate_ics_file(user.email, event_name, event_description, meeting_address, meeting.start, rounded_end)
+            boardmember_attachments += (('ECS_Sitzung.ics', ics_file, 'text/calendar'),)
+
         htmlmail = str(render_html(request, \
                                    'meetings/messages/boardmember_invitation.html', \
-                                   {'meeting': meeting, 'start': start, 'end': end, 'recipient': user}))
+                                   {'meeting': meeting, 'start': start, 'end': end, 'recipient': user, 'is_boardmember': user.profile.is_board_member}))
         deliver(user.email, subject=subject, message=None,
                 message_html=htmlmail, from_email=settings.DEFAULT_FROM_EMAIL,
                 rfc2822_headers={"Reply-To": reply_to},
-                attachments=(*attachments, ('ECS_Sitzung.ics', ics_file, 'text/calendar')))
+                attachments=boardmember_attachments)
 
     for user in User.objects.filter(groups__name__in=settings.ECS_MEETING_AGENDA_RECEIVER_GROUPS):
         start, end = meeting.start, meeting.end
