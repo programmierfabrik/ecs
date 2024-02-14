@@ -18,7 +18,6 @@
                             <div class="collapse{% if forloop.last %} show{% endif %}"
                                  id="comment-{{ forloop.counter }}">
                                 {{ amendment.comments|linebreaksbr }}
-                                {{ amendment.is_rejected }}
                             </div>
                             {% if not forloop.last %}
                                 <hr/>
