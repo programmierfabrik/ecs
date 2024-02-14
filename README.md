@@ -50,7 +50,8 @@ just `docker-compose down && docker-compose up -d`.
 ```shell
 ssh ecs@example.com cat ./deployment/data/ecs/dump/ecs.pgdump.gz | \
   gzip -d | \
-  docker exec -i test-ecs pg_restore -U test-ecs -1 --format=custom --schema=public --no-owner --dbname=test-ecs
+  docker exec -i test-ecs pg_restore -U test-ecs -1 --format=custom --schema=public --no-owner --dbname=test-ecs && \
+  pipenv run ./manage.py bootstrap
 ```
 
 ### Dump dev and restore
