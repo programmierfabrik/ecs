@@ -185,6 +185,11 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
         if not cleaned_data.get('subject_maxage_not_defined', False):
             require_fields(self, ('subject_maxage', 'subject_maxage_unit',))
 
+        if any(cleaned_data.get(f, False) for f in (
+        'subject_noncompetent_unconscious', 'subject_noncompetent_guarded', 'subject_noncompetent_minor',
+        'subject_noncompetent_emergency_study')):
+            require_fields(self, ('german_protected_subjects_info',))
+
         return cleaned_data
 
     def save(self, commit=True):
