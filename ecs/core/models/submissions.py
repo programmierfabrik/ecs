@@ -282,7 +282,7 @@ class SubmissionForm(models.Model):
     # 1.5
     sponsor = models.ForeignKey(User, null=True, related_name="sponsored_submission_forms", on_delete=models.CASCADE)
     sponsor_name = models.CharField(max_length=100)
-    sponsor_contact = NameField()
+    sponsor_contact = NameField(required=('first_name', 'last_name',))
     sponsor_address = models.CharField(max_length=60)
     sponsor_zip_code = models.CharField(max_length=10)
     sponsor_city = models.CharField(max_length=80)
