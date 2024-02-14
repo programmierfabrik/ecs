@@ -974,9 +974,6 @@ msgstr "gebärfähige Frauen"
 msgid "diverse participants"
 msgstr "Divers"
 
-msgid "non competent participants"
-msgstr "Nicht-persönlich-Einwilligungsfähige"
-
 msgid ""
 "Duration of participation of the individual test participants in the study"
 msgstr ""

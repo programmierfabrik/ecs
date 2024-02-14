@@ -60,7 +60,7 @@ SUBMISSION_FORM_TABS = (
             'subject_count', 'subject_minage', 'subject_minage_unit', 'subject_maxage_not_defined', 'subject_maxage', 'subject_maxage_unit', 'subject_males', 'subject_females_childbearing', 'subject_divers',
             'subject_duration', 'subject_duration_active', 'subject_duration_controls', 'subject_planned_total_duration',
         ]),
-        (_('non competent participants') + ' [2.10.3]', [
+        ('Besonders schutzbedürftige Personengruppen' + ' [2.10.3]', [
             'subject_noncompetent_unconscious', 'subject_noncompetent_guarded', 'subject_noncompetent_minor', 'subject_noncompetent_emergency_study',
         ]),
     ]),
