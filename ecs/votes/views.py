@@ -58,5 +58,5 @@ def sign_success(request, document=None):
 def vote_pdf_debug(request, vote_pk=None):
     vote = get_object_or_404(Vote, pk=vote_pk)
     response = HttpResponse(vote.render_pdf(), content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment;filename=debug.pdf'
+    response['Content-Disposition'] = 'inline;filename=debug.pdf'
     return response
