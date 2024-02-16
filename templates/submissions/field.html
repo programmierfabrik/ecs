@@ -43,7 +43,7 @@
                     {% if field_info.number %}
                         <small class="text-muted">&nbsp;[{{ field_info.number }}]</small>
                     {% endif %}
-                    {% if field.field.required %}
+                    {% if field.field.required or field_info.conditionally_required %}
                         <span class="text-danger">&nbsp;*</span>
                     {% endif %}
                 {% endspaceless %}

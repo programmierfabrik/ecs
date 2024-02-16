@@ -262,8 +262,14 @@
             function changeSubmissionTypeState() {
                 var isAmg = $('#id_project_type_non_reg_drug').is(':checked') || $('#id_project_type_reg_drug').is(':checked');
                 var isMpg = $('#id_project_type_medical_device').is(':checked');
+                var isDisabled = !(isAmg || isMpg);
 
-                $('#id_submission_type').prop('disabled', !(isAmg || isMpg));
+                $('#id_submission_type').prop('disabled', isDisabled);
+                if (isDisabled) {
+                  $('label[for="id_submission_type"] span.text-danger').remove();
+                } else {
+                  $('label[for="id_submission_type"]').append('<span class="text-danger">&nbsp;*</span>');
+                }
             }
 
             $('#id_project_type_medical_device_combination_studies').parent().parent().addClass('pl-5');
