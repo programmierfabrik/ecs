@@ -272,7 +272,7 @@
                             </a>
                             <br>
                             {% if debug %}
-                                <a class="ml-3" href="{% url 'votes.vote_pdf_debug' vote_pk=vote.pk %}">
+                                <a class="ml-3" href="{% url 'votes.vote_pdf_debug' vote_pk=vote.pk %}" target="_blank">
                                     <span class="fa fa-file-pdf-o"></span>
                                     PDF Debug
                                 </a>
