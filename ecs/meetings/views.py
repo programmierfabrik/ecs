@@ -862,6 +862,7 @@ def send_agenda_to_board(request, meeting_pk=None):
     rounded_end = meeting.end + timedelta(minutes=30 - (meeting.end.minute % 30))
     rounded_end = rounded_end.replace(second=0, microsecond=0)
     users = User.objects.filter(meeting_participations__entry__meeting=meeting).prefetch_related('profile').distinct()
+    user_ids_not_to_include = []
     for user in users:
         timeframe = meeting._get_timeframe_for_user(user)
         if timeframe is None:
@@ -879,8 +880,9 @@ def send_agenda_to_board(request, meeting_pk=None):
                 message_html=htmlmail, from_email=settings.DEFAULT_FROM_EMAIL,
                 rfc2822_headers={"Reply-To": reply_to},
                 attachments=boardmember_attachments)
+        user_ids_not_to_include.append(user.id)
 
-    for user in User.objects.filter(groups__name__in=settings.ECS_MEETING_AGENDA_RECEIVER_GROUPS):
+    for user in User.objects.filter(groups__name__in=settings.ECS_MEETING_AGENDA_RECEIVER_GROUPS).exclude(pk__in=user_ids_not_to_include).distinct():
         start, end = meeting.start, meeting.end
         ics_file = generate_ics_file(user.email, event_name, event_description, meeting_address, start, end)
 
