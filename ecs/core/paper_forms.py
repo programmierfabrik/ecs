@@ -16,7 +16,7 @@ from ecs.documents.models import Document
 _form_info = {}
 
 class FieldInfo(object):
-    def __init__(self, number, name, paper_label=None, help_text=None, icon_text=False, short_label=None, db_field=True):
+    def __init__(self, number, name, paper_label=None, help_text=None, icon_text=False, short_label=None, db_field=True, conditionally_required=False):
         self.number = number
         self.name = name
         self.paper_label = paper_label
@@ -24,6 +24,7 @@ class FieldInfo(object):
         self.icon_text= icon_text
         self.short_label = short_label
         self._db_field = db_field or None
+        self.conditionally_required = conditionally_required
 
     @property
     def label(self):
@@ -117,7 +118,7 @@ FormInfo(SubmissionForm, fields=(
     # 1. Allgemeines
     FieldInfo('1.1', 'project_title', _('project title'), short_label=_('project title (english)')),
     FieldInfo('1.3', None, _('date of protocol')), #'date_of_protocol'
-    FieldInfo('1.2.1', 'eudract_number', _('EudraCT-Nr.')),
+    FieldInfo('1.2.1', 'eudract_number', _('EudraCT-Nr.'), conditionally_required=True),
     FieldInfo('1.3.1', None, _('ISRCTN-Nr.')), #'isrctn_number'
     # 1.5 u'Sponsor / Rechnungsempfänger/in (Kontaktperson in der Buchhaltung)'
     FieldInfo('1.5.1', 'sponsor_name', _('sponsor name')),
@@ -177,11 +178,11 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo(None, 'is_new_medtech_law', _('is_new_medtech_law'), help_text=_('is_new_medtech_law_help'), icon_text=_('is_new_medtech_law_icon')),
     FieldInfo('2.2', 'specialism', _('special field')),
     # 2.3 Arzneimittelstudie (wenn zutreffend)
-    FieldInfo('2.3.1', 'pharma_checked_substance', _('Test substances')),
-    FieldInfo('2.3.2', 'pharma_reference_substance', _('Reference substance')),
+    FieldInfo('2.3.1', 'pharma_checked_substance', _('Test substances'), conditionally_required=True),
+    FieldInfo('2.3.2', 'pharma_reference_substance', _('Reference substance'), conditionally_required=True),
     # 2.4 Medizinproduktestudie (wenn zutreffend)
-    FieldInfo('2.4.1', 'medtech_checked_product', _('Test products(e)')),
-    FieldInfo('2.4.2', 'medtech_reference_substance', _('reference product')),
+    FieldInfo('2.4.1', 'medtech_checked_product', _('Test products(e)'), conditionally_required=True),
+    FieldInfo('2.4.2', 'medtech_reference_substance', _('reference product'), conditionally_required=True),
     FieldInfo('2.4.3', 'medtech_eu_ct_id', _('medtech_eu_ct_id')),
     FieldInfo('2.5', 'clinical_phase', _('Clinical Phase'), help_text=_('Necessarily indicate, in case of an AMG-study the clinical phase, in case of medical devices the most appropriate phase.')),
     FieldInfo('2.8', 'already_voted', _('There are already votes of other ethics commissions.'), help_text=_('If so, upload the votes on the documents tab')),
@@ -209,7 +210,7 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('2.12', 'subject_planned_total_duration', _('Expected total duration of the study')),
     # 3a. Betrifft nur Studien gemäß AMG: Angaben zur Prüfsubstanz (falls nicht in Österreich registriert)
     FieldInfo('3.1', 'substance_registered_in_countries', _('Registration in other states?')),
-    FieldInfo('3.2', 'substance_preexisting_clinical_tries', _('Are there already results of clinical trials for the tested drug?')),
+    FieldInfo('3.2', 'substance_preexisting_clinical_tries', _('Are there already results of clinical trials for the tested drug?'), conditionally_required=True),
     FieldInfo('3.2.1', 'substance_p_c_t_countries', _('3.2.1 Countries in which the tests were conducted')),
     FieldInfo('3.2.2', 'substance_p_c_t_phase', _('Phase'), help_text=_('If studies are cited in several phases, indicate the highest stage.')),
     FieldInfo('3.2.3', 'substance_p_c_t_period', _('period')),
@@ -217,14 +218,14 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('3.2.5', 'substance_p_c_t_gcp_rules', _('Were the clinical tests made according to GCP guidelines')),
     FieldInfo('3.2.6', 'substance_p_c_t_final_report', _('Does a final report exist?'), help_text=_("If yes, upload the investigator's brochure, relevant data or a report of the Pharmaceutical Advisory Council using the upload tab")),
     # 4. Betrifft nur Studien gemäß MPG: Angaben zum Medizinprodukt
-    FieldInfo('4.1', 'medtech_product_name', _('Name of the product')),
-    FieldInfo('4.2', 'medtech_manufacturer', _('Manufacturer')),
-    FieldInfo('4.3', 'medtech_certified_for_exact_indications', _('Certified for this indication')),
-    FieldInfo('4.4', 'medtech_certified_for_other_indications', _('Certified, but for another indication')),
-    FieldInfo('4.5', 'medtech_ce_symbol', _('The medical product carries a CE mark')),
-    FieldInfo('4.6', 'medtech_manual_included', _('The product brochure is included.')),
-    FieldInfo('4.7', 'medtech_technical_safety_regulations', _('What rules or standards have been used for the construction and testing of the medical product (technical safety)')),
-    FieldInfo('4.8', 'medtech_departure_from_regulations', _('Any deviations from the above provisions (standards)')),
+    FieldInfo('4.1', 'medtech_product_name', _('Name of the product'), conditionally_required=True),
+    FieldInfo('4.2', 'medtech_manufacturer', _('Manufacturer'), conditionally_required=True),
+    FieldInfo('4.3', 'medtech_certified_for_exact_indications', _('Certified for this indication'), conditionally_required=True),
+    FieldInfo('4.4', 'medtech_certified_for_other_indications', _('Certified, but for another indication'), conditionally_required=True),
+    FieldInfo('4.5', 'medtech_ce_symbol', _('The medical product carries a CE mark'), conditionally_required=True),
+    FieldInfo('4.6', 'medtech_manual_included', _('The product brochure is included.'), conditionally_required=True),
+    FieldInfo('4.7', 'medtech_technical_safety_regulations', _('What rules or standards have been used for the construction and testing of the medical product (technical safety)'), conditionally_required=True),
+    FieldInfo('4.8', 'medtech_departure_from_regulations', _('Any deviations from the above provisions (standards)'), conditionally_required=True),
     # 5. Angaben zur Versicherung (gemäß §32 Abs.1 Z.11 und Z.12 und Abs.2 AMG; §§47 und 48 MPG)
     # Diese Angaben müssen in der Patienten- / Probandeninformation enthalten sein!
     FieldInfo(None, 'insurance_not_required', _('No insurance is required')),
@@ -309,7 +310,7 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('8.6.1', 'study_plan_dataprotection_choice', _('Information privacy')),
     FieldInfo('8.6.2', 'study_plan_dataprotection_reason', _('Justification')),
     FieldInfo('8.6.2', 'study_plan_dataprotection_dvr', _('DPR-Nr.')),
-    FieldInfo('8.6.3', 'study_plan_dataprotection_anonalgoritm', _('How is the anonymization done?')),
+    FieldInfo('8.6.3', 'study_plan_dataprotection_anonalgoritm', _('How is the anonymization done?'), conditionally_required=True),
     # Name und Unterschrift der Antragstellerin/des Antragstellers
     FieldInfo('9.1', 'submitter_contact_gender', None, short_label=_('salutation')),
     FieldInfo('9.1', 'submitter_contact_title', None, short_label=_('prefix title')),
