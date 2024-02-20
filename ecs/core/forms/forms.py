@@ -364,18 +364,18 @@ class BaseInvestigatorFormSet(ReadonlyFormSetMixin, BaseFormSet):
         # validate if prüfer is mitarbeiter
         for form in self.forms:
             investigator_data = form.cleaned_data
-            investigator_gender = investigator_data['contact_gender']
-            investigator_title = investigator_data['contact_title']
-            investigator_suffix_title = investigator_data['contact_suffix_title']
-            investigator_first_name = investigator_data['contact_first_name']
-            investigator_last_name = investigator_data['contact_last_name']
+            investigator_gender = investigator_data.get('contact_gender')
+            investigator_title = investigator_data.get('contact_title')
+            investigator_suffix_title = investigator_data.get('contact_suffix_title')
+            investigator_first_name = investigator_data.get('contact_first_name')
+            investigator_last_name = investigator_data.get('contact_last_name')
 
             for employee in form.nested.cleaned_data:
-                employee_gender = employee['sex']
-                employee_title = employee['title']
-                employee_suffix_title = employee['suffix_title']
-                employee_first_name = employee['firstname']
-                employee_last_name = employee['surname']
+                employee_gender = employee.get('sex')
+                employee_title = employee.get('title')
+                employee_suffix_title = employee.get('suffix_title')
+                employee_first_name = employee.get('firstname')
+                employee_last_name = employee.get('surname')
 
                 if employee_gender == investigator_gender and \
                     employee_title == investigator_title and \
