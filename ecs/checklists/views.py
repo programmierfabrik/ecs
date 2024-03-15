@@ -56,7 +56,7 @@ def create_task(request, submission_pk=None):
         assign_to = form_stage2.cleaned_data.get('assign_to')
 
         tasks = Task.unfiltered.for_submission(submission).open().filter(
-            task_type=task_type)
+            task_type__name=task_type.name)
         if not task_type.is_delegatable:
             tasks = tasks.filter(assigned_to=assign_to)
 
