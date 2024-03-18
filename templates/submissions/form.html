@@ -273,6 +273,19 @@
                 }
             }
 
+            append_protected_subjects_astrix();
+            $('#id_subject_noncompetent_unconscious, #id_subject_noncompetent_guarded, #id_subject_noncompetent_minor, #id_subject_noncompetent_emergency_study')
+                .on('change', append_protected_subjects_astrix);
+            function append_protected_subjects_astrix() {
+                var isChecked = $('#id_subject_noncompetent_unconscious, #id_subject_noncompetent_guarded, #id_subject_noncompetent_minor, #id_subject_noncompetent_emergency_study')
+                    .is(':checked');
+
+                $('label[for="id_german_protected_subjects_info"] span.text-danger').remove();
+                if (isChecked) {
+                  $('label[for="id_german_protected_subjects_info"]').append('<span class="text-danger">&nbsp;*</span>');
+                }
+            }
+
             $('#id_project_type_medical_device_combination_studies').parent().parent().addClass('pl-5');
             $('#id_project_type_medical_device_combination_studies').on('change', changeEUCTIDState);
             $('#id_project_type_medical_device').on('change', changeEUCTIDState);
