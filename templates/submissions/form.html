@@ -264,11 +264,12 @@
                 var isMpg = $('#id_project_type_medical_device').is(':checked');
                 var isDisabled = !(isAmg || isMpg);
 
+                var submission_type = $('label[for="id_submission_type"]');
                 $('#id_submission_type').prop('disabled', isDisabled);
                 if (isDisabled) {
                   $('label[for="id_submission_type"] span.text-danger').remove();
-                } else {
-                  $('label[for="id_submission_type"]').append('<span class="text-danger">&nbsp;*</span>');
+                } else if (submission_type.children().length == 1) {
+                  submission_type.append('<span class="text-danger">&nbsp;*</span>');
                 }
             }
 
