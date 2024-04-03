@@ -11,7 +11,7 @@ PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if os.getenv('ECS_SETTINGS'):
     exec(os.getenv('ECS_SETTINGS'))
 
-ECS_VERSION = 'v2.3.1'
+ECS_VERSION = 'v2.3.2'
 
 # absolute URL prefix w/out trailing slash
 if os.getenv('ECS_DOMAIN'):
@@ -305,7 +305,7 @@ if os.getenv('SMTP_URL'):
     EMAIL_PORT = url.port or 25
     EMAIL_HOST_USER = url.username or ''
     EMAIL_HOST_PASSWORD = url.password or ''
-    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', False) == 'True'
+    EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', False).lower() == 'true'
 
 SMTPD_CONFIG = {
     'listen_addr': ('0.0.0.0', 8025),
@@ -386,7 +386,10 @@ try:
 except ImportError:
     pass
 
-DEFAULT_FROM_EMAIL = SERVER_EMAIL = 'noreply@{}'.format(DOMAIN)
+if os.getenv('DEFAULT_FROM_EMAIL'):
+    DEFAULT_FROM_EMAIL = SERVER_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+else:
+    DEFAULT_FROM_EMAIL = SERVER_EMAIL = 'noreply@{}'.format(DOMAIN)
 
 # https
 if 'SECURE_PROXY_SSL' in locals() and SECURE_PROXY_SSL:
