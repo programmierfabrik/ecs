@@ -82,7 +82,7 @@
         {% endfor %}
     </div>
     <input type="submit" value="submit" name="submit" class="hidden" />
-    <input type="submit" value="validate" name="validate" class="hidden" />
+    <input type="submit" value="save" name="save" class="hidden" />
 </form>
 {% endblock %}
 
@@ -182,6 +182,9 @@
                     }
                 });
             }
+            {% if save %}
+                ecs.openSnackbar({% if not valid %}'error'{% else %}'success'{% endif %}, 'Änderungen gespeichert{% if not valid %}\r\nPflichtangaben fehlen{% endif %}', 3000);
+            {% endif %}
         });
     </script>
 {% endblock %}

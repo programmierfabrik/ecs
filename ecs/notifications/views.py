@@ -188,6 +188,8 @@ def create_notification(request, notification_type_pk=None):
     request.docstash['type_id'] = notification_type_pk
 
     form = notification_type.form_cls(request.POST or request.docstash.POST)
+    save = False
+    valid = False
 
     if request.method == 'POST':
         submit = request.POST.get('submit', False)
@@ -202,10 +204,11 @@ def create_notification(request, notification_type_pk=None):
         request.docstash.POST = request.POST
         request.docstash.save()
         
-        if save or autosave:
+        if autosave:
             return HttpResponse(_('save successful'))
         
-        if submit and form.is_valid():
+        valid = form.is_valid()
+        if submit and valid:
             notification = form.save(commit=False)
             notification.type = notification_type
             notification.user = request.user
@@ -225,6 +228,8 @@ def create_notification(request, notification_type_pk=None):
         'notification_type': notification_type,
         'form': form,
         'tabs': get_notification_form_tabs(type(form)),
+        'save': save,
+        'valid': valid,
     })
 
 
