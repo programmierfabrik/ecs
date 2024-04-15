@@ -305,7 +305,7 @@ if os.getenv('SMTP_URL'):
     EMAIL_PORT = url.port or 25
     EMAIL_HOST_USER = url.username or ''
     EMAIL_HOST_PASSWORD = url.password or ''
-    EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', False).lower() == 'true'
+    EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'False').lower() == 'true'
 
 SMTPD_CONFIG = {
     'listen_addr': ('0.0.0.0', 8025),
