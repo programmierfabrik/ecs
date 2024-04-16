@@ -305,7 +305,6 @@ if os.getenv('SMTP_URL'):
     EMAIL_PORT = url.port or 25
     EMAIL_HOST_USER = url.username or ''
     EMAIL_HOST_PASSWORD = url.password or ''
-    EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'False').lower() == 'true'
 
 SMTPD_CONFIG = {
     'listen_addr': ('0.0.0.0', 8025),
@@ -385,11 +384,6 @@ try:
     from ecs.local_settings import *
 except ImportError:
     pass
-
-if os.getenv('DEFAULT_FROM_EMAIL'):
-    DEFAULT_FROM_EMAIL = SERVER_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
-else:
-    DEFAULT_FROM_EMAIL = SERVER_EMAIL = 'noreply@{}'.format(DOMAIN)
 
 # https
 if 'SECURE_PROXY_SSL' in locals() and SECURE_PROXY_SSL:
