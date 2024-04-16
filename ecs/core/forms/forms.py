@@ -344,12 +344,20 @@ class BaseInvestigatorFormSet(ReadonlyFormSetMixin, BaseFormSet):
 
     def clean(self):
         super().clean()
+
+        # Get only those forms which are valid, has changed and not entirely empty (excluding 'main')
         changed_forms = [
             form for form in self.forms[:self.total_form_count()]
-            if form.is_valid() and form.has_changed()
+            if form.is_valid()
+               and form.has_changed()
+               and any(
+                value
+                for field, value in form.cleaned_data.items()
+                if field != 'main' and value not in [None, '']
+            )
         ]
         if len(changed_forms) < 1:
-            raise forms.ValidationError(_('At least one centre is required.'))
+            raise forms.ValidationError(_('At least one investigator is required.'))
 
         if any(self.errors):
             return
