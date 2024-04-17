@@ -46,7 +46,7 @@
         {% endfor %}
         {% for field in form %}
             {% if not field.is_hidden %}
-                {% include "bootstrap/form_field.html" with inline=True paper_info=True %}
+                {% include "bootstrap/form_field.html" with inline=True paper_info=True hide_required_indicator=hide_required_indicator %}
             {% endif %}
         {% endfor %}
         <div class="my-3" style="display: none;">
