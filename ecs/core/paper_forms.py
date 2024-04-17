@@ -234,7 +234,7 @@ FormInfo(SubmissionForm, fields=(
     FieldInfo('5.1.2', 'insurance_address', _('address')),
     FieldInfo('5.1.3', 'insurance_phone', _('phone')),
     FieldInfo('5.1.4', 'insurance_contract_number', _('policy number')),
-    FieldInfo('5.1.5', 'insurance_validity', _('validity')),
+    FieldInfo('5.1.5', 'insurance_validity', _('validity'), help_text='wie in der Versicherungsbestätigung bzw. Versicherungspolizze angegeben'),
     # 6. Angaben zur durchzuführenden Therapie und Diagnostik
     FieldInfo('6.3', 'additional_therapy_info', _('Additional information on study-related activities and any necessary deviations from the routine treatment')),
     # 7. Strukturierte Kurzfassung des Projektes (in deutscher Sprache, kein Verweis auf das Protokoll)
