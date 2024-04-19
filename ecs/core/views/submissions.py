@@ -801,6 +801,14 @@ def create_submission_form(request):
             formsets.pop('investigator')
             # validate investigator_formset and nested
             for investigator_form in investigator_formset.forms:
+                # Filter out all the empty forms that are being also sent. See ECS-85
+                if all(
+                    value in [None, '']
+                    for field, value in investigator_form.cleaned_data.items()
+                    if field != 'main'
+                ):
+                    continue
+                
                 investigator = investigator_form.save(commit=False)
                 investigator.submission_form = submission_form
                 investigator.save()
