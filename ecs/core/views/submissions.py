@@ -1077,8 +1077,7 @@ def xls_export(request):
 
 @user_flag_required('is_internal')
 def xls_export_download(request, shasum=None):
-    cache_file = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR,
-        '{}.xls'.format(shasum))
+    cache_file = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR, 'xls-export', '{}.xls'.format(shasum))
     response = FileResponse(open(cache_file, 'rb'),
         content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment;filename=submission-export.xls'

@@ -256,8 +256,7 @@ def xls_export(user_id=None, filters=None):
     h = hashlib.sha1()
     h.update(xls_data)
 
-    cache_file = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR,
-                              '{}.xls'.format(h.hexdigest()))
+    cache_file = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR, 'xls-export', '{}.xls'.format(h.hexdigest()))
 
     with open(cache_file, 'wb') as f:
         f.write(xls_data)
