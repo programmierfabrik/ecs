@@ -324,6 +324,7 @@
                     // If countdown is finished, clear the interval
                     if (countdown < 0) {
                         $('#preview-button').prop('disabled', false);
+                        $('#preview-button').html('Vorschau');
                         clearInterval(countdownDisplay);
                     }
                 };
