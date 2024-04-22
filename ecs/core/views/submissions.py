@@ -701,6 +701,27 @@ def delete_document_from_submission(request):
     return redirect('core.submission.upload_document_for_submission',
         docstash_key=request.docstash.key)
 
+
+def submission_preview_download(request, shasum=None):
+    if not isinstance(shasum, str):
+        raise Http404()
+
+    sanitized_shasum = ''.join(e for e in shasum if e.isalnum())
+    cache_file = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR, 'submission-preview', '{}-{}.pdf'.format(request.user.id, sanitized_shasum))
+
+    if not os.path.exists(cache_file):
+        raise Http404()
+
+    try:
+        file = open(cache_file, 'rb')
+    except Exception as e:
+        return HttpResponseServerError()
+
+    response = FileResponse(file, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment;filename=Vorschau.pdf'
+    return response
+
+
 @with_docstash()
 def create_submission_form(request):
     if request.method == 'POST' and 'initial' in request.docstash:

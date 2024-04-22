@@ -17,6 +17,7 @@ from ecs.communication.utils import send_system_message_template
 from ecs.core.forms import AllSubmissionsFilterForm
 from ecs.core.models import Submission, SubmissionForm, Investigator
 from ecs.core.paper_forms import get_field_info
+from ecs.docstash.models import DocStash
 
 from celery.utils.log import get_task_logger
 
@@ -281,3 +282,20 @@ def cull_cache_dir():
         age = time.time() - os.path.getmtime(path)
         if age > settings.ECS_DOWNLOAD_CACHE_MAX_AGE:
             os.remove(path)
+
+
+@celery_app.task
+def generate_submission_preview(docstash_key=None, user_id=None):
+    docstash = DocStash.objects.get(key=docstash_key)
+    user = User.objects.get(id=user_id)
+
+    preview_pdf = docstash.render_preview_pdf()
+
+    h = hashlib.sha1()
+    h.update(preview_pdf)
+
+    cache_file = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR, 'submission-preview', '{}-{}.pdf'.format(user_id, h.hexdigest()))
+    with open(cache_file, 'wb') as f:
+        f.write(preview_pdf)
+
+    send_system_message_template(user, 'Einrechungsvorschau Fertig', 'submissions/submission_preview_done.txt', {'shasum': h.hexdigest()})

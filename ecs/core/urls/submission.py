@@ -24,6 +24,7 @@ urlpatterns = (
     path('delete/<str:docstash_key>/', views.delete_docstash_entry, name='core.submission.delete_docstash_entry'),
     path('doc/upload/<str:docstash_key>/', views.upload_document_for_submission, name='core.submission.upload_document_for_submission'),
     path('doc/delete/<str:docstash_key>/', views.delete_document_from_submission, name='core.submission.delete_document_from_submission'),
+    re_path(r'^doc/preview/(?P<shasum>[0-9a-f]{40})/$', views.submission_preview_download, name='core.submission.submission_preview_download'),
 
     path('diff/forms/<int:old_submission_form_pk>/<int:new_submission_form_pk>/', views.diff, name='core.submission.diff'),
 

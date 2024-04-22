@@ -14,6 +14,7 @@ def workflow_sync():
 @bootstrap.register()
 def create_settings_dirs():
     os.makedirs(settings.ECS_DOWNLOAD_CACHE_DIR, exist_ok=True)
+    os.makedirs(os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR, 'submission-preview'), exist_ok=True)
 
 @bootstrap.register()
 def compilemessages():
