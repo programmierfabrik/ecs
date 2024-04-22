@@ -1,3 +1,4 @@
+import math
 import uuid
 
 from django.db import models
@@ -5,6 +6,7 @@ from django.http import QueryDict
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+from django.utils import timezone
 from django_extensions.db.fields.json import JSONField
 
 from ecs import settings
@@ -28,6 +30,8 @@ class DocStash(models.Model):
     modtime = models.DateTimeField(auto_now=True)
     name = models.TextField(blank=True, null=True)
     value = JSONField(null=False)
+    # Only for create_submission
+    preview_generated_at = models.DateTimeField(null=True)
 
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(null=True)
@@ -72,8 +76,31 @@ class DocStash(models.Model):
         self.current_version += 1
         return super(DocStash, self).save(**kwargs)
 
+    def preview_generation_cooldown(self):
+        cooldown_duration = timezone.timedelta(minutes=5)
+        if not self.preview_generated_at:
+            # No cooldown if preview has not been generated yet
+            return 0
+
+        time_passed_since_last_generation = timezone.now() - self.preview_generated_at
+        if time_passed_since_last_generation >= cooldown_duration:
+            return 0  # No cooldown if the required time has passed
+
+        cooldown_remaining = cooldown_duration - time_passed_since_last_generation
+        # Return remaining cooldown length in seconds
+
+        return math.ceil(cooldown_remaining.total_seconds())
+    
+    def can_generate(self):
+        if not self.preview_generated_at:
+            return True
+        five_minutes_ago = timezone.now() - timezone.timedelta(minutes=5)
+        return self.preview_generated_at <= five_minutes_ago
+
     def render_preview_pdf(self):
         if self.group == 'ecs.core.views.submissions.create_submission_form':
+            self.preview_generated_at = timezone.now()
+            self.save(update_fields=('preview_generated_at',))
             form = SubmissionFormForm(self.POST)
             form.is_valid()
             mocked_form = form.cleaned_data

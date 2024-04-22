@@ -4,7 +4,8 @@ import re
 from itertools import groupby
 
 from django.conf import settings
-from django.http import HttpResponse, Http404, JsonResponse, FileResponse
+from django.db import transaction
+from django.http import HttpResponse, Http404, JsonResponse, FileResponse, HttpResponseServerError
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.forms.models import model_to_dict
@@ -51,6 +52,7 @@ from ecs.core.workflow import ChecklistReview
 
 from ecs.core.signals import on_study_submit, on_presenter_change, on_susar_presenter_change
 from ecs.core.serializer import Serializer
+from ecs.core.tasks import generate_submission_preview
 from ecs.docstash.decorators import with_docstash
 from ecs.docstash.models import DocStash
 from ecs.votes.models import Vote
@@ -771,19 +773,25 @@ def create_submission_form(request):
     valid = False
     save = False
     validate = False
-
+    preview = False
+    
     if request.method == 'POST':
         submit = request.POST.get('submit', False)
         save = request.POST.get('save', False)
         autosave = request.POST.get('autosave', False)
         validate = request.POST.get('validate', False)
+        preview = request.POST.get('preview', False)
 
-        request.docstash.name = (
-            request.POST.get('german_project_title') or
-            request.POST.get('project_title')
-        )
-        request.docstash.POST = request.POST
-        request.docstash.save()
+        with transaction.atomic():
+            request.docstash.name = (
+                request.POST.get('german_project_title') or
+                request.POST.get('project_title')
+            )
+            request.docstash.POST = request.POST
+            request.docstash.save()
+            
+            if preview and request.docstash.can_generate():
+                transaction.on_commit(lambda: generate_submission_preview.delay(request.docstash.key, request.user.id))
 
         if autosave:
             return HttpResponse('save successfull')
@@ -863,9 +871,11 @@ def create_submission_form(request):
         'valid': valid,
         'save': save,
         'validate': validate,
+        'preview': preview,
         'submission': submission,
         'notification_type': notification_type,
         'protocol_uploaded': protocol_uploaded,
+        'preview_generation_cooldown': request.docstash.preview_generation_cooldown(),
     }
     for prefix, formset in formsets.items():
         context['%s_formset' % prefix] = formset
