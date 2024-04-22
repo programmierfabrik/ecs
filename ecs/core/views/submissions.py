@@ -774,6 +774,7 @@ def create_submission_form(request):
     save = False
     validate = False
     preview = False
+    preview_generation_cooldown = request.docstash.preview_generation_cooldown()
     
     if request.method == 'POST':
         submit = request.POST.get('submit', False)
@@ -791,6 +792,7 @@ def create_submission_form(request):
             request.docstash.save()
             
             if preview and request.docstash.can_generate():
+                preview_generation_cooldown = 300
                 transaction.on_commit(lambda: generate_submission_preview.delay(request.docstash.key, request.user.id))
 
         if autosave:
@@ -875,7 +877,7 @@ def create_submission_form(request):
         'submission': submission,
         'notification_type': notification_type,
         'protocol_uploaded': protocol_uploaded,
-        'preview_generation_cooldown': request.docstash.preview_generation_cooldown(),
+        'preview_generation_cooldown': preview_generation_cooldown,
     }
     for prefix, formset in formsets.items():
         context['%s_formset' % prefix] = formset
