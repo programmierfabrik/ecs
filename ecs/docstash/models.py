@@ -65,15 +65,15 @@ class DocStash(models.Model):
     def POST(self, data):
         self.value['POST'] = data.urlencode()
 
-    def save(self, **kwargs):
-        if DocStash.objects.filter(key=self.key).exists():
-            updated = DocStash.objects.filter(
-                key=self.key, current_version=self.current_version
-            ).update(current_version=models.F('current_version') + 1)
-            if not updated:
-                raise self.ConcurrentModification()
-
-        self.current_version += 1
+    def save(self, increment_version=True, **kwargs):
+        if increment_version:
+            if DocStash.objects.filter(key=self.key).exists():
+                updated = DocStash.objects.filter(
+                    key=self.key, current_version=self.current_version
+                ).update(current_version=models.F('current_version') + 1)
+                if not updated:
+                    raise self.ConcurrentModification()
+            self.current_version += 1
         return super(DocStash, self).save(**kwargs)
 
     def preview_generation_cooldown(self):
@@ -100,7 +100,7 @@ class DocStash(models.Model):
     def render_preview_pdf(self):
         if self.group == 'ecs.core.views.submissions.create_submission_form':
             self.preview_generated_at = timezone.now()
-            self.save(update_fields=('preview_generated_at',))
+            self.save(increment_version=False, update_fields=('preview_generated_at',))
             form = SubmissionFormForm(self.POST)
             form.is_valid()
             mocked_form = form.cleaned_data
