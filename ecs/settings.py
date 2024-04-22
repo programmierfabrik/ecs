@@ -385,6 +385,8 @@ try:
 except ImportError:
     pass
 
+DEFAULT_FROM_EMAIL = SERVER_EMAIL = 'noreply@{}'.format(DOMAIN)
+
 # https
 if 'SECURE_PROXY_SSL' in locals() and SECURE_PROXY_SSL:
   CSRF_COOKIE_SECURE= True
