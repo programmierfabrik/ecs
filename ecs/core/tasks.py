@@ -274,13 +274,19 @@ def setup_periodic_tasks(sender, **kwargs):
 @celery_app.task
 def cull_cache_dir():
     logger.info("culling download cache")
-    for path in os.listdir(settings.ECS_DOWNLOAD_CACHE_DIR):
-        if path.startswith('.'):
-            continue
-        path = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR, path)
-        age = time.time() - os.path.getmtime(path)
-        if age > settings.ECS_DOWNLOAD_CACHE_MAX_AGE:
-            os.remove(path)
+
+    def clear_old_files_in_subfolder(sub_folder, max_age):
+        sub_folder_path = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR, sub_folder)
+        for path in os.listdir(sub_folder_path):
+            if path.startswith('.'):
+                continue
+            full_path = os.path.join(sub_folder_path, path)
+            age = time.time() - os.path.getmtime(full_path)
+            if age > max_age:
+                os.remove(full_path)
+
+    clear_old_files_in_subfolder('xls-export', settings.ECS_DOWNLOAD_CACHE_MAX_AGE)
+    clear_old_files_in_subfolder('submission-preview', 60 * 60 * 24)
 
 
 @celery_app.task
