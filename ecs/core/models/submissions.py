@@ -239,7 +239,8 @@ class Submission(models.Model):
         return not self.meetings.filter(started__isnull=False, ended=None).exists() and not self.is_active and not self.is_finished
 
     def allows_dynamic_task_creation(self):
-        return not self.is_expired and not self.is_finished and (
+        is_not_expired_or_localec = True if self.is_localec else not self.is_expired
+        return is_not_expired_or_localec and not self.is_finished and (
             self.current_published_vote is None or
             not self.current_published_vote.is_negative
         )
