@@ -40,6 +40,7 @@ def submission_workflow():
     statistical_review_checklist_blueprint = ChecklistBlueprint.objects.get(slug='statistic_review')
     insurance_review_checklist_blueprint = ChecklistBlueprint.objects.get(slug='insurance_review')
     legal_and_patient_review_checklist_blueprint = ChecklistBlueprint.objects.get(slug='legal_review')
+    legal_and_patient_review_checklist_seperate_group_blueprint = ChecklistBlueprint.objects.get(slug='legal_review_seperate_group')
     specialist_review_checklist_blueprint = ChecklistBlueprint.objects.get(slug='specialist_review')
     gcp_review_checklist_blueprint = ChecklistBlueprint.objects.get(slug='gcp_review')
 
@@ -50,6 +51,7 @@ def submission_workflow():
     STATISTIC_REVIEW_GROUP = 'Statistic Reviewer'
     GCP_REVIEW_GROUP = 'GCP Reviewer'
     SPECIALIST_GROUP = 'Specialist'
+    LEGAL_AND_PATIENT_REVIEW_GROUP = 'Legal and Patient Reviewer'
 
     setup_workflow_graph(Submission,
         auto_start=True,
@@ -64,7 +66,8 @@ def submission_workflow():
             'categorization': Args(Categorization, group=EXECUTIVE_GROUP, name=_("Categorization")),
             'categorization_review': Args(CategorizationReview, group=OFFICE_GROUP, name=_("Categorization Review")),
             'paper_submission_review': Args(PaperSubmissionReview, group=OFFICE_GROUP, name=_("Paper Submission Review")),
-            'legal_and_patient_review': Args(ChecklistReview, data=legal_and_patient_review_checklist_blueprint, name=_("Legal and Patient Review"), group=OFFICE_GROUP, is_dynamic=True),
+            'legal_and_patient_review': Args(ChecklistReview, data=legal_and_patient_review_checklist_blueprint, name="Patienteninformationsbewertung (alt)", group=OFFICE_GROUP, is_dynamic=True),
+            'legal_and_patient_review_seperate_group': Args(ChecklistReview, data=legal_and_patient_review_checklist_seperate_group_blueprint, name=_("Legal and Patient Review"), group=LEGAL_AND_PATIENT_REVIEW_GROUP, is_dynamic=True),
             'insurance_review': Args(ChecklistReview, data=insurance_review_checklist_blueprint, name=_("Insurance Review"), group=INSURANCE_REVIEW_GROUP, is_dynamic=True),
             'statistical_review': Args(ChecklistReview, data=statistical_review_checklist_blueprint, name=_("Statistical Review"), group=STATISTIC_REVIEW_GROUP, is_dynamic=True),
             'specialist_review': Args(ChecklistReview, data=specialist_review_checklist_blueprint, name=_("Specialist Review"), group=SPECIALIST_GROUP, is_delegatable=False, is_dynamic=True),
@@ -143,6 +146,7 @@ def auth_groups():
         'Userswitcher Target',
         'PKI Management',
         'Supporting Documents',
+        'Legal and Patient Reviewer',
     )
     for group in groups:
         Group.objects.get_or_create(name=group)

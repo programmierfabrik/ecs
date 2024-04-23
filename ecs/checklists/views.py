@@ -131,7 +131,7 @@ def categorization_tasks(request, submission_pk=None):
     uids = (
         'gcp_review',
         'insurance_review',
-        'legal_and_patient_review',
+        'legal_and_patient_review_seperate_group',
         'statistical_review',
     )
     created = False

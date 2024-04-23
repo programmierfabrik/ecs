@@ -18,6 +18,7 @@ def checklist_blueprints():
         dict(slug='localec_review', name=_("Local-EC Review")),
         dict(slug='statistic_review', name=_("Statistical Review")),
         dict(slug='legal_review', name=_("Legal and Patient Review")),
+        dict(slug='legal_review_seperate_group', name=_("Legal and Patient Review")),
         dict(slug='insurance_review', name=_("Insurance Review")),
         dict(slug='gcp_review', name=_("GCP Review")),
         dict(slug='specialist_review', name=_("Specialist Review"), multiple=True),
