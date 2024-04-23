@@ -12,7 +12,7 @@ from django.views.decorators.http import require_POST
 from ecs.utils.viewutils import redirect_to_next_url
 from ecs.users.utils import user_flag_required, sudo
 from ecs.users.models import UserProfile
-from ecs.core.models import Submission, SubmissionForm, Investigator
+from ecs.core.models import Submission, SubmissionForm, Investigator, AdvancedSettings
 from ecs.core.models.constants import (
     SUBMISSION_LANE_BOARD, SUBMISSION_LANE_EXPEDITED,
     SUBMISSION_LANE_RETROSPECTIVE_THESIS, SUBMISSION_LANE_LOCALEC,
@@ -92,11 +92,17 @@ def my_tasks(request, template=None, submission_pk=None, ignore_task_types=True)
 
     my_tasks = all_tasks.filter(assigned_to=request.user)
 
-    proxy_tasks = (all_tasks
-        .for_submissions(
-            Submission.objects.exclude(biased_board_members=request.user))
-        .filter(assigned_to__profile__is_indisposed=True)
-        .exclude(assigned_to=request.user))
+    if AdvancedSettings.objects.get(pk=1).dont_delegate_specalist_tasks_from_executive:
+        proxy_tasks = (all_tasks
+                       .for_submissions(Submission.objects.exclude(biased_board_members=request.user))
+                       .filter(assigned_to__profile__is_indisposed=True)
+                       .exclude(assigned_to=request.user)
+                       .exclude(Q(task_type__name='Specialist Review') & Q(assigned_to__profile__is_executive=True)))
+    else:
+        proxy_tasks = (all_tasks
+                       .for_submissions(Submission.objects.exclude(biased_board_members=request.user))
+                       .filter(assigned_to__profile__is_indisposed=True)
+                       .exclude(assigned_to=request.user))
 
     if not submission and filterform.is_valid():
         cd = filterform.cleaned_data
