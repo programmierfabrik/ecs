@@ -215,8 +215,6 @@ def deadline_duration(input_value):
     if input_value is None:
         return ''
     value = input_value - timezone.now()  # This will give us a timedelta object.
-    print(value)
-    print(timedelta(hours=1))
     if value <= timedelta(seconds=0):
         return ''
     elif value >= timedelta(days=1):
