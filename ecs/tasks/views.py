@@ -2,8 +2,9 @@ import random
 from functools import reduce
 from collections import defaultdict
 
+from django.db.models.fields import DateTimeField
 from django.urls import reverse
-from django.db.models import Q, Prefetch
+from django.db.models import Q, Prefetch, ExpressionWrapper, When, F, Case
 from django.http import Http404, QueryDict
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
@@ -35,9 +36,20 @@ def task_backlog(request, submission_pk=None):
     with sudo():
         tasks = list(
             Task.objects.for_submission(submission)
-                .select_related('task_type', 'task_type__group', 'assigned_to',
-                    'assigned_to__profile', 'medical_category')
-                .order_by('-created_at')
+            .select_related(
+                'task_type', 'task_type__group', 'assigned_to',
+                'assigned_to__profile', 'medical_category'
+            )
+            .annotate(
+                deadline=ExpressionWrapper(
+                    F('created_at') + Case(
+                        When(
+                            reminder_message_timeout__isnull=False, then='reminder_message_timeout'
+                        ), default=None
+                    ), output_field=DateTimeField()
+                )
+            )
+            .order_by('-created_at')
         )
 
     return render(request, 'tasks/log.html', {

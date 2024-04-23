@@ -1,9 +1,10 @@
 import re
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 
 from django.conf import settings
 from django.core.cache import cache
 from django.template import Library, Node, TemplateSyntaxError
+from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from ecs.core import paper_forms
@@ -207,3 +208,22 @@ def is_maintenance():
     end = time(15, 00)
     now = datetime.now().time()
     return begin < now < end
+
+
+@register.filter
+def deadline_duration(input_value):
+    if input_value is None:
+        return ''
+    value = input_value - timezone.now()  # This will give us a timedelta object.
+    print(value)
+    print(timedelta(hours=1))
+    if value <= timedelta(seconds=0):
+        return ''
+    elif value >= timedelta(days=1):
+        days = value.days
+        return f'{days} Tag' if days == 1 else f'{days} Tage'
+    elif timedelta(hours=1) <= value < timedelta(days=1):
+        hours = value.seconds // 3600
+        return f'{hours} Stunde' if hours == 1 else f'{hours} Stunden'
+    else:
+        return '1 Stunde'
