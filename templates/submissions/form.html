@@ -21,7 +21,7 @@
 {% block submission_action_buttons %}
     <li class="nav-item ml-auto">
         <small class="mr-3 text-muted last_save">&nbsp;</small>
-        <button id="preview-button" class="btn btn-outline-primary">Vorschau</button>
+        <a href="" id="preview-button" class="btn btn-outline-primary">Vorschau</a>
         <a href="" id="save-button" class="btn btn-secondary">{% trans "Save" %}</a>
         <a href="" id="submit-button" class="btn btn-primary">
             {% if submission and submission.current_submission_form %}
@@ -323,12 +323,12 @@
 
                     // If countdown is finished, clear the interval
                     if (countdown < 0) {
-                        $('#preview-button').prop('disabled', false);
+                        $('#preview-button').removeClass('disbaled');
                         $('#preview-button').html('Vorschau');
                         clearInterval(countdownDisplay);
                     }
                 };
-                $('#preview-button').prop('disabled', true);
+                $('#preview-button').addClass('disabled');
                 countDown();
                 var countdownDisplay = setInterval(countDown, 1000);  // Run every second
             }
