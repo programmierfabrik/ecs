@@ -1,13 +1,15 @@
 import random
+from datetime import timedelta
 from functools import reduce
 from collections import defaultdict
 
 from django.db.models.fields import DateTimeField
 from django.urls import reverse
 from django.db.models import Q, Prefetch, ExpressionWrapper, When, F, Case
-from django.http import Http404, QueryDict
+from django.http import Http404, QueryDict, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from ecs.utils.viewutils import redirect_to_next_url
@@ -433,3 +435,17 @@ def preview_task(request, task_pk=None):
     if not url:
         raise Http404()
     return redirect(url)
+
+
+def reset_reminder_timeout_task(request, task_pk=None):
+    task = get_object_or_404(Task, pk=task_pk, created_by=request.user)
+    if request.POST:
+        timeout_days = request.POST.get('reminder_message_timeout')
+        if timeout_days.isdigit() and int(timeout_days) > 0:
+            timeout_days = int(timeout_days)
+            interval_from_created_at = timezone.now() - task.created_at
+            task.reminder_message_timeout = interval_from_created_at + timedelta(days=timeout_days)
+            task.save(update_fields=('reminder_message_timeout',))
+            return HttpResponse(status=204)
+
+    return HttpResponse(status=400)
