@@ -15,6 +15,7 @@ def workflow_sync():
 def create_settings_dirs():
     os.makedirs(os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR, 'submission-preview'), exist_ok=True)
     os.makedirs(os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR, 'xls-export'), exist_ok=True)
+    os.makedirs(os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR, 'english-vote'), exist_ok=True)
 
 @bootstrap.register()
 def compilemessages():

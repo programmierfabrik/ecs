@@ -1,0 +1,11 @@
+{% extends 'pdf/skeleton.html' %}
+{% load core userutils %}
+
+{% block title %}{{ vote }}{% endblock %}
+
+{% block content %}
+{% include 'pdf/ec_head.html' %}
+
+<h1 class="metadata">{{ vote }}</h1>
+
+{% endblock %}

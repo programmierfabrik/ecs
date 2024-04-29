@@ -287,6 +287,7 @@ def cull_cache_dir():
 
     clear_old_files_in_subfolder('xls-export', settings.ECS_DOWNLOAD_CACHE_MAX_AGE)
     clear_old_files_in_subfolder('submission-preview', 60 * 60 * 24)
+    clear_old_files_in_subfolder('english-vote', 60 * 60 * 24)
 
 
 @celery_app.task

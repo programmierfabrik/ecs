@@ -1,15 +1,18 @@
+import os
 from uuid import uuid4
 
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, HttpResponseServerError, FileResponse
 from django.urls import reverse
 from django.contrib.contenttypes.models import ContentType
 
+from ecs import settings
 from ecs.votes.models import Vote
+from ecs.votes.tasks import generate_preview_vote
 from ecs.documents.models import Document
 from ecs.documents.views import handle_download
 from ecs.signature.views import init_batch_sign
-from ecs.users.utils import user_group_required
+from ecs.users.utils import user_group_required, user_flag_required
 from ecs.tasks.utils import task_required
 
 from ecs.utils.viewutils import render_html
@@ -59,4 +62,34 @@ def vote_pdf_debug(request, vote_pk=None):
     vote = get_object_or_404(Vote, pk=vote_pk)
     response = HttpResponse(vote.render_pdf(), content_type='application/pdf')
     response['Content-Disposition'] = 'inline;filename=debug.pdf'
+    return response
+
+
+@user_flag_required('is_internal')
+def request_english_vote(request, vote_pk=None):
+    vote = get_object_or_404(Vote, pk=vote_pk)
+    generate_preview_vote.delay(vote_pk, request.user.id)
+    
+    return HttpResponse(status=204)
+
+
+@user_flag_required('is_internal')
+def download_english_vote(request, shasum=None):
+    filename = request.GET.get('ec', '')
+    if not isinstance(shasum, str):
+        raise Http404()
+
+    sanitized_shasum = ''.join(e for e in shasum if e.isalnum())
+    cache_file = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR, 'english-vote', f'{sanitized_shasum}.pdf')
+
+    if not os.path.exists(cache_file):
+        raise Http404()
+
+    try:
+        file = open(cache_file, 'rb')
+    except Exception as e:
+        return HttpResponseServerError()
+
+    response = FileResponse(file, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment;filename=' + filename + '_vote.pdf'
     return response
