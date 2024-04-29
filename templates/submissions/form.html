@@ -334,7 +334,7 @@
             }
             {% if preview %}
                 {% if preview_generation_cooldown == 0 %}
-                    ecs.openSnackbar('success', 'Der Erstellung der Vorschau wurde gestartet. Sie erhalten eine Nachricht sobald die Datei bereitsteht.', 8000);
+                    ecs.openSnackbar('success', 'Die Erstellung der Vorschau wurde gestartet. Sie erhalten eine Nachricht sobald die Datei bereitsteht.', 8000);
                 {% endif %}
             {% elif save %}
                 ecs.openSnackbar({% if not valid %}'error'{% else %}'success'{% endif %}, 'Änderungen gespeichert{% if not valid %}\r\nPflichtangaben fehlen{% endif %}', 3000);
