@@ -62,6 +62,7 @@ else:
 
 ECS_CHANGED = os.getenv('BUILD_TIME', 'unknown')
 ECS_DISABLE_REGISTER = os.getenv('ECS_DISABLE_REGISTER', '').lower() == 'true'
+ECS_DISABLE_EMAIL_DELIVERY = os.getenv('ECS_DISABLE_EMAIL_DELIVERY', '').lower() == 'true'
 
 # Database configuration with development fallback
 DATABASES = {}

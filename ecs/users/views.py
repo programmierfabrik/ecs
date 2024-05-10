@@ -121,7 +121,7 @@ def register(request):
                 'form': form,
             })
             deliver(form.cleaned_data['email'], subject=_('ECS - Registration'), message=None, message_html=htmlmail,
-                from_email= settings.DEFAULT_FROM_EMAIL, nofilter=True)
+                from_email= settings.DEFAULT_FROM_EMAIL, nofilter=True, force_send=True)
             return render(request, 'users/registration/registration_complete.html', {})
         
     return render(request, 'users/registration/registration_form.html', {
@@ -188,7 +188,7 @@ def request_password_reset(request):
                     'reset_url': reset_url,
                 }))
             deliver(email, subject=_('ECS - Password Reset'), message=None, message_html=htmlmail,
-                from_email= settings.DEFAULT_FROM_EMAIL, nofilter=True)
+                from_email= settings.DEFAULT_FROM_EMAIL, nofilter=True, force_send=True)
         return render(request, 'users/password_reset/request_complete.html', {
             'email': email,
         })
@@ -420,7 +420,7 @@ def invite(request):
             'link': link,
         }))
         transferlist = deliver(user.email, subject, None,
-            settings.DEFAULT_FROM_EMAIL, message_html=htmlmail, nofilter=True)
+            settings.DEFAULT_FROM_EMAIL, message_html=htmlmail, nofilter=True, force_send=True)
         msgid, rawmail = transferlist[0]    # raises IndexError if delivery failed
 
         if user.groups.filter(name='EC-Signing').exists():

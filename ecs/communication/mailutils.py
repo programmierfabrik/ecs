@@ -67,14 +67,15 @@ def deliver(recipient_list, *args, **kwargs):
 
 
 def deliver_to_recipient(recipient, subject, message, from_email,
-    message_html=None, attachments=None, nofilter=False, rfc2822_headers=None):
+    message_html=None, attachments=None, nofilter=False, rfc2822_headers=None, force_send=False):
 
     msg = create_mail(subject, message, from_email, recipient,
                       message_html, attachments, rfc2822_headers)
     msgid = msg.extra_headers['Message-ID']
 
-    connection = mail.get_connection()
-    connection.send_messages([msg])
+    if not settings.ECS_DISABLE_EMAIL_DELIVERY or force_send:
+        connection = mail.get_connection()
+        connection.send_messages([msg])
 
     return (msgid, msg.message(),)
 
