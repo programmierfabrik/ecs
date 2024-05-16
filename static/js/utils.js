@@ -208,7 +208,7 @@ ecs.InvestigatorFormset.prototype = {
             if (clazz.startsWith('investigatoremployee_formset')) {
                 var inlineFormSet = new ecs.InlineFormSet('.' + clazz, {
                     prefix: 'investigator-' + investiagtorNumber + '-employee',
-                    indexRegex: /-(__prefix__|employee-\d)-/,
+                    indexRegex: /-(__prefix__|employee-\d+)-/,
                     computeIndexReplaceValue: function(options) {
                         var index = options.index;
                         var val = options.val;
