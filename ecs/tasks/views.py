@@ -3,9 +3,9 @@ from datetime import timedelta
 from functools import reduce
 from collections import defaultdict
 
-from django.db.models.fields import DateTimeField
+from django.db.models.fields import DateTimeField, BooleanField
 from django.urls import reverse
-from django.db.models import Q, Prefetch, ExpressionWrapper, When, F, Case
+from django.db.models import Q, Prefetch, ExpressionWrapper, When, F, Case, Value
 from django.http import Http404, QueryDict, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
@@ -35,6 +35,9 @@ from ecs.meetings.models import Meeting
 @user_flag_required('is_internal')
 def task_backlog(request, submission_pk=None):
     submission = get_object_or_404(Submission, pk=submission_pk)
+
+    communication_proxy_users = [profile.user for profile in request.user.communication_proxy_profiles.all()]
+
     with sudo():
         tasks = list(
             Task.objects.for_submission(submission)
@@ -47,8 +50,17 @@ def task_backlog(request, submission_pk=None):
                     F('created_at') + Case(
                         When(
                             reminder_message_timeout__isnull=False, then='reminder_message_timeout'
-                        ), default=None
+                        ),
+                        default=None
                     ), output_field=DateTimeField()
+                ),
+                has_access=Case(
+                    When(
+                        Q(created_by=request.user) | Q(created_by__in=communication_proxy_users),
+                        then=Value(True)
+                    ),
+                    default=Value(False),
+                    output_field=BooleanField()
                 )
             )
             .order_by('-created_at')

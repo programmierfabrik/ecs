@@ -35,7 +35,7 @@
             </td>
             <td>{% if task.closed_at %}{{ task.closed_at|date:'d.m.Y H:i' }}{% else %}-{% endif %}</td>
             <td class="text-center">
-                {% if task.created_by == user and not task.closed_at and not task.deleted_at %}
+                {% if task.has_access and not task.closed_at and not task.deleted_at %}
                     {% if task.deadline|date:"Y-m-d H:i:s" < current_date_time %}
                         <a href="" class="btn btn-outline-primary btn-sm new-reminder-btn"
                            data-title="{{ task.task_type }}" data-task_id="{{ task.id }}">
