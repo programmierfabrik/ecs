@@ -451,7 +451,10 @@ def preview_task(request, task_pk=None):
 
 
 def reset_reminder_timeout_task(request, task_pk=None):
-    task = get_object_or_404(Task.unfiltered, pk=task_pk, created_by=request.user)
+    communication_proxy_users = [profile.user for profile in request.user.communication_proxy_profiles.all() if
+                                 profile.is_indisposed]
+    task = get_object_or_404(Task.unfiltered, pk=task_pk, created_by__in=[request.user] + communication_proxy_users)
+
     if request.POST:
         timeout_days = request.POST.get('reminder_message_timeout')
         if timeout_days.isdigit() and int(timeout_days) > 0:
