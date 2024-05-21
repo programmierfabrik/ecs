@@ -304,4 +304,4 @@ def generate_submission_preview(docstash_key=None, user_id=None):
     with open(cache_file, 'wb') as f:
         f.write(preview_pdf)
 
-    send_system_message_template(user, 'Einrechungsvorschau Fertig', 'submissions/submission_preview_done.txt', {'shasum': h.hexdigest()})
+    send_system_message_template(user, 'Einreichungsvorschau Fertig', 'submissions/submission_preview_done.txt', {'shasum': h.hexdigest()})
