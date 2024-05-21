@@ -438,7 +438,7 @@ def preview_task(request, task_pk=None):
 
 
 def reset_reminder_timeout_task(request, task_pk=None):
-    task = get_object_or_404(Task, pk=task_pk, created_by=request.user)
+    task = get_object_or_404(Task.unfiltered, pk=task_pk, created_by=request.user)
     if request.POST:
         timeout_days = request.POST.get('reminder_message_timeout')
         if timeout_days.isdigit() and int(timeout_days) > 0:
