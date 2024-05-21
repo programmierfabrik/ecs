@@ -15,6 +15,9 @@ checklist_questions = {
     'legal_review': [
         Args('1', 'Entspricht die Patienteninformation in allen Punkten den Anforderungen?'),
     ],
+    'legal_review_seperate_group': [
+        Args('1', 'Entspricht die Patienteninformation in allen Punkten den Anforderungen?'),
+    ],
     'insurance_review': [
         Args('1', "Sind die vorgelegten Unterlagen zur Versicherung vollständig und akzeptabel?"),
     ],
