@@ -36,8 +36,9 @@ from ecs.meetings.models import Meeting
 def task_backlog(request, submission_pk=None):
     submission = get_object_or_404(Submission, pk=submission_pk)
 
-    communication_proxy_users = [profile.user for profile in request.user.communication_proxy_profiles.all()]
-
+    # Filter for users who are is_indisposed since the communication_proxy is still set even though the user is not indisposed
+    communication_proxy_users = [profile.user for profile in request.user.communication_proxy_profiles.all() if
+                                 profile.is_indisposed]
     with sudo():
         tasks = list(
             Task.objects.for_submission(submission)
