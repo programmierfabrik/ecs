@@ -332,10 +332,11 @@
                 countDown();
                 var countdownDisplay = setInterval(countDown, 1000);  // Run every second
             }
-            {% if preview %}
-                {% if preview_generation_cooldown == 0 %}
-                    ecs.openSnackbar('success', 'Die Erstellung der Vorschau wurde gestartet. Sie erhalten eine Nachricht sobald die Datei bereitsteht.', 8000);
-                {% endif %}
+            {# Only show message when the cooldown is 300 seconds (5 minutes) #}
+            {# This only happens the first the the preview is submitted. all the other times the cooldown is decreasing #}
+            {# We need this check because even though we disable the button, the user can still refresh the browser to force the same exact request #}
+            {% if preview and preview_generation_cooldown == 300 %}
+                ecs.openSnackbar('success', 'Die Erstellung der Vorschau wurde gestartet. Sie erhalten eine Nachricht sobald die Datei bereitsteht.', 8000);
             {% elif save %}
                 ecs.openSnackbar({% if not valid %}'error'{% else %}'success'{% endif %}, 'Änderungen gespeichert{% if not valid %}\r\nPflichtangaben fehlen{% endif %}', 3000);
             {% elif valid %}
