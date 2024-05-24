@@ -176,6 +176,9 @@ class Vote(models.Model):
     def render_pdf(self):
         return render_pdf_context('votes/pdf/vote.html',
             self.get_render_context())
+    
+    def render_english_pdf(self):
+        return render_pdf_context('votes/pdf/vote_en.html', self.get_render_context())
 
 
 @receiver(post_save, sender=Vote)

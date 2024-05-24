@@ -21,7 +21,7 @@
                         {% else %}
                             {{ field.label }}
                         {% endif %}
-                        {% if field.field.required %}
+                        {% if field.field.required and not hide_required_indicator|default:False %}
                             <span class="text-danger">*</span>
                         {% endif %}
                     </span>
@@ -43,7 +43,7 @@
                     {% else %}
                         <span>{{ field.label }}</span>
                     {% endif %}
-                    {% if field.field.required %}
+                    {% if field.field.required and not hide_required_indicator|default:False %}
                         <span class="text-danger">&nbsp;*</span>
                     {% endif %}
                 {% endspaceless %}

@@ -271,6 +271,14 @@
                                 {% trans "Download" %}
                             </a>
                             <br>
+{#                             TODO: Add this back when the english vote feature is ready #}
+{#                            {% if vote.is_positive and vote.is_permanent %}#}
+{#                                <a class="request_english_vote ml-3" href="" data-vote-id="{{ vote.pk }}">#}
+{#                                    <span class="fa fa-file-pdf-o"></span>#}
+{#                                    Englisch#}
+{#                                </a>#}
+{#                                <br>#}
+{#                            {% endif %}#}
                             {% if debug %}
                                 <a class="ml-3" href="{% url 'votes.vote_pdf_debug' vote_pk=vote.pk %}" target="_blank">
                                     <span class="fa fa-file-pdf-o"></span>
@@ -485,6 +493,36 @@
             event.preventDefault();
             $(this).prop('disabled', true);
             $(this).parent().submit();
+        });
+
+        $('.request_english_vote').click(function (event) {
+            event.preventDefault();
+
+            var xhr = new XMLHttpRequest();
+            var voteId = $(this).data('vote-id');
+            $(this).addClass('disabled');
+            var link = $(this);
+            link.css({
+                'opacity': '0.5',
+                'pointer-events': 'none'
+            });
+            document.activeElement.blur();
+
+            xhr.open('POST', '/vote/' + voteId + '/english/');
+            xhr.setRequestHeader('X-CSRFToken', "{{ csrf_token }}");
+
+            xhr.onload = function () {
+                console.log(xhr.status);
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    ecs.openSnackbar('success', 'Die Erstellung des englischen Votums wurde gestartet. Sie erhalten eine Nachricht sobald die Datei bereitsteht.', 8000);
+                }
+                link.css({
+                    'opacity': '',
+                    'pointer-events': ''
+                });
+            };
+
+            xhr.send();
         });
 
     </script>

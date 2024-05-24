@@ -35,6 +35,7 @@ class AdvancedSettings(models.Model):
     display_biased_in_amendment_answer_pdf = models.BooleanField(default=True)
     require_internal_vote_review = models.BooleanField(default=False)
     display_amendment_in_meeting_for_board_member = models.BooleanField(default=False)
+    dont_delegate_specalist_tasks_from_executive = models.BooleanField(default=False)
 
     # custom logos
     logo = models.BinaryField(null=True)

@@ -174,7 +174,7 @@ def delete_docstash_entry(request):
 
 @with_docstash(group='ecs.notifications.views.create_notification')
 def upload_document_for_notification(request):
-    return upload_document(request, 'notifications/upload_form.html')
+    return upload_document(request, 'notifications/upload_form.html', hide_required_indicator=True)
 
 @with_docstash(group='ecs.notifications.views.create_notification')
 def delete_document_from_notification(request):

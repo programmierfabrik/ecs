@@ -313,6 +313,8 @@ def notification_list(request, meeting_pk=None):
 @user_flag_required('is_internal', 'is_board_member', 'is_resident_member', 'is_omniscient_member')
 def download_zipped_documents(request, meeting_pk=None, submission_pk=None):
     meeting = get_object_or_404(Meeting, pk=meeting_pk)
+    max_length = 25
+    meeting_title_capped = meeting.title[:max_length] if len(meeting.title) > max_length else meeting.title
 
     if not submission_pk:
         if not meeting.documents_zip:
@@ -321,7 +323,7 @@ def download_zipped_documents(request, meeting_pk=None, submission_pk=None):
         doc = meeting.documents_zip
         response = FileResponse(doc.retrieve_raw(), content_type=doc.mimetype)
         response['Content-Disposition'] = \
-            'attachment; filename="{}.zip"'.format(slugify(meeting.title))
+            'attachment; filename="{}.zip"'.format(slugify(meeting_title_capped))
         return response
 
     submission = get_object_or_404(meeting.submissions(manager='unfiltered'),
@@ -346,7 +348,7 @@ def download_zipped_documents(request, meeting_pk=None, submission_pk=None):
 
     response = HttpResponse(zip_buf.getvalue(), content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename="{}_{}.zip"'.format(
-        slugify(meeting.title), submission.get_filename_slice())
+        slugify(meeting_title_capped), submission.get_filename_slice())
     return response
 
 

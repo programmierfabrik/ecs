@@ -21,6 +21,7 @@
 {% block submission_action_buttons %}
     <li class="nav-item ml-auto">
         <small class="mr-3 text-muted last_save">&nbsp;</small>
+        <a href="" id="preview-button" class="btn btn-outline-primary">Vorschau</a>
         <a href="" id="save-button" class="btn btn-secondary">{% trans "Save" %}</a>
         <a href="" id="submit-button" class="btn btn-primary">
             {% if submission and submission.current_submission_form %}
@@ -43,6 +44,7 @@
         <input type="submit" name="save" value="save" class="hidden" />
         <input type="submit" name="validate" value="validate" class="hidden" />
         <input type="submit" name="submit" value="submit" class="hidden" />
+        <input type="submit" name="preview" value="preview" class="hidden" />
     </form>
 {% endblock %}
 
@@ -250,6 +252,10 @@
                 ev.preventDefault();
                 ecs.mainForm.submit('validate');
             });
+            $('#preview-button').click(function(ev){
+                ev.preventDefault();
+                ecs.mainForm.submit('preview');
+            });
 
             changeOldMedtechState();
             $('#id_project_type_medical_device').on('change', changeOldMedtechState)
@@ -300,7 +306,38 @@
             $('.upload_container').load(
                 '{% url 'core.submission.upload_document_for_submission' docstash_key=request.docstash.key %}');
 
-            {% if save %}
+            var countdown = {{ preview_generation_cooldown }};
+            if (countdown > 0) {
+                var countDown = function () {
+                    var minutes = Math.floor(countdown / 60);
+                    var seconds = countdown % 60;
+
+                    // Ensuring the minutes and seconds are displayed as two digits
+                    minutes = minutes < 10 ? '0' + minutes : minutes;
+                    seconds = seconds < 10 ? '0' + seconds : seconds;
+
+                    // Updating the button text
+                    $('#preview-button').text(minutes + ":" + seconds);
+
+                    countdown--;
+
+                    // If countdown is finished, clear the interval
+                    if (countdown < 0) {
+                        $('#preview-button').removeClass('disbaled');
+                        $('#preview-button').html('Vorschau');
+                        clearInterval(countdownDisplay);
+                    }
+                };
+                $('#preview-button').addClass('disabled');
+                countDown();
+                var countdownDisplay = setInterval(countDown, 1000);  // Run every second
+            }
+            {# Only show message when the cooldown is 300 seconds (5 minutes) #}
+            {# This only happens the first the the preview is submitted. all the other times the cooldown is decreasing #}
+            {# We need this check because even though we disable the button, the user can still refresh the browser to force the same exact request #}
+            {% if preview and preview_generation_cooldown == 300 %}
+                ecs.openSnackbar('success', 'Die Erstellung der Vorschau wurde gestartet. Sie erhalten eine Nachricht sobald die Datei bereitsteht.', 8000);
+            {% elif save %}
                 ecs.openSnackbar({% if not valid %}'error'{% else %}'success'{% endif %}, 'Änderungen gespeichert{% if not valid %}\r\nPflichtangaben fehlen{% endif %}', 3000);
             {% elif valid %}
                 ecs.confirm({

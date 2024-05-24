@@ -15,5 +15,6 @@ urlpatterns = (
     path('<int:task_pk>/decline/full/', views.decline_task_full, name='tasks.decline_task_full'),
     path('<int:task_pk>/do/', views.do_task, name='tasks.do_task'),
     path('<int:task_pk>/preview/', views.preview_task, name='tasks.preview_task'),
-    path('<int:task_pk>/delete/<int:submission_pk>/', views.delete_task, name='tasks.delete_task')
+    path('<int:task_pk>/delete/<int:submission_pk>/', views.delete_task, name='tasks.delete_task'),
+    path('<int:task_pk>/reset_reminder_timeout/', views.reset_reminder_timeout_task, name='tasks.reset_reminder_timeout_task'),
 )

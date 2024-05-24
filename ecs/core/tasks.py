@@ -17,6 +17,7 @@ from ecs.communication.utils import send_system_message_template
 from ecs.core.forms import AllSubmissionsFilterForm
 from ecs.core.models import Submission, SubmissionForm, Investigator
 from ecs.core.paper_forms import get_field_info
+from ecs.docstash.models import DocStash
 
 from celery.utils.log import get_task_logger
 
@@ -255,8 +256,7 @@ def xls_export(user_id=None, filters=None):
     h = hashlib.sha1()
     h.update(xls_data)
 
-    cache_file = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR,
-                              '{}.xls'.format(h.hexdigest()))
+    cache_file = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR, 'xls-export', '{}.xls'.format(h.hexdigest()))
 
     with open(cache_file, 'wb') as f:
         f.write(xls_data)
@@ -274,10 +274,34 @@ def setup_periodic_tasks(sender, **kwargs):
 @celery_app.task
 def cull_cache_dir():
     logger.info("culling download cache")
-    for path in os.listdir(settings.ECS_DOWNLOAD_CACHE_DIR):
-        if path.startswith('.'):
-            continue
-        path = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR, path)
-        age = time.time() - os.path.getmtime(path)
-        if age > settings.ECS_DOWNLOAD_CACHE_MAX_AGE:
-            os.remove(path)
+
+    def clear_old_files_in_subfolder(sub_folder, max_age):
+        sub_folder_path = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR, sub_folder)
+        for path in os.listdir(sub_folder_path):
+            if path.startswith('.'):
+                continue
+            full_path = os.path.join(sub_folder_path, path)
+            age = time.time() - os.path.getmtime(full_path)
+            if age > max_age:
+                os.remove(full_path)
+
+    clear_old_files_in_subfolder('xls-export', settings.ECS_DOWNLOAD_CACHE_MAX_AGE)
+    clear_old_files_in_subfolder('submission-preview', 60 * 60 * 24)
+    clear_old_files_in_subfolder('english-vote', 60 * 60 * 24)
+
+
+@celery_app.task
+def generate_submission_preview(docstash_key=None, user_id=None):
+    docstash = DocStash.objects.get(key=docstash_key)
+    user = User.objects.get(id=user_id)
+
+    preview_pdf = docstash.render_preview_pdf()
+
+    h = hashlib.sha1()
+    h.update(preview_pdf)
+
+    cache_file = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR, 'submission-preview', '{}-{}.pdf'.format(user_id, h.hexdigest()))
+    with open(cache_file, 'wb') as f:
+        f.write(preview_pdf)
+
+    send_system_message_template(user, 'Einreichungsvorschau Fertig', 'submissions/submission_preview_done.txt', {'shasum': h.hexdigest()})

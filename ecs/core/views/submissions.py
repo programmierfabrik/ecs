@@ -4,7 +4,8 @@ import re
 from itertools import groupby
 
 from django.conf import settings
-from django.http import HttpResponse, Http404, JsonResponse, FileResponse
+from django.db import transaction
+from django.http import HttpResponse, Http404, JsonResponse, FileResponse, HttpResponseServerError
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.forms.models import model_to_dict
@@ -701,6 +702,27 @@ def delete_document_from_submission(request):
     return redirect('core.submission.upload_document_for_submission',
         docstash_key=request.docstash.key)
 
+
+def submission_preview_download(request, shasum=None):
+    if not isinstance(shasum, str):
+        raise Http404()
+
+    sanitized_shasum = ''.join(e for e in shasum if e.isalnum())
+    cache_file = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR, 'submission-preview', '{}-{}.pdf'.format(request.user.id, sanitized_shasum))
+
+    if not os.path.exists(cache_file):
+        raise Http404()
+
+    try:
+        file = open(cache_file, 'rb')
+    except Exception as e:
+        return HttpResponseServerError()
+
+    response = FileResponse(file, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment;filename=Vorschau.pdf'
+    return response
+
+
 @with_docstash()
 def create_submission_form(request):
     if request.method == 'POST' and 'initial' in request.docstash:
@@ -750,19 +772,27 @@ def create_submission_form(request):
     valid = False
     save = False
     validate = False
-
+    preview = False
+    preview_generation_cooldown = request.docstash.preview_generation_cooldown()
+    
     if request.method == 'POST':
         submit = request.POST.get('submit', False)
         save = request.POST.get('save', False)
         autosave = request.POST.get('autosave', False)
         validate = request.POST.get('validate', False)
+        preview = request.POST.get('preview', False)
 
-        request.docstash.name = (
-            request.POST.get('german_project_title') or
-            request.POST.get('project_title')
-        )
-        request.docstash.POST = request.POST
-        request.docstash.save()
+        with transaction.atomic():
+            request.docstash.name = (
+                request.POST.get('german_project_title') or
+                request.POST.get('project_title')
+            )
+            request.docstash.POST = request.POST
+            request.docstash.save()
+            
+            if preview and request.docstash.can_generate():
+                preview_generation_cooldown = 300
+                transaction.on_commit(lambda: generate_submission_preview.delay(request.docstash.key, request.user.id))
 
         if autosave:
             return HttpResponse('save successfull')
@@ -808,7 +838,7 @@ def create_submission_form(request):
                     if field != 'main'
                 ):
                     continue
-                
+
                 investigator = investigator_form.save(commit=False)
                 investigator.submission_form = submission_form
                 investigator.save()
@@ -842,9 +872,11 @@ def create_submission_form(request):
         'valid': valid,
         'save': save,
         'validate': validate,
+        'preview': preview,
         'submission': submission,
         'notification_type': notification_type,
         'protocol_uploaded': protocol_uploaded,
+        'preview_generation_cooldown': preview_generation_cooldown,
     }
     for prefix, formset in formsets.items():
         context['%s_formset' % prefix] = formset
@@ -1056,8 +1088,7 @@ def xls_export(request):
 
 @user_flag_required('is_internal')
 def xls_export_download(request, shasum=None):
-    cache_file = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR,
-        '{}.xls'.format(shasum))
+    cache_file = os.path.join(settings.ECS_DOWNLOAD_CACHE_DIR, 'xls-export', '{}.xls'.format(shasum))
     response = FileResponse(open(cache_file, 'rb'),
         content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment;filename=submission-export.xls'

@@ -14,7 +14,7 @@ class UserProfile(models.Model):
     last_password_change = models.DateTimeField(auto_now_add=True)
     is_phantom = models.BooleanField(default=False)
     is_indisposed = models.BooleanField(default=False)
-    communication_proxy = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
+    communication_proxy = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='communication_proxy_profiles')
 
     # denormalized from user groups for faster lookup
     is_board_member = models.BooleanField(default=False)
@@ -76,7 +76,8 @@ class UserProfile(models.Model):
             'Insurance Reviewer',
             'Statistic Reviewer',
             'External Reviewer',
-            'Specialist'
+            'Specialist',
+            'Legal and Patient Reviewer',
         })
         self.can_have_open_tasks = bool(groups & {
             'Board Member',
@@ -86,6 +87,7 @@ class UserProfile(models.Model):
             'GCP Reviewer',
             'Insurance Reviewer',
             'Statistic Reviewer',
+            'Legal and Patient Reviewer',
         })
 
     @property

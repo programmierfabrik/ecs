@@ -2,20 +2,22 @@
 {% load i18n %}
 
 <div id="imprint" class="my-3 row w-100">
-    <div class="col-12 text-center">
-        {% ec_name %}
+    <div class="col-12 text-center d-inline-flex flex-column pb-4">
+        {% db_setting 'contact_email' as email %}
+        {% db_setting 'contact_url' as url %}
+
+        <div>
+            <a href="{% url 'core.catalog' %}" class="btn btn-outline-primary" style="font-size: 14px;">
+                {% trans 'Public Catalog' %}
+            </a>
+        </div>
     </div>
 
-    <div class="col-md-6 text-center text-md-right">
+    <div class="col-md-6 text-center text-md-right" style="border-right: 1px solid rgba(0, 0, 0, 0.15);">
         {% db_setting 'address' as address %}
         {{ address|linebreaksbr }}<br>
     </div>
     <div class="col-md-6 text-center text-md-left">
-        <span class="fa fa-th-list"></span>
-        <a href="{% url 'core.catalog' %}">
-            {% trans 'Public Catalog' %}
-        </a><br>
-
         {% db_setting 'contact_email' as email %}
         <span class="fa fa-envelope"></span>
         <a href="mailto:{{ email }}">{{ email }}</a><br>

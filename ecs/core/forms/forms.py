@@ -344,12 +344,20 @@ class BaseInvestigatorFormSet(ReadonlyFormSetMixin, BaseFormSet):
 
     def clean(self):
         super().clean()
+
+        # Get only those forms which are valid, has changed and not entirely empty (excluding 'main')
         changed_forms = [
             form for form in self.forms[:self.total_form_count()]
-            if form.is_valid() and form.has_changed()
+            if form.is_valid()
+               and form.has_changed()
+               and any(
+                value
+                for field, value in form.cleaned_data.items()
+                if field != 'main' and value not in [None, '']
+            )
         ]
         if len(changed_forms) < 1:
-            raise forms.ValidationError(_('At least one centre is required.'))
+            raise forms.ValidationError(_('At least one investigator is required.'))
 
         if any(self.errors):
             return
@@ -643,6 +651,7 @@ class AdvancedSettingsForm(forms.ModelForm):
             'default_contact', 'warning_window_certificate', 'display_notifications_in_protocol',
             'display_biased_in_amendment_answer_pdf',
             'require_internal_vote_review', 'display_amendment_in_meeting_for_board_member', 
+            'dont_delegate_specalist_tasks_from_executive',
             'logo_file', 'print_logo_file', 'address', 'meeting_address', 'contact_email', 'contact_url',
             'member_list_url', 'signature_block',
             'vote1_extra', 'vote2_extra', 'vote3a_extra', 'vote3b_extra',
@@ -656,6 +665,7 @@ class AdvancedSettingsForm(forms.ModelForm):
                 _('Display biased board member in amendment answer PDF'),
             'require_internal_vote_review': _('Require internal vote review'),
             'display_amendment_in_meeting_for_board_member': 'Amendments für Board Member in der Sitzung anzeigen',
+            'dont_delegate_specalist_tasks_from_executive': 'Spezialaufgaben von EC-Executive nicht delegieren',
             'address': _('address'),
             'meeting_address': _('Meeting Address'),
             'contact_email': _('Contact Email'),

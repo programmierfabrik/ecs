@@ -9,8 +9,10 @@
             <th>{% trans "Assigend At" %}</th>
             <th>{% trans "Assigend To" %}</th>
             <th>{% trans "Closed At" %}</th>
+            <th class="text-center"><span class="fa fa-bell-o"></span></th>
             <th></th>
         </tr>
+        {% now "Y-m-d H:i:s" as current_date_time %}
     {% for task in tasks %}
         <tr class="task{% if task.closed_at %} text-muted{% endif %}{% if task.deleted_at %} deleted{% endif %}">
             <td>{{ task.created_at|date:'d.m.Y H:i' }}</td>
@@ -32,6 +34,18 @@
                 {% else %}-{% endif %}
             </td>
             <td>{% if task.closed_at %}{{ task.closed_at|date:'d.m.Y H:i' }}{% else %}-{% endif %}</td>
+            <td class="text-center">
+                {% if task.has_access and not task.closed_at and not task.deleted_at %}
+                    {% if task.deadline|date:"Y-m-d H:i:s" < current_date_time %}
+                        <a href="" class="btn btn-outline-primary btn-sm new-reminder-btn"
+                           data-title="{{ task.task_type }}" data-task_id="{{ task.id }}">
+                            Neue Erinnerung
+                        </a>
+                    {% else %}
+                        {{ task.deadline|deadline_duration }}
+                    {% endif %}
+                {% endif %}
+            </td>
             <td>
                 {% if not task.closed_at and not task.deleted_at and task.task_type.is_dynamic %}
                     <a class="fa fa-ban text-danger open-in-widget" href="{% url 'tasks.delete_task' submission_pk=submission.pk task_pk=task.pk %}"></a>
@@ -46,3 +60,64 @@
         {% trans "Closed tasks are grayed out. Deleted tasks are crossed out." %}
     </p>
 </div>
+
+<script type="text/javascript">
+    $('.new-reminder-btn').click(function (ev) {
+        ev.preventDefault();
+        var reminderButton = $(this);
+        var modal = ecs.popup({
+            backdrop: 'static',
+            keyboard: false
+        });
+        var token = "{{ csrf_token }}";
+        var title = $(this).data("title");
+        var taskId = $(this).data("task_id");
+
+
+        modal.find('.modal-content').html('\
+                    \
+                <div class="modal-header">\
+                    <h3 class="modal-title">Neue Erinnerung für <span class="font-weight-bold">' + title + '</span></h3>\
+                </div>\
+                <div class="modal-body">\
+                   <select class="form-control">\
+                      <option value="1">Nach einem Tag</option>\
+                      <option value="2">Nach zwei Tagen</option>\
+                      <option value="7">Nach einer Woche</option>\
+                      <option value="14">Nach zwei Wochen</option>\
+                   </select>\
+                </div>\
+                <div class="modal-footer">\
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>\
+                    <button type="button" class="btn btn-primary save">Speichern</button>\
+                </div>\
+            ');
+        modal.on('click', '.save', function () {
+
+            var daysTimeout = modal.find(".form-control").val();
+            var xhr = new XMLHttpRequest();
+            var formData = new FormData();
+            formData.append('reminder_message_timeout', daysTimeout);
+
+            xhr.open('POST', '/task/' + taskId + '/reset_reminder_timeout/', true);
+            xhr.setRequestHeader('X-CSRFToken', token);
+            xhr.onload = function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    // Only for whole days. if the input options should change, this logic needs to change too
+                    var newLabel = daysTimeout * 24;
+                    // parse the string value to int
+                    var days = parseInt(daysTimeout);
+                    if (days == 1) {
+                        newLabel = '1 Tag';
+                    } else {
+                        newLabel = days + ' Tage';
+                    }
+
+                    reminderButton.replaceWith('<span>' + newLabel + '</span>');
+                }
+                modal.modal('toggle');
+            };
+            xhr.send(formData);
+        });
+    });
+</script>

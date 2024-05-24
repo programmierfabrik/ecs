@@ -5,6 +5,23 @@
 
 {% block inline_css %}
     {{ block.super }}
+    {% if watermark or True %}
+        <style>
+            @page {
+                @top-center {
+                    content: "ENTWURF";
+                    font-family: "Source Sans Pro";
+                    font-size: 50mm;
+                    color: lightcoral;
+                    text-align: center;
+                    opacity: 0.75;
+                    margin-top: 123.5mm;
+                    z-index: -100;
+                    transform: translate(0, 123.5mm) rotate(-45deg);
+                }
+            }
+        </style>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -27,7 +44,8 @@
 
     {% include "submissions/pdf/section_3a.html" %}
 
-    <h3>3b. Im Rahmen der Studie verabreichte Medikamente, deren Wirksamkeit und/oder Sicherheit nicht Gegenstand der Prüfung sind:</h3>
+    <h3>3b. Im Rahmen der Studie verabreichte Medikamente, deren Wirksamkeit und/oder Sicherheit nicht Gegenstand der
+        Prüfung sind:</h3>
 
     {% include "submissions/pdf/section_3b.html" %}
 
@@ -35,7 +53,8 @@
 
     {% include "submissions/pdf/section_4.html" %}
 
-    <h3>5. Angaben zur Versicherung (gemäß §32 Abs.1 Z.11 und Z.12 und Abs.2 AMG; §§47 und 48 MPG bzw. §26 Medizinproduktegesetz 2021)</h3>
+    <h3>5. Angaben zur Versicherung (gemäß §32 Abs.1 Z.11 und Z.12 und Abs.2 AMG; §§47 und 48 MPG bzw. §26
+        Medizinproduktegesetz 2021)</h3>
 
     {% include "submissions/pdf/section_5.html" %}
 
@@ -45,7 +64,7 @@
 
     <div class="pb_after"></div>
 
-    <h3>7.  Strukturierte Kurzfassung des Projektes <em>(in deutscher Sprache, kein Verweis auf das Protokoll)</em></h3>
+    <h3>7. Strukturierte Kurzfassung des Projektes <em>(in deutscher Sprache, kein Verweis auf das Protokoll)</em></h3>
 
     {% include "submissions/pdf/section_7.html" %}
 
@@ -62,16 +81,16 @@
     {% include "submissions/pdf/section_9.html" %}
 
 
-{% for inv in submission_form.investigators.all %}
-    <div class="pb_after"></div>
+    {% for inv in submission_form.investigators.all %}
+        <div class="pb_after"></div>
 
-    <div class="title">
-      <div class="ec_number_right">
-          EK Nr: {{ submission_form.submission|ec_number }} Version {{ submission_form.version }}
-      </div>
-      <h1>Teil B</h1>
-    </div>
+        <div class="title">
+            <div class="ec_number_right">
+                EK Nr: {{ submission_form.submission|ec_number }} Version {{ submission_form.version }}
+            </div>
+            <h1>Teil B</h1>
+        </div>
 
-    {% include "submissions/pdf/part_b.html" with inv=inv %}
-{% endfor %}
+        {% include "submissions/pdf/part_b.html" with inv=inv %}
+    {% endfor %}
 {% endblock %}

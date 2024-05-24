@@ -13,7 +13,7 @@ from ecs.documents.forms import DocumentForm
 from ecs.documents.models import Document
 
 
-def upload_document(request, template='documents/upload_form.html'):
+def upload_document(request, template='documents/upload_form.html', hide_required_indicator=False):
     form = DocumentForm(request.POST or None, request.FILES or None, prefix='document')
     documents = Document.objects.filter(pk__in=request.docstash.get('document_pks', []))
     if request.method == 'POST' and form.is_valid():
@@ -27,6 +27,7 @@ def upload_document(request, template='documents/upload_form.html'):
     return render(request, template, {
         'form': form,
         'documents': documents.order_by('doctype__identifier', 'date', 'name'),
+        'hide_required_indicator': hide_required_indicator,
     })
 
 

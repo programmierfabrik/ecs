@@ -1,0 +1,8 @@
+{% extends 'msg_core.txt' %}
+
+{% block content %}
+Ihre Ausdruck steht nun zum Download zur Verfügung:
+{{ ABSOLUTE_URL_PREFIX }}{% url 'core.submission.submission_preview_download' shasum=shasum %}
+
+Dieser Link ist für 24 Stunden gültig.
+{% endblock %}

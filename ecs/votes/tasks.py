@@ -1,15 +1,20 @@
+import hashlib
+import os
 from datetime import timedelta
+from urllib import parse
 
+from django.contrib.auth.models import User
 from django.utils.translation import gettext as _
 from django.utils import timezone
 from django.db.models import F, Func
 
 from celery.schedules import crontab
 
+from ecs import settings
 from ecs.votes.models import Vote
 from ecs.core.models.constants import SUBMISSION_LANE_LOCALEC
 from ecs.users.utils import get_user, get_office_user
-from ecs.communication.utils import send_message_template
+from ecs.communication.utils import send_message_template, send_system_message_template
 from ecs.votes.constants import PERMANENT_VOTE_RESULTS
 from ecs.celery import app as celery_app
 
@@ -120,3 +125,29 @@ def expire_votes():
     now = timezone.now()
     for vote in Vote.objects.filter(valid_until__lt=now, is_expired=False):
         vote.expire()
+
+
+@celery_app.task
+def generate_preview_vote(vote_id=None, user_id=None):
+    user = User.objects.get(id=user_id)
+    vote = Vote.objects.get(id=vote_id)
+
+    if user is None or vote is None:
+        return
+
+    english_pdf_votum = vote.render_english_pdf()
+
+    h = hashlib.sha1()
+    h.update(english_pdf_votum)
+
+    cache_file = os.path.join(
+        settings.ECS_DOWNLOAD_CACHE_DIR, 'english-vote', '{}.pdf'.format(h.hexdigest())
+    )
+    with open(cache_file, 'wb') as f:
+        f.write(english_pdf_votum)
+
+    ec_number = vote.submission_form.submission.get_ec_number_display()
+    send_system_message_template(
+        user, 'English-Votum Fertig', 'votes/messages/english_vote_done.txt',
+        {'shasum': h.hexdigest(), 'ec_number': ec_number, 'query_param': parse.urlencode({'ec': ec_number})}
+    )

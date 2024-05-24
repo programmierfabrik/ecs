@@ -1,18 +1,21 @@
 import random
+from datetime import timedelta
 from functools import reduce
 from collections import defaultdict
 
+from django.db.models.fields import DateTimeField, BooleanField
 from django.urls import reverse
-from django.db.models import Q, Prefetch
-from django.http import Http404, QueryDict
+from django.db.models import Q, Prefetch, ExpressionWrapper, When, F, Case, Value
+from django.http import Http404, QueryDict, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from ecs.utils.viewutils import redirect_to_next_url
 from ecs.users.utils import user_flag_required, sudo
 from ecs.users.models import UserProfile
-from ecs.core.models import Submission, SubmissionForm, Investigator
+from ecs.core.models import Submission, SubmissionForm, Investigator, AdvancedSettings
 from ecs.core.models.constants import (
     SUBMISSION_LANE_BOARD, SUBMISSION_LANE_EXPEDITED,
     SUBMISSION_LANE_RETROSPECTIVE_THESIS, SUBMISSION_LANE_LOCALEC,
@@ -32,12 +35,36 @@ from ecs.meetings.models import Meeting
 @user_flag_required('is_internal')
 def task_backlog(request, submission_pk=None):
     submission = get_object_or_404(Submission, pk=submission_pk)
+
+    # Filter for users who are is_indisposed since the communication_proxy is still set even though the user is not indisposed
+    communication_proxy_users = [profile.user for profile in request.user.communication_proxy_profiles.all() if
+                                 profile.is_indisposed]
     with sudo():
         tasks = list(
             Task.objects.for_submission(submission)
-                .select_related('task_type', 'task_type__group', 'assigned_to',
-                    'assigned_to__profile', 'medical_category')
-                .order_by('-created_at')
+            .select_related(
+                'task_type', 'task_type__group', 'assigned_to',
+                'assigned_to__profile', 'medical_category'
+            )
+            .annotate(
+                deadline=ExpressionWrapper(
+                    F('created_at') + Case(
+                        When(
+                            reminder_message_timeout__isnull=False, then='reminder_message_timeout'
+                        ),
+                        default=None
+                    ), output_field=DateTimeField()
+                ),
+                has_access=Case(
+                    When(
+                        Q(created_by=request.user) | Q(created_by__in=communication_proxy_users),
+                        then=Value(True)
+                    ),
+                    default=Value(False),
+                    output_field=BooleanField()
+                )
+            )
+            .order_by('-created_at')
         )
 
     return render(request, 'tasks/log.html', {
@@ -92,11 +119,17 @@ def my_tasks(request, template=None, submission_pk=None, ignore_task_types=True)
 
     my_tasks = all_tasks.filter(assigned_to=request.user)
 
-    proxy_tasks = (all_tasks
-        .for_submissions(
-            Submission.objects.exclude(biased_board_members=request.user))
-        .filter(assigned_to__profile__is_indisposed=True)
-        .exclude(assigned_to=request.user))
+    if AdvancedSettings.objects.get(pk=1).dont_delegate_specalist_tasks_from_executive:
+        proxy_tasks = (all_tasks
+                       .for_submissions(Submission.objects.exclude(biased_board_members=request.user))
+                       .filter(assigned_to__profile__is_indisposed=True)
+                       .exclude(assigned_to=request.user)
+                       .exclude(Q(task_type__name='Specialist Review') & Q(assigned_to__profile__is_executive=True)))
+    else:
+        proxy_tasks = (all_tasks
+                       .for_submissions(Submission.objects.exclude(biased_board_members=request.user))
+                       .filter(assigned_to__profile__is_indisposed=True)
+                       .exclude(assigned_to=request.user))
 
     if not submission and filterform.is_valid():
         cd = filterform.cleaned_data
@@ -415,3 +448,20 @@ def preview_task(request, task_pk=None):
     if not url:
         raise Http404()
     return redirect(url)
+
+
+def reset_reminder_timeout_task(request, task_pk=None):
+    communication_proxy_users = [profile.user for profile in request.user.communication_proxy_profiles.all() if
+                                 profile.is_indisposed]
+    task = get_object_or_404(Task.unfiltered, pk=task_pk, created_by__in=[request.user] + communication_proxy_users)
+
+    if request.POST:
+        timeout_days = request.POST.get('reminder_message_timeout')
+        if timeout_days.isdigit() and int(timeout_days) > 0:
+            timeout_days = int(timeout_days)
+            interval_from_created_at = timezone.now() - task.created_at
+            task.reminder_message_timeout = interval_from_created_at + timedelta(days=timeout_days)
+            task.save(update_fields=('reminder_message_timeout',))
+            return HttpResponse(status=204)
+
+    return HttpResponse(status=400)

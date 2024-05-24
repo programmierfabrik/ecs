@@ -37,8 +37,8 @@ ChecklistAnswerFormSet = forms.modelformset_factory(ChecklistAnswer,
 
 class ChecklistTaskCreationForm(forms.Form):
     task_type = forms.ModelChoiceField(queryset=TaskType.objects.filter(
-            is_dynamic=True, workflow_node__graph__auto_start=True
-        ).order_by('workflow_node__uid'), label=_('Task Type'))
+        is_dynamic=True, workflow_node__graph__auto_start=True
+    ).exclude(workflow_node__uid='legal_and_patient_review').order_by('workflow_node__uid'), label=_('Task Type'))
     send_message_on_close = forms.BooleanField(required=False,
         label=_('Notify me when the task has been completed'))
     reminder_message_timeout = forms.ChoiceField(choices=(
