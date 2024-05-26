@@ -26,6 +26,7 @@ from ecs.core.models import (
     Submission, SubmissionForm, Investigator, TemporaryAuthorization,
     MedicalCategory, EthicsCommission,
 )
+from ecs.core.tasks import generate_submission_preview
 from ecs.checklists.models import ChecklistBlueprint, Checklist
 from ecs.meetings.models import Meeting
 
