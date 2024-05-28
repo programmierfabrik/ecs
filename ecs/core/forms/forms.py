@@ -357,7 +357,7 @@ class BaseInvestigatorFormSet(ReadonlyFormSetMixin, BaseFormSet):
             )
         ]
         if len(changed_forms) < 1:
-            raise forms.ValidationError(_('At least one investigator is required.'))
+            raise forms.ValidationError(_('At least one centre is required.'))
 
         if any(self.errors):
             return
