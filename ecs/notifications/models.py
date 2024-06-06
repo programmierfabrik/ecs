@@ -304,7 +304,16 @@ class NotificationAnswer(models.Model):
                 for vote in submission.votes.positive().permanent():
                     vote.extend()
             if finish:
-                submission.finish(ctis_transition)
+                if ctis_transition:
+                    # If we have a kombistudie we don't finish the submission
+                    # We only finish amg only studies
+                    if not submission.current_submission_form.project_type_medical_device:
+                        submission.finish()
+
+                    submission.ctis_transition = True
+                    submission.save(update_fields=('ctis_transition',))
+                else:
+                    submission.finish()
             presenting_parties = submission.current_submission_form.get_presenting_parties()
             _ = gettext
             presenting_parties.send_message(

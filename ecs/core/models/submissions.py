@@ -191,10 +191,9 @@ class Submission(models.Model):
     def __str__(self):
         return self.get_ec_number_display()
 
-    def finish(self, ctis_transition):
+    def finish(self):
         self.is_finished = True
-        self.ctis_transition = ctis_transition
-        self.save(update_fields=('is_finished', 'ctis_transition',))
+        self.save(update_fields=('is_finished',))
 
         Task.unfiltered.for_submission(self).filter(
             task_type__is_dynamic=True).open().mark_deleted()
