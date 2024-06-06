@@ -4,10 +4,10 @@ import re
 
 from django.db import migrations
 
-from ecs.docstash.models import DocStash
-
 
 def migrate_employees(apps, schema_editor):
+    DocStash = apps.get_model('docstash', 'DocStash')
+
     for doc in DocStash.objects.filter(group='ecs.core.views.submissions.create_submission_form'):
         if not doc.POST:
             continue
