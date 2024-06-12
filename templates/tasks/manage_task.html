@@ -23,13 +23,13 @@
             <div class="align-self-center">
                 {% if form.assign_to %}
                     <div class="input-group">
-                        {{ form.assign_to|add_class:'form-control' }}
                         <div class="input-group-btn">
                             <button class="btn btn-secondary" type="submit" name="task_management-action"
                                     value="delegate">
                                 {% trans 'Delegate' %}
                             </button>
                         </div>
+                        {{ form.assign_to|add_class:'form-control' }}
                     </div>
                 {% endif %}
             </div>
