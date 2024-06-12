@@ -14,4 +14,5 @@ urlpatterns = (
 if settings.DEBUG:
     urlpatterns += (
         path('<int:vote_pk>/pdf/debug/', views.vote_pdf_debug, name='votes.vote_pdf_debug'),
+        path('<int:vote_pk>/pdf/english/debug/', views.vote_pdf_english_debug, name='votes.vote_pdf_english_debug'),
     )

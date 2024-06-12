@@ -65,6 +65,13 @@ def vote_pdf_debug(request, vote_pk=None):
     return response
 
 
+def vote_pdf_english_debug(request, vote_pk=None):
+    vote = get_object_or_404(Vote, pk=vote_pk)
+    response = HttpResponse(vote.render_english_pdf(), content_type='application/pdf')
+    response['Content-Disposition'] = 'inline;filename=debug.pdf'
+    return response
+
+
 @user_flag_required('is_internal')
 def request_english_vote(request, vote_pk=None):
     vote = get_object_or_404(Vote, pk=vote_pk)

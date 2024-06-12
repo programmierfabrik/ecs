@@ -271,14 +271,20 @@
                                 {% trans "Download" %}
                             </a>
                             <br>
-{#                             TODO: Add this back when the english vote feature is ready #}
-{#                            {% if vote.is_positive and vote.is_permanent %}#}
-{#                                <a class="request_english_vote ml-3" href="" data-vote-id="{{ vote.pk }}">#}
-{#                                    <span class="fa fa-file-pdf-o"></span>#}
-{#                                    Englisch#}
-{#                                </a>#}
-{#                                <br>#}
-{#                            {% endif %}#}
+                            {% if vote.is_positive and vote.is_permanent %}
+                                <a class="ml-3" href="" data-vote-id="{{ vote.pk }}">
+                                    <span class="fa fa-file-pdf-o"></span>
+                                    Englisch
+                                </a>
+                                <br>
+                                {% if debug %}
+                                    <a class="ml-3" href="{% url 'votes.vote_pdf_english_debug' vote_pk=vote.pk %}" target="_blank">
+                                        <span class="fa fa-file-pdf-o"></span>
+                                        Englisch Debug
+                                    </a>
+                                    <br>
+                                {% endif %}
+                            {% endif %}
                             {% if debug %}
                                 <a class="ml-3" href="{% url 'votes.vote_pdf_debug' vote_pk=vote.pk %}" target="_blank">
                                     <span class="fa fa-file-pdf-o"></span>
