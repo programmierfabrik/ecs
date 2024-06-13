@@ -158,6 +158,16 @@ def categorization_tasks(request, submission_pk=None):
         with sudo():
             task = Task.objects.for_submission(submission).filter(
                 deleted_at=None, task_type__workflow_node__uid=uid).last()
+            
+            # Since we migrated to a new tasktype due to the old task being part of the EC-Office group
+            # which has more privileges than needed for the task
+            # The button should still consider the old tasks when displaying the button.
+            # if we don't have this fix this will decieve the user that the task was never started even though
+            # the old tasktype is started or finished
+            if task is None and uid == 'legal_and_patient_review_seperate_group':
+                task = Task.objects.for_submission(submission).filter(
+                    deleted_at=None, task_type__workflow_node__uid='legal_and_patient_review').last()
+
         tasks.append((task_type, task))
 
     return render(request, 'checklists/categorization_tasks.html', {
