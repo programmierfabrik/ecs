@@ -227,7 +227,7 @@ ecs.InvestigatorFormset.prototype = {
 
 ecs.setupDocumentUploadForms = function(){
     var form = $('.document_upload form');
-    var upload_button = form.find('input.upload_button[type="submit"]');
+    var upload_button = form.find('input[type="submit"]');
     var progress = form.find('progress');
     var warning = form.find('.warning');
 
@@ -295,7 +295,7 @@ ecs.setupDocumentUploadForms = function(){
         $('#updated_document_name')
             .html(null)
             .parent('div').hide();
-        upload_button.show();
+        upload_button.prop('value', 'Hochladen');
     };
 
     $('.doclist a.replace_document').click(function(ev) {
@@ -362,7 +362,7 @@ ecs.setupDocumentUploadForms = function(){
         form.find('input[name="document-edit_document"]')
             .val($(this).data('documentId'));
 
-        upload_button.hide();
+        upload_button.prop('value', 'Bearbeiten');
         $('#updated_document_name')
             .html(link.siblings('.document_display_name').html())
             .parent().show();
