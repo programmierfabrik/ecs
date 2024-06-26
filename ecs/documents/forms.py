@@ -65,20 +65,32 @@ class DocumentForm(forms.ModelForm):
         """
         If 'update_id' is given then update the document, else save a new document.
         """
+        instance = None
         update_id = self.cleaned_data.get('update_id')
         # if it's an update operation
         if update_id is not None:
             # get the existing instance
-            instance = Document.objects.get(pk=update_id)
-            # update only specific fields
-            instance.name = self.cleaned_data.get('name')
-            instance.version = self.cleaned_data.get('version')
-            instance.date = self.cleaned_data.get('date')
+            base_document = Document.objects.get(pk=update_id)
+            new_name = self.cleaned_data.get('name')
+            new_version = self.cleaned_data.get('version')
+            new_date = self.cleaned_data.get('date')
+
+            raw_data_stream = base_document.retrieve_raw()
+            try:
+                raw_data = raw_data_stream.read()
+            finally:
+                raw_data_stream.close()
 
             if commit:
-                instance.save(update_fields=('name', 'version', 'date',))
+                new_document = Document.objects.create_from_buffer(
+                    raw_data,
+                    doctype=base_document.doctype, name=new_name, version=new_version, date=new_date,
+                    replaces_document=base_document, is_replacement_update=True,
+                )
+                instance = new_document
 
-        else:  # if it's not an update operation and a file is uploaded
+        # if it's not an update operation and a file is uploaded
+        else:
             instance = super().save(commit=False)
             instance.original_file_name = self.cleaned_data.get('original_file_name')
 

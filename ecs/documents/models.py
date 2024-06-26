@@ -61,6 +61,7 @@ class Document(models.Model):
     version = models.CharField(max_length=250)
     date = models.DateTimeField()
     replaces_document = models.ForeignKey('Document', null=True, blank=True, on_delete=models.CASCADE)
+    is_replacement_update = models.BooleanField(null=True)
     
     # relation to a object
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.CASCADE)
