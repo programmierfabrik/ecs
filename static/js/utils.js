@@ -373,7 +373,6 @@ ecs.setupDocumentUploadForms = function(){
 
         form.find('input[name="document-name"]')
             .val(link.data('documentName'))
-            .attr('disabled', '');
 
         form.find('select[name="document-doctype"]')
             .val(link.data('documentType'))

@@ -16,10 +16,9 @@ class DocumentForm(forms.ModelForm):
         For this operation, the 'file', 'doctype', 'name', 'version' and 'date' are required. The 'file' can be replaced by another document.
     2. Update existing Document:
         In this operation, a field 'update_id' is used to get the existing document. 
-        Only 'version' and 'date' are required. Other fields are used from the existing document. 
+        Only 'Name', 'version' and 'date' are required. Other fields are used from the existing document. 
     """
     file = forms.FileField(required=False)
-    name = forms.CharField(required=False)
     doctype = forms.ModelChoiceField(queryset=DocumentType.objects.exclude(is_hidden=True).order_by('identifier'),
                                      required=False)
     # required for both save and update operations
@@ -31,6 +30,16 @@ class DocumentForm(forms.ModelForm):
         model = Document
         fields = ('file', 'name', 'doctype', 'version', 'date', 'replaces_document')
         widgets = {'date': forms.DateInput(), 'replaces_document': forms.HiddenInput()}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = getattr(self, 'instance', None)
+        if self.data:
+            prefix_update_id = "%s-%s" % (self.prefix, 'update_id') if self.prefix else 'update_id'
+            if prefix_update_id in self.data and self.data[prefix_update_id]:
+                self.fields['file'].widget.attrs['disabled'] = True
+                self.fields['doctype'].widget.attrs['disabled'] = True
+    
 
     def clean(self):
         """
@@ -62,11 +71,12 @@ class DocumentForm(forms.ModelForm):
             # get the existing instance
             instance = Document.objects.get(pk=update_id)
             # update only specific fields
+            instance.name = self.cleaned_data.get('name')
             instance.version = self.cleaned_data.get('version')
             instance.date = self.cleaned_data.get('date')
 
             if commit:
-                instance.save(update_fields=['version', 'date', ])
+                instance.save(update_fields=('name', 'version', 'date',))
 
         else:  # if it's not an update operation and a file is uploaded
             instance = super().save(commit=False)

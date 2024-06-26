@@ -15,7 +15,7 @@
         <a href="" class="replace_document" data-document-id="{{ doc.pk }}" data-document-type="{{ doc.doctype.pk }}">{% trans "Replace" %}</a> |
         <a href="" class="edit_document" data-document-id="{{ doc.pk }}" data-document-type="{{ doc.doctype.pk }}"
            data-document-name="{{ doc.name }}" data-document-version="{{ doc.version }}" data-document-date="{{ doc.date|date:'d.m.Y' }}">
-            Bearbeiten
+            Name, Version & Datum korrigieren
         </a>
         <span class="document_display_name" hidden>
             {% if doc.name %}
