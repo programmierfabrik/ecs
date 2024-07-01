@@ -396,7 +396,7 @@ msgstr "AMG"
 msgid "MPG"
 msgstr "MPG"
 
-msgid "Other"
+msgid "Others / miscellaneous"
 msgstr "Andere"
 
 msgid "Not Categorized"
@@ -1558,19 +1558,19 @@ msgstr "Schließen"
 msgid "Reopen"
 msgstr "Neu öffnen"
 
-msgid "Covering Letter"
+msgid "Cover Letter (CL)"
 msgstr "Cover Letter"
 
-msgid "patient information"
+msgid "SIS-ICF"
 msgstr "Teilnehmerinformation (ICF, Kontaktdatenliste)"
 
-msgid "insurancecertificate"
+msgid "Insurance Documents"
 msgstr "Versicherungsunterlagen (Polizze, Bestätigung, Bedingungen)"
 
-msgid "study protocol"
+msgid "Protocol"
 msgstr "Studienprotokoll (Prüfplan)"
 
-msgid "Investigator's Brochure"
+msgid "Investigator's Brochure (IB)"
 msgstr "Prüferinformation (Investigator's Brochure)"
 
 msgid "Amendment"
@@ -1579,43 +1579,43 @@ msgstr "Amendment"
 msgid "Curriculum Vitae (CV)"
 msgstr "Lebenslauf (CV)"
 
-msgid "Conflict of Interest"
+msgid "Conflict of Interest (CoI)"
 msgstr "Conflict of Interest"
 
 msgid "Case Report Form (CRF)"
 msgstr "Fallbericht-Formular (CRF)"
 
-msgid "EudraCT Form"
+msgid "EudraCT-Form"
 msgstr "EudraCT-Formular"
 
-msgid "adverse reaction report"
+msgid "Side effects report"
 msgstr "Nebenwirkungsbericht"
 
-msgid "Statement on a review"
+msgid "Statement on the report"
 msgstr "Stellungnahme zum Gutachten"
 
 msgid "Questionnaire"
 msgstr "Fragebogen"
 
-msgid "Signed Page"
+msgid "Signature page"
 msgstr "Unterschriftenseite"
 
-msgid "Manual"
+msgid "Instructions for use"
 msgstr "Gebrauchsanweisung"
 
-msgid "Declaration of conformity"
+msgid "Declaration of Conformity"
 msgstr "Konformitätserklärung (CE-Zertifizierung)"
 
 msgid "other"
 msgstr "Sonstige"
 
-msgid "gcp-certificate"
+msgid "GCP-Certificate"
 msgstr "GCP-Zertifikat"
 
-msgid "statistic / statistic documents"
+msgid "Statistics"
 msgstr "Statistik / Statistikunterlagen"
 
-msgid "recruitment material"
+msgid "recruitment materials"
 msgstr "Rekrutierungsmaterial"
 
 msgid "Submission Form"
@@ -2456,7 +2456,7 @@ msgstr "Notizblock aufschlagen"
 msgid "Accounting of fees"
 msgstr "Gebührenabrechnung"
 
-msgid "Statistics"
+msgid "Statistic"
 msgstr "Statistik"
 
 msgid "PKI"
@@ -2582,9 +2582,6 @@ msgstr ""
 
 msgid "Notifications"
 msgstr "Meldungen"
-
-msgid "Protocol"
-msgstr "Protokoll"
 
 msgid "Spezialistenzuordnung"
 msgstr ""
