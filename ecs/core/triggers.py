@@ -1,15 +1,16 @@
+from django.db import transaction
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
 
 from ecs.communication.utils import send_system_message_template
 from ecs.core import signals
-from ecs.core.tasks import render_submission_form
-from ecs.tasks.models import Task
-from ecs.users.utils import sudo, get_current_user
-from ecs.users.utils import get_office_user
-from ecs.votes.constants import PERMANENT_VOTE_RESULTS
 from ecs.core.models.constants import SUBMISSION_LANE_RETROSPECTIVE_THESIS, \
     SUBMISSION_LANE_EXPEDITED, SUBMISSION_LANE_BOARD, SUBMISSION_LANE_LOCALEC
+from ecs.core.tasks import render_submission_form
+from ecs.tasks.models import Task
+from ecs.users.utils import get_office_user
+from ecs.users.utils import sudo, get_current_user
+from ecs.votes.constants import PERMANENT_VOTE_RESULTS
 
 
 def send_submission_message(submission, user, subject, template, **kwargs):
@@ -60,9 +61,9 @@ def on_study_submit(sender, **kwargs):
     if resubmission_task:
         resubmission_task.done(user)
 
-    render_submission_form.apply_async(kwargs={
-        'submission_form_id': submission_form.id,
-    })
+    transaction.on_commit(
+        lambda: render_submission_form.delay(submission_form_id=submission_form.id)
+    )
 
 
 @receiver(signals.on_presenter_change)
