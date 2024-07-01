@@ -52,22 +52,19 @@ def send_submission_protocol_pdf(request, meeting, meeting_protocol):
 
 
 def create_task_for_board_members(submission, board_members):
-    task_type = TaskType.objects.get(is_dynamic=True, workflow_node__graph__auto_start=True, name='Specialist Review')
-
     # From the board_members that were selected in the ui "board_members" remove the biased ones for the given submission
     board_members_to_add = board_members.filter(~Q(id__in=submission.biased_board_members.all()))
     for member in board_members_to_add:
-        tasks = Task.unfiltered.for_submission(submission).open().filter(task_type=task_type)
-        if not task_type.is_delegatable:
-            tasks = tasks.filter(assigned_to=member)
+        tasks = Task.unfiltered.for_submission(submission).open().filter(assigned_to=member, task_type__name='Specialist Review')
         # Maybe the task for this user was already created manually
         if not tasks.exists():
+            task_type = TaskType.objects.get(is_dynamic=True, workflow_node__graph__auto_start=True, name='Specialist Review')
             token = task_type.workflow_node.bind(submission.workflow.workflows[0]).receive_token(None)
             token.task.assign(user=member)
             task = token.task
             entry = submission.timetable_entries.filter(meeting__started=None).first()
             if entry:
-                entry.participations.create(user=member, task=task)
+                entry.participations.get_or_create(user=member, task=task)
 
             task.send_message_on_close = False
             task.reminder_message_timeout = None
@@ -76,13 +73,8 @@ def create_task_for_board_members(submission, board_members):
 
 def remove_task_for_board_members(submission, board_members):
     for member in board_members:
-        task_type = TaskType.objects.get(
-            is_dynamic=True, workflow_node__graph__auto_start=True,
-            name='Specialist Review'
-        )
         tasks = Task.unfiltered.for_submission(submission).open().filter(
-            task_type=task_type, assigned_to=member,
-            created_by__isnull=True
+            task_type__name='Specialist Review', assigned_to=member, created_by__isnull=True
         )
 
         if tasks.exists():
