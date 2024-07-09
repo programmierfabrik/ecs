@@ -396,7 +396,7 @@ msgstr "AMG"
 msgid "MPG"
 msgstr "MPG"
 
-msgid "Others / miscellaneous"
+msgid "Other"
 msgstr "Andere"
 
 msgid "Not Categorized"
@@ -1606,7 +1606,7 @@ msgstr "Gebrauchsanweisung"
 msgid "Declaration of Conformity"
 msgstr "Konformitätserklärung (CE-Zertifizierung)"
 
-msgid "other"
+msgid "Others / miscellaneous"
 msgstr "Sonstige"
 
 msgid "GCP-Certificate"
