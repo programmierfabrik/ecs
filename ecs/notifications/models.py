@@ -284,8 +284,15 @@ class NotificationAnswer(models.Model):
                     if not self.is_rejected:
                         notification.apply()
                     elif self.is_rejected and self.is_withdrawn:
-                        notification.new_submission_form.is_withdrawn = True
-                        notification.new_submission_form.save(update_fields=['is_withdrawn'])
+                        from ecs.core.models import SubmissionForm
+                        # Update all submission forms to is_withdrawn = True until the most recent valid submission is reached
+                        to_withdraw_ids = []
+                        for submission_form in SubmissionForm.objects.filter(submission_id=notification.new_submission_form.submission_id).order_by('-pk'):
+                            if not submission_form.is_acknowledged:
+                                to_withdraw_ids.append(submission_form.pk)
+                            else:
+                                break
+                        SubmissionForm.objects.filter(id__in=to_withdraw_ids).update(is_withdrawn=True)
                 except AmendmentNotification.DoesNotExist:
                     assert False, "we should never get here"
         
