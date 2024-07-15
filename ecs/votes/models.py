@@ -178,16 +178,7 @@ class Vote(models.Model):
             self.get_render_context())
     
     def render_english_pdf(self):
-        context = self.get_render_context()
-        past_votes = context.pop('past_votes')
-        meeting_date = None
-        for past_vote in past_votes:
-            if past_vote.top_id is not None:
-                meeting_date = past_vote.top.meeting.start
-        
-        context.update(meeting_date=meeting_date)
-        return render_pdf_context('votes/pdf/vote_en.html', context)
-
+        return render_pdf_context('votes/pdf/vote_en.html', self.get_render_context())
 
 @receiver(post_save, sender=Vote)
 def _post_vote_save(sender, **kwargs):
