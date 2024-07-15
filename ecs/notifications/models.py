@@ -281,9 +281,7 @@ class NotificationAnswer(models.Model):
         if self.notification.type.includes_diff:
                 try:
                     notification = AmendmentNotification.objects.get(pk=self.notification.pk)
-                    if not self.is_rejected:
-                        notification.apply()
-                    elif self.is_rejected and self.is_withdrawn:
+                    if self.is_withdrawn:
                         from ecs.core.models import SubmissionForm
                         # Update all submission forms to is_withdrawn = True until the most recent valid submission is reached
                         to_withdraw_ids = []
@@ -293,6 +291,8 @@ class NotificationAnswer(models.Model):
                             else:
                                 break
                         SubmissionForm.objects.filter(id__in=to_withdraw_ids).update(is_withdrawn=True)
+                    elif not self.is_rejected:
+                        notification.apply()
                 except AmendmentNotification.DoesNotExist:
                     assert False, "we should never get here"
         
