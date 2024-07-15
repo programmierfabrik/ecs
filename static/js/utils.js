@@ -296,6 +296,27 @@ ecs.setupDocumentUploadForms = function(){
             .html(null)
             .parent('div').hide();
         upload_button.prop('value', 'Hochladen');
+
+        form.find('input[name="document-replaces_document"]')
+            .val(null);
+        form.find('input[name="document-file"]')
+            .val(null)
+            .attr('disabled', null);
+        form.find('input[name="document-name"]')
+            .val(null)
+            .attr('disabled', null);
+        form.find('select[name="document-doctype"]')
+            .val(null)
+            .attr('disabled', null);
+        form.find('select[name="document-doctype"]')
+            .val(null)
+            .attr('readonly', false);
+        form.find('input[name="document-version"]')
+            .val(null);
+        form.find('input[name="document-date"]')
+            .datepicker("update", null);
+        form.find('input[name="document-update_id"]')
+            .val(null);
     };
 
     $('.doclist a.replace_document').click(function(ev) {
@@ -315,37 +336,9 @@ ecs.setupDocumentUploadForms = function(){
             .attr('readonly', true);
     });
 
-    $('#tabs-11 a.new_document').click(function(ev) {
+    $('#tabs-11 input.reset_document').click(function(ev) {
         ev.preventDefault();
         resetUI();
-
-        form.find('input[name="document-replaces_document"]')
-            .val(null);
-
-        form.find('input[name="document-file"]')
-            .val(null)
-            .attr('disabled', null);
-
-        form.find('input[name="document-name"]')
-            .val(null)
-            .attr('disabled', null);
-
-        form.find('select[name="document-doctype"]')
-            .val(null)
-            .attr('disabled', null);
-
-        form.find('select[name="document-doctype"]')
-            .val(null)
-            .attr('readonly', false);
-
-        form.find('input[name="document-version"]')
-            .val(null);
-
-        form.find('input[name="document-date"]')
-            .datepicker("update", null);
-
-        form.find('input[name="document-update_id"]')
-            .val(null);
     });
 
     $('.doclist a.delete_document').click(function(ev) {
@@ -362,7 +355,7 @@ ecs.setupDocumentUploadForms = function(){
         form.find('input[name="document-edit_document"]')
             .val($(this).data('documentId'));
 
-        upload_button.prop('value', 'Bearbeiten');
+        upload_button.prop('value', 'Korrigieren');
         $('#updated_document_name')
             .html(link.siblings('.document_display_name').html())
             .parent().show();
