@@ -180,7 +180,6 @@ class Vote(models.Model):
     def render_english_pdf(self):
         return render_pdf_context('votes/pdf/vote_en.html', self.get_render_context())
 
-
 @receiver(post_save, sender=Vote)
 def _post_vote_save(sender, **kwargs):
     vote = kwargs['instance']

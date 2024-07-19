@@ -11,8 +11,12 @@
             <a href="{% url 'docstash.download_document' docstash_key=request.docstash.key document_pk=doc.pk %}">{% trans "Download" %}</a> |
         {% endif %}
         <a href="{% url 'docstash.view_document' docstash_key=request.docstash.key document_pk=doc.pk %}" target="_blank">{% trans "View" %}</a> |
-        <a href="{% block delete_url %}{% endblock %}?document_pk={{ doc.pk }}" class="delete_document">{% trans "Delete" %}</a>
-        | <a href="" class="replace_document" data-document-id="{{ doc.pk }}" data-document-type="{{ doc.doctype.pk }}">{% trans "Replace" %}</a>
+        <a href="{% block delete_url %}{% endblock %}?document_pk={{ doc.pk }}" class="delete_document">{% trans "Delete" %}</a> |
+        <a href="" class="replace_document" data-document-id="{{ doc.pk }}" data-document-type="{{ doc.doctype.pk }}">{% trans "Replace" %}</a> |
+        <a href="" class="edit_document" data-document-id="{{ doc.pk }}" data-document-type="{{ doc.doctype.pk }}"
+           data-document-name="{{ doc.name }}" data-document-version="{{ doc.version }}" data-document-date="{{ doc.date|date:'d.m.Y' }}">
+            Name, Version & Datum korrigieren
+        </a>
         <span class="document_display_name" hidden>
             {% if doc.name %}
             {{ doc.name|smart_truncate:100 }}
@@ -50,10 +54,13 @@
             {% endif %}
         {% endfor %}
         <div class="my-3" style="display: none;">
-            {% trans "Replaces document" %} <span id="replaced_document_name"></span>
-            <a href="" class="new_document">{% trans "New Document" %}</a>
+            Derzeit wird das Dokument <span id="replaced_document_name"></span> ersetzt
+        </div>
+        <div class="my-3" style="display: none;">
+            Derzeit wird das Dokument <span id="updated_document_name"></span> korrigiert
         </div>
         <input class="btn btn-primary" type="submit" name="upload" value="{% trans 'Upload' %}" />
+        <input class="btn btn-secondary reset_document" type="button" name="reset" value="Abbrechen" />
         <progress class="progress"></progress>
         <div class="warning">
             <span class="fa fa-exclamation-triangle text-info"></span>

@@ -148,6 +148,6 @@ def generate_preview_vote(vote_id=None, user_id=None):
 
     ec_number = vote.submission_form.submission.get_ec_number_display()
     send_system_message_template(
-        user, 'English-Votum Fertig', 'votes/messages/english_vote_done.txt',
+        user, 'English Fertig', 'votes/messages/english_vote_done.txt',
         {'shasum': h.hexdigest(), 'ec_number': ec_number, 'query_param': parse.urlencode({'ec': ec_number})}
     )

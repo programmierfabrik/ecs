@@ -1,7 +1,7 @@
 {% extends 'msg_core.txt' %}
 
 {% block content %}
-Das englische Votum für die Studie {{ ec_number }} steht nun zum Download zur Verfügung:
+Die englische Bestätigung für die Studie {{ ec_number }} steht nun zum Download zur Verfügung:
 {{ ABSOLUTE_URL_PREFIX }}{% url 'votes.download_english_vote' shasum=shasum %}?{{ query_param }}
 Dieser Link ist für 24 Stunden gültig.
 {% endblock %}

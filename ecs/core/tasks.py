@@ -26,23 +26,11 @@ logger = get_task_logger(__name__)
 
 @celery_app.task()
 def render_submission_form(submission_form_id=None):
-    # XXX: Look to wait for submission form to appear. The celery task is
-    # triggered on submit before the request transaction is committed, so we
-    # have to wait. We should start using transaction.on_commit() as soon as
-    # we've updated to Django 1.9.
-    for i in range(60):
-        with transaction.atomic():
-            try:
-                sf = SubmissionForm.unfiltered.get(id=submission_form_id)
-            except SubmissionForm.DoesNotExist:
-                pass
-            else:
-                sf.render_pdf_document()
-                break
-        time.sleep(1)
-    else:
-        logger.error("SubmissionForm(id=%d) didn't appear", submission_form_id)
-        return
+    try:
+        sf = SubmissionForm.unfiltered.get(id=submission_form_id)
+        sf.render_pdf_document()
+    except SubmissionForm.DoesNotExist:
+        logger.error("SubmissionForm(id=%d) doesn't exist", submission_form_id)
 
 
 @celery_app.task

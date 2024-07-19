@@ -288,8 +288,40 @@ ecs.setupDocumentUploadForms = function(){
         name_field.val(name);
     });
 
+    var resetUI = function () {
+        $('#replaced_document_name')
+            .html(null)
+            .parent('div').hide();
+        $('#updated_document_name')
+            .html(null)
+            .parent('div').hide();
+        upload_button.prop('value', 'Hochladen');
+
+        form.find('input[name="document-replaces_document"]')
+            .val(null);
+        form.find('input[name="document-file"]')
+            .val(null)
+            .attr('disabled', null);
+        form.find('input[name="document-name"]')
+            .val(null)
+            .attr('disabled', null);
+        form.find('select[name="document-doctype"]')
+            .val(null)
+            .attr('disabled', null);
+        form.find('select[name="document-doctype"]')
+            .val(null)
+            .attr('readonly', false);
+        form.find('input[name="document-version"]')
+            .val(null);
+        form.find('input[name="document-date"]')
+            .datepicker("update", null);
+        form.find('input[name="document-update_id"]')
+            .val(null);
+    };
+
     $('.doclist a.replace_document').click(function(ev) {
         ev.preventDefault();
+        resetUI();
         var link = $(this);
 
         form.find('input[name="document-replaces_document"]')
@@ -304,24 +336,49 @@ ecs.setupDocumentUploadForms = function(){
             .attr('readonly', true);
     });
 
-    $('#tabs-11 a.new_document').click(function(ev) {
+    $('#tabs-11 input.reset_document').click(function(ev) {
         ev.preventDefault();
-
-        form.find('input[name="document-replaces_document"]')
-            .val(null);
-
-        $('#replaced_document_name')
-            .html(null)
-            .parent('li').hide();
-
-        form.find('select[name="document-doctype"]')
-            .val(null)
-            .attr('readonly', false);
+        resetUI();
     });
 
     $('.doclist a.delete_document').click(function(ev) {
         ev.preventDefault();
         $('.upload_container').load($(this).attr('href'));
+    });
+
+    $('.doclist a.edit_document').click(function(ev) {
+        ev.preventDefault();
+        resetUI();
+
+        var link = $(this);
+
+        form.find('input[name="document-edit_document"]')
+            .val($(this).data('documentId'));
+
+        upload_button.prop('value', 'Korrigieren');
+        $('#updated_document_name')
+            .html(link.siblings('.document_display_name').html())
+            .parent().show();
+
+        form.find('input[name="document-file"]')
+            .val(null)
+            .attr('disabled', '');
+
+        form.find('input[name="document-name"]')
+            .val(link.data('documentName'))
+
+        form.find('select[name="document-doctype"]')
+            .val(link.data('documentType'))
+            .attr('disabled', '');
+
+        form.find('input[name="document-version"]')
+            .val(link.data('documentVersion'));
+
+        form.find('input[name="document-date"]')
+            .datepicker("update", link.data('documentDate'));
+
+        form.find('input[name="document-update_id"]')
+            .val(link.data('documentId'));
     });
 };
 

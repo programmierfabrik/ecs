@@ -1,11 +1,115 @@
 {% extends 'pdf/skeleton.html' %}
+{% load i18n %}
 {% load core userutils %}
 
 {% block title %}{{ vote }}{% endblock %}
 
+{% block inline_css %}
+    {{ block.super }}
+    <style>
+        @page {
+            @bottom-right {
+                content: 'Page ' counter(page) '/' counter(pages);
+            }
+        }
+
+        .applicant_table {
+            width: 100%;
+        }
+
+        .applicant_table td {
+            padding: 0.3rem 0.7rem;
+        }
+
+        .applicant_table td:nth-child(odd) {
+            white-space: nowrap;
+            width: 1%;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
-{% include 'pdf/ec_head.html' %}
+    {% language 'en' %}
 
-<h1 class="metadata">{{ vote }}</h1>
 
+        {% include 'pdf/ec_head.html' %}
+
+        <h1 class="metadata">{{ vote }}</h1>
+        <p style="text-align: center; font-weight: bold">Confirmation of Ethical Approval</p>
+
+        <div>EC-No. <b>{{ submission|ec_number }}</b></div>
+        {% if form.eudract_number %}
+            <div>EudraCT-No.: <b>{{ form.eudract_number }}</b></div>
+        {% endif %}
+        <b>{{ form.project_title }}</b>
+
+        <table style="margin-top: 1rem;" class="applicant_table withborders">
+            <tr>
+                <td>Applicant</td>
+                <td>
+                    {% with contact=form.submitter_contact %}
+                        {% if contact.title %}
+                            {{ contact.title }}
+                        {% else %}
+                            {% if contact.gender == 'f' %}
+                                Ms.
+                            {% elif contact.gender == 'm' %}
+                                Mr.
+                            {% endif %}
+                        {% endif %}
+                        {{ contact.first_name }}
+                        {{ contact.last_name }}
+                        {% if contact.suffix_title %}{{ contact.suffix_title }}{% endif %}
+                    {% endwith %}
+                </td>
+            </tr>
+            <tr>
+                <td>Email</td>
+                <td>{{ form.submitter_email }}</td>
+            </tr>
+            <tr>
+                <td style="">Phone number</td>
+                <td>{{ form.submitter_phone_number }}</td>
+            </tr>
+            <tr>
+                <td>Position</td>
+                <td>{{ form.submitter_organisation }}</td>
+            </tr>
+        </table>
+
+
+        <div style="margin-top: 1rem;">
+            Trial sites:
+            <ol>
+                {% for investigator in form.investigators.all %}
+                    <li>{{ investigator.organisation }}</li>
+                {% endfor %}
+            </ol>
+        </div>
+
+        <table class="full_width withborders">
+            <thead>
+            <tr>
+                <th style="width: 19%">Type</th>
+                <th style="width: 50%;">Name</th>
+                <th style="width: 13%;">Version</th>
+                <th style="width: 18%;">Date (dd.mm.yyyy)</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for doc in form.documents.all %}
+                <tr>
+                    <td>{{ doc.doctype }}</td>
+                    <td>{{ doc.name }}</td>
+                    <td>{{ doc.version }}</td>
+                    <td>{{ doc.date|date:'d.m.Y' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <div style="text-align: center;">
+            The Ethics Committee approved the application detailed above on {{ vote.signed_at|date:'F j, Y' }}.
+        </div>
+    {% endlanguage %}
 {% endblock %}
