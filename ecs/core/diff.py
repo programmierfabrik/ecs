@@ -213,7 +213,7 @@ class DocumentListDiffNode(ListDiffNode):
 
         for doc in changed:
             # Check if replaces_document's pk is in the changed list
-            if doc.replaces_document is not None and doc.replaces_document.pk in pks:
+            if doc.replaces_document is not None and doc.replaces_document.pk in pks and doc.is_replacement_update:
                 # Add the document to the updated_documents
                 updated_documents.append(doc)
                 # Mark both documents for removal since we don't need removed and added view
