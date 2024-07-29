@@ -147,7 +147,7 @@ class DocStash(models.Model):
                 # Use the labels from InvestigatorEmployee class for sex
                 for employee in employees:
                     for value, label in sex_field.choices:
-                        if value == employee['sex']:
+                        if value == employee.get('sex'):
                             employee.update({
                                 'get_sex_display': label
                             })
