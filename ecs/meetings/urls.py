@@ -26,6 +26,7 @@ urlpatterns = (
     re_path(r'^(?P<meeting_pk>\d+)/timetable/optimize/(?P<algorithm>random|brute_force|ga)/long/$', views.optimize_timetable_long, name='meetings.optimize_timetable_long'),
     path('<int:meeting_pk>/timetable/entry/new/', views.add_timetable_entry),
     path('<int:meeting_pk>/timetable/entry/add/', views.add_free_timetable_entry, name='meetings.add_free_timetable_entry'),
+    path('<int:meeting_pk>/timetable/entry/add-ctr/', views.add_ctr_timetable_entry, name='meetings.add_ctr_timetable_entry'),
     path('<int:meeting_pk>/timetable/entry/move/', views.move_timetable_entry, name='meetings.move_timetable_entry'),
     path('<int:meeting_pk>/timetable/entry/<int:entry_pk>/delete/', views.remove_timetable_entry, name='meetings.remove_timetable_entry'),
     path('<int:meeting_pk>/timetable/entry/<int:entry_pk>/update/', views.update_timetable_entry, name='meetings.update_timetable_entry'),

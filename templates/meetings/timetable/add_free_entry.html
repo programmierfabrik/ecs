@@ -2,7 +2,7 @@
 
 <form action="{{ request.path }}" method="post" class="open-in-widget">
     {% csrf_token %}
-    <h3>Neuer TOP</h3>
+    <h3>Neuer {% if is_ctr %}CTR-{% else %} {% endif %}TOP</h3>
 
     {% for field in form %}
         {% include "bootstrap/form_field.html" with inline=True %}
@@ -13,3 +13,13 @@
         Abbrechen (zurück zur Sitzung)
     </a>
 </form>
+{% if form.invited_users %}
+<script>
+    var input = $('#{{ form.invited_users.auto_id }}');
+    input.select2({
+        placeholder: null,
+        width: '100%',
+        dropdownParent: input.parent(),
+    });
+</script>
+{% endif %}

@@ -46,16 +46,26 @@ class MeetingAssistantForm(forms.ModelForm):
         model = Meeting
         fields = ('comments',)
 
-class FreeTimetableEntryForm(forms.Form):
+class BaseTimetableEntryForm(forms.Form):
     title = forms.CharField(required=True, label=_('title'), max_length=TimetableEntry._meta.get_field('title').max_length)
     duration = forms.DurationField(initial='1:30:00', label=_("duration"))
-    is_break = forms.BooleanField(label=_("break"), required=False)
     optimal_start = TimeField(required=False, label=_('ideal start time (time)'))
     index = forms.TypedChoiceField(label=_('Position'), coerce=int, empty_value=None, required=False, choices=[
         ('', _('Automatic')), 
         ('-1', _('Last')), 
         ('0', _('First'))
     ])
+
+
+class FreeTimetableEntryForm(BaseTimetableEntryForm):
+    is_break = forms.BooleanField(label=_("break"), required=False)
+
+
+class CTRTimetableEntryForm(BaseTimetableEntryForm):
+    ctr_link = forms.URLField(required=True, label='Link zur CTR-Studie')
+    invited_users = forms.ModelMultipleChoiceField(
+        queryset=User.objects.filter(is_active=True, groups__name='Specialist'), required=False, label='Teilnehmer'
+    )
 
 class BaseConstraintFormSet(BaseModelFormSet):
     def __init__(self, *args, **kwargs):

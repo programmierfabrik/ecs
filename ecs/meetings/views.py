@@ -31,7 +31,7 @@ from ecs.meetings.forms import (
     UserConstraintFormSet, SubmissionReschedulingForm,
     AssignedMedicalCategoryFormSet, MeetingAssistantForm, ExpeditedVoteFormSet,
     AmendmentVoteFormSet, ManualTimetableEntryCommentForm,
-    ManualTimetableEntryCommentFormset, EkMemberMarkedForm, SendProtocolGroupsForm,
+    ManualTimetableEntryCommentFormset, EkMemberMarkedForm, SendProtocolGroupsForm, CTRTimetableEntryForm,
 )
 from ecs.meetings.models import Meeting, Participation, TimetableEntry, MeetingSubmissionProtocol, MeetingDocument
 from ecs.meetings.signals import on_meeting_start, on_meeting_end, on_meeting_top_jump, \
@@ -362,6 +362,20 @@ def add_free_timetable_entry(request, meeting_pk=None):
     return render(request, 'meetings/timetable/add_free_entry.html', {
         'form': form,
         'meeting': meeting,
+    })
+
+
+@user_group_required('EC-Office')
+def add_ctr_timetable_entry(request, meeting_pk=None):
+    meeting = get_object_or_404(Meeting, pk=meeting_pk, started=None)
+    form = CTRTimetableEntryForm(request.POST or None)
+    if form.is_valid():
+        meeting.add_entry(**form.cleaned_data)
+        return redirect('meetings.timetable_editor', meeting_pk=meeting.pk)
+    return render(request, 'meetings/timetable/add_free_entry.html', {
+        'form': form,
+        'meeting': meeting,
+        'is_ctr': True,
     })
 
 

@@ -293,6 +293,7 @@ class Meeting(models.Model):
     def add_entry(self, **kwargs):
         visible = kwargs.pop('visible', True)
         index = kwargs.pop('index', None)
+        invited_users = kwargs.pop('invited_users', [])
         if visible:
             last_index = self.timetable_entries.aggregate(
                 models.Max('timetable_index'))['timetable_index__max']
@@ -303,6 +304,14 @@ class Meeting(models.Model):
         else:
             kwargs['timetable_index'] = None
         entry = self.timetable_entries.create(**kwargs)
+        for user in invited_users:
+            # create Participation instance
+            p = Participation.objects.create(
+                entry=entry,
+                user=user,
+                task=None,
+                medical_category=None,
+            )
         if index is not None and index != -1:
             entry.index = index
         if entry.optimal_start:
@@ -574,9 +583,11 @@ class Meeting(models.Model):
         # delete Participation entries where med-cat is not inside the referenced study anymore
         for p in Participation.objects.filter(entry__meeting=self, task=None):
             submission = p.entry.submission
-            if submission.workflow_lane != SUBMISSION_LANE_BOARD or \
-                not submission.medical_categories.filter(id=p.medical_category_id).exists():
-                p.delete()
+            # with the new ctr-ecs tops participations without submissions can exist. only apply the logic if the submission exists
+            if submission is not None:
+                if submission.workflow_lane != SUBMISSION_LANE_BOARD or \
+                    not submission.medical_categories.filter(id=p.medical_category_id).exists():
+                    p.delete()
 
     @property
     def active_top(self):
@@ -668,6 +679,7 @@ class TimetableEntry(models.Model):
     optimal_start = models.TimeField(null=True)
     is_open = models.BooleanField(default=True)
     text = models.TextField(null=True, blank=True)
+    ctr_link = models.URLField(null=True, blank=True)
 
     def __str__(self):
         return "TOP %s" % (self.agenda_index + 1)
