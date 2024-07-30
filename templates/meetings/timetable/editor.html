@@ -17,10 +17,10 @@
         </ol>
     {% endif %}
     <div class="my-2">
-    Wartezeit: 
+    Wartezeit:
         sum={{ meeting.metrics.waiting_time_total|simple_timedelta_format|default:'-' }},
-        avg={{ meeting.metrics.waiting_time_avg|simple_timedelta_format|default:'-' }}, 
-        max={{ meeting.metrics.waiting_time_max|simple_timedelta_format|default:'-' }}, 
+        avg={{ meeting.metrics.waiting_time_avg|simple_timedelta_format|default:'-' }},
+        max={{ meeting.metrics.waiting_time_max|simple_timedelta_format|default:'-' }},
         min={{ meeting.metrics.waiting_time_min|simple_timedelta_format|default:'-' }},
         var={{ meeting.metrics.waiting_time_variance|simple_timedelta_format|default:'-' }},
     </div>
@@ -66,7 +66,7 @@
                 {% if entry.is_expedited %}E{% endif %} {% if entry.is_retrospective %}R{% endif %} {% if entry.is_thesis %}T{% endif %}
                 {% if not entry.is_break%}
                     {% if entry.submission or entry.users %}
-                    <span class="users">Teilnehmer: 
+                    <span class="users">Teilnehmer:
                         {% if entry.submission.invite_primary_investigator_to_meeting %}
                             {% with entry.submission.current_submission_form.primary_investigator as pi %}
                             Prüfer ({{ pi.contact.full_name }}){% if entry.users %},{% endif %}
@@ -81,7 +81,7 @@
                     <span>
                         Brötchen: {% trans 'before' %}: {{ entry.broetchen.0 }}, {% trans 'waiting' %}: {{ entry.broetchen.1 }}, {% trans 'after' %}: {{ entry.broetchen.2 }}
                     </span>
-                {% endif %}    
+                {% endif %}
             </div>
         </li>
     {% endfor %}
