@@ -271,7 +271,7 @@
                                 {% trans "Download" %}
                             </a>
                             <br>
-                            {% if vote.is_positive and vote.is_permanent %}
+                            {% if user.profile.is_internal and vote.is_positive and vote.is_permanent %}
                                 <a class="request_english_vote ml-3" href="" data-vote-id="{{ vote.pk }}">
                                     <span class="fa fa-file-pdf-o"></span>
                                     Englisch
