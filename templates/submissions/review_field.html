@@ -19,7 +19,7 @@
             </label>
         </div>
     {% else %}
-        <div class="form-group{% if field.field.required %} required{% endif %}{% if field.errors %} errors{% endif %}">
+        <div class="form-group{% if field.field.required %} required{% endif %}{% if field.field.widget.attrs.p_hidden %} d-none{% endif %}{% if field.errors %} errors{% endif %}">
             {% if not readonly and field_info.help_text %}
                 <span class="text-muted">
                     {{ field_info.help_text }}

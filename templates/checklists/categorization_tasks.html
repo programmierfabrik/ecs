@@ -4,34 +4,56 @@
 
 <table>
     <tbody>
-        {% for task_type, task in tasks %}
-            <tr>
-                <th class="pr-5">{{ task_type }}</th>
-                <td>
-                    {% if task.closed_at %}
-                        <span class="btn btn-outline-primary disabled">
+    {% for task_type, task in tasks %}
+        <tr>
+            <th class="pr-5">{{ task_type }}</th>
+            <td>
+                {% if task.closed_at %}
+                    <span class="btn btn-outline-primary disabled">
                             {% trans 'Closed' %}
                         </span>
-                    {% elif task %}
-                        <span class="btn btn-outline-primary disabled">
+                {% elif task %}
+                    <span class="btn btn-outline-primary disabled">
                             {% trans 'Started' %}
                         </span>
-                    {% else %}
-                        <a class="btn btn-primary open-in-widget" href="{{ request.path }}?start={{ task_type.workflow_node.uid }}">
-                            {% trans "Start" %}
-                        </a>
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
+                {% else %}
+                    <a class="btn btn-primary open-in-widget"
+                       href="{{ request.path }}?start={{ task_type.workflow_node.uid }}">
+                        {% trans "Start" %}
+                    </a>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
     </tbody>
 </table>
 
-{% if created %}
 <script type="text/javascript">
-    (function(){
-        var task_widget = $('#workflow_log .ecs-Widget:first');
-        task_widget.data('widget').load(task_widget.data('widget-url'));
+    (function () {
+        {% if created %}
+            var task_widget = $('#workflow_log .ecs-Widget:first');
+            task_widget.data('widget').load(task_widget.data('widget-url'));
+        {% endif %}
+        var workflowLane = $('#id_workflow_lane');
+        var currentMeeting;
+
+        function changeMeetingField() {
+            var workflow_lane_id = workflowLane.val();
+            var oldMeetingField = currentMeeting;
+            if (oldMeetingField) {
+                oldMeetingField.parent().addClass('d-none');
+            }
+
+
+            if (workflow_lane_id === '1') {
+                currentMeeting = $('#id_meeting_to_be_scheduled_thesis');
+            } else {
+                currentMeeting = $('#id_meeting_to_be_scheduled_board');
+            }
+            currentMeeting.parent().removeClass('d-none');
+        }
+
+        changeMeetingField();
+        workflowLane.change(changeMeetingField);
     })();
 </script>
-{% endif %}

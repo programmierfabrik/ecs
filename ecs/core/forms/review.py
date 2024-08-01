@@ -17,8 +17,8 @@ from ecs.utils.formutils import require_fields
 
 
 class CategorizationForm(ReadonlyFormMixin, forms.ModelForm):
-    meeting_to_be_scheduled_board = forms.ModelChoiceField(Meeting.objects.none(), label=_('Sitzung'))
-    meeting_to_be_scheduled_thesis = forms.ModelChoiceField(Meeting.objects.none(), label=_('Sitzung'))
+    meeting_to_be_scheduled_board = forms.ModelChoiceField(Meeting.objects.none(), label='Sitzung', initial=0)
+    meeting_to_be_scheduled_thesis = forms.ModelChoiceField(Meeting.objects.none(), label='Sitzung', initial=0)
 
     class Meta:
         model = Submission
@@ -60,10 +60,12 @@ class CategorizationForm(ReadonlyFormMixin, forms.ModelForm):
             accepted_sf = self.instance.current_submission_form
 
         grace_period = getattr(settings, 'ECS_MEETING_GRACE_PERIOD', timedelta(0))
+        self.fields['meeting_to_be_scheduled_board'].widget.attrs['p_hidden'] = True
         self.fields['meeting_to_be_scheduled_board'].queryset = (
             Meeting.objects.filter(deadline__gt=first_sf.created_at)
             .filter(deadline__gt=accepted_sf.created_at - grace_period)
         ).order_by('start')
+        self.fields['meeting_to_be_scheduled_thesis'].widget.attrs['p_hidden'] = True
         self.fields['meeting_to_be_scheduled_thesis'].queryset = (
             Meeting.objects.filter(deadline_diplomathesis__gt=first_sf.created_at)
             .filter(deadline_diplomathesis__gt=accepted_sf.created_at - grace_period)
