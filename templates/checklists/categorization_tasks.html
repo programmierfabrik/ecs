@@ -37,23 +37,25 @@
         var workflowLane = $('#id_workflow_lane');
         var currentMeeting;
 
-        function changeMeetingField() {
-            var workflow_lane_id = workflowLane.val();
-            var oldMeetingField = currentMeeting;
-            if (oldMeetingField) {
-                oldMeetingField.parent().addClass('d-none');
-            }
+        if (!workflowLane.is('[readonly]')) {
+            function changeMeetingField() {
+                var workflow_lane_id = workflowLane.val();
+                var oldMeetingField = currentMeeting;
+                if (oldMeetingField) {
+                    oldMeetingField.parent().addClass('d-none');
+                }
 
 
-            if (workflow_lane_id === '1') {
-                currentMeeting = $('#id_meeting_to_be_scheduled_thesis');
-            } else {
-                currentMeeting = $('#id_meeting_to_be_scheduled_board');
+                if (workflow_lane_id === '1') {
+                    currentMeeting = $('#id_meeting_to_be_scheduled_thesis');
+                } else {
+                    currentMeeting = $('#id_meeting_to_be_scheduled_board');
+                }
+                currentMeeting.parent().removeClass('d-none');
             }
-            currentMeeting.parent().removeClass('d-none');
+
+            changeMeetingField();
+            workflowLane.change(changeMeetingField);
         }
-
-        changeMeetingField();
-        workflowLane.change(changeMeetingField);
     })();
 </script>
