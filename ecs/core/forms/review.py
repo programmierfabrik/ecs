@@ -13,6 +13,7 @@ from ecs.core.models.constants import SUBMISSION_LANE_BOARD, SUBMISSION_LANE_EXP
     SUBMISSION_LANE_RETROSPECTIVE_THESIS
 from ecs.core.models.core import MedicalCategory
 from ecs.meetings.models import Meeting
+from ecs.meetings.utils import reschedule_submission_meeting
 from ecs.utils.formutils import require_fields
 
 
@@ -82,13 +83,7 @@ class CategorizationForm(ReadonlyFormMixin, forms.ModelForm):
 
     def save(self, commit=True):
         instance = super().save(commit=commit)
-        # Instead of changing the whole workflow and the logic how the categoriziation works
-        # We instead create a shallow entry which will later be updated in the categorization workflow
-        # visible needs to be false so the duration gets updated if the visibilty is actually true (workflow_lane = BOARD)
-        # Duration 0 is just a default value since it will be updated either way
-        duration = timedelta(minutes=0)
-        visible = False
-        
+
         workflow_lane = self.cleaned_data['workflow_lane']
         meeting_to_be_scheduled_board = self.cleaned_data['meeting_to_be_scheduled_board']
         meeting_to_be_scheduled_thesis = self.cleaned_data['meeting_to_be_scheduled_thesis']
@@ -96,9 +91,11 @@ class CategorizationForm(ReadonlyFormMixin, forms.ModelForm):
         meeting_to_be_scheduled = meeting_to_be_scheduled_board
         if workflow_lane == SUBMISSION_LANE_RETROSPECTIVE_THESIS and meeting_to_be_scheduled_thesis:
             meeting_to_be_scheduled = meeting_to_be_scheduled_thesis
+        old_meeting = instance.meetings.filter(started=None).first()
 
-        if meeting_to_be_scheduled:
-            new_entry = meeting_to_be_scheduled.add_entry(submission=instance, duration=duration, visible=visible)
+        if old_meeting is None or old_meeting != meeting_to_be_scheduled:
+            reschedule_submission_meeting(old_meeting, instance, meeting_to_be_scheduled)
+
         return instance
 
 class BiasedBoardMemberForm(forms.Form):

@@ -38,7 +38,7 @@ from ecs.meetings.signals import on_meeting_start, on_meeting_end, on_meeting_to
     on_meeting_date_changed
 from ecs.meetings.tasks import optimize_timetable_task
 from ecs.meetings.utils import render_protocol_pdf_for_submission, send_submission_protocol_pdf, \
-    get_users_for_protocol
+    get_users_for_protocol, reschedule_submission_meeting
 from ecs.notifications.models import NotificationAnswer
 from ecs.tasks.models import Task
 from ecs.users.models import UserProfile
@@ -91,29 +91,7 @@ def reschedule_submission(request, submission_pk=None):
         from_meeting = form.cleaned_data['from_meeting']
         to_meeting = form.cleaned_data['to_meeting']
 
-        old_entry = from_meeting.timetable_entries.get(submission=submission)
-        assert not hasattr(old_entry, 'vote')
-        visible = (not old_entry.timetable_index is None)
-        new_entry = to_meeting.add_entry(submission=submission,
-                                         duration=old_entry.duration, title=old_entry.title, visible=visible)
-        old_entry.participations.exclude(task=None).update(entry=new_entry)
-        old_entry.participations.all().delete()
-        old_entry.delete()
-
-        old_experts = set(from_meeting.medical_categories
-                          .exclude(specialist=None)
-                          .filter(category__in=submission.medical_categories.values('pk'))
-                          .values_list('specialist_id', flat=True))
-        new_experts = set(to_meeting.medical_categories
-                          .exclude(specialist=None)
-                          .filter(category__in=submission.medical_categories.values('pk'))
-                          .values_list('specialist_id', flat=True))
-
-        with sudo():
-            Task.objects.for_data(submission).filter(
-                task_type__workflow_node__uid='specialist_review',
-                assigned_to__in=(old_experts - new_experts)
-            ).open().mark_deleted()
+        reschedule_submission_meeting(from_meeting, submission, to_meeting)
 
         return redirect('view_submission', submission_pk=submission.pk)
 

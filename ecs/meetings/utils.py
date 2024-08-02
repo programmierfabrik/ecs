@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib.auth.models import Group, User
 from django.db.models import Q
 from django.utils import timezone
@@ -5,6 +7,7 @@ from django.utils import timezone
 from ecs import settings
 from ecs.communication.mailutils import deliver
 from ecs.tasks.models import TaskType, Task
+from ecs.users.utils import sudo
 from ecs.utils.viewutils import render_html
 
 
@@ -94,3 +97,40 @@ def get_users_for_protocol(meeting, invited_group_ids, invite_ek_member=False, b
     else:
         board_member_filter = Q()
     return User.objects.filter((Q(groups__in=group_ids) | board_member_filter) & Q(is_active=True)).distinct()
+
+
+def reschedule_submission_meeting(from_meeting, submission, to_meeting):
+    # Instead of changing the whole workflow and the logic how the categoriziation works
+    # We instead create a shallow entry which will later be updated in the categorization workflow
+    # visible needs to be false so the duration gets updated if the visibilty is actually true (workflow_lane = BOARD)
+    # Duration 0 is just a default value since it will be updated either way
+    duration = timedelta(minutes=0)
+    visible = False
+    title = None
+    old_entry = None
+    if from_meeting is not None:
+        old_entry = from_meeting.timetable_entries.get(submission=submission)
+        assert not hasattr(old_entry, 'vote')
+        visible = (not old_entry.timetable_index is None)
+        duration = old_entry.duration
+        title = old_entry.title
+
+    new_entry = to_meeting.add_entry(submission=submission, duration=duration, title=title, visible=visible)
+    
+    if from_meeting is not None and old_entry is not None:
+        old_entry.participations.exclude(task=None).update(entry=new_entry)
+        old_entry.participations.all().delete()
+        old_entry.delete()
+        old_experts = set(from_meeting.medical_categories
+                          .exclude(specialist=None)
+                          .filter(category__in=submission.medical_categories.values('pk'))
+                          .values_list('specialist_id', flat=True))
+        new_experts = set(to_meeting.medical_categories
+                          .exclude(specialist=None)
+                          .filter(category__in=submission.medical_categories.values('pk'))
+                          .values_list('specialist_id', flat=True))
+        with sudo():
+            Task.objects.for_data(submission).filter(
+                task_type__workflow_node__uid='specialist_review',
+                assigned_to__in=(old_experts - new_experts)
+            ).open().mark_deleted()
