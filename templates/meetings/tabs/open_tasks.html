@@ -1,5 +1,10 @@
 {% load core i18n %}
 
+<div class="btn-group py-2" role="group">
+    <button type="button" class="btn btn-outline-primary active btn-all">Alle</button>
+    <button type="button" class="btn btn-outline-primary btn-blocking">Blockierende Aufgaben</button>
+</div>
+
 <table class="table table-sm mb-3">
     {% for top, tasks in open_tasks.items %}
         <thead>
@@ -22,7 +27,7 @@
                 <th>{% trans "Assigend To" %}</th>
             </tr>
             {% for task in tasks %}
-                <tr class="task{% if task.closed_at %} text-muted{% endif %}{% if task.deleted_at %} deleted{% endif %}">
+                <tr class="task{% if task.closed_at %} text-muted{% endif %}{% if task.deleted_at %} deleted{% endif %}{% if task.is_blocking %} blocking{% endif %}">
                     <td>{{ task.created_at|date:'d.m.Y H:i' }}</td>
                     <td>
                         {{ task.task_type }}
@@ -43,3 +48,27 @@
         </tbody>
     {% endfor %}
 </table>
+
+<script>
+    $('.btn-all').click(function () {
+        $('tr.task, tbody, thead').removeClass('d-none');
+
+        $('.btn-blocking').removeClass('active');
+        $(this).addClass('active');
+    });
+
+    $('.btn-blocking').click(function () {
+        $('tr.task').addClass('d-none');
+        $('tr.task.blocking').removeClass('d-none');
+
+        $('tbody').each(function() {
+            if ($(this).find('tr.task:visible').length === 0) {
+                $(this).addClass('d-none');
+                $(this).prev('thead').addClass('d-none');
+            }
+        });
+
+        $('.btn-all').removeClass('active');
+        $(this).addClass('active');
+    });
+</script>

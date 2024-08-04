@@ -10,7 +10,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
-from django.db.models import Q, Max, Prefetch
+from django.db.models import Q, Max, Prefetch, Case, When, Value, BooleanField
 from django.http import FileResponse, HttpResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -108,12 +108,25 @@ def open_tasks(request, meeting=None):
                                                                                           'submission__current_submission_form'))
     tops.sort(key=lambda e: e.agenda_index)
 
+    blocking_meeting_tasks = get_blocking_meeting_tasks(meeting)
+    blocking_meeting_tasks_recommendations = blocking_meeting_tasks.get('recommendations')
+    blocking_meeting_tasks_vote_preparations = blocking_meeting_tasks.get('vote_preparations')
+    combined_tasks = blocking_meeting_tasks_recommendations.union(blocking_meeting_tasks_vote_preparations)
+    task_pks = combined_tasks.values_list('pk', flat=True)
+
     open_tasks = OrderedDict()
     for top in tops:
         ts = list(
             Task.unfiltered.for_submission(top.submission).open()
             .select_related('task_type', 'task_type__group', 'assigned_to',
                             'assigned_to__profile', 'medical_category')
+            .annotate(
+                is_blocking=Case(
+                    When(pk__in=task_pks, then=Value(True)),
+                    default=Value(False),
+                    output_field=BooleanField(),
+                )
+            )
             .order_by('created_at')
         )
         if len(ts):
