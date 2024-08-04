@@ -63,13 +63,17 @@ class CategorizationForm(ReadonlyFormMixin, forms.ModelForm):
         grace_period = getattr(settings, 'ECS_MEETING_GRACE_PERIOD', timedelta(0))
         self.fields['meeting_to_be_scheduled_board'].widget.attrs['p_hidden'] = True
         self.fields['meeting_to_be_scheduled_board'].queryset = (
-            Meeting.objects.filter(deadline__gt=first_sf.created_at)
+            Meeting.objects
+            .filter(deadline__gt=first_sf.created_at)
             .filter(deadline__gt=accepted_sf.created_at - grace_period)
+            .filter(started=None)
         ).order_by('start')
         self.fields['meeting_to_be_scheduled_thesis'].widget.attrs['p_hidden'] = True
         self.fields['meeting_to_be_scheduled_thesis'].queryset = (
-            Meeting.objects.filter(deadline_diplomathesis__gt=first_sf.created_at)
+            Meeting.objects
+            .filter(deadline_diplomathesis__gt=first_sf.created_at)
             .filter(deadline_diplomathesis__gt=accepted_sf.created_at - grace_period)
+            .filter(started=None)
         ).order_by('start')
 
     def clean(self):
