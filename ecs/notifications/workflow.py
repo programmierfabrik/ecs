@@ -109,7 +109,7 @@ class EditNotificationAnswer(BaseNotificationReview):
     
     def pre_perform(self, choice):
         answer = self.workflow.data.answer
-        answer.is_valid = choice
+        answer.is_valid = choice and answer.is_final_version
         answer.save()
 
 
