@@ -76,6 +76,13 @@ class CategorizationForm(ReadonlyFormMixin, forms.ModelForm):
             .filter(started=None)
         ).order_by('start')
 
+        current_meeting = self.instance.meetings.filter(started=None).order_by('start').first()
+        if current_meeting and self.instance.workflow_lane:
+            if self.instance.workflow_lane == SUBMISSION_LANE_RETROSPECTIVE_THESIS:
+                self.fields['meeting_to_be_scheduled_thesis'].initial = current_meeting
+            else:
+                self.fields['meeting_to_be_scheduled_board'].initial = current_meeting
+
     def clean(self):
         cd = self.cleaned_data
         lane = cd.get('workflow_lane')
