@@ -134,3 +134,25 @@ def reschedule_submission_meeting(from_meeting, submission, to_meeting):
                 task_type__workflow_node__uid='specialist_review',
                 assigned_to__in=(old_experts - new_experts)
             ).open().mark_deleted()
+
+
+def get_blocking_meeting_tasks(meeting):
+    with sudo():
+        # Get the list of submissions from timetable_entries
+        submission_ids = [top.submission.pk for top in meeting.timetable_entries.filter(submission__isnull=False)]
+
+        # Get open recommendations
+        recommendations = Task.objects.filter(
+            task_type__workflow_node__uid__in=[
+                'thesis_recommendation', 'thesis_recommendation_review',
+                'expedited_recommendation',
+                'localec_recommendation'
+            ],
+        ).for_submissions(submission_ids).open()
+
+        # Get open vote preparations
+        vote_preparations = Task.objects.filter(
+            task_type__workflow_node__uid='vote_preparation',
+        ).for_submissions(submission_ids).open()
+
+        return {'recommendations': recommendations, 'vote_preparations': vote_preparations}

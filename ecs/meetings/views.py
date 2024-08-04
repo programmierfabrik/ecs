@@ -38,7 +38,7 @@ from ecs.meetings.signals import on_meeting_start, on_meeting_end, on_meeting_to
     on_meeting_date_changed
 from ecs.meetings.tasks import optimize_timetable_task
 from ecs.meetings.utils import render_protocol_pdf_for_submission, send_submission_protocol_pdf, \
-    get_users_for_protocol, reschedule_submission_meeting
+    get_users_for_protocol, reschedule_submission_meeting, get_blocking_meeting_tasks
 from ecs.notifications.models import NotificationAnswer
 from ecs.tasks.models import Task
 from ecs.users.models import UserProfile
@@ -559,30 +559,22 @@ def meeting_assistant_start(request, meeting_pk=None):
     meeting = get_object_or_404(Meeting, pk=meeting_pk, started=None)
     nocheck = request.GET.get('nocheck', False) if settings.DEBUG else False
 
-    for top in meeting.timetable_entries.filter(submission__isnull=False):
-        with sudo():
-            recommendation_exists = Task.objects.for_submission(top.submission).filter(
-                task_type__workflow_node__uid__in=['thesis_recommendation', 'thesis_recommendation_review',
-                                                   'expedited_recommendation',
-                                                   'localec_recommendation']).open().exists()
-        if recommendation_exists and not nocheck:
-            return render(request, 'meetings/assistant/error.html', {
-                'active': 'assistant',
-                'meeting': meeting,
-                'message': _(
-                    'There are open recommendations. You can start the meeting assistant when all recommendations are done.'),
-            })
-        with sudo():
-            vote_preparation_exists = Task.objects.filter(
-                task_type__workflow_node__uid='vote_preparation'
-            ).for_submission(top.submission).open().exists()
-        if vote_preparation_exists and not nocheck:
-            return render(request, 'meetings/assistant/error.html', {
-                'active': 'assistant',
-                'meeting': meeting,
-                'message': _(
-                    'There are open vote preparations. You can start the meeting assistant when all vote preparations are done.'),
-            })
+    blocking_tasks = get_blocking_meeting_tasks(meeting)
+    
+    if blocking_tasks.get('recommendations').exists() and not nocheck:
+        return render(request, 'meetings/assistant/error.html', {
+            'active': 'assistant',
+            'meeting': meeting,
+            'message': _(
+                'There are open recommendations. You can start the meeting assistant when all recommendations are done.'),
+        })
+    elif blocking_tasks.get('vote_preparations').exists() and not nocheck:
+        return render(request, 'meetings/assistant/error.html', {
+            'active': 'assistant',
+            'meeting': meeting,
+            'message': _(
+                'There are open vote preparations. You can start the meeting assistant when all vote preparations are done.'),
+        })
 
     meeting.started = timezone.now()
     meeting.save()
@@ -1077,6 +1069,10 @@ def meeting_details(request, meeting_pk=None, active=None):
     with sudo():
         submissions = meeting.submissions.order_by('ec_number')
 
+    blocking_meeting_tasks = get_blocking_meeting_tasks(meeting)
+    blocking_tasks_count = (
+        blocking_meeting_tasks.get('recommendations').count() + blocking_meeting_tasks.get('vote_preparations').count()
+    )
     return render(request, 'meetings/details.html', {
         'cumulative_count': submissions.distinct().count(),
 
@@ -1106,6 +1102,7 @@ def meeting_details(request, meeting_pk=None, active=None):
                 Prefetch('submission_forms',
                          queryset=SubmissionForm.unfiltered.select_related('submission'))
             ).order_by('submission_forms__submission__ec_number'),
+        'blocking_tasks_count': blocking_tasks_count,
 
         'meeting': meeting,
         'expert_formset': expert_formset,

@@ -27,6 +27,20 @@
         </td>
     </tr>
     <tr>
+        <th>Blockierende Aufgaben</th>
+        <td colspan="2">
+            <div
+                style="width: min-content; white-space: nowrap"
+                class="alert mb-0 {% if blocking_tasks_count > 0 %}alert-danger{% else %}alert-success{% endif %}">
+                {% if blocking_tasks_count > 0 %}
+                    {{ blocking_tasks_count }} Aufgaben
+                {% else %}
+                    Keine blockierenden Aufgaben. Sitzung kann gestartet werden.
+                {% endif %}
+            </div>
+        </td>
+    </tr>
+    <tr>
         <th>{% trans "Deadline for Submission" %}</th>
         <td colspan="2">
             {{ meeting.deadline|date:'d.m.Y' }}
