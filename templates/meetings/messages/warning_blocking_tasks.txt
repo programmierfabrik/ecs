@@ -1,0 +1,6 @@
+{% extends 'msg_core.txt' %}
+{% load i18n %}
+
+{% block content %}
+Für die Sitzung "{{ meeting.title }}" sind noch {{ blocking_count }} blockierende Aufgaben offen.
+{% endblock %}

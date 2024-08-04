@@ -1,13 +1,19 @@
+import datetime
 import random, itertools, math
 import io
 import zipfile
+from datetime import timedelta
 
 from celery.schedules import crontab
 from celery.utils.log import get_task_logger
+from django.contrib.auth.models import User
 
 from django.db import transaction
 from django.contrib.contenttypes.models import ContentType
+from django.utils import timezone
 
+from ecs.communication.utils import send_system_message_template
+from ecs.meetings.utils import get_blocking_meeting_tasks
 from ecs.utils.genetic_sort import GeneticSorter, inversion_mutation, swap_mutation, displacement_mutation, \
     random_replacement_mutation
 from ecs.meetings.models import Meeting
@@ -23,6 +29,7 @@ logger = get_task_logger(__name__)
 def setup_periodic_tasks(sender, **kwargs):
     # run once per day at 04:07
     sender.add_periodic_task(crontab(hour=4, minute=7), gen_meeting_zip.s())
+    sender.add_periodic_task(crontab(minute=0), send_blocking_task_warning.s())
 
 
 def optimize_random(timetable, func, params):
@@ -167,3 +174,40 @@ def gen_meeting_zip():
         zip_buf.getvalue(), doctype='meeting_zip', parent_object=meeting,
         mimetype='application/zip', name=meeting.title)
     meeting.save(update_fields=('documents_zip',))
+
+
+@celery_app.task
+def send_blocking_task_warning():
+    # Get warning start time hours from system settings
+    hours_before_meeting = 8
+
+    # Set your time variables based on system settings
+    warning_start_time = timedelta(hours=hours_before_meeting)
+    warning_end_time = timedelta(hours=hours_before_meeting + 1)
+
+    # Get the current time
+    now = timezone.now()
+
+    # Select meetings occurring within the defined hours range
+    target_meetings = Meeting.objects.filter(
+        start__gte=now + warning_start_time,
+        start__lte=now + warning_end_time,
+    )
+
+    for meeting in target_meetings:
+        blocking_meeting_tasks = get_blocking_meeting_tasks(meeting)
+        blocking_meeting_tasks_recommendations = blocking_meeting_tasks.get('recommendations')
+        blocking_meeting_tasks_vote_preparations = blocking_meeting_tasks.get('vote_preparations')
+        blocking_count = blocking_meeting_tasks_recommendations.count() + blocking_meeting_tasks_vote_preparations.count()
+
+        office = User.objects.filter(groups__name='EC-Office')
+        for user in office:
+            send_system_message_template(
+                user.email,
+                'Erinnerung an blockierende Aufgaben',
+                'meetings/messages/warning_blocking_tasks.txt', {
+                    'meeting': meeting,
+                    'blocking_count': blocking_count,
+                }
+            )
+
