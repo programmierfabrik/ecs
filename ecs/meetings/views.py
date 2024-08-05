@@ -560,10 +560,16 @@ def meeting_assistant(request, meeting_pk=None):
                 'message': _('No TOPs are assigned to this meeting.'),
             })
     else:
+        blocking_meeting_tasks = get_blocking_meeting_tasks(meeting)
+        blocking_tasks_count = (
+            blocking_meeting_tasks.get('recommendations').count() + blocking_meeting_tasks.get(
+            'vote_preparations').count()
+        )
         return render(request, 'meetings/assistant/error.html', {
             'active': 'assistant',
             'meeting': meeting,
             'message': _('This meeting has not yet started.'),
+            'blocking_tasks_count': blocking_tasks_count
         })
 
 

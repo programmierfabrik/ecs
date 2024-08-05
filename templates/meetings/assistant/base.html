@@ -7,6 +7,16 @@
                 <a class="btn btn-block btn-primary start_meeting" href="{% url 'meetings.meeting_assistant_start' meeting_pk=meeting.pk %}">
                     Sitzung starten
                 </a>
+                {% if blocking_tasks_count != None %}
+                    <div
+                        class="w-100 mt-2 alert mb-0 {% if blocking_tasks_count > 0 %}alert-danger{% else %}alert-success{% endif %}">
+                        {% if blocking_tasks_count > 0 %}
+                            {{ blocking_tasks_count }} Aufgaben offen
+                        {% else %}
+                            Keine blockierenden Aufgaben. Sitzung kann gestartet werden.
+                        {% endif %}
+                    </div>
+                {% endif %}
             {% else %}
                 {% if not meeting.ended and open_top_count == 0 %}
                     <a class="btn btn-block btn-primary stop_meeting" href="{% url 'meetings.meeting_assistant_stop' meeting_pk=meeting.pk %}">
