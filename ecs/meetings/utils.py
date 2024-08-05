@@ -106,7 +106,7 @@ def reschedule_submission_meeting(from_meeting, submission, to_meeting):
     # Duration 0 is just a default value since it will be updated either way
     duration = timedelta(minutes=0)
     visible = False
-    title = None
+    title = ''
     old_entry = None
     if from_meeting is not None:
         old_entry = from_meeting.timetable_entries.get(submission=submission)
