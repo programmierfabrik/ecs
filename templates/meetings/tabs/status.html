@@ -134,7 +134,7 @@
     </tr>
     {% if user.profile.is_internal %}
         <tr>
-            <th>{% trans "Protocol" %}</th>
+            <th>Protokoll</th>
             <td colspan="2">
                 {% if meeting.protocol_id %}
                     <a href="{% url 'meetings.protocol_pdf' meeting_pk=meeting.pk %}">
