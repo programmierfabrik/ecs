@@ -175,6 +175,14 @@ class DocStash(models.Model):
                 len(foreignparticipatingcenters) > 0
             )
 
+            project_type_education_context = mocked_form.get('project_type_education_context')
+            subject_females, subject_childbearing = (
+                (True, True),
+                (True, False),
+                (False, True),
+                (False, False),
+            )[int(mocked_form.get('subject_females_childbearing'))]
+
             # Set values that are either generate after a save or a function properties that are computed
             mocked_form.update({
                 'version': -1,
@@ -212,6 +220,15 @@ class DocStash(models.Model):
                 },
                 'measures_study_specific': measures,
                 'measures_nonspecific': routinemeasures,
+                'project_type_education_context_dissertation': project_type_education_context == 1,
+                'project_type_education_context_thesis': project_type_education_context == 2,
+                'project_type_education_context_bachelor': project_type_education_context == 3,
+                'project_type_education_context_master': project_type_education_context == 4,
+                'project_type_education_context_phd': project_type_education_context == 5,
+                'subject_divers': mocked_form.get('subject_divers'),
+                'subject_childbearing': subject_childbearing,
+                'subject_females': subject_females,
+                'subject_males': mocked_form.get('subject_males'),
             })
 
             return render_pdf_context('submissions/pdf/view.html', {
