@@ -181,7 +181,7 @@ class DocStash(models.Model):
                 (True, False),
                 (False, True),
                 (False, False),
-            )[int(mocked_form.get('subject_females_childbearing'))]
+            )[int(mocked_form.get('subject_females_childbearing', '3'))]
 
             # Set values that are either generate after a save or a function properties that are computed
             mocked_form.update({
