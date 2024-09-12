@@ -856,7 +856,7 @@ def create_submission_form(request):
 
             request.docstash.delete()
             
-            on_study_submit.send(Submission, submission=submission, form=submission_form, user=request.user)
+            on_study_submit.send(Submission, submission=submission, form=submission_form, user=request.user, investigator_count=len(investigator_formset))
 
             if notification_type:
                 return redirect('notifications.create_diff_notification',

@@ -1,3 +1,5 @@
+import logging
+
 from django.db import transaction
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
@@ -60,6 +62,17 @@ def on_study_submit(sender, **kwargs):
     ).open().first()
     if resubmission_task:
         resubmission_task.done(user)
+
+    investigator_count = kwargs.get('investigator_count', None)
+    # Not none check
+    if investigator_count is not None:
+        # check if the count matches
+        actual_count = submission_form.investigators.count()
+        if investigator_count != actual_count:
+            # Log that the count does not match
+            logging.error(
+                f"Investigator count mismatch: provided count is {investigator_count}, but actual count is {actual_count}. Submission ID: {submission.id}."
+            )
 
     transaction.on_commit(
         lambda: render_submission_form.delay(submission_form_id=submission_form.id)
