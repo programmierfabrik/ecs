@@ -4,6 +4,8 @@ import os, sys, platform, logging
 from datetime import timedelta
 from urllib.parse import urlparse
 
+from sentry_sdk.integrations.logging import LoggingIntegration
+
 # root dir of project
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -401,7 +403,10 @@ if os.getenv('ECS_SENTRY_DSN', '') != '':
 
     sentry_sdk.init(
         dsn=os.getenv('ECS_SENTRY_DSN'),
-        integrations=[DjangoIntegration()],
+        integrations=[DjangoIntegration(), LoggingIntegration(
+            level=logging.FATAL,        # Capture info and above as breadcrumbs
+            event_level=logging.FATAL   # Send records as events
+        ),],
 
         # Set traces_sample_rate to 1.0 to capture 100%
         # of transactions for performance monitoring.
