@@ -70,7 +70,7 @@ def on_study_submit(sender, **kwargs):
         actual_count = submission_form.investigators.count()
         if investigator_count != actual_count:
             # Log that the count does not match
-            logging.error(
+            logging.fatal(
                 f"Investigator count mismatch: provided count is {investigator_count}, but actual count is {actual_count}. Submission ID: {submission.id}."
             )
 
