@@ -131,7 +131,7 @@ commissions = [
     },
     {
         "uuid": "dc1b115d9809461ba3ea9450b079ddd6",
-        "name": "Kommission für Scientific Integrity und Ethik der Karl Landsteiner Privatuniversität",
+        "name": "Kommission für Ethik und wissenschaftliche Integrität der Karl Landsteiner Privatuniversität",
     },
     {
         "uuid": "50dba0126a0746dc8802e6c0e0199dad",
