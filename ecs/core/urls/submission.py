@@ -39,6 +39,8 @@ urlpatterns = (
     path('<int:submission_pk>/temp-auth/<int:temp_auth_pk>/revoke/', views.revoke_temporary_access, name='core.submission.revoke_temporary_access'),
     path('<int:submission_pk>/review/checklist/<int:blueprint_pk>/reopen/', views.reopen_checklist, name='core.submission.reopen_checklist'),
 
+    path('form/ctr/<int:ctr_submission_form_pk>/', views.readonly_submission_form, name='core.submission.readonly_ctr_submission_form'),
+
     path('form/<int:submission_form_pk>/', views.readonly_submission_form, name='readonly_submission_form'),
     path('form/<int:submission_form_pk>/pdf/', views.submission_form_pdf, name='core.submission.submission_form_pdf'),
     path('form/<int:submission_form_pk>/pdf/view/', views.submission_form_pdf_view, name='core.submission.submission_form_pdf_view'),

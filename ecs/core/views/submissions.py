@@ -19,6 +19,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.contrib import messages
 
+from ecs.core.models.submissions import CTRSubmissionForm
 from ecs.documents.models import Document
 from ecs.documents.views import handle_download
 from ecs.utils.viewutils import redirect_to_next_url
@@ -175,10 +176,95 @@ def copy_latest_submission_form(request, submission_pk=None, **kwargs):
 
 def view_submission(request, submission_pk=None):
     submission = get_object_or_404(Submission, pk=submission_pk)
+    if submission.current_ctr_form_id:
+        return redirect('core.submission.readonly_ctr_submission_form', ctr_submission_form_pk=submission.current_ctr_form_id)
+
     return redirect('readonly_submission_form', submission_form_pk=submission.current_submission_form.pk)
 
 
-def readonly_submission_form(request, submission_form_pk=None, submission_form=None, extra_context=None, template='submissions/readonly_form.html', checklist_overwrite=None):
+def readonly_ctr_submission_form(request, extra_context, template, checklist_overwrite, ctr_submission_form_pk):
+    ctr_submission_form = CTRSubmissionForm.objects.get(pk=ctr_submission_form_pk)
+    submission = ctr_submission_form.submission
+    
+    ###################
+    # CHECKLIST BEGIN #
+    ###################
+
+    checklists_q = Q(last_edited_by=request.user)
+    if request.user.profile.is_internal:
+        checklists_q |= Q(status__in=['completed', 'review_ok', 'review_ok_internal'])
+    else:
+        presenting_parties = [submission.presenter_id, submission.susar_presenter_id]
+        allowed_status = ['completed', 'review_ok']
+        external_review_allowed_status = ['review_ok']
+        if request.user.id not in presenting_parties:
+            allowed_status.append('review_ok_internal')
+            external_review_allowed_status.append('review_ok_internal')
+        checklists_q |= Q(status__in=allowed_status) & ~(Q(blueprint__slug='external_review') & ~Q(status__in=external_review_allowed_status))
+    checklists = submission.checklists.filter(checklists_q).order_by('blueprint__name')
+    checklist_reviews = []
+    for checklist in checklists:
+        if checklist_overwrite and checklist in checklist_overwrite:
+            checklist_formset = checklist_overwrite[checklist]
+        else:
+            checklist_formset = ChecklistAnswerFormSet(None, readonly=True,
+                prefix='checklist{}'.format(checklist.id),
+                queryset=checklist.answers.order_by('question__index'))
+
+            task = (get_obj_tasks((ChecklistReview,), submission, data=checklist.blueprint)
+                .filter(assigned_to=request.user, deleted_at=None)
+                .exclude(task_type__workflow_node__uid='thesis_recommendation_review')  # XXX: legacy
+                .order_by('-closed_at')
+                .first())
+
+            if task and task.closed_at and (
+                task.task_type.workflow_node.uid not in (
+                    'thesis_recommendation', 'expedited_recommendation',
+                    'localec_recommendation',
+                ) or submission.meetings.filter(started=None).exists()
+            ):
+                checklist_formset.allow_reopen = True
+        checklist_reviews.append((checklist, checklist_formset))
+    
+    checklist_summary = []
+    for checklist in checklists:
+        if checklist.is_negative or checklist.get_all_answers_with_comments().exists():
+            q = Q(question__is_inverted=False, answer=False) | Q(question__is_inverted=True, answer=True)
+            q |= Q(question__requires_comment=False) & ~(Q(comment=None) | Q(comment=''))
+            answers = checklist.answers.filter(q)
+            checklist_summary.append((checklist, answers))
+    
+    #################
+    # CHECKLIST END #
+    #################
+
+    votes = submission.votes
+    external_review_checklists = submission.checklists.filter(blueprint__slug='external_review')
+
+    context = {
+        'ctr_submission_form': ctr_submission_form,
+        'submission': submission,
+        'checklist_reviews': checklist_reviews,
+        'checklist_summary': checklist_summary,
+        'pending_votes': votes.filter(published_at=None),
+        'published_votes': votes.filter(published_at__isnull=False),
+        'external_review_checklists': external_review_checklists,
+        'temporary_auth': submission.temp_auth.order_by('end'),
+        'temporary_auth_form': TemporaryAuthorizationForm(prefix='temp_auth'),
+        'tags': submission.tags.all(),
+    }
+    
+    if extra_context:
+        context.update(extra_context)
+
+    return render(request, template, context)
+
+
+def readonly_submission_form(request, submission_form_pk=None, submission_form=None, extra_context=None,
+                             template='submissions/readonly_form.html', checklist_overwrite=None, ctr_submission_form_pk=None):
+    if ctr_submission_form_pk:
+        return readonly_ctr_submission_form(request, extra_context, template, checklist_overwrite, ctr_submission_form_pk)
+    
     if not submission_form:
         submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
     form = SubmissionFormForm(initial=submission_form_to_dict(submission_form), readonly=True)
@@ -991,7 +1077,7 @@ def submission_list(request, submissions, stashed_submission_forms=None, templat
     filterform = filter_form(request.POST or getattr(usersettings, filtername))
 
     submissions = (filterform.filter_submissions(submissions, request.user)
-        .exclude(current_submission_form=None)
+        .exclude(current_submission_form=None, current_ctr_form=None)
         .select_related('current_submission_form')
         .only(
             'ec_number',

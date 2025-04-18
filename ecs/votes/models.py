@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import post_save
@@ -21,7 +22,8 @@ from ecs.tasks.models import Task
 
 @reversion.register(fields=('result', 'text'))
 class Vote(models.Model):
-    submission_form = models.ForeignKey('core.SubmissionForm', related_name='votes', on_delete=models.CASCADE)
+    submission_form = models.ForeignKey('core.SubmissionForm', related_name='votes', null=True, on_delete=models.CASCADE)
+    ctr_submission_form = models.ForeignKey('core.CTRSubmissionForm', related_name='votes', null=True, on_delete=models.CASCADE)
     top = models.OneToOneField('meetings.TimetableEntry', related_name='vote', null=True, on_delete=models.CASCADE)
     upgrade_for = models.OneToOneField('self', null=True, related_name='previous', on_delete=models.CASCADE)
     result = models.CharField(max_length=2, choices=VOTE_RESULT_CHOICES, null=True, verbose_name=_('vote'))
@@ -67,6 +69,9 @@ class Vote(models.Model):
         return '{} ID {}'.format(name, self.pk)
 
     def save(self, *args, **kwargs):
+        if not (self.submission_form or self.ctr_submission_form):
+            raise ValidationError("Either 'submission_form' or 'ctr_submission_form' must be set.")
+
         if self.result or self.text:
             with reversion.create_revision():
                 reversion.set_user(get_current_user())

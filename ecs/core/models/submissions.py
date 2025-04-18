@@ -58,6 +58,7 @@ class Submission(models.Model):
     current_submission_form = models.OneToOneField('core.SubmissionForm', null=True, related_name='current_for_submission', on_delete=models.CASCADE)
     current_published_vote = models.OneToOneField('votes.Vote', null=True, related_name='_currently_published_for', on_delete=models.CASCADE)
     current_pending_vote = models.OneToOneField('votes.Vote', null=True, related_name='_currently_pending_for', on_delete=models.CASCADE)
+    current_ctr_form = models.OneToOneField('core.CTRSubmissionForm', null=True, related_name='current_ctr_for_submission', on_delete=models.CASCADE)
 
     objects = SubmissionManager()
     unfiltered = SubmissionQuerySet.as_manager()
@@ -106,7 +107,10 @@ class Submission(models.Model):
    
     @property
     def votes(self):
-        return Vote.objects.filter(submission_form__submission=self)
+        if self.current_submission_form_id:
+            return Vote.objects.filter(submission_form__submission=self)
+        else:
+            return Vote.objects.filter(ctr_submission_form__submission=self)
 
     # XXX: Is this used anywhere?
     @property
@@ -252,6 +256,12 @@ class MySubmission(models.Model):
     class Meta:
         db_table = 'core_mysubmission'
         managed = False
+
+
+class CTRSubmissionForm(models.Model):
+    submission = models.ForeignKey(Submission, on_delete=models.RESTRICT)
+    application = models.JSONField()
+    # documents
 
 
 class SubmissionForm(models.Model):
