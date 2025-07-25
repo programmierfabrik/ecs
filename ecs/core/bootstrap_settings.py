@@ -135,6 +135,6 @@ commissions = [
     },
     {
         "uuid": "50dba0126a0746dc8802e6c0e0199dad",
-        "name": "Ethik-Kommission der Vinzenz Gruppe Wien",
+        "name": "Ethikkommission der Vinzenz Kliniken Wien",
     },
 ]
