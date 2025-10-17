@@ -137,4 +137,8 @@ commissions = [
         "uuid": "50dba0126a0746dc8802e6c0e0199dad",
         "name": "Ethikkommission der Vinzenz Kliniken Wien",
     },
+    {
+        "uuid": "fdd2f861-c750-4696-b9b1-da21bfeb2c1d",
+        "name": "Ethikkommission TU Graz"
+    }
 ]
