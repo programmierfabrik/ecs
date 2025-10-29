@@ -8,6 +8,6 @@ static/help/
 celerybeat-schedule
 celerybeat.pid
 
-/venv
+/.venv
 /data
 /volatile
