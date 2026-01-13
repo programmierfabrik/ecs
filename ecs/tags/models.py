@@ -3,7 +3,8 @@ from django.core.validators import RegexValidator
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=25, unique=True)
+    name = models.CharField(max_length=25, unique=True,
+        validators=[RegexValidator(r'^[A-Za-z0-9._-]{1,25}$')])
     color = models.IntegerField()
 
     # XXX: This could be any model instead, but let's not complicate matters as
