@@ -16,6 +16,9 @@ class VoteQuerySet(models.QuerySet):
 
     def recessed(self):
         return self.filter(result__in=RECESSED_VOTE_RESULTS)
+    
+    def populated(self):
+        return self.filter(valid_until__isnull=False)
 
 
 VoteManager = AuthorizationManager.from_queryset(VoteQuerySet)

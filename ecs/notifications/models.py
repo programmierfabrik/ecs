@@ -308,7 +308,7 @@ class NotificationAnswer(models.Model):
 
         for submission in Submission.objects.filter(forms__in=self.notification.submission_forms.values('pk').query):
             if extend:
-                for vote in submission.votes.positive().permanent():
+                for vote in submission.votes.populated().positive().permanent():
                     vote.extend()
             if finish:
                 if ctis_transition:

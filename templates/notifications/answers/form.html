@@ -31,7 +31,7 @@
         <br>
         <p>
             Die aktuelle Gültigkeit des Votums endet mit
-            <b>{{ notification.get_submission.votes.positive.permanent.latest.valid_until|date:'d.m.Y' }}</b>
+            <b>{{ notification.get_submission.votes.populated.positive.permanent.latest.valid_until|date:'d.m.Y' }}</b>
         </p>
     {% endif %}
 </div>
