@@ -1,5 +1,6 @@
 import uuid
 import traceback
+from email.utils import formataddr
 
 from django.conf import settings
 from django.db import models
@@ -196,7 +197,7 @@ class Message(models.Model):
                     self.receiver.email,
                     subject=subject,
                     message=self.text,
-                    from_email='{0} <{1}>'.format(get_full_name(self.sender), self.return_address),
+                    from_email=formataddr((get_full_name(self.sender), self.return_address)),
                     rfc2822_headers=headers,
                 )
 
