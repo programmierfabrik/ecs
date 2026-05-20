@@ -101,14 +101,14 @@ class UserProfile(models.Model):
 
 class UserSettings(models.Model):
     user = models.OneToOneField(User, related_name='ecs_settings', on_delete=models.CASCADE)
-    submission_filter_search = JSONField()
-    submission_filter_all = JSONField()
-    submission_filter_widget = JSONField()
-    submission_filter_widget_internal = JSONField()
-    submission_filter_mine = JSONField()
-    submission_filter_assigned = JSONField()
+    submission_filter_search = JSONField(default=dict)
+    submission_filter_all = JSONField(default=dict)
+    submission_filter_widget = JSONField(default=dict)
+    submission_filter_widget_internal = JSONField(default=dict)
+    submission_filter_mine = JSONField(default=dict)
+    submission_filter_assigned = JSONField(default=dict)
     task_filter = models.TextField(null=True)
-    useradministration_filter = JSONField()
+    useradministration_filter = JSONField(default=dict)
 
 @receiver(post_save, sender=User)
 def _post_user_save(sender, **kwargs):
