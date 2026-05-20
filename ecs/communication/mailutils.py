@@ -12,7 +12,7 @@ from django.utils.html import strip_tags
 def html2text(htmltext):
     text = html.unescape(strip_tags(htmltext))
     text = '\n\n'.join(re.split(r'\s*\n\s*\n\s*', text))
-    text = re.sub('\s\s\s+', ' ', text)
+    text = re.sub(r'\s\s\s+', ' ', text)
     wrapper = textwrap.TextWrapper(
         replace_whitespace=False, drop_whitespace=False, width=72)
     return '\n'.join(wrapper.wrap(text))
