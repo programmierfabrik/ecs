@@ -1,4 +1,3 @@
-from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
 
 from django.contrib.auth.models import User, Group
@@ -6,21 +5,24 @@ from ecs.users.utils import get_user
 
 class Command(BaseCommand):
     help = "add or remove users from the userswitcher"
-    option_list = BaseCommand.option_list + (
-        make_option('-i', action='store_true', dest='activate_internal', help='add is_internal users to the userswitcher'),
-        make_option('-I', action='store_false', dest='activate_internal', help='remove is_internal users from the userswitcher'),
-        make_option('-t', action='store_true', dest='activate_testusers', help='add testusers to the userswitcher'),
-        make_option('-T', action='store_false', dest='activate_testusers', help='remove testusers from the userswitcher'),
-        make_option('-m', action='store_true', dest='activate_board', help='add board member users to the userswitcher'),
-        make_option('-M', action='store_false', dest='activate_board', help='remove board member users from the userswitcher'),
-        make_option('-r', action='store_true', dest='remove_user', help='remove users from the userswitcher'),
-    )
-    def handle(self, *emails, **options):
+
+    def add_arguments(self, parser):
+        parser.add_argument('-i', action='store_true', dest='activate_internal', default=None, help='add is_internal users to the userswitcher')
+        parser.add_argument('-I', action='store_false', dest='activate_internal', help='remove is_internal users from the userswitcher')
+        parser.add_argument('-t', action='store_true', dest='activate_testusers', default=None, help='add testusers to the userswitcher')
+        parser.add_argument('-T', action='store_false', dest='activate_testusers', help='remove testusers from the userswitcher')
+        parser.add_argument('-m', action='store_true', dest='activate_board', default=None, help='add board member users to the userswitcher')
+        parser.add_argument('-M', action='store_false', dest='activate_board', help='remove board member users from the userswitcher')
+        parser.add_argument('-r', action='store_true', dest='remove_user', default=False, help='remove users from the userswitcher')
+        parser.add_argument('emails', nargs='*')
+
+    def handle(self, **options):
         verbosity = int(options['verbosity'])
         activate_internal = options['activate_internal']
         activate_testusers = options['activate_testusers']
         activate_boardmember = options['activate_board']
         remove_user = options['remove_user']
+        emails = options['emails']
 
         if activate_internal is None and activate_testusers is None and activate_boardmember is None and not emails:
             raise CommandError("nothing to do")

@@ -3,7 +3,7 @@ import getpass
 
 from django.core.management.base import CommandError
 from django.core import exceptions
-from django.contrib.auth.management.commands.createsuperuser import is_valid_email
+from django.core.validators import validate_email
 from django.contrib.auth.management.commands.createsuperuser import Command as OrigCommand
 from django.contrib.auth.models import User
 
@@ -22,7 +22,7 @@ class Command(OrigCommand):
             if not email:
                 raise CommandError('You must use --email with --noinput')
             try:
-                is_valid_email(email)
+                validate_email(email)
             except exceptions.ValidationError:
                 raise CommandError('Invalid email address.')
 
@@ -34,7 +34,7 @@ class Command(OrigCommand):
                     if not email:
                         email = input('Email: ')
                     try:
-                        is_valid_email(email)
+                        validate_email(email)
                     except exceptions.ValidationError:
                         sys.stderr.write('Error: That e-mail address is invalid.\n')
                         email = None

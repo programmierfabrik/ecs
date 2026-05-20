@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils import timezone
-from django_extensions.db.fields.json import JSONField
+from django.db.models import JSONField
 
 from ecs import settings
 from ecs.core.forms import SubmissionFormForm, ParticipatingCenterNonSubjectFormSet, InvestigatorFormSet, \
