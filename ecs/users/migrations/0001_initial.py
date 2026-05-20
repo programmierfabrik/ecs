@@ -1,6 +1,5 @@
 from django.db import models, migrations
 from django.conf import settings
-import django_extensions.db.fields.json
 
 
 class Migration(migrations.Migration):
@@ -82,15 +81,15 @@ class Migration(migrations.Migration):
             name='UserSettings',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('submission_filter_search', django_extensions.db.fields.json.JSONField()),
-                ('submission_filter_all', django_extensions.db.fields.json.JSONField()),
-                ('submission_filter_widget', django_extensions.db.fields.json.JSONField()),
-                ('submission_filter_widget_internal', django_extensions.db.fields.json.JSONField()),
-                ('submission_filter_mine', django_extensions.db.fields.json.JSONField()),
-                ('submission_filter_assigned', django_extensions.db.fields.json.JSONField()),
+                ('submission_filter_search', models.JSONField()),
+                ('submission_filter_all', models.JSONField()),
+                ('submission_filter_widget', models.JSONField()),
+                ('submission_filter_widget_internal', models.JSONField()),
+                ('submission_filter_mine', models.JSONField()),
+                ('submission_filter_assigned', models.JSONField()),
                 ('task_filter', models.TextField(null=True)),
-                ('communication_filter', django_extensions.db.fields.json.JSONField()),
-                ('useradministration_filter', django_extensions.db.fields.json.JSONField()),
+                ('communication_filter', models.JSONField()),
+                ('useradministration_filter', models.JSONField()),
                 ('user', models.OneToOneField(related_name='ecs_settings', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
