@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone as dt_timezone
 from collections import defaultdict
 
 from django.http import Http404, HttpResponse
@@ -181,7 +181,7 @@ def request_password_reset(request):
                     'email': email,
                 }))
             else:
-                timestamp = (datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()
+                timestamp = datetime.now(tz=dt_timezone.utc).timestamp()
                 token = _password_reset_token_factory.generate_token([email, timestamp])
                 reset_url = request.build_absolute_uri(reverse('users.do_password_reset', kwargs={'token': token}))
                 htmlmail = str(render_html(request, 'users/password_reset/reset_email.html', {
@@ -209,7 +209,7 @@ def do_password_reset(request, token=None):
     except User.DoesNotExist:
         raise Http404()
     profile = user.profile
-    timestamp = datetime.utcfromtimestamp(timestamp).replace(tzinfo=timezone.utc)
+    timestamp = datetime.fromtimestamp(timestamp, tz=dt_timezone.utc)
     if profile.last_password_change and profile.last_password_change > timestamp:
         return render(request, 'users/password_reset/token_already_used.html', {})
     

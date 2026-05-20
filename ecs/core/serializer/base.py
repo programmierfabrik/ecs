@@ -264,7 +264,7 @@ class ModelSerializer(object):
             if isinstance(field, models.DateTimeField):
                 val = timezone.make_aware(
                     datetime.datetime.strptime(val, DATETIME_FORMAT),
-                    timezone.utc)
+                    datetime.timezone.utc)
             elif isinstance(field, models.DateField):
                 val = datetime.date.strptime(val, DATE_FORMAT)
             elif isinstance(field, models.ManyToManyField):
@@ -503,7 +503,7 @@ def dump_model_instance(obj, zf):
 class _JsonEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, datetime.datetime):
-            return obj.astimezone(timezone.utc).strftime(DATETIME_FORMAT)
+            return obj.astimezone(datetime.timezone.utc).strftime(DATETIME_FORMAT)
         elif isinstance(obj, datetime.date):
             return obj.strftime(DATE_FORMAT)
         return super().default(obj)
