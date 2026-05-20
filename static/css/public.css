@@ -32,9 +32,9 @@ html {
 img.logo {
     width: auto;
     height: 60px;
+}
 
-    &.full {
-        width: 100%;
-        height: auto;
-    }
+img.logo.full {
+    width: 100%;
+    height: auto;
 }

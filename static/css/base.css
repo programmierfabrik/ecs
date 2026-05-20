@@ -14,10 +14,10 @@ body {
 
 #headertitle {
     line-height: normal;
+}
 
-    &:focus {
-        white-space: normal;
-    }
+#headertitle:focus {
+    white-space: normal;
 }
 
 /* general content-specific */

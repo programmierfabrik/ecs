@@ -847,19 +847,6 @@ files = [
 django = ">=4.2"
 
 [[package]]
-name = "enum34"
-version = "1.1.10"
-description = "Python 3.4 Enum backported to 3.3, 3.2, 3.1, 2.7, 2.6, 2.5, and 2.4"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "enum34-1.1.10-py2-none-any.whl", hash = "sha256:a98a201d6de3f2ab3db284e70a33b0f896fbf35f8086594e8c9e74b909058d53"},
-    {file = "enum34-1.1.10-py3-none-any.whl", hash = "sha256:c3858660960c984d6ab0ebad691265180da2b43f07e061c0f8dca9ef3cffd328"},
-    {file = "enum34-1.1.10.tar.gz", hash = "sha256:cce6a7477ed816bd2542d03d53db9f0db935dd013b70f336a95c73979289f248"},
-]
-
-[[package]]
 name = "fonttools"
 version = "4.63.0"
 description = "Tools to manipulate font files"
@@ -1337,21 +1324,6 @@ files = [
 ]
 
 [[package]]
-name = "pathlib2"
-version = "2.3.7.post1"
-description = "Object-oriented filesystem paths"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "pathlib2-2.3.7.post1-py2.py3-none-any.whl", hash = "sha256:5266a0fd000452f1b3467d782f079a4343c63aaa119221fbdc4e39577489ca5b"},
-    {file = "pathlib2-2.3.7.post1.tar.gz", hash = "sha256:9fe0edad898b83c0c3e199c842b27ed216645d2e177757b2dd67384d4113c641"},
-]
-
-[package.dependencies]
-six = "*"
-
-[[package]]
 name = "pikepdf"
 version = "10.7.0"
 description = "Read, write, repair, and transform PDFs in Python, powered by qpdf"
@@ -1591,22 +1563,6 @@ files = [
 [package.extras]
 doc = ["sphinx", "sphinx_rtd_theme"]
 test = ["pytest", "ruff"]
-
-[[package]]
-name = "pyscss"
-version = "1.4.0"
-description = "pyScss, a Scss compiler for Python"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "pyScss-1.4.0.tar.gz", hash = "sha256:8f35521ffe36afa8b34c7d6f3195088a7057c185c2b8f15ee459ab19748669ff"},
-]
-
-[package.dependencies]
-enum34 = "*"
-pathlib2 = "*"
-six = "*"
 
 [[package]]
 name = "python-dateutil"
@@ -2553,4 +2509,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.14"
-content-hash = "5adfc1bd3580aed28393329b96a9530ff9b2a13cfd8d970aa560c888e9e7a0d9"
+content-hash = "41a45372e2ff80af7fa8445bfe385692b710f17d0139b18819bca34fb3b9ce1f"

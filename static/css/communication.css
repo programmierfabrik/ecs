@@ -1,0 +1,5 @@
+/* Communication Thread */
+
+.communication_thread .card.message pre.card-text {
+    white-space: pre-wrap;
+}

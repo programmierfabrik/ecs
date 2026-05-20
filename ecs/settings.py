@@ -366,13 +366,6 @@ else:
 
 # ### django_compressor ###
 COMPRESS_ENABLED = True
-COMPRESS_PRECOMPILERS = (
-    (
-        'text/x-scss',
-        'pyscss -I {} -o {{outfile}} {{infile}}'.format(
-            os.path.join(STATIC_ROOT, 'css'))
-    ),
-)
 
 
 # settings override
