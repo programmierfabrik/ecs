@@ -6,15 +6,13 @@ ARG TZ="Europe/Vienna"
 
 # Global environment variables
 ENV BUILD_TIME=${BUILD_TIME}
-ENV LANG en_US.UTF-8
+ENV LANG=en_US.UTF-8
 
 # Install dependencies
 RUN apt-get update -y && \
     apt-get install -y \
     # Python
     python3 python3-pip \
-    # PostgreSQL
-    libpq-dev \
     # ecs
     gettext tzdata \
     # Weasyprint
@@ -22,10 +20,10 @@ RUN apt-get update -y && \
     && rm -rf /var/lib/apt/lists/*
 
 # Install poetry
-RUN pip install --no-cache-dir poetry
+RUN pip install --no-cache-dir --break-system-packages poetry
 
 # Create ecs user with uid 1000
-RUN useradd ecs -m -u 1000
+RUN useradd ecs -m -u 1000 -o
 RUN mkdir /opt/ecs && chown ecs:ecs /opt/ecs
 
 # Change to user ecs
