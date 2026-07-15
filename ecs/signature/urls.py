@@ -7,6 +7,9 @@ from ecs.signature import views
 
 urlpatterns = (
     path('batch/<int:sign_session_id>/', views.batch_sign, name='signature.batch_sign'),
+    path('batch/<int:sign_session_id>/<int:index>/', views.batch_sign, name='signature.batch_sign'),
+    path('bulk-sign/<int:sign_session_id>/', views.bulk_sign, name='signature.bulk_sign'),
+    path('bulk-receive/<int:sign_session_id>/', views.bulk_receive, name='signature.bulk_receive'),
     path('send/<int:pdf_id>/', views.sign_send, name='signature.sign_send'),
     path('error/<int:pdf_id>/', views.sign_error, name='signature.sign_error'),
     path('preview/<int:pdf_id>/', views.sign_preview, name='signature.sign_preview'),

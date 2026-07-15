@@ -40,7 +40,7 @@ class SigningData(dict):
             cache.delete(self.id)
 
     def pop_listitem(self, key, index):
-        item = self[key].pop(0)
+        item = self[key].pop(index)
         self.store()
         return item
 
