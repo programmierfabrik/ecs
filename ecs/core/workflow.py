@@ -164,7 +164,7 @@ class B2ResubmissionReview(Activity):
         model = Submission
 
     def get_url(self):
-        return reverse('core.submission.b2_vote_preparation', kwargs={'submission_form_pk': self.workflow.data.newest_submission_form.pk})
+        return reverse('core.submission.b2_vote_preparation', kwargs=self.workflow.data.newest_form_url_kwargs())
 
     def receive_token(self, source, trail=(), repeated=False):
         token = super().receive_token(source, trail=trail, repeated=repeated)
@@ -196,8 +196,9 @@ class InitialB2ResubmissionReview(B2ResubmissionReview):
                 vote.is_draft = False
             vote.save()
             if is_upgrade:
-                vote.submission_form.acknowledge(True)
-                vote.submission_form.mark_current()
+                form = vote.submission_form or vote.ctr_submission_form
+                form.acknowledge(True)
+                form.mark_current()
 
 
 class Categorization(Activity):
@@ -311,8 +312,9 @@ class ChecklistReview(Activity):
 
     def get_url(self):
         blueprint_id = self.node.data_id
-        submission_form_id = self.workflow.data.current_submission_form_id
-        return reverse('core.submission.checklist_review', kwargs={'submission_form_pk': submission_form_id, 'blueprint_pk': blueprint_id})
+        submission = self.workflow.data
+        return reverse('core.submission.checklist_review',
+            kwargs={'blueprint_pk': blueprint_id, **submission.current_form_url_kwargs()})
 
     def pre_perform(self, choice):
         blueprint = self.node.data
@@ -338,7 +340,7 @@ class VotePreparation(Activity):
         model = Submission
 
     def get_url(self):
-        return reverse('core.submission.vote_preparation', kwargs={'submission_form_pk': self.workflow.data.current_submission_form_id})
+        return reverse('core.submission.vote_preparation', kwargs=self.workflow.data.current_form_url_kwargs())
 
 
 ### to be deleted

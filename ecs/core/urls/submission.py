@@ -51,7 +51,9 @@ urlpatterns = (
     path('form/<int:submission_form_pk>/copy/', views.copy_submission_form),
     path('form/<int:submission_form_pk>/amend/<int:notification_type_pk>/', views.copy_submission_form),
     path('form/<int:submission_form_pk>/review/checklist/<int:blueprint_pk>/', views.checklist_review, name='core.submission.checklist_review'),
+    path('form/ctr/<int:ctr_submission_form_pk>/review/checklist/<int:blueprint_pk>/', views.checklist_review, name='core.submission.checklist_review'),
     path('form/<int:submission_form_pk>/review/checklist/show/<int:checklist_pk>/', views.show_checklist_review, name='core.submission.show_checklist_review'),
+    path('form/ctr/<int:ctr_submission_form_pk>/review/checklist/show/<int:checklist_pk>/', views.show_checklist_review, name='core.submission.show_checklist_review'),
     path('form/<int:submission_form_pk>/review/checklist/drop/<int:checklist_pk>/', views.drop_checklist_review, name='core.submission.drop_checklist_review'),
     path('<int:submission_pk>/categorization/', views.categorization, name='core.submission.categorization'),
     path('<int:submission_pk>/categorization/reopen/', views.reopen_categorization, name='core.submission.reopen_categorization'),
@@ -61,8 +63,11 @@ urlpatterns = (
     path('form/<int:submission_pk>/biased/', views.biased_board_members, name='core.submission.biased_board_members'),
     path('form/<int:submission_pk>/biased/remove/<int:user_pk>/', views.remove_biased_board_member, name='core.submission.remove_biased_board_member'),
     path('form/<int:submission_form_pk>/review/vote/', views.vote_review, name='core.submission.vote_review'),
+    path('form/ctr/<int:ctr_submission_form_pk>/review/vote/', views.vote_review, name='core.submission.vote_review'),
     path('form/<int:submission_form_pk>/vote/prepare/', views.vote_preparation, name='core.submission.vote_preparation'),
+    path('form/ctr/<int:ctr_submission_form_pk>/vote/prepare/', views.vote_preparation, name='core.submission.vote_preparation'),
     path('form/<int:submission_form_pk>/vote/b2-prepare/', views.b2_vote_preparation, name='core.submission.b2_vote_preparation'),
+    path('form/ctr/<int:ctr_submission_form_pk>/vote/b2-prepare/', views.b2_vote_preparation, name='core.submission.b2_vote_preparation'),
     path('form/<int:submission_form_pk>/toggle-mpg/', views.toggle_mpg, name='core.submission.toggle_mpg'),
 )
 

@@ -39,9 +39,9 @@ class ExternalReview(Activity):
 
     def get_url(self):
         checklist = self.workflow.data
-        blueprint_id = checklist.blueprint_id
-        submission_form_id = checklist.submission.current_submission_form_id
-        return reverse('core.submission.checklist_review', kwargs={'submission_form_pk': submission_form_id, 'blueprint_pk': blueprint_id})
+        submission = checklist.submission
+        return reverse('core.submission.checklist_review',
+            kwargs={'blueprint_pk': checklist.blueprint_id, **submission.current_form_url_kwargs()})
 
     def get_choices(self):
         return (
@@ -51,10 +51,15 @@ class ExternalReview(Activity):
     def get_final_urls(self):
         checklist = self.workflow.data
         blueprint_id = checklist.blueprint_id
-        return super().get_final_urls() + [
+        submission = checklist.submission
+        urls = [
             reverse('core.submission.checklist_review', kwargs={'submission_form_pk': sf, 'blueprint_pk': blueprint_id})
-            for sf in self.workflow.data.submission.forms.values_list('pk', flat=True)
+            for sf in submission.forms.values_list('pk', flat=True)
+        ] + [
+            reverse('core.submission.checklist_review', kwargs={'ctr_submission_form_pk': sf, 'blueprint_pk': blueprint_id})
+            for sf in submission.ctr_forms.values_list('pk', flat=True)
         ]
+        return super().get_final_urls() + urls
 
     def get_afterlife_url(self):
         c = self.workflow.data
@@ -96,8 +101,9 @@ class ExternalReviewReview(Activity):
 
     def get_url(self):
         checklist = self.workflow.data
-        submission_form_id = checklist.submission.current_submission_form_id
-        return reverse('core.submission.show_checklist_review', kwargs={'submission_form_pk': submission_form_id, 'checklist_pk': checklist.pk})
+        submission = checklist.submission
+        return reverse('core.submission.show_checklist_review',
+            kwargs={'checklist_pk': checklist.pk, **submission.current_form_url_kwargs()})
 
     def get_choices(self):
         return (
@@ -114,7 +120,7 @@ class ExternalReviewReview(Activity):
         if c.status == 'review_ok':
             if not c.pdf_document:
                 c.render_pdf_document()
-            presenting_parties = c.submission.current_submission_form.get_presenting_parties()
+            presenting_parties = c.submission.current_form.get_presenting_parties()
             presenting_parties.send_message(
                 _('External Review'),
                 'checklists/external_review_publish.txt',

@@ -583,12 +583,21 @@ def remove_biased_board_member(request, submission_pk=None, user_pk=None):
 
 
 @with_task_management
-def show_checklist_review(request, submission_form_pk=None, checklist_pk=None):
-    submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
+def show_checklist_review(request, submission_form_pk=None, ctr_submission_form_pk=None, checklist_pk=None):
+    if ctr_submission_form_pk:
+        current_form = get_object_or_404(CTRSubmissionForm, pk=ctr_submission_form_pk)
+    else:
+        current_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
     checklist = get_object_or_404(Checklist, pk=checklist_pk)
-    if not submission_form.submission == checklist.submission:
+    if not current_form.submission == checklist.submission:
         raise Http404()
-    return readonly_submission_form(request, submission_form=submission_form, extra_context={'active_checklist': checklist.pk})
+    if ctr_submission_form_pk:
+        kwargs = {'ctr_submission_form': current_form}
+    else:
+        kwargs = {'submission_form': current_form}
+    return readonly_submission_form(request,
+        extra_context={'active_checklist': checklist.pk},
+        **kwargs)
 
 
 @user_flag_required('is_internal')
@@ -605,15 +614,21 @@ def drop_checklist_review(request, submission_form_pk=None, checklist_pk=None):
 
 @task_required
 @with_task_management
-def checklist_review(request, submission_form_pk=None, blueprint_pk=None):
-    submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
-    if request.method == 'GET' and not submission_form.is_current:
-        return redirect('', submission_form_pk=submission_form.submission.current_submission_form.pk, blueprint_pk=blueprint_pk)
+def checklist_review(request, submission_form_pk=None, ctr_submission_form_pk=None, blueprint_pk=None):
+    if ctr_submission_form_pk:
+        current_form = get_object_or_404(CTRSubmissionForm, pk=ctr_submission_form_pk)
+    else:
+        current_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
+    submission = current_form.submission
+
+    if request.method == 'GET' and not current_form.is_current:
+        return redirect('core.submission.checklist_review', blueprint_pk=blueprint_pk,
+            **submission.current_form_url_kwargs())
     blueprint = get_object_or_404(ChecklistBlueprint, pk=blueprint_pk)
 
     user = request.user if blueprint.multiple else get_user('root@system.local')
     checklist, created = Checklist.unfiltered.select_for_update().update_or_create(
-        blueprint=blueprint, submission=submission_form.submission, user=user,
+        blueprint=blueprint, submission=submission, user=user,
         defaults={'last_edited_by': request.user},
     )
     if created:
@@ -633,48 +648,57 @@ def checklist_review(request, submission_form_pk=None, blueprint_pk=None):
         formset.save()
         checklist.save()    # XXX: trigger post_save signal
 
-    response = readonly_submission_form(request, submission_form=submission_form,
-        checklist_overwrite={checklist: formset}, extra_context=extra_context)
+    response = readonly_submission_form(request,
+        checklist_overwrite={checklist: formset}, extra_context=extra_context,
+        **submission.current_form_kwargs())
     response.has_errors = not formset.is_valid()
     return response
 
 
 @task_required
 @with_task_management
-def vote_review(request, submission_form_pk=None):
-    submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
-    vote = submission_form.submission.current_pending_vote
+def vote_review(request, submission_form_pk=None, ctr_submission_form_pk=None):
+    if ctr_submission_form_pk:
+        current_form = get_object_or_404(CTRSubmissionForm, pk=ctr_submission_form_pk)
+    else:
+        current_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
+    submission = current_form.submission
+    vote = submission.current_pending_vote
     if not vote:
         raise Http404("This SubmissionForm has no Vote yet.")
     vote_review_form = VoteReviewForm(request.POST or None, instance=vote)
     if request.method == 'POST' and vote_review_form.is_valid():
         vote_review_form.save()
 
-    response = readonly_submission_form(request, submission_form=submission_form, extra_context={
+    response = readonly_submission_form(request, extra_context={
         'vote_review_form': vote_review_form,
         'vote_version': vote.version_number,
-    })
+    }, **submission.current_form_kwargs())
     response.has_errors = not vote_review_form.is_valid()
     return response
 
 @task_required
 @with_task_management
-def vote_preparation(request, submission_form_pk=None):
-    submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
-    vote = submission_form.submission.current_pending_vote
+def vote_preparation(request, submission_form_pk=None, ctr_submission_form_pk=None):
+    if ctr_submission_form_pk:
+        current_form = get_object_or_404(CTRSubmissionForm, pk=ctr_submission_form_pk)
+    else:
+        current_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
+    submission = current_form.submission
+    vote = submission.current_pending_vote
 
     # TODO: prevent race condition where new version is submitted while the
     # vote preparation is done
-    assert submission_form.is_current
+    assert current_form.is_current
 
-    if submission_form.submission.is_expedited:
+    if submission.is_expedited:
         blueprint_slug = 'expedited_review'
-    elif submission_form.submission.is_localec:
+    elif submission.is_localec:
         blueprint_slug = 'localec_review'
     else:
         blueprint_slug = 'thesis_review'
 
-    checklists = Checklist.objects.filter(submission=submission_form.submission,
+    checklists = Checklist.objects.filter(submission=submission,
         blueprint__slug=blueprint_slug, status='completed')
 
     text = []
@@ -687,36 +711,43 @@ def vote_preparation(request, submission_form_pk=None):
         initial = {'text': text}
     form = VotePreparationForm(request.POST or None, instance=vote, initial=initial)
     form.is_preparation = True
-    
+
     if form.is_valid():
         vote = form.save(commit=False)
-        vote.submission_form = submission_form
+        if ctr_submission_form_pk:
+            vote.ctr_submission_form = current_form
+        else:
+            vote.submission_form = current_form
         vote.save()
 
-    response = readonly_submission_form(request, submission_form=submission_form, extra_context={
+    response = readonly_submission_form(request, extra_context={
         'vote_review_form': form,
         'vote_version': vote.version_number if vote else 0,
-    })
+    }, **submission.current_form_kwargs())
     response.has_errors = not form.is_valid()
     return response
 
 
 @task_required
 @with_task_management
-def b2_vote_preparation(request, submission_form_pk=None):
-    submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
-    submission = submission_form.submission
+def b2_vote_preparation(request, submission_form_pk=None, ctr_submission_form_pk=None):
+    if ctr_submission_form_pk:
+        current_form = get_object_or_404(CTRSubmissionForm, pk=ctr_submission_form_pk)
+    else:
+        current_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
+    submission = current_form.submission
     try:
         with sudo():
             vote = submission.votes.get(is_draft=True, upgrade_for__isnull=False)
     except Vote.DoesNotExist:
         vote = submission.votes.order_by('-pk')[:1][0]
+        form_kwargs = {'ctr_submission_form': current_form} if ctr_submission_form_pk else {'submission_form': current_form}
         vote = Vote.objects.create(
-            submission_form=submission_form, 
-            result='2', 
-            is_draft=True, 
-            upgrade_for=vote, 
+            result='2',
+            is_draft=True,
+            upgrade_for=vote,
             text=vote.text,
+            **form_kwargs,
         )
 
     form = B2VotePreparationForm(request.POST or None, instance=vote)
@@ -724,13 +755,16 @@ def b2_vote_preparation(request, submission_form_pk=None):
 
     if form.is_valid():
         vote = form.save(commit=False)
-        vote.submission_form = submission_form
+        if ctr_submission_form_pk:
+            vote.ctr_submission_form = current_form
+        else:
+            vote.submission_form = current_form
         vote.save()
-    
-    response = readonly_submission_form(request, submission_form=submission.current_submission_form, extra_context={
+
+    response = readonly_submission_form(request, extra_context={
         'vote_review_form': form,
         'vote_version': vote.version_number if vote else 0,
-    })
+    }, **submission.current_form_kwargs())
     response.has_errors = not form.is_valid()
     return response
 

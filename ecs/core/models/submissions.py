@@ -100,6 +100,16 @@ class Submission(models.Model):
             return {'ctr_submission_form': self.current_ctr_form}
         return {'submission_form': self.current_submission_form}
 
+    def current_form_url_kwargs(self):
+        if self.uses_ctr_form:
+            return {'ctr_submission_form_pk': self.current_ctr_form_id}
+        return {'submission_form_pk': self.current_submission_form_id}
+
+    def newest_form_url_kwargs(self):
+        if self.uses_ctr_form:
+            return {'ctr_submission_form_pk': self.newest_ctr_form.pk}
+        return {'submission_form_pk': self.newest_submission_form.pk}
+
     @property
     def is_expedited(self):
         return self.workflow_lane == SUBMISSION_LANE_EXPEDITED
