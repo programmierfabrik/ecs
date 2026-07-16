@@ -12,8 +12,6 @@ def import_ctis_study(request):
     form = CTISNumberForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         submission = import_or_sync_ctis_study(form.cleaned_data['ctis_number'])
-        messages.success(request, 'CTIS-Studie mit EK-Nr. {ec_number} verknüpft.'.format(
-            ec_number=submission.get_ec_number_display()))
         return redirect('view_submission', submission_pk=submission.pk)
     return render(request, 'submissions/ctis_import.html', {'form': form})
 

@@ -20,6 +20,28 @@
         </div>
     </form>
 </div>
+<script type="text/javascript">
+(function () {
+    var input = document.getElementById('{{ form.ctis_number.id_for_label }}');
+    if (!input) {
+        return;
+    }
+
+    function formatCtis(raw) {
+        var digits = raw.replace(/\D/g, '').slice(0, 13);
+        var groups = [digits.slice(0, 4), digits.slice(4, 10), digits.slice(10, 12), digits.slice(12, 13)];
+        return groups.filter(function (group) { return group.length; }).join('-');
+    }
+
+    input.addEventListener('input', function () {
+        var atEnd = input.selectionStart === input.value.length;
+        input.value = formatCtis(input.value);
+        if (atEnd) {
+            input.selectionStart = input.selectionEnd = input.value.length;
+        }
+    });
+})();
+</script>
 {% endblock %}
 
 {% block menuSelection %}submissions{% endblock %}
