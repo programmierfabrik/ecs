@@ -38,6 +38,7 @@ if os.getenv('ECS_PROD', 'false').lower() == 'true':
 # Default development settings
 else:
     # PDF Signing will use fake signing if PDFAS_SERVICE is "mock:"
+    # PDFAS_SERVICE = 'https://appliancetest.programmierfabrik.eu/pdf-as-web/'
     PDFAS_SERVICE = 'mock:'
     DEBUG = True
     EMAIL_HOST = 'localhost'
