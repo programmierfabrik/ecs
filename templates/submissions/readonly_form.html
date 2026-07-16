@@ -5,9 +5,15 @@
 {% block htmltitle %}… | {{ submission_form.submission|ec_number }} | {{ block.super }}{% endblock %}
 
 {% block headertitle %}
-    <a href="{% url 'readonly_submission_form' submission_form_pk=submission_form.pk %}" target="_blank">
-        {{ submission_form.submission|ec_number }}
-    </a>
+    {% if is_ctr %}
+        <a href="{% url 'core.submission.readonly_ctr_submission_form' ctr_submission_form_pk=submission_form.pk %}" target="_blank">
+            {{ submission_form.submission|ec_number }}
+        </a>
+    {% else %}
+        <a href="{% url 'readonly_submission_form' submission_form_pk=submission_form.pk %}" target="_blank">
+            {{ submission_form.submission|ec_number }}
+        </a>
+    {% endif %}
     <small title="{{ submission.project_title_display }}">
         {{ submission.project_title_display }}
         {% if submission.is_finished %}
@@ -23,19 +29,21 @@
 
 {% block submission_action_buttons %}
     <li class="nav-item ml-auto">
-        {% if submission_form|allows_edits_by:user %}
-            <a class="btn btn-primary" href="{% url 'core.submission.copy_latest_submission_form' submission_pk=submission.pk %}">
-                {% trans 'Edit' %}
-            </a>
-        {% endif %}
-        {% if submission_form|allows_amendments_by:user %}
-            {% for notification_type in diff_notification_types %}
-                <a class="btn btn-primary" href="{% url 'core.submission.copy_latest_submission_form_by_notification_pk' submission_pk=submission.pk notification_type_pk=notification_type.pk %}">
-                    {% blocktrans with notification_type_name=notification_type.name trimmed %}
-                        New {{ notification_type_name }}
-                    {% endblocktrans %}
+        {% if not is_ctr %}
+            {% if submission_form|allows_edits_by:user %}
+                <a class="btn btn-primary" href="{% url 'core.submission.copy_latest_submission_form' submission_pk=submission.pk %}">
+                    {% trans 'Edit' %}
                 </a>
-            {% endfor %}
+            {% endif %}
+            {% if submission_form|allows_amendments_by:user %}
+                {% for notification_type in diff_notification_types %}
+                    <a class="btn btn-primary" href="{% url 'core.submission.copy_latest_submission_form_by_notification_pk' submission_pk=submission.pk notification_type_pk=notification_type.pk %}">
+                        {% blocktrans with notification_type_name=notification_type.name trimmed %}
+                            New {{ notification_type_name }}
+                        {% endblocktrans %}
+                    </a>
+                {% endfor %}
+            {% endif %}
         {% endif %}
     </li>
 {% endblock %}

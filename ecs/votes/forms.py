@@ -22,7 +22,8 @@ class SaveVoteForm(forms.ModelForm):
     def save(self, top, *args, **kwargs):
         kwargs['commit'] = False
         instance = super().save(*args, **kwargs)
-        instance.submission_form = top.submission.current_submission_form
+        for key, value in top.submission.current_form_kwargs().items():
+            setattr(instance, key, value)
         instance.top = top
         instance.save()
         return instance

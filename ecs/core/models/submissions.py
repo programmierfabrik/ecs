@@ -56,6 +56,7 @@ class Submission(models.Model):
 
     # denormalization
     current_submission_form = models.OneToOneField('core.SubmissionForm', null=True, related_name='current_for_submission', on_delete=models.CASCADE)
+    current_ctr_form = models.OneToOneField('core.CTRSubmissionForm', null=True, related_name='current_for_submission', on_delete=models.CASCADE)
     current_published_vote = models.OneToOneField('votes.Vote', null=True, related_name='_currently_published_for', on_delete=models.CASCADE)
     current_pending_vote = models.OneToOneField('votes.Vote', null=True, related_name='_currently_pending_for', on_delete=models.CASCADE)
 
@@ -69,6 +70,35 @@ class Submission(models.Model):
     @property
     def submission_form_to_copy(self):
         return self.forms.all().filter(is_withdrawn=False).order_by('-pk').first()
+
+    @property
+    def newest_ctr_form(self):
+        return self.ctr_forms.all().order_by('-pk')[0]
+
+    @property
+    def uses_ctr_form(self):
+        return bool(self.current_ctr_form_id) or (
+            not self.current_submission_form_id and self.ctr_forms.exists()
+        )
+
+    @property
+    def current_form(self):
+        return self.current_submission_form or self.current_ctr_form
+
+    @property
+    def newest_form(self):
+        return self.newest_ctr_form if self.uses_ctr_form else self.newest_submission_form
+
+    @property
+    def acknowledged_form_count(self):
+        if self.uses_ctr_form:
+            return self.ctr_forms.filter(is_acknowledged=True).count()
+        return self.forms.filter(is_acknowledged=True).count()
+
+    def current_form_kwargs(self):
+        if self.uses_ctr_form:
+            return {'ctr_submission_form': self.current_ctr_form}
+        return {'submission_form': self.current_submission_form}
 
     @property
     def is_expedited(self):
@@ -106,7 +136,7 @@ class Submission(models.Model):
    
     @property
     def votes(self):
-        return Vote.objects.filter(submission_form__submission=self)
+        return Vote.objects.filter(submission=self)
 
     # XXX: Is this used anywhere?
     @property
@@ -123,6 +153,8 @@ class Submission(models.Model):
         return self.current_submission_form.german_project_title
 
     def project_title_display(self):
+        if self.current_ctr_form_id and not self.current_submission_form_id:
+            return 'CTR-Studie ({})'.format(self.current_ctr_form.ctis_number)
         return self.german_project_title or self.project_title
 
     @property
@@ -144,7 +176,7 @@ class Submission(models.Model):
             if self.is_localec:
                 return _('Unknown (local EC)')
             return _('Active')
-        elif self.current_submission_form.is_acknowledged:
+        elif self.current_form.is_acknowledged:
             return _('Acknowledged')
         return _('New')
         
@@ -796,6 +828,90 @@ def _post_submission_form_save(**kwargs):
         ))
 
     on_study_change.send(Submission, submission=submission, old_form=old_sf, new_form=new_sf)
+
+
+class CTRSubmissionForm(models.Model):
+    submission = models.ForeignKey('core.Submission', related_name='ctr_forms', on_delete=models.CASCADE)
+    application = models.JSONField()
+    documents = models.JSONField(default=list)
+    # full CTIS number as imported, e.g. "2024-123456-00-1" - one specific
+    # revision, globally unique (a revision is only ever imported once).
+    ctis_number = models.CharField(max_length=20, unique=True)
+    # the "JJJJ-NNNNNN" part identifying the trial itself, independent of
+    # revision - shared across all CTRSubmissionForm versions of one
+    # submission, used to find the submission a new revision belongs to.
+    ctis_base_number = models.CharField(max_length=13, db_index=True)
+    is_transient = models.BooleanField(default=False)
+    is_withdrawn = models.BooleanField(default=False)
+    is_acknowledged = models.BooleanField(default=False)
+    presenter = models.ForeignKey(User, related_name='presented_ctr_submission_forms', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = AuthorizationManager()
+    unfiltered = models.Manager()
+
+    def save(self, **kwargs):
+        if not self.presenter_id:
+            self.presenter = get_current_user()
+        return super().save(**kwargs)
+
+    def __str__(self):
+        return "%s: CTR" % self.submission.get_ec_number_display()
+
+    def get_filename_slice(self):
+        return self.submission.get_filename_slice()
+
+    @property
+    def version(self):
+        assert self.pk is not None      # already saved
+        return self.submission.ctr_forms.filter(created_at__lte=self.created_at).count()
+
+    @property
+    def is_current(self):
+        return self.submission.current_ctr_form_id == self.id
+
+    def acknowledge(self, choice):
+        self.is_acknowledged = choice
+        self.save(update_fields=('is_acknowledged',))
+
+    def mark_current(self):
+        self.submission.current_ctr_form = self
+        self.submission.save(update_fields=('current_ctr_form',))
+
+    def allows_edits(self, user):
+        s = self.submission
+        return s.presenter == user and self.is_current and not s.has_permanent_vote and not s.is_finished
+
+    def allows_amendments(self, user):
+        # amendment/diff notifications for CTR forms are not built yet
+        return False
+
+    def get_involved_parties(self):
+        return get_involved_parties(self)
+
+    def get_presenting_parties(self):
+        return get_presenting_parties(self)
+
+    def get_reviewing_parties(self, active=None):
+        return get_reviewing_parties(self, active=active)
+
+
+@receiver(post_save, sender=CTRSubmissionForm)
+def _post_ctr_submission_form_save(**kwargs):
+    new_form = kwargs['instance']
+
+    if not kwargs['created'] or new_form.is_transient:
+        return
+
+    submission = new_form.submission
+    old_form = submission.current_ctr_form
+
+    if not old_form:
+        new_form.mark_current()
+        submission.workflow_lane = SUBMISSION_LANE_BOARD
+        submission.save(update_fields=('workflow_lane',))
+
+    on_study_change.send(Submission, submission=submission, old_form=old_form, new_form=new_form)
 
 
 class Investigator(models.Model):

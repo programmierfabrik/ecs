@@ -50,24 +50,26 @@
                         </td>
                     </tr>
                 {% endif %}
-                {% with submission.newest_submission_form as newest_form %}
+                {% with submission.newest_form as newest_form %}
                     {% for sf in submission_forms %}
-                    <tr class="{% if not sf.is_acknowledged %}table-danger{% if sf.is_withdrawn %}-withdrawn{% endif %}{% elif sf == submission.current_submission_form %}table-info{% endif %} {% if forloop.counter0 > current_form_idx %}collapse{% endif %}">
+                    <tr class="{% if not sf.is_acknowledged %}table-danger{% if sf.is_withdrawn %}-withdrawn{% endif %}{% elif sf.is_current %}table-info{% endif %} {% if forloop.counter0 > current_form_idx %}collapse{% endif %}">
                         <td>{{ forloop.revcounter }}</td>
                         <td>{{ sf.presenter }}</td>
                         <td>{{ sf.created_at|date:'d.m.Y, H:i' }} Uhr</td>
                         <td>
-                            {% if sf.previous_form %}
-                                <a href="{% url 'core.submission.diff' old_submission_form_pk=sf.previous_form.pk new_submission_form_pk=sf.pk %}">
-                                    <span class="fa fa-pencil-square-o"></span>
-                                    Unterschiede zur Vorversion
-                                </a><br>
-                            {% endif %}
-                            {% if sf != newest_form %}
-                                <a href="{% url 'core.submission.diff' old_submission_form_pk=sf.pk new_submission_form_pk=newest_form.pk %}">
-                                    <span class="fa fa-pencil-square-o"></span>
-                                    Unterschiede zur neuesten Version
-                                </a><br>
+                            {% if not is_ctr %}
+                                {% if sf.previous_form %}
+                                    <a href="{% url 'core.submission.diff' old_submission_form_pk=sf.previous_form.pk new_submission_form_pk=sf.pk %}">
+                                        <span class="fa fa-pencil-square-o"></span>
+                                        Unterschiede zur Vorversion
+                                    </a><br>
+                                {% endif %}
+                                {% if sf != newest_form %}
+                                    <a href="{% url 'core.submission.diff' old_submission_form_pk=sf.pk new_submission_form_pk=newest_form.pk %}">
+                                        <span class="fa fa-pencil-square-o"></span>
+                                        Unterschiede zur neuesten Version
+                                    </a><br>
+                                {% endif %}
                             {% endif %}
                         </td>
                         <td>
@@ -85,30 +87,32 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if forloop.first %}
-                                {% if sf.pdf_document_id %}
-                                    <a href="{% url 'core.submission.submission_form_pdf' submission_form_pk=sf.pk %}">
-                                        <span class="fa fa-file-pdf-o"></span>
-                                        {% trans 'Download PDF' %}
-                                    </a>
-                                {% else %}
-                                    {% trans 'PDF is being rendered' %}
-                                    <i class="fa fa-spinner fa-spin"></i>
+                            {% if not is_ctr %}
+                                {% if forloop.first %}
+                                    {% if sf.pdf_document_id %}
+                                        <a href="{% url 'core.submission.submission_form_pdf' submission_form_pk=sf.pk %}">
+                                            <span class="fa fa-file-pdf-o"></span>
+                                            {% trans 'Download PDF' %}
+                                        </a>
+                                    {% else %}
+                                        {% trans 'PDF is being rendered' %}
+                                        <i class="fa fa-spinner fa-spin"></i>
+                                    {% endif %}
+                                    <br>
                                 {% endif %}
-                                <br>
-                            {% endif %}
-                            {% if debug %}
-                                <a href="{% url 'core.submission.submission_form_pdf_debug' submission_form_pk=sf.pk %}" target="_blank">
-                                    <span class="fa fa-file-pdf-o"></span>
-                                    PDF Debug
-                                </a><br>
-                            {% endif %}
-                            {% if sf == submission.current_submission_form %}
-                                {% if user.profile.is_internal or user == submission.presenter %}
-                                    <a href="{% url 'core.submission.export_submission' submission_pk=submission.pk %}">
-                                        <span class="fa fa-file-archive-o"></span>
-                                        {% trans "Export" %}
+                                {% if debug %}
+                                    <a href="{% url 'core.submission.submission_form_pdf_debug' submission_form_pk=sf.pk %}" target="_blank">
+                                        <span class="fa fa-file-pdf-o"></span>
+                                        PDF Debug
                                     </a><br>
+                                {% endif %}
+                                {% if sf.is_current %}
+                                    {% if user.profile.is_internal or user == submission.presenter %}
+                                        <a href="{% url 'core.submission.export_submission' submission_pk=submission.pk %}">
+                                            <span class="fa fa-file-archive-o"></span>
+                                            {% trans "Export" %}
+                                        </a><br>
+                                    {% endif %}
                                 {% endif %}
                             {% endif %}
                         </td>
@@ -262,10 +266,12 @@
         <td>
             {% for checklist in external_review_checklists %}
                 <div>{{ checklist }} [{{ checklist.get_status_display }}]
-                {% if checklist.status == 'new' or checklist.status == 'review_fail' %}
-                    <a class="ml-2" href="{% url 'core.submission.drop_checklist_review' submission_form_pk=submission_form.pk checklist_pk=checklist.pk %}">
-                        {% trans "drop" %}
-                    </a>
+                {% if not is_ctr %}
+                    {% if checklist.status == 'new' or checklist.status == 'review_fail' %}
+                        <a class="ml-2" href="{% url 'core.submission.drop_checklist_review' submission_form_pk=submission_form.pk checklist_pk=checklist.pk %}">
+                            {% trans "drop" %}
+                        </a>
+                    {% endif %}
                 {% endif %}</div>
             {% endfor %}
         </td>

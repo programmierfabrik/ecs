@@ -499,7 +499,9 @@ class SubmissionFilterForm(forms.Form, metaclass=SubmissionFilterFormMetaclass):
                 Q(current_submission_form__project_type_reg_drug=False) &
                 Q(current_submission_form__project_type_medical_device=False)
             )
-        return submissions.filter(reduce(lambda x, y: x | y, qs))
+        # CTR submissions don't have a project_type_* classification yet -
+        # this filter dimension doesn't apply to them, so they always pass.
+        return submissions.filter(reduce(lambda x, y: x | y, qs) | Q(current_ctr_form__isnull=False))
 
     def _filter_by_lane(self, submissions, user):
         from ecs.core.models.constants import (
@@ -540,7 +542,7 @@ class SubmissionFilterForm(forms.Form, metaclass=SubmissionFilterFormMetaclass):
             q = Q(current_published_vote=None)
             if user.profile.is_internal:
                 q &= Q(current_pending_vote=None)
-            qs.append(q & Q(current_submission_form__isnull=False))
+            qs.append(q & (Q(current_submission_form__isnull=False) | Q(current_ctr_form__isnull=False)))
 
         return submissions.filter(reduce(lambda x, y: x | y, qs))
 

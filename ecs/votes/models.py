@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import post_save
@@ -21,7 +22,15 @@ from ecs.tasks.models import Task
 
 @reversion.register(fields=('result', 'text'))
 class Vote(models.Model):
-    submission_form = models.ForeignKey('core.SubmissionForm', related_name='votes', on_delete=models.CASCADE)
+    # denormalized for cheap "which study is this vote for" lookups -
+    # derived from submission_form/ctr_submission_form on save().
+    # related_name is '+' (no reverse accessor): Submission.votes is already
+    # a curated property and a same-named reverse FK manager would clobber it.
+    submission = models.ForeignKey('core.Submission', related_name='+', on_delete=models.CASCADE)
+    # exactly one of these is set: a vote is always issued against one
+    # specific form version - if that version changes, a new Vote is issued.
+    submission_form = models.ForeignKey('core.SubmissionForm', related_name='votes', null=True, on_delete=models.CASCADE)
+    ctr_submission_form = models.ForeignKey('core.CTRSubmissionForm', related_name='votes', null=True, on_delete=models.CASCADE)
     top = models.OneToOneField('meetings.TimetableEntry', related_name='vote', null=True, on_delete=models.CASCADE)
     upgrade_for = models.OneToOneField('self', null=True, related_name='previous', on_delete=models.CASCADE)
     result = models.CharField(max_length=2, choices=VOTE_RESULT_CHOICES, null=True, verbose_name=_('vote'))
@@ -35,16 +44,25 @@ class Vote(models.Model):
     published_by = models.ForeignKey('auth.User', null=True, on_delete=models.CASCADE)
     valid_until = models.DateTimeField(null=True)
     changed_after_voting = models.BooleanField(default=False)
-    
+
     objects = VoteManager()
     unfiltered = models.Manager()
 
     class Meta:
         get_latest_by = 'published_at'
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(submission_form__isnull=False, ctr_submission_form__isnull=True) |
+                    models.Q(submission_form__isnull=True, ctr_submission_form__isnull=False)
+                ),
+                name='vote_submission_form_xor_ctr_submission_form',
+            ),
+        ]
 
     def get_submission(self):
-        return self.submission_form.submission
-    
+        return self.submission
+
     @property
     def result_text(self):
         # FIXME: use get_result_display instead
@@ -53,8 +71,8 @@ class Vote(models.Model):
         return dict(VOTE_RESULT_CHOICES)[self.result]
 
     def get_ec_number(self):
-        return self.submission_form.submission.get_ec_number_display()
-        
+        return self.submission.get_ec_number_display()
+
     def __str__(self):
         if self.result in ('1', '4'):
             name = 'Votum'
@@ -67,6 +85,14 @@ class Vote(models.Model):
         return '{} ID {}'.format(name, self.pk)
 
     def save(self, *args, **kwargs):
+        if not (self.submission_form_id or self.ctr_submission_form_id):
+            raise ValidationError("Either 'submission_form' or 'ctr_submission_form' must be set.")
+        if self.submission_form_id and self.ctr_submission_form_id:
+            raise ValidationError("Only one of 'submission_form' or 'ctr_submission_form' may be set.")
+        if not self.submission_id:
+            form = self.submission_form or self.ctr_submission_form
+            self.submission_id = form.submission_id
+
         if self.result or self.text:
             with reversion.create_revision():
                 reversion.set_user(get_current_user())
@@ -84,7 +110,10 @@ class Vote(models.Model):
                 self.valid_until = self.published_at + timedelta(days=365)
             self.save()
 
-        if not self.needs_signature:
+        # PDF rendering assumes SubmissionForm-shaped data (documents,
+        # project title, ...); deferred for ctr_submission_form until the
+        # CTR document/content design is settled.
+        if not self.needs_signature and self.submission_form_id:
             pdf_data = self.render_pdf()
             Document.objects.create_from_buffer(pdf_data, doctype='votes',
                 parent_object=self, original_file_name=self.pdf_filename,
@@ -162,13 +191,13 @@ class Vote(models.Model):
         return filename.replace(' ', '_')
 
     def get_render_context(self):
-        past_votes = Vote.objects.filter(published_at__isnull=False, submission_form__submission=self.submission_form.submission).exclude(pk=self.pk).order_by('published_at')
+        past_votes = Vote.objects.filter(published_at__isnull=False, submission=self.submission).exclude(pk=self.pk).order_by('published_at')
 
         return {
             'vote': self,
             'submission': self.get_submission(),
-            'form': self.submission_form,
-            'documents': self.submission_form.documents.order_by('doctype__identifier', 'date', 'name'),
+            'form': self.submission_form or self.ctr_submission_form,
+            'documents': self.submission_form.documents.order_by('doctype__identifier', 'date', 'name') if self.submission_form_id else Document.objects.none(),
             'ABSOLUTE_URL_PREFIX': settings.ABSOLUTE_URL_PREFIX,
             'past_votes': past_votes,
         }
@@ -183,7 +212,7 @@ class Vote(models.Model):
 @receiver(post_save, sender=Vote)
 def _post_vote_save(sender, **kwargs):
     vote = kwargs['instance']
-    submission = vote.submission_form.submission
+    submission = vote.submission
     if not vote.published_at and submission.current_pending_vote != vote:
         submission.current_pending_vote = vote
         submission.save(update_fields=('current_pending_vote',))

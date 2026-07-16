@@ -147,6 +147,7 @@ def auth_groups():
         'PKI Management',
         'Supporting Documents',
         'Legal and Patient Reviewer',
+        'CTIS Importer',
     )
     for group in groups:
         Group.objects.get_or_create(name=group)

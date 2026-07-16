@@ -15,18 +15,18 @@ from ecs.checklists.utils import get_checklist_answer
 from ecs.tasks.models import Task
 from ecs.tasks.utils import block_duplicate_task, block_if_task_exists
 
-register(Submission, autostart_if=lambda s, created: bool(s.current_submission_form_id) and not s.workflow and not s.is_transient)
+register(Submission, autostart_if=lambda s, created: bool(s.current_submission_form_id or s.current_ctr_form_id) and not s.workflow and not s.is_transient)
 
 ##########################
 # acknowledgement guards #
 ##########################
 @guard(model=Submission)
 def is_acknowledged(wf):
-    return wf.data.newest_submission_form.is_acknowledged
+    return wf.data.newest_form.is_acknowledged
 
 @guard(model=Submission)
 def is_initial_submission(wf):
-    return wf.data.forms.filter(is_acknowledged=True).count() == 1
+    return wf.data.acknowledged_form_count == 1
 
 @guard(model=Submission)
 def is_acknowledged_and_initial_submission(wf):
@@ -135,9 +135,9 @@ class InitialReview(Activity):
 
     def pre_perform(self, choice):
         s = self.workflow.data
-        sf = s.newest_submission_form
-        sf.acknowledge(choice)
-        on_initial_review.send(Submission, submission=s, form=sf)
+        form = s.newest_form
+        form.acknowledge(choice)
+        on_initial_review.send(Submission, submission=s, form=form)
 
 
 class Resubmission(Activity):

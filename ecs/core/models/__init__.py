@@ -1,6 +1,6 @@
 from ecs.core.models.core import EthicsCommission, MedicalCategory, AdvancedSettings
 from ecs.core.models.submissions import (
-    SubmissionForm, Investigator, InvestigatorEmployee, Measure,
+    SubmissionForm, CTRSubmissionForm, Investigator, InvestigatorEmployee, Measure,
     NonTestedUsedDrug, ParticipatingCenterNonSubject,
     ForeignParticipatingCenter, Submission, MySubmission,
     TemporaryAuthorization,

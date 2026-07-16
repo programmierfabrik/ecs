@@ -78,6 +78,11 @@
                             <a class="dropdown-item" href="{% url 'core.submission.import_submission_form' %}">
                                 {% trans "Import" %}
                             </a>
+                            {% if user|is_ctis_importer %}
+                                <a class="dropdown-item" href="{% url 'core.submission.import_ctis_study' %}">
+                                    CTIS-Studie verknüpfen
+                                </a>
+                            {% endif %}
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="{% url 'notifications.open_notifications' %}">
                                 {% trans 'Open Notifications' %}

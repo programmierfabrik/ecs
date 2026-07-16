@@ -80,7 +80,7 @@ class TaskQuerySet(models.QuerySet):
         q = Q(content_type=submission_ct, data_id__in=submissions)
 
         vote_ct = ContentType.objects.get_for_model(Vote)
-        votes = Vote.objects.filter(submission_form__submission__in=submissions)
+        votes = Vote.objects.filter(submission__in=submissions)
         q |= Q(content_type=vote_ct, data_id__in=votes.values('pk'))
 
         notification_cts = ContentType.objects.get_for_models(

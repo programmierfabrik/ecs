@@ -6,6 +6,7 @@ from django.utils.translation import gettext as _
 
 from ecs.communication.utils import send_system_message_template
 from ecs.core import signals
+from ecs.core.models.submissions import CTRSubmissionForm
 from ecs.core.models.constants import SUBMISSION_LANE_RETROSPECTIVE_THESIS, \
     SUBMISSION_LANE_EXPEDITED, SUBMISSION_LANE_BOARD, SUBMISSION_LANE_LOCALEC
 from ecs.core.tasks import render_submission_form
@@ -111,10 +112,13 @@ def on_initial_review(sender, **kwargs):
 
     if submission_form.is_acknowledged:
         send_submission_message(submission, submission.presenter, _('Acknowledgement of Receipt'), 'submissions/acknowledge_message.txt')
-        if not submission.current_submission_form == submission_form:
+        if not submission.current_form == submission_form:
             pending_vote = submission.current_pending_vote
             if pending_vote and pending_vote.is_draft:
-                pending_vote.submission_form = submission_form
+                if isinstance(submission_form, CTRSubmissionForm):
+                    pending_vote.ctr_submission_form = submission_form
+                else:
+                    pending_vote.submission_form = submission_form
                 pending_vote.save()
             submission_form.mark_current()
             vote = submission.current_published_vote

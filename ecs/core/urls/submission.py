@@ -2,6 +2,7 @@ from django.conf import settings
 from django.urls import path, re_path
 
 from ecs.core.views import submissions as views
+from ecs.core.views import ctis as ctis_views
 from ecs.tasks.views import task_backlog, delete_task
 from ecs.communication.views import new_thread
 
@@ -19,6 +20,7 @@ urlpatterns = (
     path('list/mine/', views.my_submissions, name='core.submission.my_submissions'),
 
     path('import/', views.import_submission_form, name='core.submission.import_submission_form'),
+    path('ctis/import/', ctis_views.import_ctis_study, name='core.submission.import_ctis_study'),
     path('new/', views.create_submission_form, name='core.submission.create_submission_form'),
     path('new/<str:docstash_key>/', views.create_submission_form, name='core.submission.create_submission_form_by_docstash_key'),
     path('delete/<str:docstash_key>/', views.delete_docstash_entry, name='core.submission.delete_docstash_entry'),
@@ -29,6 +31,7 @@ urlpatterns = (
     path('diff/forms/<int:old_submission_form_pk>/<int:new_submission_form_pk>/', views.diff, name='core.submission.diff'),
 
     path('<int:submission_pk>/', views.view_submission, name='view_submission'),
+    path('<int:submission_pk>/ctis/sync/', ctis_views.sync_ctis_study, name='core.submission.sync_ctis_study'),
     path('<int:submission_pk>/copy/', views.copy_latest_submission_form, name='core.submission.copy_latest_submission_form'),
     path('<int:submission_pk>/amend/<int:notification_type_pk>/', views.copy_latest_submission_form, name='core.submission.copy_latest_submission_form_by_notification_pk'),
     path('<int:submission_pk>/export/', views.export_submission, name='core.submission.export_submission'),
@@ -40,6 +43,7 @@ urlpatterns = (
     path('<int:submission_pk>/review/checklist/<int:blueprint_pk>/reopen/', views.reopen_checklist, name='core.submission.reopen_checklist'),
 
     path('form/<int:submission_form_pk>/', views.readonly_submission_form, name='readonly_submission_form'),
+    path('form/ctr/<int:ctr_submission_form_pk>/', views.readonly_submission_form, name='core.submission.readonly_ctr_submission_form'),
     path('form/<int:submission_form_pk>/pdf/', views.submission_form_pdf, name='core.submission.submission_form_pdf'),
     path('form/<int:submission_form_pk>/pdf/view/', views.submission_form_pdf_view, name='core.submission.submission_form_pdf_view'),
     path('form/<int:submission_form_pk>/doc/<int:document_pk>/', views.download_document, name='core.submission.download_document'),

@@ -68,12 +68,13 @@ class Checklist(models.Model):
         if self.blueprint.multiple:
             u = get_current_user()
             s = self.submission
-            sf = self.submission.current_submission_form
-            presenting_parties = [
-                s.presenter_id, s.susar_presenter_id,
-                sf.submitter_id, sf.sponsor_id,
-                *(inv.user_id for inv in sf.investigators.all())
-            ]
+            sf = s.current_submission_form
+            presenting_parties = [s.presenter_id, s.susar_presenter_id]
+            if sf is not None:
+                presenting_parties += [
+                    sf.submitter_id, sf.sponsor_id,
+                    *(inv.user_id for inv in sf.investigators.all())
+                ]
             name = _('Anonymous') if self.blueprint.reviewer_is_anonymous else str(self.last_edited_by)
             if u.id == self.user_id or (u is not None and u.profile.is_internal and not u.id in presenting_parties):
                 name = str(self.last_edited_by)

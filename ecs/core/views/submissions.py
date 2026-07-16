@@ -23,7 +23,7 @@ from ecs.documents.models import Document
 from ecs.documents.views import handle_download
 from ecs.utils.viewutils import redirect_to_next_url
 from ecs.core.models import (
-    Submission, SubmissionForm, Investigator, TemporaryAuthorization,
+    Submission, SubmissionForm, CTRSubmissionForm, Investigator, TemporaryAuthorization,
     MedicalCategory, EthicsCommission,
 )
 from ecs.core.tasks import generate_submission_preview
@@ -38,6 +38,7 @@ from ecs.core.forms import (
     SubmissionImportForm, SubmissionFilterForm, SubmissionMinimalFilterForm,
     PresenterChangeForm, SusarPresenterChangeForm,
     AssignedSubmissionsFilterForm, AllSubmissionsFilterForm,
+    CTISNumberForm,
 )
 from ecs.core.forms.review import CategorizationForm, BiasedBoardMemberForm
 from ecs.core.forms.layout import SUBMISSION_FORM_TABS
@@ -175,17 +176,30 @@ def copy_latest_submission_form(request, submission_pk=None, **kwargs):
 
 def view_submission(request, submission_pk=None):
     submission = get_object_or_404(Submission, pk=submission_pk)
+    if submission.current_ctr_form_id:
+        return redirect('core.submission.readonly_ctr_submission_form', ctr_submission_form_pk=submission.current_ctr_form_id)
     return redirect('readonly_submission_form', submission_form_pk=submission.current_submission_form.pk)
 
 
-def readonly_submission_form(request, submission_form_pk=None, submission_form=None, extra_context=None, template='submissions/readonly_form.html', checklist_overwrite=None):
-    if not submission_form:
-        submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
-    form = SubmissionFormForm(initial=submission_form_to_dict(submission_form), readonly=True)
-    formsets = get_submission_formsets(
-        initial=get_submission_formsets_initial(submission_form),
-        readonly=True)
-    submission = submission_form.submission
+def readonly_submission_form(request, submission_form_pk=None, submission_form=None, ctr_submission_form_pk=None, ctr_submission_form=None, extra_context=None, template='submissions/readonly_form.html', checklist_overwrite=None):
+    if ctr_submission_form_pk and not ctr_submission_form:
+        ctr_submission_form = get_object_or_404(CTRSubmissionForm, pk=ctr_submission_form_pk)
+
+    if ctr_submission_form:
+        submission = ctr_submission_form.submission
+        form = None
+        formsets = {}
+    else:
+        if not submission_form:
+            submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
+        form = SubmissionFormForm(initial=submission_form_to_dict(submission_form), readonly=True)
+        formsets = get_submission_formsets(
+            initial=get_submission_formsets_initial(submission_form),
+            readonly=True)
+        submission = submission_form.submission
+
+    # unified handle used by templates regardless of submission type
+    current_form = submission_form or ctr_submission_form
 
     crumbs_key = 'submission_breadcrumbs-user_{0}'.format(request.user.pk)
     crumbs = cache.get(crumbs_key, [])
@@ -195,6 +209,14 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
     checklists_q = Q(last_edited_by=request.user)
     if request.user.profile.is_internal:
         checklists_q |= Q(status__in=['completed', 'review_ok', 'review_ok_internal'])
+    elif ctr_submission_form:
+        presenting_parties = [submission.presenter_id, submission.susar_presenter_id]
+        allowed_status = ['completed', 'review_ok']
+        external_review_allowed_status = ['review_ok']
+        if request.user.id not in presenting_parties:
+            allowed_status.append('review_ok_internal')
+            external_review_allowed_status.append('review_ok_internal')
+        checklists_q |= Q(status__in=allowed_status) & ~(Q(blueprint__slug='external_review') & ~Q(status__in=external_review_allowed_status))
     else:
         presenting_parties = [
             submission.presenter_id, submission.susar_presenter_id,
@@ -241,22 +263,36 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
             answers = checklist.answers.filter(q)
             checklist_summary.append((checklist, answers))
 
-    submission_forms = list(
-        submission.forms(manager='unfiltered').only(
-            'submission_id', 'is_acknowledged', 'presenter_id', 'created_at',
-            'is_notification_update', 'pdf_document_id',
+    if ctr_submission_form:
+        submission_forms = list(
+            submission.ctr_forms(manager='unfiltered').only(
+                'submission_id', 'is_acknowledged', 'presenter_id', 'created_at',
+                'ctis_number',
 
-            'presenter__first_name', 'presenter__last_name', 'presenter__email',
-        ).prefetch_related(
-            Prefetch('new_for_notification', queryset=
-                AmendmentNotification.objects.only('new_submission_form_id')),
-            Prefetch('presenter__profile', queryset=
-                UserProfile.objects.only('gender', 'title', 'user_id')),
-        ).order_by('-created_at')
-    )
+                'presenter__first_name', 'presenter__last_name', 'presenter__email',
+            ).prefetch_related(
+                Prefetch('presenter__profile', queryset=
+                    UserProfile.objects.only('gender', 'title', 'user_id')),
+            ).order_by('-created_at')
+        )
+        current_form_idx = [sf.id == submission.current_ctr_form_id for sf in submission_forms].index(True)
+    else:
+        submission_forms = list(
+            submission.forms(manager='unfiltered').only(
+                'submission_id', 'is_acknowledged', 'presenter_id', 'created_at',
+                'is_notification_update', 'pdf_document_id',
+
+                'presenter__first_name', 'presenter__last_name', 'presenter__email',
+            ).prefetch_related(
+                Prefetch('new_for_notification', queryset=
+                    AmendmentNotification.objects.only('new_submission_form_id')),
+                Prefetch('presenter__profile', queryset=
+                    UserProfile.objects.only('gender', 'title', 'user_id')),
+            ).order_by('-created_at')
+        )
+        current_form_idx = [sf.id == submission.current_submission_form_id for sf in submission_forms].index(True)
     for sf, prev in zip(submission_forms, submission_forms[1:]):
         sf.previous_form = prev
-    current_form_idx = [sf.id == submission.current_submission_form_id for sf in submission_forms].index(True)
 
     external_review_checklists = submission.checklists.filter(blueprint__slug='external_review')
     notifications = (submission.notifications
@@ -298,13 +334,14 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
 
     context = {
         'form': form,
-        'tabs': SUBMISSION_FORM_TABS,
-        'documents': submission_form.documents
+        'tabs': () if ctr_submission_form else SUBMISSION_FORM_TABS,
+        'documents': None if ctr_submission_form else submission_form.documents
             .select_related('doctype')
             .order_by('doctype__identifier', 'date', 'name'),
         'readonly': True,
         'submission': submission,
-        'submission_form': submission_form,
+        'is_ctr': bool(ctr_submission_form),
+        'submission_form': current_form,
         'submission_forms': submission_forms,
         'current_form_idx': current_form_idx,
         'checklist_reviews': checklist_reviews,
@@ -320,23 +357,25 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
         'temporary_auth_form': TemporaryAuthorizationForm(prefix='temp_auth'),
         'current_docstash': current_docstash,
         'tags': submission.tags.all(),
+        'sync_form': CTISNumberForm() if ctr_submission_form else None,
     }
 
-    center_close_notifications = CenterCloseNotification.objects.filter(
-        answer__published_at__isnull=False, answer__is_rejected=False,
-        investigator__submission_form__submission_id=submission.id
-    ).annotate(
-        organisation=F('investigator__organisation'),
-        ethics_commission_id=F('investigator__ethics_commission_id')
-    ).values('organisation', 'ethics_commission_id', 'close_date')
-    for form in formsets['investigator']:
-        for n in center_close_notifications:
-            if n['organisation'].strip() == form.initial['organisation'].strip() and \
-                n['ethics_commission_id'] == form.initial['ethics_commission']:
-                form.close_date = n['close_date']
-                break
+    if not ctr_submission_form:
+        center_close_notifications = CenterCloseNotification.objects.filter(
+            answer__published_at__isnull=False, answer__is_rejected=False,
+            investigator__submission_form__submission_id=submission.id
+        ).annotate(
+            organisation=F('investigator__organisation'),
+            ethics_commission_id=F('investigator__ethics_commission_id')
+        ).values('organisation', 'ethics_commission_id', 'close_date')
+        for form in formsets['investigator']:
+            for n in center_close_notifications:
+                if n['organisation'].strip() == form.initial['organisation'].strip() and \
+                    n['ethics_commission_id'] == form.initial['ethics_commission']:
+                    form.close_date = n['close_date']
+                    break
 
-    presenting_users = submission_form.get_presenting_parties().get_users().union([submission.presenter, submission.susar_presenter])
+    presenting_users = current_form.get_presenting_parties().get_users().union([submission.presenter, submission.susar_presenter])
     if not request.user in presenting_users:
         vote = submission.current_pending_vote or submission.current_published_vote
         context['vote_review_form'] = VoteReviewForm(instance=vote, readonly=True)
@@ -350,8 +389,11 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
             if task and task.closed_at:
                 context['categorization_form'].allow_reopen = True
 
-    if not submission_form == submission.newest_submission_form:
-        context['unacknowledged_forms'] = submission.forms.filter(pk__gt=submission_form.pk).count()
+    if not current_form.is_current:
+        if ctr_submission_form:
+            context['unacknowledged_forms'] = submission.ctr_forms.filter(pk__gt=current_form.pk).count()
+        else:
+            context['unacknowledged_forms'] = submission.forms.filter(pk__gt=current_form.pk).count()
 
     if extra_context:
         context.update(extra_context)
@@ -411,8 +453,8 @@ def categorization(request, submission_pk=None):
             docstash.save()
 
     response = readonly_submission_form(request,
-        submission_form=submission.current_submission_form,
-        extra_context={'categorization_form': form,})
+        extra_context={'categorization_form': form,},
+        **submission.current_form_kwargs())
     response.has_errors = not form.is_valid()
     return response
 
@@ -472,18 +514,18 @@ def reopen_checklist(request, submission_pk=None, blueprint_pk=None):
 def categorization_review(request, submission_pk=None):
     submission = get_object_or_404(Submission, pk=submission_pk)
     return readonly_submission_form(request,
-        submission_form=submission.current_submission_form,
         extra_context={
             'categorization_review': True,
             'categorization_task': request.related_tasks[0].review_for,
-        })
+        },
+        **submission.current_form_kwargs())
 
 
 @task_required
 @with_task_management
 def initial_review(request, submission_pk=None):
     submission = get_object_or_404(Submission, pk=submission_pk)
-    return readonly_submission_form(request, submission_form=submission.current_submission_form)
+    return readonly_submission_form(request, **submission.current_form_kwargs())
 
 
 @user_flag_required('is_internal')
@@ -494,7 +536,7 @@ def paper_submission_review(request, submission_pk=None):
     if not task.assigned_to == request.user:
         task.accept(request.user)
         return redirect('core.submission.paper_submission_review', submission_pk=submission_pk)
-    return readonly_submission_form(request, submission_form=submission.current_submission_form)
+    return readonly_submission_form(request, **submission.current_form_kwargs())
 
 
 @user_flag_required('is_internal')
@@ -991,13 +1033,14 @@ def submission_list(request, submissions, stashed_submission_forms=None, templat
     filterform = filter_form(request.POST or getattr(usersettings, filtername))
 
     submissions = (filterform.filter_submissions(submissions, request.user)
-        .exclude(current_submission_form=None)
-        .select_related('current_submission_form')
+        .exclude(current_submission_form=None, current_ctr_form=None)
+        .select_related('current_submission_form', 'current_ctr_form')
         .only(
             'ec_number',
 
             'current_submission_form__project_title',
             'current_submission_form__german_project_title',
+            'current_ctr_form__ctis_number',
         ).prefetch_related(
             Prefetch('meetings', queryset=
                 Meeting.unfiltered.only('start', 'title').order_by('start')),
@@ -1035,7 +1078,7 @@ def submission_list(request, submissions, stashed_submission_forms=None, templat
     paper_submission_tasks = tasks.filter(content_type=submission_ct, data_id__in=visible_submission_pks,
         task_type__workflow_node__uid='paper_submission_review')
     b2_resubmission_tasks = tasks.filter(content_type=vote_ct,
-        data_id__in=Vote.objects.filter(submission_form__submission__pk__in=visible_submission_pks).values('pk').query,
+        data_id__in=Vote.objects.filter(submission__pk__in=visible_submission_pks).values('pk').query,
         task_type__workflow_node__uid='b2_resubmission')
 
     for s in submissions.object_list:
@@ -1048,7 +1091,7 @@ def submission_list(request, submissions, stashed_submission_forms=None, templat
             if task.data == s:
                 s.paper_submission_task = task
         for task in b2_resubmission_tasks:
-            if task.data.submission_form.submission == s:
+            if task.data.submission == s:
                 s.b2_resubmission_task = task
 
     # save the filter in the user settings
