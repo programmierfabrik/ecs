@@ -230,7 +230,8 @@ def submission_list(request, meeting_pk=None):
 
         submission = entry.submission
         if submission:
-            submission.current_submission_form._submission_cache = submission
+            if submission.current_submission_form:
+                submission.current_submission_form._submission_cache = submission
             submission.is_accessible = submission.id in accessible_submissions
 
     active_top = meeting.active_top

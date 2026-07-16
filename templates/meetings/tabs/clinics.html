@@ -25,7 +25,7 @@
                 {% with clinics=submission.clinics.all %}
                     <li class="list-group-item d-block">
                         <h4>{{ submission }} ({{ clinics|length }})</h4>
-                        {% if clinics|length_is:0 %}
+                        {% if clinics|length == 0 %}
                             Es wurden keine Krankenanstalten für diese Studie zugewiesen.
                         {% else %}
                             {% for clinic in clinics %}
