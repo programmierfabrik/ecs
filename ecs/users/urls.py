@@ -1,6 +1,9 @@
+from django.conf import settings
 from django.urls import include, path, re_path
+from mozilla_django_oidc.views import OIDCAuthenticationRequestView
 
-from ecs.users import views
+from ecs.users import oidc_views, views
+from ecs.utils import forceauth
 
 
 urlpatterns = (
@@ -23,3 +26,13 @@ urlpatterns = (
     path('users/login_history/', views.login_history, name='users.login_history'),
     re_path(r'^accept_invitation/(?P<invitation_uuid>[\da-zA-Z]{32})/$', views.accept_invitation, name='users.accept_invitation'),
 )
+
+if settings.ECS_KEYCLOAK_ENABLED:
+    urlpatterns = urlpatterns + (
+        path('accounts/oidc/authenticate/',
+            forceauth.exempt(OIDCAuthenticationRequestView.as_view()),
+            name='oidc_authentication_init'),
+        path('accounts/oidc/callback/',
+            forceauth.exempt(oidc_views.KeycloakOIDCCallbackView.as_view()),
+            name='oidc_authentication_callback'),
+    )

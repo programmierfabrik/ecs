@@ -229,6 +229,37 @@ INSTALLED_APPS = (
 # authenticate with email address
 AUTHENTICATION_BACKENDS = ('ecs.users.backends.EmailAuthBackend',)
 
+# Keycloak SSO (optional, for poweruser day-to-day login). Authentication
+# only - authorization stays entirely in the app (see ecs.authorization).
+ECS_KEYCLOAK_ENABLED = os.getenv('ECS_KEYCLOAK_ENABLED', '').lower() == 'true'
+
+if ECS_KEYCLOAK_ENABLED:
+    INSTALLED_APPS = INSTALLED_APPS + ('mozilla_django_oidc',)
+    AUTHENTICATION_BACKENDS = AUTHENTICATION_BACKENDS + ('ecs.users.backends.KeycloakOIDCBackend',)
+
+    KEYCLOAK_SERVER_URL = os.getenv('ECS_KEYCLOAK_SERVER_URL')
+    KEYCLOAK_REALM = os.getenv('ECS_KEYCLOAK_REALM')
+    _keycloak_base = '{0}/realms/{1}/protocol/openid-connect'.format(KEYCLOAK_SERVER_URL, KEYCLOAK_REALM)
+
+    OIDC_RP_CLIENT_ID = os.getenv('ECS_KEYCLOAK_CLIENT_ID')
+    # Public client (no client authentication) - the Keycloak client must be
+    # configured accordingly. Auth-code interception is mitigated by PKCE
+    # below instead of a shared secret; the ID token is verified against
+    # Keycloak's own signing keys (OIDC_OP_JWKS_ENDPOINT), not by revocation.
+    OIDC_RP_CLIENT_SECRET = ''
+    OIDC_USE_PKCE = True
+    OIDC_RP_SIGN_ALGO = 'RS256'
+    OIDC_OP_AUTHORIZATION_ENDPOINT = _keycloak_base + '/auth'
+    OIDC_OP_TOKEN_ENDPOINT = _keycloak_base + '/token'
+    OIDC_OP_USER_ENDPOINT = _keycloak_base + '/userinfo'
+    OIDC_OP_JWKS_ENDPOINT = _keycloak_base + '/certs'
+
+    OIDC_RP_SCOPES = 'openid email profile'
+    OIDC_CREATE_USER = False
+    OIDC_USE_NONCE = True
+    OIDC_STORE_ACCESS_TOKEN = False
+    OIDC_STORE_ID_TOKEN = False
+
 # Force Django to always use real files, not an InMemoryUploadedFile.
 # The document processing pipeline depends on the file objects having
 # a fileno().
