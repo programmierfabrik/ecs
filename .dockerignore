@@ -8,5 +8,6 @@
 !templates
 !docker-entrypoint.sh
 !manage.py
-!Pipfile
-!Pipfile.lock
+!pyproject.toml
+!poetry.lock
+!poetry.toml

@@ -1,7 +1,6 @@
 import sys, datetime
 import importlib
 from xml.dom.minidom import parse
-from optparse import make_option
 
 from django.core.management.base import BaseCommand
 
@@ -35,13 +34,14 @@ def trim_docstring(docstring):
 class Command(BaseCommand):
     help = "convert a xml nosetests file to a restructured text file using the docstrings of the test objects and functions"
 
-    option_list = BaseCommand.option_list + (
-        make_option('-o', action='store', dest='outfile', help='output file', default=None),
-        make_option('-i', action='store', dest='infile', help='input file', default=None),
-        make_option('-d', action='store', dest='cdate', help='cdate', default=None),
-    )
-    def handle(self, test, **options):
-        
+    def add_arguments(self, parser):
+        parser.add_argument('-o', dest='outfile', help='output file', default=None)
+        parser.add_argument('-i', dest='infile', help='input file', default=None)
+        parser.add_argument('-d', dest='cdate', help='cdate', default=None)
+        parser.add_argument('test', nargs='?')
+
+    def handle(self, **options):
+
         cdate = None
         if not options['outfile']:
             print("no output file specified!")

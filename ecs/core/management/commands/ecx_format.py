@@ -1,5 +1,3 @@
-from optparse import make_option
-
 from django.core.management.base import BaseCommand, CommandError
 from django.template.loader import get_template
 
@@ -8,11 +6,9 @@ from ecs.utils.pdfutils import html2pdf
 
 
 class Command(BaseCommand):
-    option_list = BaseCommand.option_list + (
-        make_option('-o', action='store', dest='outfile', help='output file', default=None),
-        make_option('-t', dest='output_type', action='store', default='html', 
-            help="one of 'html' or 'pdf'"),
-    )
+    def add_arguments(self, parser):
+        parser.add_argument('-o', dest='outfile', help='output file', default=None)
+        parser.add_argument('-t', dest='output_type', default='html', help="one of 'html' or 'pdf'")
 
     def handle(self, **options):
         if options['output_type'] not in ['html', 'pdf']:

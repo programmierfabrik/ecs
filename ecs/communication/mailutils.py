@@ -2,7 +2,7 @@ import html
 import re
 import textwrap
 
-import pytz
+from zoneinfo import ZoneInfo
 from django.conf import settings
 from django.core import mail
 from django.core.mail import EmailMessage, EmailMultiAlternatives, make_msgid
@@ -12,7 +12,7 @@ from django.utils.html import strip_tags
 def html2text(htmltext):
     text = html.unescape(strip_tags(htmltext))
     text = '\n\n'.join(re.split(r'\s*\n\s*\n\s*', text))
-    text = re.sub('\s\s\s+', ' ', text)
+    text = re.sub(r'\s\s\s+', ' ', text)
     wrapper = textwrap.TextWrapper(
         replace_whitespace=False, drop_whitespace=False, width=72)
     return '\n'.join(wrapper.wrap(text))
@@ -82,7 +82,7 @@ def deliver_to_recipient(recipient, subject, message, from_email,
 
 def generate_ics_file(user_email, event_name, event_description, location, start_datetime, end_datetime):
     proid = f"Ethic Committee System {settings.ECS_VERSION}"
-    vienna_timezone = pytz.timezone('Europe/Vienna')
+    vienna_timezone = ZoneInfo('Europe/Vienna')
 
     dt_format = '%Y%m%dT%H%M%S'
     start_datetime_formatted = start_datetime.astimezone(vienna_timezone).strftime(dt_format)

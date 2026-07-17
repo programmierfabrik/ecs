@@ -1,5 +1,5 @@
-import imp
 from importlib import import_module
+from importlib.util import find_spec
 
 from django.conf import settings
 from django.dispatch import receiver
@@ -21,15 +21,9 @@ def register(model, autostart_if=None):
 def autodiscover():
     import ecs.workflow.patterns
     for app in settings.INSTALLED_APPS:
-        try:
-            app_path = import_module(app).__path__
-        except AttributeError:
+        if find_spec("%s.workflow" % app) is None:
             continue
-        try:
-            imp.find_module('workflow', app_path)
-        except ImportError:
-            continue
-        module = import_module("%s.workflow" % app)
+        import_module("%s.workflow" % app)
 
 @receiver(post_save)
 def _post_save(sender, **kwargs):

@@ -22,7 +22,8 @@ from pikepdf import Pdf
 from qrcode import QRCode
 from reportlab.lib import pagesizes
 from reportlab.pdfgen import canvas
-from weasyprint import default_url_fetcher, HTML
+from weasyprint import HTML
+from weasyprint.urls import URLFetcher
 
 logger = logging.getLogger(__name__)
 
@@ -61,17 +62,17 @@ def pdf_barcodestamp(source, barcode, text=None):
     return data
 
 
-def _url_fetcher(url):
-    if url.startswith('static:'):
-        path = os.path.abspath(os.path.join(settings.STATIC_ROOT, url[len('static:'):]))
-        if not path.startswith(settings.STATIC_ROOT):
-            raise ValueError('static: URI points outside of static directory!')
-        with open(path, 'rb') as f:
-            data = f.read()
-        return {'string': data, 'mime_type': mimetypes.guess_type(path)[0]}
-
-    return default_url_fetcher(url)
+class _URLFetcher(URLFetcher):
+    def __call__(self, url):
+        if url.startswith('static:'):
+            path = os.path.abspath(os.path.join(settings.STATIC_ROOT, url[len('static:'):]))
+            if not path.startswith(settings.STATIC_ROOT):
+                raise ValueError('static: URI points outside of static directory!')
+            with open(path, 'rb') as f:
+                data = f.read()
+            return {'string': data, 'mime_type': mimetypes.guess_type(path)[0]}
+        return super().__call__(url)
 
 
 def html2pdf(html):
-    return HTML(string=html, url_fetcher=_url_fetcher).write_pdf()
+    return HTML(string=html, url_fetcher=_URLFetcher()).write_pdf()

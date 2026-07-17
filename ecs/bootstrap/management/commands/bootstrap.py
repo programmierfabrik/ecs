@@ -1,5 +1,5 @@
-import imp
 from importlib import import_module
+from importlib.util import find_spec
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
@@ -32,9 +32,7 @@ class Command(BaseCommand):
                 app_path = import_module(app).__path__
             except AttributeError:
                 continue
-            try:
-                imp.find_module('bootstrap', app_path)
-            except ImportError:
+            if find_spec("%s.bootstrap" % app) is None:
                 continue
             module = import_module("%s.bootstrap" % app)
             for name in dir(module):

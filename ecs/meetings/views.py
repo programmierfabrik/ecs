@@ -498,7 +498,7 @@ def meeting_assistant_quickjump(request, meeting_pk=None):
     top = None
     q = request.POST.get('q', '').strip().upper()
 
-    m = re.match('(\d{4})(?:/(\d{4}))?$', q)
+    m = re.match(r'(\d{4})(?:/(\d{4}))?$', q)
     if m:
         if m.group(2):
             ec_number = '{}{}'.format(m.group(2), m.group(1))

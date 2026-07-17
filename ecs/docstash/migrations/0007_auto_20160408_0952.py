@@ -5,7 +5,6 @@ import pickle
 import zlib
 
 from django.db import migrations, models
-import django_extensions
 
 
 def pickle_to_json(apps, schema_editor):
@@ -32,7 +31,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='docstash',
             name='value',
-            field=django_extensions.db.fields.json.JSONField(),
+            field=models.JSONField(),
         ),
         migrations.RunPython(pickle_to_json),
         migrations.RunSQL('set constraints all immediate'),

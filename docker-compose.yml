@@ -11,7 +11,7 @@ services:
     command: postgres -c jit=off
     shm_size: 1024mb
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
 
   mailpit:
       container_name: test-ecs-mailpit
@@ -19,3 +19,5 @@ services:
       ports:
         - "8025:8025"
         - "1025:1025"
+volumes:
+  postgres-data:
