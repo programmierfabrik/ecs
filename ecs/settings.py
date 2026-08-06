@@ -262,7 +262,18 @@ LOGGING = {
         },
         'django.utils.autoreload': {
             'level': 'INFO'
-        }
+        },
+        'fontTools': {
+            # During PDF rendering, fontTools logs every font table it reads
+            # and dumps the full glyph list of every subsetted font at DEBUG
+            # level. Setting a level here does not help: weasyprint wraps
+            # subsetting in capture_logs('fontTools'), which forces this logger
+            # to DEBUG for the duration (see weasyprint/pdf/fonts.py). It does
+            # not touch propagate, so that is where we cut the messages off.
+            # Subsetting problems are still reported by weasyprint itself, on
+            # the weasyprint logger.
+            'propagate': False,
+        },
     },
 }
 
