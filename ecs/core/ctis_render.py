@@ -1093,19 +1093,18 @@ def _trial_site_sections(part2):
         organisation = site.get('organisation') or {}
         address = organisation.get('address') or {}
         investigator = site.get('principalInvestigator') or {}
+        street = _lines(address.get('line1'), address.get('line2'),
+                        address.get('line3'), address.get('line4'))
         rows.append([
             Cell(_words(investigator.get('titleName'),
                         investigator.get('firstName'),
                         investigator.get('lastName'))),
             Cell(_txt(organisation.get('name'))),
-            # TODO: « Site location » has no source. A trial site carries one
-            # address and its four lines are the street address - real payloads
-            # fill line 1 only - so whatever CTR-ECS shows here comes from
-            # somewhere the contract does not describe. Left empty rather than
-            # filled with the street address a second time.
-            Cell(None),
-            Cell(_lines(address.get('line1'), address.get('line2'),
-                        address.get('line3'), address.get('line4'))),
+            # « Site location » and « Site street address » both show the
+            # address lines - a trial site has only the one address, and
+            # CTR-ECS repeats it in both columns.
+            Cell(street),
+            Cell(street),
             Cell(_txt(address.get('city'))),
             Cell(_txt(address.get('zipCode'))),
             # A site address carries a country *name*, unlike mscCountryCode
