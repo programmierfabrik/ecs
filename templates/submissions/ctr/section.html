@@ -13,18 +13,6 @@
         <div class="text-muted mb-2">{{ section.note }}</div>
     {% endif %}
     <ul class="list-unstyled mb-0">
-        {% for entry in section.entries %}
-            {% if entry.widget == 'table' %}
-                {% include "submissions/ctr/table.html" %}
-            {% elif entry.widget == 'docs' %}
-                {% include "submissions/ctr/docs.html" %}
-            {% elif entry.widget == 'doclist' %}
-                {% include "submissions/ctr/document_list.html" %}
-            {% elif entry.widget == 'message' %}
-                <li class="ctr-message">{{ entry.value }}</li>
-            {% else %}
-                {% include "submissions/ctr/field.html" %}
-            {% endif %}
-        {% endfor %}
+        {% include "submissions/ctr/entries.html" with entries=section.entries %}
     </ul>
 </div>

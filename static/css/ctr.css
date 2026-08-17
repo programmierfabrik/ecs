@@ -104,6 +104,24 @@
     display: block;
 }
 
+/* Chip strip, sized like the classic centres tab's jump list. */
+.ctr-chip-list {
+    margin-bottom: 1rem;
+}
+
+.ctr-chip-list button {
+    max-width: 20rem;
+}
+
+/* Only the chosen chip's fields are on screen. */
+.ctr-chip-pane {
+    display: none;
+}
+
+.ctr-chip-pane.ctr-chip-pane-active {
+    display: block;
+}
+
 .ctr-raw-json {
     max-height: 40rem;
     overflow: auto;

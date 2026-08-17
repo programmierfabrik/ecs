@@ -1,0 +1,20 @@
+{% comment %}
+    The widget dispatch for a list of CTIS entries, shared by a section and by
+    one chip's pane. Expects `entries`; renders each as an <li>, so the caller
+    provides the <ul>.
+{% endcomment %}
+{% for entry in entries %}
+    {% if entry.widget == 'table' %}
+        {% include "submissions/ctr/table.html" %}
+    {% elif entry.widget == 'docs' %}
+        {% include "submissions/ctr/docs.html" %}
+    {% elif entry.widget == 'doclist' %}
+        {% include "submissions/ctr/document_list.html" %}
+    {% elif entry.widget == 'chips' %}
+        {% include "submissions/ctr/chips.html" %}
+    {% elif entry.widget == 'message' %}
+        <li class="ctr-message">{{ entry.value }}</li>
+    {% else %}
+        {% include "submissions/ctr/field.html" %}
+    {% endif %}
+{% endfor %}

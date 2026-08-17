@@ -15,6 +15,7 @@ ecs.ctr = {
 
         this.initTextAreas();
         this.initPaneSelectors();
+        this.initChips();
         this.initDocumentVersions();
         this.initDocumentFilters();
     },
@@ -60,6 +61,28 @@ ecs.ctr = {
                         String(pane.data('pane')) === key);
                 });
                 ecs.ctr.updateTextAreas(tab);
+            });
+        });
+    },
+
+    // Chip and pane are matched by position, the way the classic centres tab
+    // matches a jump-list button to its investigator form.
+    initChips: function() {
+        $('.ctr-chips').each(function() {
+            var chips = $(this);
+            var buttons = chips.children('.ctr-chip-list').find('button');
+            var panes = chips.children('.ctr-chip-pane');
+
+            buttons.click(function(ev) {
+                ev.preventDefault();
+                var index = buttons.index(this);
+
+                buttons.removeClass('active');
+                $(this).addClass('active');
+                panes.each(function(i) {
+                    $(this).toggleClass('ctr-chip-pane-active', i === index);
+                });
+                ecs.ctr.updateTextAreas(panes.eq(index));
             });
         });
     },

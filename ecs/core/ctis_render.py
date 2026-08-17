@@ -180,6 +180,24 @@ class Docs:
 
 
 @dataclass
+class ChipGroup:
+    label: str
+    entries: list = dc_field(default_factory=list)
+
+
+@dataclass
+class Chips:
+    """
+    A set of like items shown one at a time, picked from a chip strip - what
+    the classic centres tab does with investigators. Stacking them instead
+    would repeat the same twenty labels once per item.
+    """
+    groups: list = dc_field(default_factory=list)
+    note: str = ''
+    widget: str = 'chips'
+
+
+@dataclass
 class Filter:
     key: str
     label: str
@@ -869,33 +887,39 @@ def _sponsor_sections(application):
         ], rows),
     ])]
 
-    for sponsor in sponsors:
+    # One contact point on screen at a time, picked by sponsor name.
+    groups = []
+    for i, sponsor in enumerate(sponsors):
         contact = sponsor.get('unionContactPoint') or {}
-        name = 'Contact Point for Union'
-        if len(sponsors) > 1:
-            name = '{} - {}'.format(name, _txt(sponsor.get('name')))
-        sections.append(Section(name=name, level=4, entries=[
-            Field('Organisation name', _txt(contact.get('organisationName'))),
-            # CTR-ECS shows an « Address » of its own next to the four address
-            # lines; the interface schema has no such key, so say so unless a
-            # later payload starts delivering one.
-            Field('Address', _txt(contact['address'])
-                  if 'address' in contact else NOT_RETRIEVABLE),
-            Field('Address line 1', _txt(contact.get('addressLine1'))),
-            Field('Address line 2', _txt(contact.get('addressLine2'))),
-            Field('Address line 3', _txt(contact.get('addressLine3'))),
-            Field('Address line 4', _txt(contact.get('addressLine4'))),
-            Field('Town/City', _txt(contact.get('city'))),
-            Field('Post code', _txt(contact.get('postCode'))),
-            Field('Country', _country(contact.get('country'))
-                  if contact.get('country') else NOT_PROVIDED),
-            Field('Functional contact point name',
-                  _txt(contact.get('functionalContactPointName'))),
-            Field('Firstname', _txt(contact.get('firstName'))),
-            Field('Lastname', _txt(contact.get('lastName'))),
-            Field('Phone', _txt(contact.get('phone'))),
-            Field('Email', _txt(contact.get('email'))),
-        ]))
+        groups.append(ChipGroup(
+            label=sponsor.get('name') or 'Sponsor {}'.format(i + 1),
+            entries=[
+                Field('Organisation name',
+                      _txt(contact.get('organisationName'))),
+                # CTR-ECS shows an « Address » of its own next to the four
+                # address lines; the interface schema has no such key, so say
+                # so unless a later payload starts delivering one.
+                Field('Address', _txt(contact['address'])
+                      if 'address' in contact else NOT_RETRIEVABLE),
+                Field('Address line 1', _txt(contact.get('addressLine1'))),
+                Field('Address line 2', _txt(contact.get('addressLine2'))),
+                Field('Address line 3', _txt(contact.get('addressLine3'))),
+                Field('Address line 4', _txt(contact.get('addressLine4'))),
+                Field('Town/City', _txt(contact.get('city'))),
+                Field('Post code', _txt(contact.get('postCode'))),
+                Field('Country', _country(contact.get('country'))
+                      if contact.get('country') else NOT_PROVIDED),
+                Field('Functional contact point name',
+                      _txt(contact.get('functionalContactPointName'))),
+                Field('Firstname', _txt(contact.get('firstName'))),
+                Field('Lastname', _txt(contact.get('lastName'))),
+                Field('Phone', _txt(contact.get('phone'))),
+                Field('Email', _txt(contact.get('email'))),
+            ]))
+
+    if groups:
+        sections.append(Section(name='Contact Point for Union', level=4,
+                                entries=[Chips(groups=groups)]))
     return sections
 
 
