@@ -225,12 +225,7 @@ class Section:
 
 @dataclass
 class Pane:
-    """
-    One switchable variant of a subtab's content. Everything but Part II has
-    a single unkeyed pane; Part II has one pane per member state, switched by
-    the country selector above the third-level tabs.
-    """
-    key: str = ''
+    """One subtab's content."""
     sections: list = dc_field(default_factory=list)
 
 
@@ -242,20 +237,10 @@ class SubTab:
 
 
 @dataclass
-class Choice:
-    key: str
-    label: str
-
-
-@dataclass
 class Tab:
     slug: str
     name: str
     subtabs: list = dc_field(default_factory=list)
-    # non-empty only for Part II: the country selector shown above the
-    # third-level tabs, switching every subtab's pane at once.
-    pane_choices: list = dc_field(default_factory=list)
-    pane_selector_label: str = ''
 
     @property
     def has_subtab_strip(self):
@@ -513,16 +498,12 @@ def _docs(label, documents, families=None, note='', labels=None, **filters):
 
     `families` names the kinds to show, in order, and every one is emitted even
     when empty, so a reviewer sees what CTIS holds nothing for rather than a
-    silently shorter list. With no `families` the groups are whichever kinds
-    the matching documents have, in payload order. `labels` overrides a kind's
-    heading where CTR-ECS words it differently from the whitelist.
+    silently shorter list. With no `families` only the kinds the matching
+    documents actually have are shown, in alphabetical order - the payload's
+    own order is not stable enough to read a page by twice. `labels` overrides
+    a kind's heading where CTR-ECS words it differently from the whitelist.
     """
     matching = [d for d in documents if _doc_matches(d, **filters)]
-
-    if families is None:
-        keys = list(dict.fromkeys(d.family or d.type_code for d in matching))
-    else:
-        keys = list(families)
 
     def name_of(key):
         if labels and key in labels:
@@ -535,6 +516,11 @@ def _docs(label, documents, families=None, note='', labels=None, **filters):
             if not d.family and d.type_code == key:
                 return d.category
         return key
+
+    if families is None:
+        keys = sorted({d.family or d.type_code for d in matching}, key=name_of)
+    else:
+        keys = list(families)
 
     # Strictly the asked-for kinds: a widget scoped to one kind must not absorb
     # every other document that happens to share its part. Nothing goes missing
@@ -1093,30 +1079,12 @@ def _part1_tab(application, part1, documents):
 
 # ─── tab 4: Part II (country-specific) ───────────────────────────────────
 
-def _country_details_sections(part2):
-    return [Section(entries=[
-        Field('Member state', _country(part2.get('mscCountryCode'))),
-        Field('Subjects to be recruited',
-              _txt(part2.get('recruitmentSubjectCount'))),
-        Field('Submission date', _date(part2.get('submissionDate'))),
-    ])]
-
-
 def _part2_available(part2):
     """
     Part2.isAvailable() in the interface contract: a member state that has not
     submitted yet carries no assessable content.
     """
     return bool(part2.get('submissionDate'))
-
-
-def _part2_key(part2):
-    """
-    A pane key per Part II. Not the country code - an application can carry
-    more than one Part II for the same member state, which the contract's own
-    `hasRelevantPart2` is written for.
-    """
-    return str(part2.get('id') or '')
 
 
 def _trial_site_sections(part2):
@@ -1129,63 +1097,62 @@ def _trial_site_sections(part2):
             Cell(_words(investigator.get('titleName'),
                         investigator.get('firstName'),
                         investigator.get('lastName'))),
-            Cell(_txt(investigator.get('email'))),
-            Cell(_txt(investigator.get('phoneNumber'))),
             Cell(_txt(organisation.get('name'))),
-            Cell(_txt(site.get('departmentName'))),
-            Cell(_lines(address.get('line1'), address.get('line2'),
-                        address.get('line3'), address.get('line4'))),
+            # TODO confirm: CTR-ECS shows « Site location » next to the street
+            # address, and the contract's only address lines are line1..line4.
+            # Reading line 1 as the location and the rest as the street is the
+            # one split that fills both columns; nothing states it.
+            Cell(_txt(address.get('line1'))),
+            Cell(_lines(address.get('line2'), address.get('line3'),
+                        address.get('line4'))),
             Cell(_txt(address.get('city'))),
             Cell(_txt(address.get('zipCode'))),
             # A site address carries a country *name*, unlike mscCountryCode
             # and the member states, which are two-letter codes.
             Cell(_txt(address.get('country'))),
+            Cell(_txt(site.get('departmentName'))),
+            Cell(_txt(investigator.get('phoneNumber'))),
+            Cell(_txt(investigator.get('email'))),
             Cell(_txt(organisation.get('id'))),
         ])
 
-    return [Section(name='Trial sites', entries=[
+    return [Section(name='Trial sites', level=4, entries=[
         _table('', [
             'Contact',
-            'E-mail',
-            'Phone',
             'Org name',
-            'Department',
+            'Site location',
             'Site street address',
             'Site city',
             'Site post code',
             'Site country',
+            'Department',
+            'Phone',
+            'E-mail',
             'Org ID',
         ], rows),
     ])]
 
 
 def _part2_document_sections(part2, documents):
-    # The country's Part II documents are the ones it references by id.
+    # The country's Part II documents are the ones it references by id. Only
+    # the kinds it actually holds are shown - CTR-ECS lists no empty group
+    # here, unlike the Part I sections with their fixed kind lists.
     ids = set(part2.get('documentIds') or [])
-    return [Section(name='Documents', entries=[
+    return [Section(name='Documents', level=4, entries=[
         _docs('', documents, ids=ids),
     ])]
 
 
-def _part2_choices(part2s):
+def _part2_label(part2, duplicate_country):
     """
-    One selector entry per Part II. Two of them can name the same member
-    state, so those get their submission date alongside the country to tell
-    them apart rather than reading as a duplicate button.
+    A member state names its own chip. Two Part IIs can name the same state,
+    so those carry their submission date as well rather than reading as two
+    identical chips.
     """
-    counts = {}
-    for part2 in part2s:
-        code = part2.get('mscCountryCode')
-        counts[code] = counts.get(code, 0) + 1
-
-    choices = []
-    for part2 in part2s:
-        code = part2.get('mscCountryCode')
-        label = _country(code)
-        if counts.get(code, 0) > 1:
-            label = '{} ({})'.format(label, _date(part2.get('submissionDate')))
-        choices.append(Choice(key=_part2_key(part2), label=label))
-    return choices
+    label = _country(part2.get('mscCountryCode'))
+    if duplicate_country:
+        label = '{} ({})'.format(label, _date(part2.get('submissionDate')))
+    return label
 
 
 def _part2_tab(part2s, documents, selected_country=None):
@@ -1194,35 +1161,39 @@ def _part2_tab(part2s, documents, selected_country=None):
 
     if not part2s:
         return Tab('part2', 'Part II', subtabs=[
-            SubTab('part2-country-details', 'Country details', panes=[
+            SubTab('part2-all', 'Part II', panes=[
                 Pane(sections=[Section(entries=[
                     Field('Member state', NOT_PROVIDED)])])]),
         ])
 
-    choices = _part2_choices(part2s)
-    keys_by_country = {}
+    counts = {}
     for part2 in part2s:
-        keys_by_country.setdefault(part2.get('mscCountryCode'), _part2_key(part2))
+        code = part2.get('mscCountryCode')
+        counts[code] = counts.get(code, 0) + 1
 
-    # The ethics commission's own country is preselected when the trial
-    # includes it; otherwise fall back to the first delivered one. A country
-    # with two Part IIs preselects the first of them.
-    default = (keys_by_country.get(selected_country)
-               or keys_by_country.get(OWN_COUNTRY)
-               or choices[0].key)
-    choices.sort(key=lambda c: (c.key != default, c.label))
+    # The first chip is the open one: the country asked for, else the ethics
+    # commission's own, else whichever the interface delivered first. A country
+    # with two Part IIs opens on the first of them.
+    def order(part2):
+        code = part2.get('mscCountryCode')
+        rank = 0 if code == selected_country else 1 if code == OWN_COUNTRY else 2
+        return (rank, _part2_label(part2, counts[code] > 1))
 
-    def panes(build):
-        return [Pane(key=_part2_key(p), sections=build(p)) for p in part2s]
+    groups = []
+    for part2 in sorted(part2s, key=order):
+        country = _country(part2.get('mscCountryCode'))
+        label = _part2_label(part2, counts[part2.get('mscCountryCode')] > 1)
+        # The heading names the member state; telling two of them apart is the
+        # chip's job, so the submission date does not repeat here.
+        groups.append(ChipGroup(label=label, sections=(
+            [Section(name='Country specific details (Part II - {})'.format(country))]
+            + _trial_site_sections(part2)
+            + _part2_document_sections(part2, documents))))
 
-    return Tab('part2', 'Part II', pane_choices=choices,
-               pane_selector_label='Mitgliedsstaat', subtabs=[
-        SubTab('part2-country-details', 'Country details',
-               panes=panes(_country_details_sections)),
-        SubTab('part2-trial-sites', 'Trial sites',
-               panes=panes(_trial_site_sections)),
-        SubTab('part2-documents', 'Documents',
-               panes=panes(lambda p: _part2_document_sections(p, documents))),
+    return Tab('part2', 'Part II', subtabs=[
+        SubTab('part2-all', 'Part II', panes=[
+            Pane(sections=[Section(entries=[Chips(groups=groups)])]),
+        ]),
     ])
 
 
@@ -1275,7 +1246,6 @@ def build_ctr_view(trial, documents=None, selected_country=None,
         # blowing up.
         return {
             'ctr_tabs': [],
-            'ctr_selected_pane': None,
             'ctr_payload_unusable': True,
         }
 
@@ -1293,11 +1263,7 @@ def build_ctr_view(trial, documents=None, selected_country=None,
         _unterlagen_tab(entries),
     ]
 
-    part2_tab = tabs[3]
-    selected = part2_tab.pane_choices[0].key if part2_tab.pane_choices else None
-
     return {
         'ctr_tabs': tabs,
-        'ctr_selected_pane': selected,
         'ctr_payload_unusable': False,
     }

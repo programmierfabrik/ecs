@@ -89,21 +89,6 @@
 
 /* ─── member-state selector ──────────────────────────────────────────── */
 
-.ctr-pane-selector {
-    display: flex;
-    align-items: center;
-    margin: 1rem 0;
-}
-
-/* Only the selected member state's pane is on screen. */
-.ctr-pane-keyed {
-    display: none;
-}
-
-.ctr-pane-keyed.ctr-pane-active {
-    display: block;
-}
-
 /* Chip strip, laid out like the classic centres tab's jump list - but the
    labels are never truncated: products share a « Comparator: » prefix and
    differ only at the end, so a cut-off chip is an unreadable chip. */
