@@ -191,13 +191,13 @@
       "recruitmentSubjectCount": 60,
       "submissionDate": "2025-04-02",
       "documentIds": [
-       "70000156",
-       "70000169",
-       "70000182",
-       "70000195",
-       "70000208",
-       "70000221",
-       "70000234"
+       "70000234",
+       "70000247",
+       "70000260",
+       "70000273",
+       "70000286",
+       "70000299",
+       "70000312"
       ],
       "trialSites": [
        {
@@ -235,12 +235,12 @@
       "recruitmentSubjectCount": 45,
       "submissionDate": "2025-04-14",
       "documentIds": [
-       "70000247",
-       "70000260",
-       "70000273",
-       "70000286",
-       "70000299",
-       "70000312"
+       "70000325",
+       "70000338",
+       "70000351",
+       "70000364",
+       "70000377",
+       "70000390"
       ],
       "trialSites": [
        {
@@ -333,8 +333,8 @@
    "estimatedLanguageCode": "EN",
    "estimatedPart": 1,
    "section": "Assess part I",
-   "title": "Cover letter",
-   "type": "Cover letter",
+   "title": "Cover letter (not for publication)",
+   "type": "Cover letter (not for publication)",
    "typeCode": "2",
    "versions": [
     {
@@ -344,7 +344,7 @@
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Cover letter",
+     "title": "Cover letter (not for publication)",
      "version": "1"
     }
    ]
@@ -354,8 +354,8 @@
    "estimatedLanguageCode": "EN",
    "estimatedPart": 1,
    "section": "Assess part I",
-   "title": "Proof of payment",
-   "type": "Proof of payment",
+   "title": "Proof of payment (not for publication)",
+   "type": "Proof of payment (not for publication)",
    "typeCode": "326",
    "versions": [
     {
@@ -365,7 +365,7 @@
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Proof of payment",
+     "title": "Proof of payment (not for publication)",
      "version": "1"
     }
    ]
@@ -459,8 +459,8 @@
    "estimatedLanguageCode": "EN",
    "estimatedPart": 1,
    "section": "Roles: Test Name: EXA-4711",
-   "title": "Investigator Brochure",
-   "type": "Investigator Brochure",
+   "title": "Investigator Brochure (not for publication)",
+   "type": "Investigator Brochure (not for publication)",
    "typeCode": "313",
    "versions": [
     {
@@ -470,7 +470,7 @@
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Investigator Brochure",
+     "title": "Investigator Brochure (not for publication)",
      "version": "1"
     }
    ]
@@ -480,8 +480,8 @@
    "estimatedLanguageCode": "EN",
    "estimatedPart": 1,
    "section": "Roles: Test Name: EXA-4711",
-   "title": "Investigational Medicinal Product Dossier: Safety and Efficacy",
-   "type": "Investigational Medicinal Product Dossier: Safety and Efficacy",
+   "title": "Investigational Medicinal Product Dossier: Safety and Efficacy (not for publication)",
+   "type": "Investigational Medicinal Product Dossier: Safety and Efficacy (not for publication)",
    "typeCode": "331",
    "versions": [
     {
@@ -491,7 +491,7 @@
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Investigational Medicinal Product Dossier: Safety and Efficacy",
+     "title": "Investigational Medicinal Product Dossier: Safety and Efficacy (not for publication)",
      "version": "1"
     }
    ]
@@ -501,8 +501,8 @@
    "estimatedLanguageCode": "EN",
    "estimatedPart": 1,
    "section": "Roles: Test Name: EXA-4711",
-   "title": "Content labelling of the IMPs",
-   "type": "Content labelling of the IMPs",
+   "title": "Content labelling of the IMPs (not for publication)",
+   "type": "Content labelling of the IMPs (not for publication)",
    "typeCode": "317",
    "versions": [
     {
@@ -512,7 +512,7 @@
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Content labelling of the IMPs",
+     "title": "Content labelling of the IMPs (not for publication)",
      "version": "1"
     }
    ]
@@ -561,6 +561,132 @@
   },
   {
    "documentId": "70000156",
+   "estimatedLanguageCode": "EN",
+   "estimatedPart": 1,
+   "section": "Assess part I",
+   "title": "Study design (not for publication)",
+   "type": "Study design (not for publication)",
+   "typeCode": "310",
+   "versions": [
+    {
+     "comment": null,
+     "documentUrl": "11111111-2222-4333-8444-000000001200",
+     "fromDate": "2024-01-10",
+     "mimeType": "PDF",
+     "submissionDate": "2025-01-10",
+     "systemVersion": 1,
+     "title": "Study design (not for publication)",
+     "version": "1"
+    }
+   ]
+  },
+  {
+   "documentId": "70000169",
+   "estimatedLanguageCode": "EN",
+   "estimatedPart": 1,
+   "section": "Assess part I",
+   "title": "Summary of scientific advice (not for publication)",
+   "type": "Summary of scientific advice (not for publication)",
+   "typeCode": "311",
+   "versions": [
+    {
+     "comment": null,
+     "documentUrl": "11111111-2222-4333-8444-000000001300",
+     "fromDate": "2024-01-10",
+     "mimeType": "PDF",
+     "submissionDate": "2025-01-10",
+     "systemVersion": 1,
+     "title": "Summary of scientific advice (not for publication)",
+     "version": "1"
+    }
+   ]
+  },
+  {
+   "documentId": "70000182",
+   "estimatedLanguageCode": "EN",
+   "estimatedPart": 1,
+   "section": "Assess part I",
+   "title": "Low Intervention Justification (not for publication)",
+   "type": "Low Intervention Justification (not for publication)",
+   "typeCode": "329",
+   "versions": [
+    {
+     "comment": null,
+     "documentUrl": "11111111-2222-4333-8444-000000001400",
+     "fromDate": "2024-01-10",
+     "mimeType": "PDF",
+     "submissionDate": "2025-01-10",
+     "systemVersion": 1,
+     "title": "Low Intervention Justification (not for publication)",
+     "version": "1"
+    }
+   ]
+  },
+  {
+   "documentId": "70000195",
+   "estimatedLanguageCode": "EN",
+   "estimatedPart": 1,
+   "section": "Assess part I",
+   "title": "Modification Description (not for publication)",
+   "type": "Modification Description (not for publication)",
+   "typeCode": "324",
+   "versions": [
+    {
+     "comment": null,
+     "documentUrl": "11111111-2222-4333-8444-000000001500",
+     "fromDate": "2024-01-10",
+     "mimeType": "PDF",
+     "submissionDate": "2025-01-10",
+     "systemVersion": 1,
+     "title": "Modification Description (not for publication)",
+     "version": "1"
+    }
+   ]
+  },
+  {
+   "documentId": "70000208",
+   "estimatedLanguageCode": "EN",
+   "estimatedPart": 1,
+   "section": "Assess part I",
+   "title": "Supporting information (not for publication)",
+   "type": "Supporting information (not for publication)",
+   "typeCode": "364",
+   "versions": [
+    {
+     "comment": null,
+     "documentUrl": "11111111-2222-4333-8444-000000001600",
+     "fromDate": "2024-01-10",
+     "mimeType": "PDF",
+     "submissionDate": "2025-01-10",
+     "systemVersion": 1,
+     "title": "Supporting information (not for publication)",
+     "version": "1"
+    }
+   ]
+  },
+  {
+   "documentId": "70000221",
+   "estimatedLanguageCode": "EN",
+   "estimatedPart": 1,
+   "section": "Assess part I",
+   "title": "PIP opinion - Extract (not for publication)",
+   "type": "PIP opinion - Extract (not for publication)",
+   "typeCode": "352",
+   "versions": [
+    {
+     "comment": null,
+     "documentUrl": "11111111-2222-4333-8444-000000001700",
+     "fromDate": "2024-01-10",
+     "mimeType": "PDF",
+     "submissionDate": "2025-01-10",
+     "systemVersion": 1,
+     "title": "PIP opinion - Extract (not for publication)",
+     "version": "1"
+    }
+   ]
+  },
+  {
+   "documentId": "70000234",
    "estimatedLanguageCode": "DE",
    "estimatedPart": 2,
    "section": "Assess part II",
@@ -570,7 +696,7 @@
    "versions": [
     {
      "comment": null,
-     "documentUrl": "11111111-2222-4333-8444-000000001200",
+     "documentUrl": "11111111-2222-4333-8444-000000001800",
      "fromDate": "2024-01-10",
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
@@ -581,7 +707,7 @@
    ]
   },
   {
-   "documentId": "70000169",
+   "documentId": "70000247",
    "estimatedLanguageCode": "DE",
    "estimatedPart": 2,
    "section": "Assess part II",
@@ -591,7 +717,7 @@
    "versions": [
     {
      "comment": null,
-     "documentUrl": "11111111-2222-4333-8444-000000001300",
+     "documentUrl": "11111111-2222-4333-8444-000000001900",
      "fromDate": "2024-01-10",
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
@@ -602,70 +728,70 @@
    ]
   },
   {
-   "documentId": "70000182",
+   "documentId": "70000260",
    "estimatedLanguageCode": "DE",
    "estimatedPart": 2,
    "section": "Assess part II",
-   "title": "Proof of insurance",
-   "type": "Proof of insurance",
+   "title": "Proof of insurance (not for publication)",
+   "type": "Proof of insurance (not for publication)",
    "typeCode": "318",
    "versions": [
     {
      "comment": null,
-     "documentUrl": "11111111-2222-4333-8444-000000001400",
+     "documentUrl": "11111111-2222-4333-8444-000000002000",
      "fromDate": "2024-01-10",
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Proof of insurance",
+     "title": "Proof of insurance (not for publication)",
      "version": "1"
     }
    ]
   },
   {
-   "documentId": "70000195",
+   "documentId": "70000273",
    "estimatedLanguageCode": "DE",
    "estimatedPart": 2,
    "section": "Assess part II",
-   "title": "Suitability of the investigator",
-   "type": "Suitability of the investigator",
+   "title": "Suitability of the investigator (not for publication)",
+   "type": "Suitability of the investigator (not for publication)",
    "typeCode": "321",
    "versions": [
     {
      "comment": null,
-     "documentUrl": "11111111-2222-4333-8444-000000001500",
+     "documentUrl": "11111111-2222-4333-8444-000000002100",
      "fromDate": "2024-01-10",
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Suitability of the investigator",
+     "title": "Suitability of the investigator (not for publication)",
      "version": "1"
     }
    ]
   },
   {
-   "documentId": "70000208",
+   "documentId": "70000286",
    "estimatedLanguageCode": "DE",
    "estimatedPart": 2,
    "section": "Assess part II",
-   "title": "Suitability of the clinical trial sites facilities",
-   "type": "Suitability of the clinical trial sites facilities",
+   "title": "Suitability of the clinical trial sites facilities (not for publication)",
+   "type": "Suitability of the clinical trial sites facilities (not for publication)",
    "typeCode": "319",
    "versions": [
     {
      "comment": null,
-     "documentUrl": "11111111-2222-4333-8444-000000001600",
+     "documentUrl": "11111111-2222-4333-8444-000000002200",
      "fromDate": "2024-01-10",
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Suitability of the clinical trial sites facilities",
+     "title": "Suitability of the clinical trial sites facilities (not for publication)",
      "version": "1"
     }
    ]
   },
   {
-   "documentId": "70000221",
+   "documentId": "70000299",
    "estimatedLanguageCode": "DE",
    "estimatedPart": 2,
    "section": "Assess part II",
@@ -675,7 +801,7 @@
    "versions": [
     {
      "comment": null,
-     "documentUrl": "11111111-2222-4333-8444-000000001700",
+     "documentUrl": "11111111-2222-4333-8444-000000002300",
      "fromDate": "2024-01-10",
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
@@ -686,28 +812,28 @@
    ]
   },
   {
-   "documentId": "70000234",
+   "documentId": "70000312",
    "estimatedLanguageCode": "DE",
    "estimatedPart": 2,
    "section": "Assess part II",
-   "title": "Compliance with national requirements on Data Protection",
-   "type": "Compliance with national requirements on Data Protection",
+   "title": "Compliance with national requirements on Data Protection (not for publication)",
+   "type": "Compliance with national requirements on Data Protection (not for publication)",
    "typeCode": "327",
    "versions": [
     {
      "comment": null,
-     "documentUrl": "11111111-2222-4333-8444-000000001800",
+     "documentUrl": "11111111-2222-4333-8444-000000002400",
      "fromDate": "2024-01-10",
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Compliance with national requirements on Data Protection",
+     "title": "Compliance with national requirements on Data Protection (not for publication)",
      "version": "1"
     }
    ]
   },
   {
-   "documentId": "70000247",
+   "documentId": "70000325",
    "estimatedLanguageCode": "DE",
    "estimatedPart": 2,
    "section": "Assess part II",
@@ -717,7 +843,7 @@
    "versions": [
     {
      "comment": null,
-     "documentUrl": "11111111-2222-4333-8444-000000001900",
+     "documentUrl": "11111111-2222-4333-8444-000000002500",
      "fromDate": "2024-01-10",
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
@@ -728,70 +854,70 @@
    ]
   },
   {
-   "documentId": "70000260",
+   "documentId": "70000338",
    "estimatedLanguageCode": "DE",
    "estimatedPart": 2,
    "section": "Assess part II",
-   "title": "Proof of insurance",
-   "type": "Proof of insurance",
+   "title": "Proof of insurance (not for publication)",
+   "type": "Proof of insurance (not for publication)",
    "typeCode": "318",
    "versions": [
     {
      "comment": null,
-     "documentUrl": "11111111-2222-4333-8444-000000002000",
+     "documentUrl": "11111111-2222-4333-8444-000000002600",
      "fromDate": "2024-01-10",
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Proof of insurance",
+     "title": "Proof of insurance (not for publication)",
      "version": "1"
     }
    ]
   },
   {
-   "documentId": "70000273",
+   "documentId": "70000351",
    "estimatedLanguageCode": "DE",
    "estimatedPart": 2,
    "section": "Assess part II",
-   "title": "Investigator CV",
-   "type": "Investigator CV",
+   "title": "Investigator CV (not for publication)",
+   "type": "Investigator CV (not for publication)",
    "typeCode": "320",
    "versions": [
     {
      "comment": null,
-     "documentUrl": "11111111-2222-4333-8444-000000002100",
+     "documentUrl": "11111111-2222-4333-8444-000000002700",
      "fromDate": "2024-01-10",
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Investigator CV",
+     "title": "Investigator CV (not for publication)",
      "version": "1"
     }
    ]
   },
   {
-   "documentId": "70000286",
+   "documentId": "70000364",
    "estimatedLanguageCode": "DE",
    "estimatedPart": 2,
    "section": "Assess part II",
-   "title": "Suitability of the investigator",
-   "type": "Suitability of the investigator",
+   "title": "Suitability of the investigator (not for publication)",
+   "type": "Suitability of the investigator (not for publication)",
    "typeCode": "321",
    "versions": [
     {
      "comment": null,
-     "documentUrl": "11111111-2222-4333-8444-000000002200",
+     "documentUrl": "11111111-2222-4333-8444-000000002800",
      "fromDate": "2024-01-10",
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Suitability of the investigator",
+     "title": "Suitability of the investigator (not for publication)",
      "version": "1"
     }
    ]
   },
   {
-   "documentId": "70000299",
+   "documentId": "70000377",
    "estimatedLanguageCode": "DE",
    "estimatedPart": 2,
    "section": "Assess part II",
@@ -801,7 +927,7 @@
    "versions": [
     {
      "comment": null,
-     "documentUrl": "11111111-2222-4333-8444-000000002300",
+     "documentUrl": "11111111-2222-4333-8444-000000002900",
      "fromDate": "2024-01-10",
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
@@ -812,22 +938,22 @@
    ]
   },
   {
-   "documentId": "70000312",
+   "documentId": "70000390",
    "estimatedLanguageCode": "DE",
    "estimatedPart": 2,
    "section": "Assess part II",
-   "title": "Compliance with use of Biological samples",
-   "type": "Compliance with use of Biological samples",
+   "title": "Compliance with use of Biological samples (not for publication)",
+   "type": "Compliance with use of Biological samples (not for publication)",
    "typeCode": "328",
    "versions": [
     {
      "comment": null,
-     "documentUrl": "11111111-2222-4333-8444-000000002400",
+     "documentUrl": "11111111-2222-4333-8444-000000003000",
      "fromDate": "2024-01-10",
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Compliance with use of Biological samples",
+     "title": "Compliance with use of Biological samples (not for publication)",
      "version": "1"
     }
    ]

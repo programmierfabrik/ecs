@@ -551,7 +551,7 @@
    "estimatedPart": 1,
    "section": "Roles: Test Name: Gazyvaro 1,000 mg concentrate for solution for infusion.",
    "title": "Investigator Brochure GAZ-1000",
-   "type": "Investigator Brochure",
+   "type": "Investigator Brochure (not for publication)",
    "typeCode": "313",
    "versions": [
     {
@@ -572,7 +572,7 @@
    "estimatedPart": 1,
    "section": "Roles: Test Name: Gazyvaro 1,000 mg concentrate for solution for infusion.",
    "title": "Labelling GAZ-1000",
-   "type": "Content labelling of the IMPs",
+   "type": "Content labelling of the IMPs (not for publication)",
    "typeCode": "317",
    "versions": [
     {
@@ -592,8 +592,8 @@
    "estimatedLanguageCode": "EN",
    "estimatedPart": 1,
    "section": "Roles: Test Name: Gazyvaro 1,000 mg concentrate for solution for infusion.",
-   "title": "Investigational Medicinal Product Dossier: Safety and Efficacy",
-   "type": "Investigational Medicinal Product Dossier: Safety and Efficacy",
+   "title": "Investigational Medicinal Product Dossier: Safety and Efficacy (not for publication)",
+   "type": "Investigational Medicinal Product Dossier: Safety and Efficacy (not for publication)",
    "typeCode": "331",
    "versions": [
     {
@@ -603,7 +603,7 @@
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Investigational Medicinal Product Dossier: Safety and Efficacy",
+     "title": "Investigational Medicinal Product Dossier: Safety and Efficacy (not for publication)",
      "version": "1"
     }
    ]
@@ -614,7 +614,7 @@
    "estimatedPart": 1,
    "section": "Roles: Comparator Name: PREDNISONE",
    "title": "Investigator Brochure PREDNISONE",
-   "type": "Investigator Brochure",
+   "type": "Investigator Brochure (not for publication)",
    "typeCode": "313",
    "versions": [
     {
@@ -635,7 +635,7 @@
    "estimatedPart": 1,
    "section": "Roles: Comparator Name: PREDNISONE",
    "title": "Labelling PREDNISONE",
-   "type": "Content labelling of the IMPs",
+   "type": "Content labelling of the IMPs (not for publication)",
    "typeCode": "317",
    "versions": [
     {
@@ -656,7 +656,7 @@
    "estimatedPart": 1,
    "section": "Roles: Comparator Name: PREDNISOLONE",
    "title": "Investigator Brochure PREDNISOLONE",
-   "type": "Investigator Brochure",
+   "type": "Investigator Brochure (not for publication)",
    "typeCode": "313",
    "versions": [
     {
@@ -677,7 +677,7 @@
    "estimatedPart": 1,
    "section": "Roles: Comparator Name: PREDNISOLONE",
    "title": "Labelling PREDNISOLONE",
-   "type": "Content labelling of the IMPs",
+   "type": "Content labelling of the IMPs (not for publication)",
    "typeCode": "317",
    "versions": [
     {
@@ -698,7 +698,7 @@
    "estimatedPart": 1,
    "section": "Roles: Auxiliary Name: RITUXIMAB",
    "title": "Investigator Brochure RITUXIMAB",
-   "type": "Investigator Brochure",
+   "type": "Investigator Brochure (not for publication)",
    "typeCode": "313",
    "versions": [
     {
@@ -719,7 +719,7 @@
    "estimatedPart": 1,
    "section": "Roles: Auxiliary Name: RITUXIMAB",
    "title": "Labelling RITUXIMAB",
-   "type": "Content labelling of the IMPs",
+   "type": "Content labelling of the IMPs (not for publication)",
    "typeCode": "317",
    "versions": [
     {
@@ -740,7 +740,7 @@
    "estimatedPart": 1,
    "section": "Roles: Auxiliary Name: TACROLIMUS",
    "title": "Investigator Brochure TACROLIMUS",
-   "type": "Investigator Brochure",
+   "type": "Investigator Brochure (not for publication)",
    "typeCode": "313",
    "versions": [
     {
@@ -761,7 +761,7 @@
    "estimatedPart": 1,
    "section": "Roles: Auxiliary Name: TACROLIMUS",
    "title": "Labelling TACROLIMUS",
-   "type": "Content labelling of the IMPs",
+   "type": "Content labelling of the IMPs (not for publication)",
    "typeCode": "317",
    "versions": [
     {
@@ -781,8 +781,8 @@
    "estimatedLanguageCode": "EN",
    "estimatedPart": 1,
    "section": "Assess part I",
-   "title": "Cover letter",
-   "type": "Cover letter",
+   "title": "Cover letter (not for publication)",
+   "type": "Cover letter (not for publication)",
    "typeCode": "2",
    "versions": [
     {
@@ -792,7 +792,7 @@
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Cover letter",
+     "title": "Cover letter (not for publication)",
      "version": "1"
     }
    ]
@@ -802,8 +802,8 @@
    "estimatedLanguageCode": "EN",
    "estimatedPart": 1,
    "section": "Assess part I",
-   "title": "Proof of payment",
-   "type": "Proof of payment",
+   "title": "Proof of payment (not for publication)",
+   "type": "Proof of payment (not for publication)",
    "typeCode": "326",
    "versions": [
     {
@@ -813,7 +813,7 @@
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Proof of payment",
+     "title": "Proof of payment (not for publication)",
      "version": "1"
     }
    ]
@@ -886,8 +886,8 @@
    "estimatedLanguageCode": "DE",
    "estimatedPart": 2,
    "section": "Assess part II",
-   "title": "Suitability of the investigator",
-   "type": "Suitability of the investigator",
+   "title": "Suitability of the investigator (not for publication)",
+   "type": "Suitability of the investigator (not for publication)",
    "typeCode": "321",
    "versions": [
     {
@@ -897,7 +897,7 @@
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Suitability of the investigator",
+     "title": "Suitability of the investigator (not for publication)",
      "version": "1"
     }
    ]
@@ -907,8 +907,8 @@
    "estimatedLanguageCode": "DE",
    "estimatedPart": 2,
    "section": "Assess part II",
-   "title": "Proof of insurance",
-   "type": "Proof of insurance",
+   "title": "Proof of insurance (not for publication)",
+   "type": "Proof of insurance (not for publication)",
    "typeCode": "318",
    "versions": [
     {
@@ -918,7 +918,7 @@
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Proof of insurance",
+     "title": "Proof of insurance (not for publication)",
      "version": "1"
     }
    ]
@@ -928,8 +928,8 @@
    "estimatedLanguageCode": "DE",
    "estimatedPart": 2,
    "section": "Assess part II",
-   "title": "Suitability of the clinical trial sites facilities",
-   "type": "Suitability of the clinical trial sites facilities",
+   "title": "Suitability of the clinical trial sites facilities (not for publication)",
+   "type": "Suitability of the clinical trial sites facilities (not for publication)",
    "typeCode": "319",
    "versions": [
     {
@@ -939,7 +939,7 @@
      "mimeType": "PDF",
      "submissionDate": "2025-01-10",
      "systemVersion": 1,
-     "title": "Suitability of the clinical trial sites facilities",
+     "title": "Suitability of the clinical trial sites facilities (not for publication)",
      "version": "1"
     }
    ]

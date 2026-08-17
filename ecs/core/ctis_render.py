@@ -19,6 +19,8 @@ from datetime import date, datetime
 
 from django_countries import countries
 
+from ecs.core import ctis_document_types
+
 # A value CTIS delivered as null/empty. The field stays visible with this
 # placeholder so a reviewer can tell nothing was silently dropped.
 NOT_PROVIDED = '– Keine Angaben –'
@@ -143,6 +145,7 @@ class DocEntry:
     title: str = ''
     type_code: str = ''             # the stable CTIS document-type code
     category: str = ''              # its label, as shown
+    family: str = ''                # the document kind the code is a variant of
     part: object = None             # 1 | 2 | None, as CTIS estimates it
     part_label: str = ''            # as shown, e.g. « Part I »
     section: str = ''               # raw CTIS section, e.g. « Review section A »
@@ -343,54 +346,35 @@ def _table(label, columns, rows, note=''):
 # document service alongside it. Each entry is a plain dict; every key is
 # read with .get() so a partial payload degrades instead of crashing.
 
-# CTIS types a document by a numeric `typeCode` and a `type` label. Grouping
-# keys off the code and takes its heading from here, so a renamed label
-# upstream does not silently split a group in two.
-#
-# Read off a real document list, so these 24 are confirmed - but they are only
-# the types that one trial happened to carry, not the whole CTIS taxonomy.
-# TODO: complete from the CTIS document-type list. Until it is complete, a
-# group of unknown types falls back to the label the payload carried, and a
-# type CTIS holds nothing for cannot be shown as « No document available »
-# because nothing names it.
-DOCUMENT_TYPES = {
-    '2': 'Cover letter',
-    '5': 'Protocol (not for publication)',
-    '7': 'Synopsis of the protocol (for publication)',
-    '10': 'Financial arrangements',
-    '14': 'Recruitment arrangements (for publication)',
-    '15': 'Subject information and informed consent form (for publication)',
-    '86': 'Part I Section 1 Introduction - Draft',
-    '88': 'Part I Section 3 Pre clinical Assessment - Draft',
-    '89': 'Part I Section 4 Clinical Assessment - Draft',
-    '90': 'Part I Section 5 Statistical Methodological Assessment - Draft',
-    '91': 'Part I Section 6 Regulatory Assessment - Draft',
-    '104': 'Protocol (for publication)',
-    '308': 'Synopsis of the protocol (not for publication)',
-    '313': 'Investigator Brochure',
-    '317': 'Content labelling of the IMPs',
-    '318': 'Proof of insurance',
-    '319': 'Suitability of the clinical trial sites facilities',
-    '320': 'Investigator CV',
-    '321': 'Suitability of the investigator',
-    '323': 'Subject information and informed consent form (not for publication)',
-    '326': 'Proof of payment',
-    '327': 'Compliance with national requirements on Data Protection',
-    '328': 'Compliance with use of Biological samples',
-    '331': 'Investigational Medicinal Product Dossier: Safety and Efficacy',
-}
-
 # Documents that belong to the application itself rather than to either part.
 # Not derivable from `estimatedPart` - a cover letter is estimated into Part I
-# like everything else - so the types are named.
-APPLICATION_DOC_TYPES = ('2', '326')
+# like everything else - so the kinds are named.
+APPLICATION_DOC_FAMILIES = (
+    'COVER_LETTER',
+    'DESCRIPTION_OF_MODIFICATION',
+    'SUPPORTING_INFORMATION',
+    'PROOF_OF_PAYMENT',
+)
 
-# The trial protocol, as Part I « Protocol information » shows it.
-PROTOCOL_DOC_TYPES = ('5', '104', '7', '308')
+# Part I « Protocol information ».
+PROTOCOL_DOC_FAMILIES = (
+    'PROTOCOL',
+    'SYNOPSIS_OF_THE_PROTOCOL',
+    'STUDY_DESIGN',
+)
+
+# Part I « Scientific advice and Paediatric Investigation Plan ». CTIS has no
+# document kind for a PIP itself, only an opinion extract - a PIP's own
+# documents arrive through part1.paediatricInvestigationPlan[].documentIds.
+SCIENTIFIC_ADVICE_DOC_FAMILIES = ('SUMMARY_OF_SCIENTIFIC_ADVICE',)
+PIP_DOC_FAMILIES = ('PIP_OPINION',)
+
+# Part I « Trial category », next to the low-intervention answer.
+LOW_INTERVENTION_DOC_FAMILIES = ('LOW_INTERVENTION_JUSTIFICATION',)
 
 # Listed once for the whole trial even though the documents hang off the
 # individual products.
-CONTENT_LABELLING_DOC_TYPES = ('317',)
+CONTENT_LABELLING_DOC_FAMILIES = ('CONTENT_LABELLING_OF_THE_IMPS',)
 
 # « Roles: {role} Name: {product name} » - how the document service names the
 # section of a document that belongs to one product of the trial.
@@ -401,7 +385,12 @@ _PART_LABELS = {1: 'Part I', 2: 'Part II'}
 
 
 def _doc_type_label(doc):
-    return (DOCUMENT_TYPES.get(str(doc.get('typeCode') or ''))
+    """
+    The whitelist's label, not the payload's - a payload sometimes drops the
+    « (not for publication) » qualifier, and an unknown code has no whitelist
+    entry at all, so fall back to whatever it sent.
+    """
+    return (ctis_document_types.TYPES.get(str(doc.get('typeCode') or ''))
             or doc.get('type') or NOT_PROVIDED)
 
 
@@ -448,6 +437,8 @@ def build_document_entries(documents, download_url=None):
             title=doc.get('title') or NOT_PROVIDED,
             type_code=str(doc.get('typeCode') or ''),
             category=_doc_type_label(doc),
+            family=ctis_document_types.FAMILIES.get(
+                str(doc.get('typeCode') or ''), ''),
             part=part,
             part_label=_PART_LABELS.get(part) or NOT_PROVIDED,
             section=section,
@@ -466,7 +457,7 @@ def build_document_entries(documents, download_url=None):
 
 
 def _doc_matches(doc, parts=None, ids=None, product_names=None,
-                 is_product=None, exclude_types=()):
+                 is_product=None, exclude_families=()):
     """
     `parts` is the set of `estimatedPart` values to keep - None is a value of
     its own there, so it has to be passed explicitly rather than meaning
@@ -481,41 +472,46 @@ def _doc_matches(doc, parts=None, ids=None, product_names=None,
         return False
     if product_names is not None and doc.product_name not in product_names:
         return False
-    if doc.type_code in exclude_types:
+    if doc.family in exclude_families:
         return False
     return True
 
 
-def _docs(label, documents, type_codes=None, note='', **filters):
+def _docs(label, documents, families=None, note='', **filters):
     """
-    Group documents by CTIS document type. `type_codes` names the groups to
-    show, in CTIS order, and every one of them is emitted even when empty, so
-    a reviewer sees which types CTIS holds nothing for rather than a silently
-    shorter list.
+    Group documents by document kind - not by `typeCode`, which is one code per
+    publication variant and would split « Protocol » into four groups.
 
-    With no `type_codes` the groups are whichever types the matching documents
-    have, in payload order - see DOCUMENT_TYPES.
+    `families` names the kinds to show, in order, and every one is emitted even
+    when empty, so a reviewer sees what CTIS holds nothing for rather than a
+    silently shorter list. With no `families` the groups are whichever kinds
+    the matching documents have, in payload order.
     """
     matching = [d for d in documents if _doc_matches(d, **filters)]
 
-    if type_codes is None:
-        codes = list(dict.fromkeys(d.type_code for d in matching))
+    if families is None:
+        keys = list(dict.fromkeys(d.family or d.type_code for d in matching))
     else:
-        codes = list(type_codes)
+        keys = list(families)
 
-    def name_of(code):
+    def name_of(key):
+        label = ctis_document_types.FAMILY_LABELS.get(key)
+        if label:
+            return label
+        # An unwhitelisted code is its own group, labelled as it arrived.
         for d in matching:
-            if d.type_code == code:
+            if not d.family and d.type_code == key:
                 return d.category
-        return DOCUMENT_TYPES.get(code) or code
+        return key
 
-    # Strictly the asked-for types: a widget scoped to one type must not
-    # absorb every other document that happens to share its part. Nothing goes
-    # missing because « Unterlagen » lists the application's documents in full.
+    # Strictly the asked-for kinds: a widget scoped to one kind must not absorb
+    # every other document that happens to share its part. Nothing goes missing
+    # because « Unterlagen » lists the application's documents in full.
     return Docs(label=label, note=note, groups=[
-        DocGroup(name=name_of(code),
-                 documents=[d for d in matching if d.type_code == code])
-        for code in codes
+        DocGroup(name=name_of(key),
+                 documents=[d for d in matching
+                            if (d.family or d.type_code) == key])
+        for key in keys
     ])
 
 
@@ -553,7 +549,7 @@ def _formular_tab(trial, application, documents):
     ])
 
     docs = Section(name='Documents', entries=[
-        _docs('', documents, APPLICATION_DOC_TYPES),
+        _docs('', documents, APPLICATION_DOC_FAMILIES),
     ])
 
     return Tab('formular', 'Formular', subtabs=[
@@ -684,9 +680,8 @@ def _trial_information_sections(part1, documents):
         Section(name='Trial information', level=4),
         Section(name='Trial category', level=5, entries=[
             Field('Category', category),
-            # TODO: DOCUMENT_TYPES pending - « Attachment of justification of
-            # low interventional clinical trial » is a document type whose
-            # code is not known yet, as in « Protocol information » below.
+            _docs('Attachment of justification of low interventional '
+                  'clinical trial', documents, LOW_INTERVENTION_DOC_FAMILIES),
             Field('Trial phase', _txt(part1.get('phase'))),
         ]),
         Section(name='Medical condition', level=5, entries=[
@@ -764,11 +759,11 @@ def _trial_information_sections(part1, documents):
 
 
 def _protocol_information_sections(documents):
-    # CTR-ECS labels this « Clinical trial protocol » and « Study design ».
-    # Neither is a CTIS document type; these four are what a real document
-    # list holds here. TODO: check against a screenshot.
+    # CTR-ECS labels this « Clinical trial protocol » and « Study design »;
+    # the whitelist's own kinds are Protocol, Synopsis of the protocol and
+    # Study design. TODO: check the headings against a screenshot.
     return [Section(name='Protocol information', level=4, entries=[
-        _docs('', documents, PROTOCOL_DOC_TYPES),
+        _docs('', documents, PROTOCOL_DOC_FAMILIES),
     ])]
 
 
@@ -798,7 +793,9 @@ def _scientific_advice_sections(part1, documents):
                 'ID',
                 'Competent authorities that have provided scientific advice',
             ], rows),
-            # TODO: DOCUMENT_TYPES pending, as in « Protocol information ».
+            _docs('', documents, SCIENTIFIC_ADVICE_DOC_FAMILIES),
+            _docs('Paediatric investigation plan', documents,
+                  PIP_DOC_FAMILIES),
         ])]
 
 
@@ -999,15 +996,15 @@ def _one_product_sections(role, product, documents):
                 for s in substances
             ]),
         ]),
-        # CTR-ECS shows each document type as a heading of its own over its
+        # CTR-ECS shows each document kind as a heading of its own over its
         # cards, not as a labelled row - the one place a non-section gets a
         # heading. Content labelling is sectioned per product like the rest
         # but listed once for the trial, so it is not repeated here.
-        # TODO: the full ordered type list is pending, so the groups shown
-        # are whichever types this product's documents have.
+        # TODO: which kinds a product shows, and in what order, still needs a
+        # screenshot; for now they are whichever kinds its documents have.
         Section(level=5, entries=[
             _docs('', documents, product_names=_product_names(role, product),
-                  exclude_types=CONTENT_LABELLING_DOC_TYPES),
+                  exclude_families=CONTENT_LABELLING_DOC_FAMILIES),
         ]),
     ]
 
@@ -1022,7 +1019,7 @@ def _product_sections(part1, documents):
     sections += [
         Section(name='Content Labelling', level=4),
         Section(name="Content labeling of the IMP's", level=5, entries=[
-            _docs('', documents, CONTENT_LABELLING_DOC_TYPES),
+            _docs('', documents, CONTENT_LABELLING_DOC_FAMILIES),
         ]),
     ]
     return sections
