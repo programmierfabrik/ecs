@@ -18,9 +18,16 @@
         {% endfor %}
     </ul>
     {% for group in entry.groups %}
-        <ul class="ctr-chip-pane list-unstyled mb-0{% if forloop.first %} ctr-chip-pane-active{% endif %}">
-            {% include "submissions/ctr/entries.html" with entries=group.entries %}
-        </ul>
+        <div class="ctr-chip-pane{% if forloop.first %} ctr-chip-pane-active{% endif %}">
+            {% if group.entries %}
+                <ul class="list-unstyled mb-0">
+                    {% include "submissions/ctr/entries.html" with entries=group.entries %}
+                </ul>
+            {% endif %}
+            {% for section in group.sections %}
+                {% include "submissions/ctr/section.html" %}
+            {% endfor %}
+        </div>
     {% endfor %}
     {% if entry.note %}
         <div class="text-muted">{{ entry.note }}</div>

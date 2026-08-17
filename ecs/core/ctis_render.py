@@ -181,8 +181,10 @@ class Docs:
 
 @dataclass
 class ChipGroup:
+    """One chip and what it shows: loose entries, whole sections, or both."""
     label: str
     entries: list = dc_field(default_factory=list)
+    sections: list = dc_field(default_factory=list)
 
 
 @dataclass
@@ -944,7 +946,7 @@ def _product_title(role, product):
     return _txt(role.get('description') or details.get('medicinalProductName'))
 
 
-def _one_product_sections(role, product, documents):
+def _product_chip(role, product, documents):
     details = product.get('productDetails') or {}
     substances = product.get('substances') or []
     dosage = product.get('dosage') or {}
@@ -974,9 +976,9 @@ def _one_product_sections(role, product, documents):
         Cell(_strings([s.get('substanceEvCode') for s in substances])),
     ]])
 
-    return [
-        Section(name='{}: {}'.format(_txt(role.get('name')), title),
-                level=4, entries=[summary]),
+    # The chip names the product, so the block below it does not repeat it.
+    return ChipGroup(label='{}: {}'.format(_txt(role.get('name')), title), sections=[
+        Section(level=4, entries=[summary]),
         Section(name='Details for Product with EU MP number {}'.format(_txt(number)),
                 level=5, entries=[
             Field('Role description', _txt(role.get('description'))),
@@ -1048,23 +1050,24 @@ def _one_product_sections(role, product, documents):
             _docs('', documents, product_names=_product_names(role, product),
                   exclude_families=CONTENT_LABELLING_DOC_FAMILIES),
         ]),
-    ]
+    ])
 
 
 def _product_sections(part1, documents):
-    sections = [Section(name='Products', level=3)]
+    chips = [_product_chip(role, product, documents)
+             for role in part1.get('medicinalProductRoles') or []
+             for product in role.get('products') or []]
 
-    for role in part1.get('medicinalProductRoles') or []:
-        for product in role.get('products') or []:
-            sections += _one_product_sections(role, product, documents)
-
-    sections += [
-        Section(name='Content Labelling', level=4),
-        Section(name="Content labeling of the IMP's", level=5, entries=[
+    return [
+        Section(name='Products', level=3,
+                entries=[Chips(groups=chips)] if chips else []),
+        # Content labelling is a trial-wide document list, so it stays outside
+        # the per-product chips - and it is nothing but that list, which is why
+        # it carries one heading rather than a heading over a heading.
+        Section(name="Content labeling of the IMP's", level=4, entries=[
             _docs('', documents, CONTENT_LABELLING_DOC_FAMILIES),
         ]),
     ]
-    return sections
 
 
 def _part1_tab(application, part1, documents):
