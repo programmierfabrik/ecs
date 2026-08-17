@@ -343,16 +343,54 @@ def _table(label, columns, rows, note=''):
 # document service alongside it. Each entry is a plain dict; every key is
 # read with .get() so a partial payload degrades instead of crashing.
 
-# CTIS types a document by a numeric `typeCode` and a `type` label. Only the
-# code is stable - the same code arrives with differently worded labels - so
-# grouping keys off the code and takes its heading from here.
+# CTIS types a document by a numeric `typeCode` and a `type` label. Grouping
+# keys off the code and takes its heading from here, so a renamed label
+# upstream does not silently split a group in two.
 #
-# TODO: fill from the CTIS document-type list. Until then the label falls back
-# to whatever `type` the entry carried, and a document group derives its
-# members from the data instead of naming the codes it expects. That means an
-# empty group is currently invisible rather than shown as « No document
-# available », and the group order follows the payload rather than CTIS.
-DOCUMENT_TYPES = {}
+# Read off a real document list, so these 24 are confirmed - but they are only
+# the types that one trial happened to carry, not the whole CTIS taxonomy.
+# TODO: complete from the CTIS document-type list. Until it is complete, a
+# group of unknown types falls back to the label the payload carried, and a
+# type CTIS holds nothing for cannot be shown as « No document available »
+# because nothing names it.
+DOCUMENT_TYPES = {
+    '2': 'Cover letter',
+    '5': 'Protocol (not for publication)',
+    '7': 'Synopsis of the protocol (for publication)',
+    '10': 'Financial arrangements',
+    '14': 'Recruitment arrangements (for publication)',
+    '15': 'Subject information and informed consent form (for publication)',
+    '86': 'Part I Section 1 Introduction - Draft',
+    '88': 'Part I Section 3 Pre clinical Assessment - Draft',
+    '89': 'Part I Section 4 Clinical Assessment - Draft',
+    '90': 'Part I Section 5 Statistical Methodological Assessment - Draft',
+    '91': 'Part I Section 6 Regulatory Assessment - Draft',
+    '104': 'Protocol (for publication)',
+    '308': 'Synopsis of the protocol (not for publication)',
+    '313': 'Investigator Brochure',
+    '317': 'Content labelling of the IMPs',
+    '318': 'Proof of insurance',
+    '319': 'Suitability of the clinical trial sites facilities',
+    '320': 'Investigator CV',
+    '321': 'Suitability of the investigator',
+    '323': 'Subject information and informed consent form (not for publication)',
+    '326': 'Proof of payment',
+    '327': 'Compliance with national requirements on Data Protection',
+    '328': 'Compliance with use of Biological samples',
+    '331': 'Investigational Medicinal Product Dossier: Safety and Efficacy',
+}
+
+# Documents that belong to the application itself rather than to either part.
+# Not derivable from `estimatedPart` - a cover letter is estimated into Part I
+# like everything else - so the types are named.
+APPLICATION_DOC_TYPES = ('2', '326')
+
+# The trial protocol, as Part I « Protocol information » shows it.
+PROTOCOL_DOC_TYPES = ('5', '104', '7', '308')
+
+# Listed once for the whole trial even though the documents hang off the
+# individual products.
+CONTENT_LABELLING_DOC_TYPES = ('317',)
 
 # « Roles: {role} Name: {product name} » - how the document service names the
 # section of a document that belongs to one product of the trial.
@@ -428,7 +466,7 @@ def build_document_entries(documents, download_url=None):
 
 
 def _doc_matches(doc, parts=None, ids=None, product_names=None,
-                 is_product=None):
+                 is_product=None, exclude_types=()):
     """
     `parts` is the set of `estimatedPart` values to keep - None is a value of
     its own there, so it has to be passed explicitly rather than meaning
@@ -442,6 +480,8 @@ def _doc_matches(doc, parts=None, ids=None, product_names=None,
     if is_product is not None and doc.is_product_document != is_product:
         return False
     if product_names is not None and doc.product_name not in product_names:
+        return False
+    if doc.type_code in exclude_types:
         return False
     return True
 
@@ -512,10 +552,8 @@ def _formular_tab(trial, application, documents):
               widget='list'),
     ])
 
-    # Application-level documents are the ones CTIS attributes to neither
-    # part - cover letter, proof of payment and the like.
     docs = Section(name='Documents', entries=[
-        _docs('', documents, parts=(None,)),
+        _docs('', documents, APPLICATION_DOC_TYPES),
     ])
 
     return Tab('formular', 'Formular', subtabs=[
@@ -726,12 +764,11 @@ def _trial_information_sections(part1, documents):
 
 
 def _protocol_information_sections(documents):
-    # TODO: DOCUMENT_TYPES pending - « Clinical trial protocol » and « Study
-    # design » are two document types, and which codes they are is not known
-    # yet. Until then their documents show up in « Documents » below, with the
-    # rest of Part I's.
+    # CTR-ECS labels this « Clinical trial protocol » and « Study design ».
+    # Neither is a CTIS document type; these four are what a real document
+    # list holds here. TODO: check against a screenshot.
     return [Section(name='Protocol information', level=4, entries=[
-        Message(NOT_PROVIDED),
+        _docs('', documents, PROTOCOL_DOC_TYPES),
     ])]
 
 
@@ -964,10 +1001,13 @@ def _one_product_sections(role, product, documents):
         ]),
         # CTR-ECS shows each document type as a heading of its own over its
         # cards, not as a labelled row - the one place a non-section gets a
-        # heading. TODO: DOCUMENT_TYPES pending, so the types shown are
-        # whichever ones this product's documents have.
+        # heading. Content labelling is sectioned per product like the rest
+        # but listed once for the trial, so it is not repeated here.
+        # TODO: the full ordered type list is pending, so the groups shown
+        # are whichever types this product's documents have.
         Section(level=5, entries=[
-            _docs('', documents, product_names=_product_names(role, product)),
+            _docs('', documents, product_names=_product_names(role, product),
+                  exclude_types=CONTENT_LABELLING_DOC_TYPES),
         ]),
     ]
 
@@ -979,13 +1019,11 @@ def _product_sections(part1, documents):
         for product in role.get('products') or []:
             sections += _one_product_sections(role, product, documents)
 
-    # Content labelling is listed once for the whole trial, not per product,
-    # even though its documents hang off the individual products.
-    # TODO: DOCUMENT_TYPES pending - which type code that is is not known yet,
-    # so this shows nothing rather than the wrong documents.
     sections += [
         Section(name='Content Labelling', level=4),
-        Section(name="Content labeling of the IMP's", level=5),
+        Section(name="Content labeling of the IMP's", level=5, entries=[
+            _docs('', documents, CONTENT_LABELLING_DOC_TYPES),
+        ]),
     ]
     return sections
 
