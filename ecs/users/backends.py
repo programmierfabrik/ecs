@@ -34,7 +34,6 @@ class KeycloakOIDCBackend(OIDCAuthenticationBackend):
         # "second-email" attribute (mapped to userinfo) first, falling back
         # to the regular email claim, before giving up.
         for email in (claims.get('second-email'), claims.get('email')):
-            print(email)
             if not email:
                 continue
             users = User.objects.filter(username=hash_email(email), is_active=True)
