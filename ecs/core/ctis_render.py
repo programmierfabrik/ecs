@@ -356,12 +356,21 @@ APPLICATION_DOC_FAMILIES = (
     'PROOF_OF_PAYMENT',
 )
 
-# Part I « Protocol information ».
+# Part I « Protocol information ». CTR-ECS heads the PROTOCOL group with CTIS's
+# own Part I wording rather than the whitelist label, which is just « Protocol ».
 PROTOCOL_DOC_FAMILIES = (
     'PROTOCOL',
-    'SYNOPSIS_OF_THE_PROTOCOL',
     'STUDY_DESIGN',
 )
+PROTOCOL_DOC_LABELS = {'PROTOCOL': 'Clinical trial protocol'}
+
+# TODO delete once confirmed: SYNOPSIS_OF_THE_PROTOCOL is a real whitelist kind
+# (codes 7, 57, 308 and 344), but CTR-ECS does not list it under « Protocol
+# information » - and since it does show empty groups, that absence is a
+# decision, not a trial without a synopsis. Hidden here rather than dropped
+# because nothing else confirms where the kind belongs. « Unterlagen » still
+# lists these documents.
+HIDDEN_PROTOCOL_DOC_FAMILIES = ('SYNOPSIS_OF_THE_PROTOCOL',)
 
 # Part I « Scientific advice and Paediatric Investigation Plan ». CTIS has no
 # document kind for a PIP itself, only an opinion extract - a PIP's own
@@ -477,7 +486,7 @@ def _doc_matches(doc, parts=None, ids=None, product_names=None,
     return True
 
 
-def _docs(label, documents, families=None, note='', **filters):
+def _docs(label, documents, families=None, note='', labels=None, **filters):
     """
     Group documents by document kind - not by `typeCode`, which is one code per
     publication variant and would split « Protocol » into four groups.
@@ -485,7 +494,8 @@ def _docs(label, documents, families=None, note='', **filters):
     `families` names the kinds to show, in order, and every one is emitted even
     when empty, so a reviewer sees what CTIS holds nothing for rather than a
     silently shorter list. With no `families` the groups are whichever kinds
-    the matching documents have, in payload order.
+    the matching documents have, in payload order. `labels` overrides a kind's
+    heading where CTR-ECS words it differently from the whitelist.
     """
     matching = [d for d in documents if _doc_matches(d, **filters)]
 
@@ -495,6 +505,8 @@ def _docs(label, documents, families=None, note='', **filters):
         keys = list(families)
 
     def name_of(key):
+        if labels and key in labels:
+            return labels[key]
         label = ctis_document_types.FAMILY_LABELS.get(key)
         if label:
             return label
@@ -765,7 +777,8 @@ def _protocol_information_sections(documents):
     # the whitelist's own kinds are Protocol, Synopsis of the protocol and
     # Study design. TODO: check the headings against a screenshot.
     return [Section(name='Protocol information', level=4, entries=[
-        _docs('', documents, PROTOCOL_DOC_FAMILIES),
+        _docs('', documents, PROTOCOL_DOC_FAMILIES,
+              labels=PROTOCOL_DOC_LABELS),
     ])]
 
 
