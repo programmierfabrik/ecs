@@ -1064,7 +1064,7 @@ def _product_sections(part1, documents):
         # Content labelling is a trial-wide document list, so it stays outside
         # the per-product chips - and it is nothing but that list, which is why
         # it carries one heading rather than a heading over a heading.
-        Section(name="Content labeling of the IMP's", level=4, entries=[
+        Section(name='Content Labelling', level=4, entries=[
             _docs('', documents, CONTENT_LABELLING_DOC_FAMILIES),
         ]),
     ]

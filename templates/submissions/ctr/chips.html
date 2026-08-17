@@ -11,7 +11,7 @@
     <ul class="ctr-chip-list list-unstyled">
         {% for group in entry.groups %}
             <li class="btn-group mr-2 mb-2 readonly">
-                <button type="button" class="btn btn-outline-primary text-truncate{% if forloop.first %} active{% endif %}">
+                <button type="button" class="btn btn-outline-primary{% if forloop.first %} active{% endif %}">
                     {{ group.label }}
                 </button>
             </li>

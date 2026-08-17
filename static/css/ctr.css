@@ -104,13 +104,16 @@
     display: block;
 }
 
-/* Chip strip, sized like the classic centres tab's jump list. */
+/* Chip strip, laid out like the classic centres tab's jump list - but the
+   labels are never truncated: products share a « Comparator: » prefix and
+   differ only at the end, so a cut-off chip is an unreadable chip. */
 .ctr-chip-list {
     margin-bottom: 1rem;
 }
 
 .ctr-chip-list button {
-    max-width: 20rem;
+    white-space: normal;
+    text-align: left;
 }
 
 /* Only the chosen chip's fields are on screen. */
