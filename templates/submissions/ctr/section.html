@@ -1,0 +1,30 @@
+{# One CTIS section: a heading plus its fields, tables and document lists. #}
+<div class="ctr-section"{% if section.anchor %} id="{{ section.anchor }}"{% endif %}>
+    {% if section.name %}
+        {% if section.level == 5 %}
+            <h5 class="my-3">{{ section.name }}</h5>
+        {% elif section.level == 4 %}
+            <h4 class="my-3">{{ section.name }}</h4>
+        {% else %}
+            <h3 class="my-4">{{ section.name }}</h3>
+        {% endif %}
+    {% endif %}
+    {% if section.note %}
+        <div class="text-muted mb-2">{{ section.note }}</div>
+    {% endif %}
+    <ul class="list-unstyled mb-0">
+        {% for entry in section.entries %}
+            {% if entry.widget == 'table' %}
+                {% include "submissions/ctr/table.html" %}
+            {% elif entry.widget == 'docs' %}
+                {% include "submissions/ctr/docs.html" %}
+            {% elif entry.widget == 'doclist' %}
+                {% include "submissions/ctr/document_list.html" %}
+            {% elif entry.widget == 'message' %}
+                <li class="ctr-message">{{ entry.value }}</li>
+            {% else %}
+                {% include "submissions/ctr/field.html" %}
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>

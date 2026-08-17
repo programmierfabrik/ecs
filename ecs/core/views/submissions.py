@@ -26,6 +26,8 @@ from ecs.core.models import (
     Submission, SubmissionForm, CTRSubmissionForm, Investigator, TemporaryAuthorization,
     MedicalCategory, EthicsCommission,
 )
+from ecs.core.ctis import fetch_ctis_document
+from ecs.core.ctis_render import build_ctr_view
 from ecs.core.tasks import generate_submission_preview
 from ecs.checklists.models import ChecklistBlueprint, Checklist
 from ecs.meetings.models import Meeting
@@ -360,6 +362,18 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
         'sync_form': CTISNumberForm() if ctr_submission_form else None,
     }
 
+    if ctr_submission_form:
+        context.update(build_ctr_view(
+            ctr_submission_form.application,
+            ctr_submission_form.documents,
+            selected_country=request.GET.get('country') or None,
+            download_url=lambda document_id: reverse(
+                'core.submission.download_ctr_document', kwargs={
+                    'ctr_submission_form_pk': ctr_submission_form.pk,
+                    'document_id': document_id,
+                }),
+        ))
+
     if not ctr_submission_form:
         center_close_notifications = CenterCloseNotification.objects.filter(
             answer__published_at__isnull=False, answer__is_rejected=False,
@@ -428,6 +442,27 @@ def download_document(request, submission_form_pk=None, document_pk=None, view=F
 
 def view_document(request, submission_form_pk=None, document_pk=None):
     return download_document(request, submission_form_pk, document_pk, view=True)
+
+
+def download_ctr_document(request, ctr_submission_form_pk=None, document_id=None):
+    ctr_submission_form = get_object_or_404(CTRSubmissionForm, pk=ctr_submission_form_pk)
+
+    # Only keys this form actually references may be fetched - otherwise the
+    # view would be an open proxy to the whole CTIS document service. A
+    # document's content hangs off its versions, each with its own
+    # `documentUrl` handle; the document itself is not downloadable.
+    known_ids = set()
+    for document in ctr_submission_form.documents or []:
+        for version in document.get('versions') or []:
+            known_ids.add(version.get('documentUrl'))
+    if document_id not in known_ids:
+        raise Http404
+
+    document = fetch_ctis_document(document_id)
+    response = HttpResponse(document['content'], content_type=document['mime_type'])
+    response['Content-Disposition'] = 'attachment; filename="{}"'.format(
+        document['filename'])
+    return response
 
 
 @task_required

@@ -1,0 +1,11 @@
+{# Second-level tab strip on the CTIS path, replacing the classic form tabs. #}
+{% if ctr_payload_unusable %}
+    <li class="nav-item">
+        <a class="nav-link" href="#ctr-payload">Antragsdaten</a>
+    </li>
+{% endif %}
+{% for tab in ctr_tabs %}
+    <li class="nav-item">
+        <a class="nav-link" href="#ctr-{{ tab.slug }}">{{ tab.name }}</a>
+    </li>
+{% endfor %}

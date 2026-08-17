@@ -16,9 +16,7 @@
         <div id="tabs_submission" class="collapse">
             <ul class="nav nav-tabs flex-wrap tab_headers mb-3">
                 {% if is_ctr %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="#tabs-1">Antragsdaten</a>
-                    </li>
+                    {% include "submissions/ctr/tab_headers.html" %}
                 {% else %}
                     {% for tab in tabs %}
                         <li class="nav-item">
@@ -35,21 +33,7 @@
       <div class="form_main{% if readonly %} readonly{% endif %}">
           {% block tabs %}
             {% if is_ctr %}
-                <div id="tabs-1" class="container collapse">
-                    <h3 class="my-4">Unterlagen</h3>
-                    {% if submission_form.documents %}
-                        <ul class="mb-3">
-                            {% for document in submission_form.documents %}
-                                <li>{{ document.title }} ({{ document.section }} - {{ document.type }})</li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="text-muted">Keine Unterlagen.</p>
-                    {% endif %}
-
-                    <h3 class="my-4">Antragsdaten (roh)</h3>
-                    <pre>{{ submission_form.application|pprint }}</pre>
-                </div>
+                {% include "submissions/ctr/tabs.html" %}
             {% else %}
             {% for tab in tabs %}
                 <div id="tabs-{{ forloop.counter }}" class="collapse {% if tab.slug != 'measures' %}container{% endif %}">

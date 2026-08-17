@@ -1,0 +1,28 @@
+{% comment %}
+    One read-only CTIS value, laid out like submissions/field.html and using
+    the same readonly form controls, so the CTIS path looks like the classic
+    submission form. `entry` is a ctis_render.Field.
+{% endcomment %}
+<li class="form-group row">
+    <label class="col-md-3 col-form-label">
+        <span>{{ entry.label }}</span>
+    </label>
+    <div class="col-md-9">
+        {% if entry.widget == 'text' %}
+            <input class="form-control" type="text" readonly
+                   {% if entry.is_placeholder %}
+                       placeholder="{{ entry.value }}"
+                   {% else %}
+                       value="{{ entry.value }}"
+                   {% endif %}>
+        {% else %}
+            {# textarea and list: one entry per line, height set by ecs.textarea #}
+            <textarea class="form-control ctr-textarea" readonly rows="{{ entry.rows }}"
+                      {% if entry.is_placeholder %}placeholder="{{ entry.value }}"{% endif %}
+            >{% if not entry.is_placeholder %}{{ entry.text }}{% endif %}</textarea>
+        {% endif %}
+        {% if entry.note %}
+            <div class="text-muted">{{ entry.note }}</div>
+        {% endif %}
+    </div>
+</li>

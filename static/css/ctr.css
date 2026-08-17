@@ -1,0 +1,110 @@
+/*
+ * CTIS submission path: read-only rendering of an imported CTIS trial.
+ *
+ * Fields, tables and headings deliberately carry no sizing of their own -
+ * they use the same Bootstrap classes and readonly form controls as the
+ * classic submission form so both paths look the same. Only what the
+ * classic form has no equivalent for is styled here.
+ */
+
+/* Readonly values are never editable, so don't invite a resize drag.
+   ecs.textarea.TextArea sets the height from the content. */
+.ctr-textarea {
+    resize: none;
+    overflow: hidden;
+}
+
+/* ─── data tables ────────────────────────────────────────────────────── */
+
+.ctr-data-table th {
+    vertical-align: bottom;
+    white-space: nowrap;
+}
+
+.ctr-data-table td {
+    vertical-align: top;
+}
+
+/* Trial-site and product tables are wide enough to scroll horizontally,
+   and the contact/role column is what orients you while it does. */
+.ctr-data-table th:first-child,
+.ctr-data-table td:first-child {
+    position: sticky;
+    left: 0;
+    background-color: #fff;
+    box-shadow: 1px 0 0 rgba(0, 0, 0, .08);
+}
+
+/* ─── document cards ─────────────────────────────────────────────────── */
+
+.ctr-doc-group {
+    margin-bottom: .75rem;
+}
+
+.ctr-doc-group-name {
+    font-weight: 600;
+    color: #555;
+    margin-bottom: .25rem;
+}
+
+.ctr-doc {
+    padding: .5rem .75rem;
+    border: 1px solid rgba(0, 0, 0, .1);
+    border-radius: .25rem;
+    background-color: #fbfbfb;
+    margin-bottom: .35rem;
+}
+
+.ctr-doc-title {
+    font-weight: 600;
+}
+
+.ctr-doc-meta {
+    color: #777;
+}
+
+.ctr-doc-empty {
+    display: inline-block;
+    padding: .2rem .6rem;
+    font-style: italic;
+    color: #8a8a8a;
+    background-color: #f1f1f1;
+    border-radius: 1rem;
+}
+
+/* Previous versions stay folded away until asked for. */
+.ctr-doc-versions {
+    display: none;
+    color: #777;
+    margin: .25rem 0 0 1rem;
+}
+
+.ctr-doc-versions.show {
+    display: block;
+}
+
+.ctr-doclist-filters {
+    margin-bottom: .75rem;
+}
+
+/* ─── member-state selector ──────────────────────────────────────────── */
+
+.ctr-pane-selector {
+    display: flex;
+    align-items: center;
+    margin: 1rem 0;
+}
+
+/* Only the selected member state's pane is on screen. */
+.ctr-pane-keyed {
+    display: none;
+}
+
+.ctr-pane-keyed.ctr-pane-active {
+    display: block;
+}
+
+.ctr-raw-json {
+    max-height: 40rem;
+    overflow: auto;
+}

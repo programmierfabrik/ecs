@@ -1,0 +1,89 @@
+{# The flat, filterable « Unterlagen » list. `entry` is a ctis_render.DocList. #}
+<li class="ctr-doclist">
+    <div class="ctr-doclist-filters form-inline">
+        {% for filter in entry.filters %}
+            <label class="mr-3 mb-2">
+                <span class="mr-1">{{ filter.label }}</span>
+                <select class="form-control form-control-sm ctr-doc-filter" data-filter="{{ filter.key }}">
+                    <option value="">Alle</option>
+                    {% for option in filter.options %}
+                        <option value="{{ option }}">{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        {% endfor %}
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm ctr-data-table ctr-doclist-table">
+            <thead>
+                <tr>
+                    <th>Document</th>
+                    <th>Category</th>
+                    <th>Part</th>
+                    <th>Language</th>
+                    <th>System version</th>
+                    <th>From date</th>
+                    <th>Versions</th>
+                    <th>Source</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for document in entry.documents %}
+                    <tr data-category="{{ document.category }}"
+                        data-part="{{ document.part_label }}"
+                        data-language="{{ document.language }}"
+                        data-source="{{ document.source }}">
+                        <td>{{ document.title }}</td>
+                        <td>{{ document.category }}</td>
+                        <td>{{ document.part_label }}</td>
+                        <td>{{ document.language }}</td>
+                        <td>{{ document.system_version }}</td>
+                        <td>{{ document.from_date }}</td>
+                        <td>
+                            {% if document.versions %}
+                                <a class="ctr-doc-versions-toggle" href="#">
+                                    {{ document.versions|length }} frühere Version{{ document.versions|length|pluralize:"en" }} anzeigen
+                                </a>
+                                <ul class="ctr-doc-versions list-unstyled">
+                                    {% for version in document.versions %}
+                                        <li>
+                                            {{ version.system_version }} · ab {{ version.from_date }}
+                                            {% if version.url %}
+                                                <a href="{{ version.url }}">
+                                                    <span class="fa fa-download"></span>
+                                                </a>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                –
+                            {% endif %}
+                        </td>
+                        <td>{{ document.source }}</td>
+                        <td>
+                            {% if document.url %}
+                                <a href="{{ document.url }}">
+                                    <span class="fa fa-download"></span>
+                                    Download
+                                </a>
+                            {% else %}
+                                –
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr class="ctr-doclist-empty">
+                        <td colspan="9" class="text-center text-muted">– Keine Angaben –</td>
+                    </tr>
+                {% endfor %}
+                <tr class="ctr-doclist-nomatch" hidden>
+                    <td colspan="9" class="text-center text-muted">
+                        Keine Unterlagen entsprechen der Filterauswahl.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</li>

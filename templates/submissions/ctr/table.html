@@ -1,0 +1,51 @@
+{% comment %}
+    A read-only CTIS table, in the same shape as forms/tables/inline_formset
+    (table table-sm, « no data available » when empty).
+
+    A labelled table is a labelled value like any other, so it sits in the
+    same two-column form row as a field rather than getting a heading of its
+    own - headings are for sections. An unlabelled table is its section's
+    only content and spans the full width.
+
+    `entry` is a ctis_render.Table.
+{% endcomment %}
+<li class="ctr-table{% if entry.label %} form-group row{% endif %}">
+    {% if entry.label %}
+        <label class="col-md-3 col-form-label">{{ entry.label }}</label>
+    {% endif %}
+    <div class="{% if entry.label %}col-md-9 {% endif %}table-responsive">
+        <table class="table table-sm ctr-data-table">
+            <thead>
+                <tr>
+                    {% for column in entry.columns %}
+                        <th>{{ column }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in entry.rows %}
+                    <tr>
+                        {% for cell in row %}
+                            <td>
+                                {% if cell.href %}
+                                    <a href="{{ cell.href }}">{% for line in cell.lines %}{{ line }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</a>
+                                {% else %}
+                                    {% for line in cell.lines %}{{ line }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td class="text-muted" colspan="{{ entry.columns|length }}">
+                            No data available
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if entry.note %}
+            <div class="text-muted">{{ entry.note }}</div>
+        {% endif %}
+    </div>
+</li>

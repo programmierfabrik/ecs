@@ -1,0 +1,31 @@
+{% comment %}
+    Document card list, grouped by CTIS category. Like a table, a labelled
+    document group sits in the same two-column form row as a field instead of
+    getting its own heading. `entry` is a ctis_render.Docs.
+{% endcomment %}
+<li class="ctr-docs{% if entry.label %} form-group row{% endif %}">
+    {% if entry.label %}
+        <label class="col-md-3 col-form-label">{{ entry.label }}</label>
+    {% endif %}
+    <div class="{% if entry.label %}col-md-9{% endif %}">
+        {% for group in entry.groups %}
+            <div class="ctr-doc-group">
+                {% if entry.groups|length > 1 or not entry.label %}
+                    <div class="ctr-doc-group-name">{{ group.name }}</div>
+                {% endif %}
+                {% if group.documents %}
+                    <ul class="list-unstyled mb-0">
+                        {% for document in group.documents %}
+                            {% include "submissions/ctr/document.html" %}
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <span class="ctr-doc-empty">No document available</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+        {% if entry.note %}
+            <div class="text-muted">{{ entry.note }}</div>
+        {% endif %}
+    </div>
+</li>

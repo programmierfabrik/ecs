@@ -1,0 +1,74 @@
+{% comment %}
+    The CTIS tab panels. Like the classic tabs the panel itself is full
+    width and only the content sits in a container, so the third-level tab
+    strip spans the whole view the way the strips above it do.
+
+    Two nesting levels live in here:
+    - the third-level tab strip (Bootstrap tabs, e.g. Part I › Sponsors), and
+    - panes, variants of the same content switched by a selector above the
+      strip (Part II › one pane per member state).
+{% endcomment %}
+{% if ctr_payload_unusable %}
+    <div id="ctr-payload" class="container collapse">
+        <div class="alert alert-warning mt-3">
+            <strong>Diese Studie enthält noch keine auswertbaren CTIS-Daten.</strong>
+            <div>
+                Der Import lieferte kein Antragsobjekt. Bitte die Studie erneut
+                mit der CTIS-Nummer synchronisieren.
+            </div>
+        </div>
+        <h3 class="my-4">Antragsdaten (roh)</h3>
+        <pre class="ctr-raw-json">{{ submission_form.application|pprint }}</pre>
+    </div>
+{% endif %}
+
+{% for tab in ctr_tabs %}
+    <div id="ctr-{{ tab.slug }}" class="collapse ctr-tab">
+        {% if tab.pane_choices %}
+            <div class="container">
+                <div class="ctr-pane-selector" data-tab="ctr-{{ tab.slug }}">
+                    <span class="mr-2 text-muted">{{ tab.pane_selector_label }}</span>
+                    <div class="btn-group btn-group-sm" role="group">
+                        {% for choice in tab.pane_choices %}
+                            <button type="button"
+                                    class="btn btn-outline-primary{% if choice.key == ctr_selected_pane %} active{% endif %}"
+                                    data-pane="{{ choice.key }}">
+                                {{ choice.label }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if tab.has_subtab_strip %}
+            <ul class="nav nav-tabs flex-wrap mb-3">
+                {% for subtab in tab.subtabs %}
+                    <li class="nav-item">
+                        <a class="nav-link{% if forloop.first %} active{% endif %}"
+                           data-toggle="tab" href="#ctr-{{ subtab.slug }}">
+                            {{ subtab.name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <div class="tab-content">
+            {% for subtab in tab.subtabs %}
+                <div class="tab-pane{% if forloop.first %} active{% endif %}" id="ctr-{{ subtab.slug }}">
+                    <div class="container">
+                        {% for pane in subtab.panes %}
+                            <div class="ctr-pane{% if pane.key %} ctr-pane-keyed{% if pane.key == ctr_selected_pane %} ctr-pane-active{% endif %}{% endif %}"
+                                 {% if pane.key %}data-pane="{{ pane.key }}"{% endif %}>
+                                {% for section in pane.sections %}
+                                    {% include "submissions/ctr/section.html" %}
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endfor %}

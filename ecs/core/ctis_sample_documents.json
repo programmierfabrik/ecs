@@ -1,0 +1,1156 @@
+[
+ {
+  "documentId": "40215847",
+  "estimatedLanguageCode": "EN",
+  "estimatedPart": null,
+  "section": "Review section A",
+  "title": "D2_Report EU ST 2024-624158-23-00_placeholder",
+  "type": "Summary (for disclosure)",
+  "typeCode": "207",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "4ac37fd9-94e5-4bda-971d-bd4fa07e3189",
+    "fromDate": "2024-08-15",
+    "mimeType": "TXT",
+    "submissionDate": "2024-11-19",
+    "systemVersion": 1,
+    "title": "D2_Report EU ST 2024-624158-23-00_placeholder",
+    "version": "3"
+   }
+  ]
+ },
+ {
+  "documentId": "40215845",
+  "estimatedLanguageCode": "EN",
+  "estimatedPart": 1,
+  "section": "Review section A",
+  "title": "A3_Response memo EU ST 2024-624158-23-00",
+  "type": "Memo documentation",
+  "typeCode": "4",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "19f34ced-23ca-5bd2-cd767-7fa9ecde3214",
+    "fromDate": "2024-11-02",
+    "mimeType": "DOCX",
+    "submissionDate": "2023-12-01",
+    "systemVersion": 1,
+    "title": "B2_Application form EU TR 2023-219845-11-05",
+    "version": "k.A."
+   }
+  ]
+ },
+ {
+  "documentId": "47291562",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 2,
+  "section": "Review section IV",
+  "title": "L2_PDS and ICF DE AB",
+  "type": "Participant details and consent document (not for distribution)",
+  "typeCode": "157",
+  "versions": [
+   {
+    "comment": "EX RFP-002",
+    "documentUrl": "6a82b1d5-3c92-4d91-b482-f52015b02ea5",
+    "fromDate": "2023-11-18",
+    "mimeType": "TXT",
+    "submissionDate": "2023-11-20",
+    "systemVersion": 1,
+    "title": "L2_PDS and ICF DE AB",
+    "version": "4.3"
+   }
+  ]
+ },
+ {
+  "documentId": "98157645",
+  "estimatedLanguageCode": "FR",
+  "estimatedPart": 1,
+  "section": "Review section III",
+  "title": "49278 REV II TG prRS 9 Laboratory",
+  "type": "Part II Section 7 Analysis Report - Proposal",
+  "typeCode": "76",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "a8d4c2fa-ff58-4b92-b8a3-8b4f6c254d91",
+    "fromDate": "2025-03-15",
+    "mimeType": "PDF",
+    "submissionDate": "2025-03-15",
+    "systemVersion": 1,
+    "title": "48291 BSS II IN rAS 7 Review",
+    "version": "1"
+   }
+  ]
+ },
+ {
+  "documentId": "40918734",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 1,
+  "section": "Roles: Study Name: 153Tm-XFG789",
+  "title": "L3_ Label IMP_ EN Ta89-RVG438",
+  "type": "Packaging details of the IMPs",
+  "typeCode": "294",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "c528e1d0-cc88-4a5b-a92f-d260f859417b",
+    "fromDate": "2025-01-08",
+    "mimeType": "DOCX",
+    "submissionDate": "2025-01-08",
+    "systemVersion": 1,
+    "title": "Z3_ Label IMP_ EN Ta89-RVG438",
+    "version": "1"
+   }
+  ]
+ },
+ {
+  "documentId": "50287146",
+  "estimatedLanguageCode": "FR",
+  "estimatedPart": 1,
+  "section": "Review phase A",
+  "title": "D2_ Study overview_FR EU CT 2024-728492-07-12",
+  "type": "Overview of the study (for release)",
+  "typeCode": "5",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "47390281-fa3c-4b78-81ef-8d6eab9abc12",
+    "fromDate": "2025-03-14",
+    "mimeType": "DOC",
+    "submissionDate": "2025-03-21",
+    "systemVersion": 1,
+    "title": "D2_ Study overview_FR EU CT 2024-728492-07-12",
+    "version": "2"
+   }
+  ]
+ },
+ {
+  "documentId": "50947283",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 1,
+  "section": "Critique segment A",
+  "title": "D2_ Study overview_ES EU CT 2024-728492-07-12",
+  "type": "Study summary (for distribution)",
+  "typeCode": "5",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "d5239f21-38c7-4c19-92cf-b3eb456ac8bf",
+    "fromDate": "2025-03-14",
+    "mimeType": "DOC",
+    "submissionDate": "2025-03-21",
+    "systemVersion": 1,
+    "title": "D4_ Study summary_DE EU CT 2025-275091-33-01",
+    "version": "2"
+   }
+  ]
+ },
+ {
+  "documentId": "50507891",
+  "estimatedLanguageCode": "DE",
+  "estimatedPart": 1,
+  "section": "Roles: Study Name: 153Tm-XFG789",
+  "title": "G2_ Report_A_B_89Sr-JKA456",
+  "type": "Clinical Trial Document: Results and Analysis",
+  "typeCode": "214",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "92d86f31-8a24-4e93-9f41-5eec77cbd832",
+    "fromDate": "2025-12-08",
+    "mimeType": "DOCX",
+    "submissionDate": "2025-12-15",
+    "systemVersion": 1,
+    "title": "G2_ Report_A_B_89Sr-JKA456",
+    "version": "2"
+   }
+  ]
+ },
+ {
+  "documentId": "50507893",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 2,
+  "section": "Evaluate section IV",
+  "title": "R3_Reference guide_FR",
+  "type": "Participant details and consent agreement (for release)",
+  "typeCode": "27",
+  "versions": [
+   {
+    "comment": "IN QVI-002",
+    "documentUrl": "f93ad227-babc-4729-81de-a4223f8c2207",
+    "fromDate": "2024-08-15",
+    "mimeType": "PDF",
+    "submissionDate": "2024-08-16",
+    "systemVersion": 2,
+    "title": "M5_Projektliste_DE",
+    "version": "2.0"
+   },
+   {
+    "comment": null,
+    "documentUrl": "d98561c4-bfd4-4b52-9216-1d56c8c9e6f7",
+    "fromDate": "2024-07-20",
+    "mimeType": "PDF",
+    "submissionDate": "2024-07-25",
+    "systemVersion": 1,
+    "title": "M5_Projektliste_DE",
+    "version": "2"
+   }
+  ]
+ },
+ {
+  "documentId": "50470982",
+  "estimatedLanguageCode": "EN",
+  "estimatedPart": 1,
+  "section": "Roles: Study Name: 153Tm-XFG789",
+  "title": "E7_IB_42Ao-BVX567",
+  "type": "Investigator Brochure ",
+  "typeCode": "215",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "a6743d83-426a-4b74-92c1-2b715f6c340a",
+    "fromDate": "2024-07-19",
+    "mimeType": "TXT",
+    "submissionDate": "2025-03-12",
+    "systemVersion": 1,
+    "title": "Z5_ AL 452 Lo-YTR849",
+    "version": "3"
+   }
+  ]
+ },
+ {
+  "documentId": "83499021",
+  "estimatedLanguageCode": "DE",
+  "estimatedPart": 1,
+  "section": "Review phase III",
+  "title": "3_INT_2025-834057-24-01_FTR",
+  "type": "Part III Section 4 Analysis - Final",
+  "typeCode": "72",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "b9a12e73-fd34-40f2-b436-7f02a1cff114",
+    "fromDate": "2025-06-15",
+    "mimeType": "XLSX",
+    "submissionDate": "2025-06-15",
+    "systemVersion": 1,
+    "title": "3_INT_2025-834057-24-01_FTR",
+    "version": "12"
+   }
+  ]
+ },
+ {
+  "documentId": "29047853",
+  "estimatedLanguageCode": "FR",
+  "estimatedPart": 1,
+  "section": "Evaluation section II",
+  "title": "Commitment to operational costs France",
+  "type": "Confirmation of payment",
+  "typeCode": "452",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "f291d123-1abc-4f84-bdef-9a7d931f5af3",
+    "fromDate": "2024-07-18",
+    "mimeType": "DOCX",
+    "submissionDate": "2024-08-11",
+    "systemVersion": 1,
+    "title": "Cost acceptance statement Germany",
+    "version": "k.A."
+   }
+  ]
+ },
+ {
+  "documentId": "50978621",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 2,
+  "section": "Review section IV",
+  "title": "L2_First Aid Record FR",
+  "type": "Participant details and consent agreement (for documentation)",
+  "typeCode": "22",
+  "versions": [
+   {
+    "comment": "individuals are advised to keep this guide available for urgent situations",
+    "documentUrl": "c2a4d8ef-7dec-4c91-ad72-e3cfc472bd54",
+    "fromDate": "2024-08-03",
+    "mimeType": "RTF",
+    "submissionDate": "2024-08-11",
+    "systemVersion": 1,
+    "title": "L2_First Aid Record FR",
+    "version": "2"
+   }
+  ]
+ },
+ {
+  "documentId": "40327619",
+  "estimatedLanguageCode": "EN",
+  "estimatedPart": 1,
+  "section": "Roles: Study Name: 153Tm-XFG789",
+  "title": "J5_Label_IMP_EN_Ac223-GRT891",
+  "type": "Content analysis of the IMPs ",
+  "typeCode": "428",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "3c21de34-5bc3-4b1a-83d5-264b1a3fc9e2",
+    "fromDate": "2025-11-13",
+    "mimeType": "PDF",
+    "submissionDate": "2025-11-13",
+    "systemVersion": 1,
+    "title": "J5_Label_IMP_EN_Ac223-GRT891",
+    "version": "1"
+   }
+  ]
+ },
+ {
+  "documentId": "40327743",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 2,
+  "section": "Evaluate section III",
+  "title": "L9_GCP deputy PI RMeadows Vienna",
+  "type": "Qualification of the researcher",
+  "typeCode": "428",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "d7f2189a-4df2-49e8-91a2-23ea89d520f7",
+    "fromDate": "2020-08-15",
+    "mimeType": "PDF",
+    "submissionDate": "2024-12-15",
+    "systemVersion": 1,
+    "title": "T5_RCT lead PI KStober Graz",
+    "version": "7"
+   }
+  ]
+ },
+ {
+  "documentId": "50409238",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 2,
+  "section": "Evaluate section III",
+  "title": "L3_Researcher Liability Assurance Document_DE",
+  "type": "Verification of policy",
+  "typeCode": "426",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "95c3d21f-803b-4179-92e1-d723bb938f62",
+    "fromDate": "2024-11-09",
+    "mimeType": "DOCX",
+    "submissionDate": "2024-11-08",
+    "systemVersion": 1,
+    "title": "L3_Researcher Liability Assurance Document_DE",
+    "version": "7"
+   }
+  ]
+ },
+ {
+  "documentId": "50409002",
+  "estimatedLanguageCode": "DE",
+  "estimatedPart": 2,
+  "section": "Evaluate section III",
+  "title": "T8_Research Agent EJäger Salzburg",
+  "type": "Qualification of the researcher",
+  "typeCode": "529",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "dabbc123-3478-49ef-a9c1-5629fc93ed47",
+    "fromDate": "2025-05-15",
+    "mimeType": "PDF",
+    "submissionDate": "2025-06-10",
+    "systemVersion": 1,
+    "title": "F3_Trial GK Müller Berlin",
+    "version": "n.a."
+   }
+  ]
+ },
+ {
+  "documentId": "40657215",
+  "estimatedLanguageCode": "FR",
+  "estimatedPart": 2,
+  "section": "Review section III",
+  "title": "S77_Site Overview_Switzerland",
+  "type": "Compliance with trial site protocols",
+  "typeCode": "427",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "a12fedc4-cb12-49ef-bc9e-38fde7ab9c25",
+    "fromDate": "2025-05-20",
+    "mimeType": "PDF",
+    "submissionDate": "2025-06-17",
+    "systemVersion": 1,
+    "title": "S77_Site Overview_Switzerland",
+    "version": "2"
+   }
+  ]
+ },
+ {
+  "documentId": "40657322",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 2,
+  "section": "Review section III",
+  "title": "R3_medical update FR",
+  "type": "Patient summary and agreement form (for distribution)",
+  "typeCode": "22",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "a79d5c90-d2f5-42b1-81d9-3f8b9e3c1e4f",
+    "fromDate": "2025-08-15",
+    "mimeType": "DOCX",
+    "submissionDate": "2025-09-10",
+    "systemVersion": 1,
+    "title": "R3_medical update FR",
+    "version": "3"
+   }
+  ]
+ },
+ {
+  "documentId": "40918273",
+  "estimatedLanguageCode": "FR",
+  "estimatedPart": 2,
+  "section": "Review section III",
+  "title": "T2_Enrollment coordination_FR",
+  "type": "Enrollment coordination (for distribution)",
+  "typeCode": "19",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "c11eaf67-3df1-4eb8-9244-a1d697eefc3b",
+    "fromDate": "2025-08-15",
+    "mimeType": "DOCX",
+    "submissionDate": "2025-09-10",
+    "systemVersion": 1,
+    "title": "T2_Enrollment coordination_FR",
+    "version": "2"
+   }
+  ]
+ },
+ {
+  "documentId": "80567249",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 1,
+  "section": "Review section A",
+  "title": "D2_Technical study abstract DE 2025-928746-09-00_documented",
+  "type": "Summary of the study (for dissemination)",
+  "typeCode": "9",
+  "versions": [
+   {
+    "comment": "OUT RFI-007",
+    "documentUrl": "6fa5e78b-4c67-49ea-836a-59da36741290",
+    "fromDate": "2025-07-15",
+    "mimeType": "DOC",
+    "submissionDate": "2025-11-19",
+    "systemVersion": 1,
+    "title": "D2_Technical study abstract DE 2025-928746-09-00_documented",
+    "version": "3"
+   }
+  ]
+ },
+ {
+  "documentId": "50291738",
+  "estimatedLanguageCode": "FR",
+  "estimatedPart": 2,
+  "section": "Review section B",
+  "title": "S2_Guidelines for acquisition management and archival of biological data",
+  "type": "Policy on use of Biological archives",
+  "typeCode": "412",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "7a14c3db-aa84-44c1-a756-5246bc13e839",
+    "fromDate": "2024-11-15",
+    "mimeType": "PDF",
+    "submissionDate": "2024-11-18",
+    "systemVersion": 1,
+    "title": "S2_Regulations on sample management and storage protocol",
+    "version": "2"
+   }
+  ]
+ },
+ {
+  "documentId": "40320798",
+  "estimatedLanguageCode": "EN",
+  "estimatedPart": 2,
+  "section": "Review section V",
+  "title": "M3_BioTech Solutions Vienna",
+  "type": "Researcher CV ",
+  "typeCode": "415",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "a72c3d92-89f2-4e55-a08c-c9247ef196ae",
+    "fromDate": "2024-11-02",
+    "mimeType": "PDF",
+    "submissionDate": "2024-11-05",
+    "systemVersion": 1,
+    "title": "M3_BioTech Solutions Vienna",
+    "version": "n.a."
+   }
+  ]
+ },
+ {
+  "documentId": "40320781",
+  "estimatedLanguageCode": "EN",
+  "estimatedPart": 2,
+  "section": "Review section V",
+  "title": "P3_Research collaboration contract GER RCC",
+  "type": "Budget allocations",
+  "typeCode": "15",
+  "versions": [
+   {
+    "comment": "initial draft",
+    "documentUrl": "d1b47f16-64a8-4d2b-9c2d-bd9803cf4829",
+    "fromDate": "2024-11-12",
+    "mimeType": "DOCX",
+    "submissionDate": "2024-11-12",
+    "systemVersion": 1,
+    "title": "P3_Research collaboration contract GER RCC",
+    "version": "k.A."
+   }
+  ]
+ },
+ {
+  "documentId": "40819273",
+  "estimatedLanguageCode": "EN",
+  "estimatedPart": 2,
+  "section": "Review stage III",
+  "title": "M3_Statement lead researcher HWeber Munich",
+  "type": "Eligibility of the coordinator",
+  "typeCode": "454",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "a2c392b7-d9c2-48b1-af7f-dc4304d776e3",
+    "fromDate": "2024-11-14",
+    "mimeType": "DOCX",
+    "submissionDate": "2024-11-17",
+    "systemVersion": 1,
+    "title": "X4_HnS lead PM JKepler Salzburg",
+    "version": "7"
+   }
+  ]
+ },
+ {
+  "documentId": "40752498",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 2,
+  "section": "Review segment III",
+  "title": "R3_Test Contributor Coverage Plan DE",
+  "type": "Validation of coverage",
+  "typeCode": "425",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "fa321a87-9c45-4f63-a1dc-e34cf81ab079",
+    "fromDate": "2025-12-15",
+    "mimeType": "DOCX",
+    "submissionDate": "2025-12-20",
+    "systemVersion": 1,
+    "title": "R3_Test Contributor Coverage Plan DE",
+    "version": "k.A."
+   }
+  ]
+ },
+ {
+  "documentId": "40752504",
+  "estimatedLanguageCode": "DE",
+  "estimatedPart": 2,
+  "section": "Review segment III",
+  "title": "L12_Catalogue of Affiliated Centres Spain",
+  "type": "Eligibility of the investigational trial locations' infrastructure",
+  "typeCode": "426",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "a7c9e983-3b91-4915-964f-78b6482fc320",
+    "fromDate": "2024-08-14",
+    "mimeType": "PDF",
+    "submissionDate": "2024-11-12",
+    "systemVersion": 1,
+    "title": "X32_Overview of Participants Germany",
+    "version": "7"
+   }
+  ]
+ },
+ {
+  "documentId": "50328192",
+  "estimatedLanguageCode": "EN",
+  "estimatedPart": 2,
+  "section": "Review stage III",
+  "title": "P2_Adherence to methods for handling medical data_DE",
+  "type": "Conformity in preservation of medical data",
+  "typeCode": "211",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "ca3396d4-92d8-4adc-a562-e3fa71df8fab",
+    "fromDate": "2024-11-12",
+    "mimeType": "PDF",
+    "submissionDate": "2024-12-09",
+    "systemVersion": 1,
+    "title": "P2_Adherence to methods for handling medical data_DE",
+    "version": "9"
+   }
+  ]
+ },
+ {
+  "documentId": "50328745",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 1,
+  "section": "Roles: Study Name: 153Tm-XFG789",
+  "title": "L3_Patient Approval_DE Lu231-RTK981",
+  "type": "Markierung von Inhaltsstoffen der SMI",
+  "typeCode": "418",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "5e0fad28-7854-4853-8a77-da134c12e345",
+    "fromDate": "2024-09-15",
+    "mimeType": "DOCX",
+    "submissionDate": "2024-09-15",
+    "systemVersion": 1,
+    "title": "P7_Beschriftung SMI_DE Lu177-EVG854",
+    "version": "3"
+   }
+  ]
+ },
+ {
+  "documentId": "50549081",
+  "estimatedLanguageCode": "DE",
+  "estimatedPart": 2,
+  "section": "Bewertung Teil II",
+  "title": "P3_Datenschutzrichtlinie PK MSteininger Berlin",
+  "type": "Einhaltung der regionalen Vorschriften zum Datenschutz",
+  "typeCode": "458",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "8a21f362-633c-4f57-a611-dc021c561f73",
+    "fromDate": "2024-08-25",
+    "mimeType": "XLSX",
+    "submissionDate": "2024-09-15",
+    "systemVersion": 1,
+    "title": "P3_Datenschutzrichtlinie PK MSteininger Berlin",
+    "version": "k.A."
+   }
+  ]
+ },
+ {
+  "documentId": "90845213",
+  "estimatedLanguageCode": "EN",
+  "estimatedPart": 2,
+  "section": "Review section B",
+  "title": "X7_Privacy Terms Korda Milano",
+  "type": "Adherence to local standards on Privacy Policies",
+  "typeCode": "453",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "d1a2f3c4-12ab-34cd-567e-8ab0c9d0e1f2",
+    "fromDate": "2025-08-15",
+    "mimeType": "DOCX",
+    "submissionDate": "2025-08-18",
+    "systemVersion": 1,
+    "title": "X7_Privacy Terms Korda Milano",
+    "version": "n.a."
+   }
+  ]
+ },
+ {
+  "documentId": "90845189",
+  "estimatedLanguageCode": "EN",
+  "estimatedPart": 1,
+  "section": "Review section A",
+  "title": "Y9_Guidelines EU CT 2025-726845-16-03",
+  "type": "Guidelines (confidential)",
+  "typeCode": "8",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "34fda123-c672-4abc-b98d-5aefc7890d23",
+    "fromDate": "2025-09-10",
+    "mimeType": "DOCX",
+    "submissionDate": "2025-02-13",
+    "systemVersion": 1,
+    "title": "M2_Report EU CL 2025-429721-09-03",
+    "version": "3"
+   }
+  ]
+ },
+ {
+  "documentId": "50621483",
+  "estimatedLanguageCode": "FR",
+  "estimatedPart": 2,
+  "section": "Review segment III",
+  "title": "Q2_Settlements and related provisions_ES",
+  "type": "Contractual agreements",
+  "typeCode": "15",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "c5c99fb2-ce72-4ab4-a926-57fa3d09e74b",
+    "fromDate": "2025-01-19",
+    "mimeType": "XLSX",
+    "submissionDate": "2025-03-11",
+    "systemVersion": 1,
+    "title": "R3_Policies and accommodations_FR",
+    "version": "2"
+   }
+  ]
+ },
+ {
+  "documentId": "80961472",
+  "estimatedLanguageCode": "DE",
+  "estimatedPart": 2,
+  "section": "Examine segment IV",
+  "title": "M3_Remuneration for study subjects_DE",
+  "type": "Legal agreements",
+  "typeCode": "15",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "83974c2f-adc3-4c12-912a-37d85f250347",
+    "fromDate": "2024-10-12",
+    "mimeType": "DOC",
+    "submissionDate": "2024-11-01",
+    "systemVersion": 1,
+    "title": "P2_Payment for study subjects_FR",
+    "version": "5"
+   }
+  ]
+ },
+ {
+  "documentId": "40581277",
+  "estimatedLanguageCode": "FR",
+  "estimatedPart": 2,
+  "section": "Review section III",
+  "title": "N2_Site Evaluation document Zurich",
+  "type": "Evaluation of clinic infrastructure",
+  "typeCode": "452",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "98e4ca51-9d72-4b34-918d-7cecfa71db23",
+    "fromDate": "2024-11-01",
+    "mimeType": "TXT",
+    "submissionDate": "2024-11-01",
+    "systemVersion": 1,
+    "title": "N2_Site Evaluation document Zurich",
+    "version": "n.n."
+   }
+  ]
+ },
+ {
+  "documentId": "47920581",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 2,
+  "section": "Examine section IV",
+  "title": "M2_TAS and OCF QT",
+  "type": "Participant details and signed agreement documentation (for sharing)",
+  "typeCode": "22",
+  "versions": [
+   {
+    "comment": "OUT RFQ-002",
+    "documentUrl": "a8c913e9-cc7b-41f5-a456-12d9cfb2d785",
+    "fromDate": "2025-03-14",
+    "mimeType": "DOC",
+    "submissionDate": "2025-03-14",
+    "systemVersion": 2,
+    "title": "M2_TAS and OCF QT",
+    "version": "3.0"
+   },
+   {
+    "comment": "we adjusted the Bavarian compliance template following guidance from a meeting on 12th Nov with the Munich Ethics; all segments between sections 6-7-8 remain seamless",
+    "documentUrl": "d31453c8-13fe-49f6-91ed-22c84dc639ac",
+    "fromDate": "2025-01-18",
+    "mimeType": "DOC",
+    "submissionDate": "2025-01-18",
+    "systemVersion": 1,
+    "title": "M2_TAS and OCF QT",
+    "version": "1"
+   }
+  ]
+ },
+ {
+  "documentId": "47920645",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 2,
+  "section": "Evaluate section B",
+  "title": "L2_Patient Critical Info_EN",
+  "type": "Participant guidelines and agreement document (for distribution)",
+  "typeCode": "34",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "9fddc881-a6b3-4f1f-9e6d-4e32fb75b982",
+    "fromDate": "2025-08-17",
+    "mimeType": "PDF",
+    "submissionDate": "2025-08-24",
+    "systemVersion": 1,
+    "title": "L2_Patient Critical Info_EN",
+    "version": "2"
+   }
+  ]
+ },
+ {
+  "documentId": "75862044",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 2,
+  "section": "Evaluate section B",
+  "title": "M3_GCP PI Schwarz Vienna",
+  "type": "Investigator's qualifications",
+  "typeCode": "982",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "cdbc625d-af53-4e49-9f23-9b123f0564c7",
+    "fromDate": "2020-05-15",
+    "mimeType": "PDF",
+    "submissionDate": "2025-08-24",
+    "systemVersion": 1,
+    "title": "M3_GCP PI Schwarz Vienna",
+    "version": "3"
+   }
+  ]
+ },
+ {
+  "documentId": "50738126",
+  "estimatedLanguageCode": "DE",
+  "estimatedPart": 2,
+  "section": "Review section III",
+  "title": "T1_Research Collaboration Dresden",
+  "type": "Payment details",
+  "typeCode": "25",
+  "versions": [
+   {
+    "comment": "final draft",
+    "documentUrl": "bb63b683-2f15-5e8a-942c-e406873c2caa",
+    "fromDate": "2025-11-18",
+    "mimeType": "DOC",
+    "submissionDate": "2025-11-18",
+    "systemVersion": 1,
+    "title": "T1_Research Collaboration Dresden",
+    "version": "k.A."
+   }
+  ]
+ },
+ {
+  "documentId": "61429175",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 1,
+  "section": "Overview step II",
+  "title": "A2_Research Study Outline GR 2025-912478-23-11",
+  "type": "Summary of the research plan (restricted access)",
+  "typeCode": "486",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "7def7808-3c68-54gf-93af-137493hg1fb4",
+    "fromDate": "2024-08-15",
+    "mimeType": "PDF",
+    "submissionDate": "2024-11-12",
+    "systemVersion": 1,
+    "title": "D2_Clinical Study Overview DE 2024-627493-24-11",
+    "version": "2"
+   }
+  ]
+ },
+ {
+  "documentId": "40318273",
+  "estimatedLanguageCode": "EN",
+  "estimatedPart": 2,
+  "section": "Review section B",
+  "title": "M2_CV PI JBaumann Wien",
+  "type": "Researcher Resume",
+  "typeCode": "340",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "374c9177-e893-41ac-b9fd-5c6827f4a923",
+    "fromDate": "2024-10-01",
+    "mimeType": "PDF",
+    "submissionDate": "2024-10-18",
+    "systemVersion": 1,
+    "title": "M2_CV PI JBaumann Wien",
+    "version": "n.a."
+   }
+  ]
+ },
+ {
+  "documentId": "40318298",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 2,
+  "section": "Review section B",
+  "title": "O2_Study Health Coverage_Document",
+  "type": "Insurance document",
+  "typeCode": "451",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "e19cd47e-d9e4-56d3-aecd-b64e9dfa9f98",
+    "fromDate": "2024-12-15",
+    "mimeType": "PDF",
+    "submissionDate": "2024-12-17",
+    "systemVersion": 1,
+    "title": "Z2_Trial Coverage Insurance_Policy",
+    "version": "2"
+   }
+  ]
+ },
+ {
+  "documentId": "40510837",
+  "estimatedLanguageCode": "EN",
+  "estimatedPart": 2,
+  "section": "Evaluate section IV",
+  "title": "M2_Participant guidelines_EN",
+  "type": "Participant guidelines (for distribution)",
+  "typeCode": "18",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "b56968da-37b2-548d-975a-70ea95g289db",
+    "fromDate": "2024-11-08",
+    "mimeType": "PDF",
+    "submissionDate": "2024-12-15",
+    "systemVersion": 1,
+    "title": "M2_Participant guidelines_EN",
+    "version": "3"
+   }
+  ]
+ },
+ {
+  "documentId": "40567281",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 1,
+  "section": "Review section A",
+  "title": "D2_ Study summary_FR EU CT 2025-614782-19-01",
+  "type": "Summary of the study (for release)",
+  "typeCode": "9",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "a7d945ff-a351-4a32-867c-ff7842331abc",
+    "fromDate": "2025-03-14",
+    "mimeType": "PDF",
+    "submissionDate": "2025-04-01",
+    "systemVersion": 1,
+    "title": "D2_ Study summary_FR EU CT 2025-614782-19-01",
+    "version": "2"
+   }
+  ]
+ },
+ {
+  "documentId": "48291376",
+  "estimatedLanguageCode": "EN",
+  "estimatedPart": 1,
+  "section": "Review section A",
+  "title": "5_PHARMA_2025-614782-19-01_XYZ",
+  "type": "Section A Phase 5 Clinical Evaluation - Initial",
+  "typeCode": "92",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "63fc817e-c249-473f-807d-ca88e2934def",
+    "fromDate": "2025-06-17",
+    "mimeType": "DOCX",
+    "submissionDate": "2025-03-15",
+    "systemVersion": 1,
+    "title": "4_TEX_2025-921045-32-01_FAL",
+    "version": "7"
+   }
+  ]
+ },
+ {
+  "documentId": "40819234",
+  "estimatedLanguageCode": "EN",
+  "estimatedPart": 2,
+  "section": "Review procedure III",
+  "title": "N2_Protocol submission form Torino",
+  "type": "Review of protocol compliance at trial sites",
+  "typeCode": "402",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "bd73891e-cdf2-452a-a97b-7ac741e8af62",
+    "fromDate": "2024-12-05",
+    "mimeType": "DOC",
+    "submissionDate": "2024-12-06",
+    "systemVersion": 1,
+    "title": "N2_Protocol submission form Torino",
+    "version": "n.a."
+   }
+  ]
+ },
+ {
+  "documentId": "40819182",
+  "estimatedLanguageCode": "EN",
+  "estimatedPart": 2,
+  "section": "Review procedure III",
+  "title": "M2_CV primary investigator CVRozzi Salzburg",
+  "type": "Trial investigator credentials",
+  "typeCode": "421",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "f84a9b2c-3c7d-4e89-aa23-6a9af82d4c39",
+    "fromDate": "2025-03-15",
+    "mimeType": "PDF",
+    "submissionDate": "2025-03-15",
+    "systemVersion": 1,
+    "title": "K4_CV assistant PI JHSchmidt Munich",
+    "version": "n.a."
+   }
+  ]
+ },
+ {
+  "documentId": "50872256",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 2,
+  "section": "Evaluate section III",
+  "title": "R3_Information list_DE SC",
+  "type": "Participant details and agreement form (not for publication)",
+  "typeCode": "471",
+  "versions": [
+   {
+    "comment": "EX QRM-003",
+    "documentUrl": "7fb5b3e1-c481-42ab-b87d-3ed1a7c7d92f",
+    "fromDate": "2025-06-12",
+    "mimeType": "PDF",
+    "submissionDate": "2025-06-13",
+    "systemVersion": 1,
+    "title": "R3_Information list_DE SC",
+    "version": "2.0"
+   }
+  ]
+ },
+ {
+  "documentId": "50946723",
+  "estimatedLanguageCode": "FR",
+  "estimatedPart": 1,
+  "section": "Evaluate segment A",
+  "title": "Payment confirmation fee FR",
+  "type": "Confirmation of fee payment",
+  "typeCode": "412",
+  "versions": [
+   {
+    "comment": "includes proof for 18k for a stage A study and the documentation charge",
+    "documentUrl": "e72f34b6-a789-478c-93ab-2c8d9b18f3ca",
+    "fromDate": "2025-03-12",
+    "mimeType": "DOC",
+    "submissionDate": "2025-04-20",
+    "systemVersion": 1,
+    "title": "Payment confirmation fee FR",
+    "version": "n.k."
+   }
+  ]
+ },
+ {
+  "documentId": "78215491",
+  "estimatedLanguageCode": "FR",
+  "estimatedPart": 2,
+  "section": "Evaluate segment B",
+  "title": "S1_Regula Paris",
+  "type": "Eligibility of the researcher",
+  "typeCode": "528",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "b91d7b12-4ec2-4f16-ad58-7e3a9d987123",
+    "fromDate": "2023-11-19",
+    "mimeType": "DOC",
+    "submissionDate": "2025-03-15",
+    "systemVersion": 1,
+    "title": "K2_LCR Verona Testa",
+    "version": "n.i."
+   }
+  ]
+ },
+ {
+  "documentId": "60321745",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 2,
+  "section": "Evaluate segment IV",
+  "title": "P2_Test Subject Coverage Document DE",
+  "type": "Coverage assurance",
+  "typeCode": "415",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "a27f35c8-a456-4d7b-9b3c-f73g6r41582d",
+    "fromDate": "2025-03-12",
+    "mimeType": "DOC",
+    "submissionDate": "2025-03-15",
+    "systemVersion": 1,
+    "title": "P2_Test Subject Coverage Document DE",
+    "version": "2"
+   }
+  ]
+ },
+ {
+  "documentId": "52648023",
+  "estimatedLanguageCode": "FR",
+  "estimatedPart": 1,
+  "section": "Evaluation part III",
+  "title": "76234 EVAL III IN TER 9 Analytical",
+  "type": "Segment III Chapter 9 Data Analysis - Preliminary",
+  "typeCode": "85",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "3f89c134-ec70-4b34-b27d-e4a0c87ab897",
+    "fromDate": "2025-03-15",
+    "mimeType": "PPTX",
+    "submissionDate": "2025-03-15",
+    "systemVersion": 1,
+    "title": "74892 BTT V EK dFR 8 Analytical",
+    "version": "2"
+   }
+  ]
+ },
+ {
+  "documentId": "40185739",
+  "estimatedLanguageCode": null,
+  "estimatedPart": 2,
+  "section": "Evaluate section III",
+  "title": "L2_ITC and VCF EN",
+  "type": "Document overview and participation agreement (for submission)",
+  "typeCode": "20",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "d547b3c9-72fe-4d75-a642-4c0fe29b8f91",
+    "fromDate": "2025-01-12",
+    "mimeType": "TXT",
+    "submissionDate": "2025-01-14",
+    "systemVersion": 1,
+    "title": "L2_ITC and VCF EN",
+    "version": "4"
+   }
+  ]
+ },
+ {
+  "documentId": "42039857",
+  "estimatedLanguageCode": "FR",
+  "estimatedPart": 1,
+  "section": "Review step A",
+  "title": "7_COM_2025-629015-23-11_REF",
+  "type": "Step A Overview 7 Compliance Review - Preliminary",
+  "typeCode": "85",
+  "versions": [
+   {
+    "comment": null,
+    "documentUrl": "a208c4d1-45e1-4e3e-ad93-5e9178f34b2e",
+    "fromDate": "2025-12-15",
+    "mimeType": "PDF",
+    "submissionDate": "2025-12-15",
+    "systemVersion": 1,
+    "title": "7_COM_2025-629015-23-11_REF",
+    "version": "2"
+   }
+  ]
+ }
+]
