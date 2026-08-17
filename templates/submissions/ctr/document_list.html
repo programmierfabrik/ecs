@@ -13,7 +13,7 @@
             <label class="mr-3 mb-2">
                 <span class="mr-1">{{ filter.label }}</span>
                 <select class="form-control form-control-sm ctr-doc-filter" data-filter="{{ filter.key }}">
-                    <option value="">Alle</option>
+                    <option value="">All</option>
                     {% for option in filter.options %}
                         <option value="{{ option }}">{{ option }}</option>
                     {% endfor %}
@@ -37,6 +37,7 @@
             <tbody>
                 {% for document in entry.documents %}
                     <tr data-category="{{ document.category }}"
+                        data-section="{{ document.section }}"
                         data-part="{{ document.part_label }}"
                         data-language="{{ document.language }}"
                         data-source="{{ document.source }}">

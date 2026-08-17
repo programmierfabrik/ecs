@@ -1204,16 +1204,22 @@ def _part2_tab(part2s, documents, selected_country=None):
 # ─── tab 5: Unterlagen (flat document list) ──────────────────────────────
 
 def _document_filters(documents):
-    """The distinct values each « Unterlagen » filter offers."""
+    """
+    The distinct values each document filter offers. A filter every document
+    answers the same way narrows nothing - « Quelle » was always CTIS - so it
+    is left out rather than offered as a choice that changes nothing.
+    """
     def options(attribute):
         return sorted({getattr(d, attribute) for d in documents if getattr(d, attribute)})
 
-    return [
-        Filter('category', 'Kategorie', options('category')),
-        Filter('part', 'Teil', options('part_label')),
-        Filter('language', 'Sprache', options('language')),
-        Filter('source', 'Quelle', options('source')),
+    candidates = [
+        Filter('category', 'Document type', options('category')),
+        Filter('section', 'Section', options('section')),
+        Filter('part', 'Part', options('part_label')),
+        Filter('language', 'Language', options('language')),
+        Filter('source', 'Source', options('source')),
     ]
+    return [f for f in candidates if len(f.options) > 1]
 
 
 def _unterlagen_tab(documents):
