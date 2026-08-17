@@ -799,8 +799,10 @@ def _scientific_advice_sections(part1, documents):
             rows.append([Cell(None), Cell(_txt(advice))])
 
     # The group heading already names both halves, so the entries carry the
-    # labels instead of repeating « Scientific advice » as a sub-heading. The
-    # advice documents sit unlabelled right under their table, as in CTR-ECS.
+    # labels instead of repeating « Scientific advice » as a sub-heading. Both
+    # document kinds are labelled rows like the table above them - CTR-ECS
+    # words the PIP one after the plan, not after the whitelist kind
+    # « PIP opinion ».
     return [Section(
         name='Scientific advice and Paediatric Investigation Plan (PIP)',
         level=4, entries=[
@@ -808,7 +810,8 @@ def _scientific_advice_sections(part1, documents):
                 'ID',
                 'Competent authorities that have provided scientific advice',
             ], rows),
-            _docs('', documents, SCIENTIFIC_ADVICE_DOC_FAMILIES),
+            _docs('Summary of scientific advice', documents,
+                  SCIENTIFIC_ADVICE_DOC_FAMILIES),
             _docs('Paediatric investigation plan', documents,
                   PIP_DOC_FAMILIES),
         ])]
