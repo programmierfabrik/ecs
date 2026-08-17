@@ -89,6 +89,13 @@
 
 /* ─── member-state selector ──────────────────────────────────────────── */
 
+.ctr-doclist-pager {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: .5rem;
+}
+
 /* Chip strip, laid out like the classic centres tab's jump list - but the
    labels are never truncated: products share a « Comparator: » prefix and
    differ only at the end, so a cut-off chip is an unreadable chip. */

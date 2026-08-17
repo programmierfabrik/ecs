@@ -393,7 +393,7 @@
    "typeCode": "2",
    "versions": [
     {
-     "comment": null,
+     "comment": "Version ohne Datumsangabe",
      "documentUrl": "11111111-2222-4333-8444-000000400100",
      "fromDate": "2024-01-10",
      "mimeType": "PDF",

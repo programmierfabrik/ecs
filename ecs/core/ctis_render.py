@@ -130,6 +130,7 @@ class DocVersion:
     system_version: str = ''
     from_date: str = ''
     version: str = ''               # the sponsor's own version, free text
+    comment: str = ''
     mime_type: str = ''
     url: str = ''
 
@@ -155,6 +156,7 @@ class DocEntry:
     system_version: str = ''
     from_date: str = ''
     version: str = ''
+    comment: str = ''               # the uploader's note on this version
     mime_type: str = ''
     source: str = 'CTIS'
     url: str = ''
@@ -435,6 +437,7 @@ def build_document_entries(documents, download_url=None):
             from_date=(_date(version.get('fromDate'))
                        if version.get('fromDate') else '–'),
             version=version.get('version') or '',
+            comment=version.get('comment') or '',
             mime_type=(version.get('mimeType') or '').upper(),
             url=url_for(version),
         )
@@ -462,6 +465,7 @@ def build_document_entries(documents, download_url=None):
             system_version=latest.system_version,
             from_date=latest.from_date,
             version=latest.version,
+            comment=latest.comment,
             mime_type=latest.mime_type,
             source=doc.get('source') or 'CTIS',
             url=latest.url,
@@ -1214,8 +1218,8 @@ def _document_filters(documents):
 
 def _unterlagen_tab(documents):
     doclist = DocList(documents=documents, filters=_document_filters(documents))
-    return Tab('unterlagen', 'Unterlagen', subtabs=[
-        SubTab('unterlagen-all', 'Unterlagen', panes=[
+    return Tab('unterlagen', 'Application Documents', subtabs=[
+        SubTab('unterlagen-all', 'Application Documents', panes=[
             Pane(sections=[Section(name='All documents', entries=[doclist])]),
         ]),
     ])

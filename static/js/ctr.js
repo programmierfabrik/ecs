@@ -70,6 +70,8 @@ ecs.ctr = {
         });
     },
 
+    // An application can deliver a few hundred documents, so the list filters
+    // and pages in the browser - it is all in the page already.
     initDocumentFilters: function() {
         var table = $('.ctr-doclist-table');
         if (!table.length)
@@ -78,8 +80,11 @@ ecs.ctr = {
         var filters = $('.ctr-doc-filter');
         var rows = table.find('tbody tr').not('.ctr-doclist-empty, .ctr-doclist-nomatch');
         var nomatch = table.find('.ctr-doclist-nomatch');
+        var pager = $('.ctr-doclist-pager');
+        var perPage = parseInt(pager.data('per-page'), 10) || 20;
+        var page = 0;
 
-        filters.change(function() {
+        function matching() {
             var selected = {};
             filters.each(function() {
                 var value = $(this).val();
@@ -87,22 +92,87 @@ ecs.ctr = {
                     selected[$(this).data('filter')] = value;
             });
 
-            var visible = 0;
-            rows.each(function() {
+            return rows.filter(function() {
                 var row = $(this);
-                var matches = true;
                 for (var key in selected) {
-                    if (String(row.data(key)) !== selected[key]) {
-                        matches = false;
-                        break;
-                    }
+                    if (String(row.data(key)) !== selected[key])
+                        return false;
                 }
-                row.prop('hidden', !matches);
-                if (matches)
-                    visible++;
+                return true;
             });
+        }
 
-            nomatch.prop('hidden', visible > 0 || !rows.length);
+        function drawPager(pages, total) {
+            pager.empty();
+            if (!total)
+                return;
+
+            var count = $('<span>', {
+                'class': 'text-muted mr-3',
+                text: total + (total === 1 ? ' Dokument' : ' Dokumente')
+            });
+            pager.append(count);
+
+            if (pages < 2)
+                return;
+
+            var group = $('<div>', {'class': 'btn-group btn-group-sm'});
+            var step = function(label, target, enabled) {
+                group.append($('<button>', {
+                    'class': 'btn btn-outline-primary',
+                    type: 'button',
+                    text: label,
+                    disabled: !enabled,
+                    click: function(ev) {
+                        ev.preventDefault();
+                        page = target;
+                        draw();
+                    }
+                }));
+            };
+
+            step('«', page - 1, page > 0);
+            for (var i = 0; i < pages; i++) {
+                var button = $('<button>', {
+                    'class': 'btn btn-outline-primary',
+                    type: 'button',
+                    text: String(i + 1),
+                    click: (function(target) {
+                        return function(ev) {
+                            ev.preventDefault();
+                            page = target;
+                            draw();
+                        };
+                    })(i)
+                });
+                button.toggleClass('active', i === page);
+                group.append(button);
+            }
+            step('»', page + 1, page < pages - 1);
+
+            pager.append(group);
+        }
+
+        function draw() {
+            var visible = matching();
+            var pages = Math.max(1, Math.ceil(visible.length / perPage));
+            if (page > pages - 1)
+                page = pages - 1;
+
+            rows.prop('hidden', true);
+            visible.slice(page * perPage, (page + 1) * perPage)
+                   .prop('hidden', false);
+            nomatch.prop('hidden', visible.length > 0 || !rows.length);
+            drawPager(pages, visible.length);
+        }
+
+        // A new filter selection starts over at the first page - staying on
+        // page 6 of a two-page result would look like an empty list.
+        filters.change(function() {
+            page = 0;
+            draw();
         });
+
+        draw();
     }
 };

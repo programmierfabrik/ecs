@@ -338,7 +338,7 @@
    "typeCode": "2",
    "versions": [
     {
-     "comment": null,
+     "comment": "Erstfassung",
      "documentUrl": "11111111-2222-4333-8444-000000000100",
      "fromDate": "2024-01-10",
      "mimeType": "PDF",
@@ -359,7 +359,7 @@
    "typeCode": "326",
    "versions": [
     {
-     "comment": null,
+     "comment": "Nach Rückfrage der Behörde ergänzt",
      "documentUrl": "11111111-2222-4333-8444-000000000200",
      "fromDate": "2024-01-10",
      "mimeType": "PDF",
