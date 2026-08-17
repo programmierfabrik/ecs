@@ -6,7 +6,15 @@ from django.db import transaction
 
 from ecs.core.models import Submission, CTRSubmissionForm
 
-_SAMPLE_DIR = Path(__file__).parent
+_FIXTURE_DIR = Path(__file__).parent / 'ctis_fixtures'
+
+# The example trials the mock serves, in the order the revision part of a CTIS
+# number picks them. Each is one {"application": …, "documents": […]} payload.
+CTIS_FIXTURES = (
+    'single_product.json',      # the ordinary case
+    'multi_product.json',       # several role groups, documents per product
+    'edge_cases.json',          # nulls, sentinels, ATMP, an unsubmitted Part II
+)
 
 # JJJJ-NNNNNN-XX-Y: year, 6-digit sequence, 2-digit revision (application
 # sequence number), 1-digit check digit. The check digit's computation is a
@@ -50,17 +58,19 @@ def fetch_ctis_study(ctis_number):
     "application" is the CTIS trial object described by the interface's JSON
     schema and "documents" the accompanying document-service entries.
 
-    The payload comes from ctis_sample.json / ctis_sample_documents.json -
-    synthesised from the interface schema, not real trial data - with the
-    requested CTIS number patched in so the imported study identifies itself
-    as the one that was asked for.
+    The payload comes from ctis_fixtures/ - example trials, not real trial
+    data - with the requested CTIS number patched in so the imported study
+    identifies itself as the one that was asked for. Which example is served
+    follows the revision part of the number, so all of them are reachable:
+    « 2026-123456-00-0 » gives the first, « …-01-0 » the second, and so on,
+    wrapping round.
 
     TODO: replace with the real CTR-ECS API client once it's available.
     """
-    with open(_SAMPLE_DIR / 'ctis_sample.json') as f:
-        trial = json.load(f)
-    with open(_SAMPLE_DIR / 'ctis_sample_documents.json') as f:
-        documents = json.load(f)
+    revision = int(ctis_number.split('-')[2])
+    with open(_FIXTURE_DIR / CTIS_FIXTURES[revision % len(CTIS_FIXTURES)]) as f:
+        payload = json.load(f)
+    trial, documents = payload['application'], payload['documents']
 
     trial['clinicalTrialId'] = ctis_number
     trial_id = ctis_base_number(ctis_number) + '-' + ctis_number.split('-')[2]
