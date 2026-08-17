@@ -584,7 +584,7 @@ def _member_states_sections(application, part1, part2s):
             Cell(_txt(sum(subjects)) if subjects else None),
         ])
 
-    table = _table('', [
+    table = _table('Member states concerned', [
         'Member state concerned',
         'RMS',
         'First submission date',
@@ -595,9 +595,10 @@ def _member_states_sections(application, part1, part2s):
     rest_of_world = part1.get('restOfTheWorldSubjectCount')
 
     return [
-        Section(name='Member states concerned', entries=[
+        Section(entries=[
             table,
             Field('Countries outside the European Economic Area', NOT_RETRIEVABLE),
+            Field('Rest of the world subjects', _txt(rest_of_world)),
         ]),
         Section(name='Estimated total population for the trial', entries=[
             Field('EEA subjects', _txt(eea_subjects)),
