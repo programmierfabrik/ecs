@@ -143,68 +143,83 @@
             {% endif %}
         </td>
     </tr>
-    <tr>
-        <th class="text-nowrap">Sicherheitsmeldungsersteller</th>
-        <td>
-            {% with submission.susar_presenter.profile.organisation as organisation %}
-                {{ submission.susar_presenter }}{% if organisation %} ({{ organisation }}){% endif %}
-            {% endwith %}
-            {% if user.profile.is_executive or user == submission.susar_presenter %}
-                <a class="ml-2" href="{% url 'core.submission.change_submission_susar_presenter' submission_pk=submission.pk %}">
-                    <span class="fa fa-pencil"></span>
-                    {% trans "change" %}
-                </a>
-            {% endif %}
-        </td>
-    </tr>
-    <tr>
-        <th class="text-nowrap">Antragsteller</th>
-        {% with submission_form.submitter_organisation as organisation %}
-            <td>{{ submission_form.submitter }}{% if organisation %} ({{ organisation }}){% endif %}</td>
-        {% endwith %}
-    </tr>
-    <tr>
-        <th class="text-nowrap">Sponsor</th>
-        {% with submission_form.sponsor_name as organisation %}
-            <td>{{ submission_form.sponsor }}{% if organisation %} ({{ organisation }}){% endif %}</td>
-        {% endwith %}
-    </tr>
-    <tr>
-        <th class="text-nowrap">Rechnungsempfänger</th>
-        {% with submission_form.invoice_name as organisation %}
+    {% if not is_ctr %}
+        <tr>
+            <th class="text-nowrap">Sicherheitsmeldungsersteller</th>
             <td>
-            {% if organisation %}
-                {{ submission_form.invoice_contact }}{% if organisation %} ({{ organisation }}){% endif %}
-            {% else %}
-                <em>{% trans "same as sponsor" %}</em>
-            {% endif %}
-            </td>
-        {% endwith %}
-    </tr>
-    <tr>
-        <th class="text-nowrap">Hauptprüfer</th>
-        <td>
-            {% with submission_form.primary_investigator as pi %}
-                {% if pi %}
-                    {{ pi.contact.full_name }}{% if pi.organisation %} ({{ pi.organisation }}){% endif %}
-                {% else %}
-                    <em>{% trans "No Primary Investigator" %}</em>
+                {% with submission.susar_presenter.profile.organisation as organisation %}
+                    {{ submission.susar_presenter }}{% if organisation %} ({{ organisation }}){% endif %}
+                {% endwith %}
+                {% if user.profile.is_executive or user == submission.susar_presenter %}
+                    <a class="ml-2" href="{% url 'core.submission.change_submission_susar_presenter' submission_pk=submission.pk %}">
+                        <span class="fa fa-pencil"></span>
+                        {% trans "change" %}
+                    </a>
                 {% endif %}
+            </td>
+        </tr>
+    {% endif %}
+    {% if is_ctr %}
+        {% comment %}
+            The CTIS counterparts of the rows below go here. Which values from
+            the payload belong in the status overview is not decided yet, so
+            this stays empty - a CTRSubmissionForm has none of the classic
+            form's fields, and asking it for them renders blank rows and
+            defaults (« wie Sponsor », « Kein/e koordinierende/r Prüfärztin/arzt »)
+            that state something untrue about the trial.
+        {% endcomment %}
+    {% else %}
+        <tr>
+            <th class="text-nowrap">Antragsteller</th>
+            {% with submission_form.submitter_organisation as organisation %}
+                <td>{{ submission_form.submitter }}{% if organisation %} ({{ organisation }}){% endif %}</td>
             {% endwith %}
-        </td>
-    </tr>
+        </tr>
+        <tr>
+            <th class="text-nowrap">Sponsor</th>
+            {% with submission_form.sponsor_name as organisation %}
+                <td>{{ submission_form.sponsor }}{% if organisation %} ({{ organisation }}){% endif %}</td>
+            {% endwith %}
+        </tr>
+        <tr>
+            <th class="text-nowrap">Rechnungsempfänger</th>
+            {% with submission_form.invoice_name as organisation %}
+                <td>
+                {% if organisation %}
+                    {{ submission_form.invoice_contact }}{% if organisation %} ({{ organisation }}){% endif %}
+                {% else %}
+                    <em>{% trans "same as sponsor" %}</em>
+                {% endif %}
+                </td>
+            {% endwith %}
+        </tr>
+        <tr>
+            <th class="text-nowrap">Hauptprüfer</th>
+            <td>
+                {% with submission_form.primary_investigator as pi %}
+                    {% if pi %}
+                        {{ pi.contact.full_name }}{% if pi.organisation %} ({{ pi.organisation }}){% endif %}
+                    {% else %}
+                        <em>{% trans "No Primary Investigator" %}</em>
+                    {% endif %}
+                {% endwith %}
+            </td>
+        </tr>
+    {% endif %}
     <tr>
         <th class="text-nowrap">Phase</th>
         <td>
             {{ submission.lifecycle_phase }}
         </td>
     </tr>
-    <tr>
-        <th class="text-nowrap">Typ</th>
-        <td>
-            {{ submission_form.get_type_display }}
-        </td>
-    </tr>
+    {% if not is_ctr %}
+        <tr>
+            <th class="text-nowrap">Typ</th>
+            <td>
+                {{ submission_form.get_type_display }}
+            </td>
+        </tr>
+    {% endif %}
     <tr>
         <th class="text-nowrap">Kategorien</th>
         <td>
@@ -213,10 +228,12 @@
             {% endfor %}
         </td>
     </tr>
-    <tr>
-        <th class="text-nowrap">Ethikkommission</th>
-        <td>{{ submission_form.main_ethics_commission|default:'<em>Keine Angabe</em>' }}</td>
-    </tr>
+    {% if not is_ctr %}
+        <tr>
+            <th class="text-nowrap">Ethikkommission</th>
+            <td>{{ submission_form.main_ethics_commission|default:'<em>Keine Angabe</em>' }}</td>
+        </tr>
+    {% endif %}
     {% if user.profile.is_internal %}
     <tr>
         <th class="text-nowrap">Arbeitsablauf</th>

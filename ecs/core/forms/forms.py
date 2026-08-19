@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import Q
+from django.http import QueryDict
 from django.utils import timezone
 
 from django_countries import countries
@@ -441,6 +442,7 @@ _labels = {
 
     'amg': _('AMG'),
     'mpg': _('MPG'),
+    'ctis': _('CTIS'),
     'other': _('Other'),
 
     'not_categorized': _('Not Categorized'),
@@ -482,6 +484,14 @@ class SubmissionFilterForm(forms.Form, metaclass=SubmissionFilterFormMetaclass):
             filter_defaults[key] = 'on'
 
         data = data or filter_defaults
+        if not isinstance(data, QueryDict):
+            # Not a submitted form but a filter stored on the user's settings,
+            # which predates any flag added since it was saved. For a POST an
+            # absent checkbox means off; here it means the user never saw the
+            # flag, so default it to on rather than silently hiding rows.
+            data = dict(data)
+            for key in keys:
+                data.setdefault(key, 'on')
         return super().__init__(data, *args, **kwargs)
 
     def _filter_by_type(self, submissions, user):
@@ -493,15 +503,17 @@ class SubmissionFilterForm(forms.Form, metaclass=SubmissionFilterFormMetaclass):
             )
         if self.cleaned_data['mpg']:
             qs.append(Q(current_submission_form__project_type_medical_device=True))
+        if self.cleaned_data['ctis']:
+            # CTR submissions carry no project_type_* classification - being
+            # imported from CTIS is what they are classified by instead.
+            qs.append(Q(current_ctr_form__isnull=False))
         if self.cleaned_data['other']:
             qs.append(
                 Q(current_submission_form__project_type_non_reg_drug=False) &
                 Q(current_submission_form__project_type_reg_drug=False) &
                 Q(current_submission_form__project_type_medical_device=False)
             )
-        # CTR submissions don't have a project_type_* classification yet -
-        # this filter dimension doesn't apply to them, so they always pass.
-        return submissions.filter(reduce(lambda x, y: x | y, qs) | Q(current_ctr_form__isnull=False))
+        return submissions.filter(reduce(lambda x, y: x | y, qs))
 
     def _filter_by_lane(self, submissions, user):
         from ecs.core.models.constants import (
@@ -571,7 +583,7 @@ class SubmissionFilterForm(forms.Form, metaclass=SubmissionFilterFormMetaclass):
 
 
 FILTER_MEETINGS = ('past_meetings', 'next_meeting', 'upcoming_meetings', 'no_meeting')
-FILTER_TYPE = ('amg', 'mpg', 'other')
+FILTER_TYPE = ('amg', 'mpg', 'ctis', 'other')
 FILTER_LANE = ('board', 'thesis', 'expedited', 'local_ec', 'not_categorized')
 FILTER_VOTES = ('b2', 'b3', 'other_votes', 'no_votes')
 FILTER_ASSIGNMENT = ('mine', 'assigned', 'other_studies')

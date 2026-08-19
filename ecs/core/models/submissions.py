@@ -11,6 +11,7 @@ from django_countries import countries
 from django_countries.fields import CountryField
 
 from ecs.authorization.managers import AuthorizationManager
+from ecs.core.ctis_render import sorted_applications
 from ecs.core.models.constants import (
     MIN_EC_NUMBER, SUBMISSION_INFORMATION_PRIVACY_CHOICES, SUBMISSION_LANE_CHOICES, SUBMISSION_LANE_EXPEDITED,
     SUBMISSION_LANE_RETROSPECTIVE_THESIS, SUBMISSION_LANE_LOCALEC, SUBMISSION_LANE_BOARD,
@@ -164,7 +165,9 @@ class Submission(models.Model):
 
     def project_title_display(self):
         if self.current_ctr_form_id and not self.current_submission_form_id:
-            return 'CTR-Studie ({})'.format(self.current_ctr_form.ctis_number)
+            ctr_form = self.current_ctr_form
+            return ctr_form.trial_title or 'CTR-Studie ({})'.format(
+                ctr_form.ctis_number)
         return self.german_project_title or self.project_title
 
     @property
@@ -879,6 +882,24 @@ class CTRSubmissionForm(models.Model):
     @property
     def is_current(self):
         return self.submission.current_ctr_form_id == self.id
+
+    @property
+    def current_application(self):
+        # The payload's newest application - the one the tabs render.
+        applications = sorted_applications(
+            self.application if isinstance(self.application, dict) else {})
+        return applications[0] if applications else {}
+
+    @property
+    def trial_title(self):
+        # The trial's own title. `part1.title` is the full one but CTIS may
+        # deliver it as null, so degrade the way the Part I tab lists them.
+        part1 = self.current_application.get('part1') or {}
+        for key in ('title', 'publicTitle', 'protocolCode'):
+            title = str(part1.get(key) or '').strip()
+            if title:
+                return title
+        return None
 
     def acknowledge(self, choice):
         self.is_acknowledged = choice
