@@ -1294,6 +1294,17 @@ def all_submissions(request):
             for f in ('project_title', 'german_project_title', 'sponsor_name', 'eudract_number'):
                 q |= _sf_query(f, k)
 
+            # A CTR study keeps its identifiers in the imported payload rather
+            # than on a form. The CTIS number matches partially, the way an EC
+            # number does, so « 2026-509999 » finds every revision of the
+            # trial; an application id is opaque and only ever pasted whole,
+            # so it matches exactly. Both look at all imported revisions, not
+            # just the current one - a number from an earlier import should
+            # still find the study.
+            q |= _query('ctr_forms__ctis_number', k)
+            q |= Q(ctr_forms__application__applications__contains=[
+                {'applicationId': k}])
+
             for f in ('presenter', 'susar_presenter'):
                 q |= _query('{0}__first_name'.format(f), k)
                 q |= _query('{0}__last_name'.format(f), k)
