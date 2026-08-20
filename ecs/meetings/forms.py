@@ -86,6 +86,29 @@ class SubmissionReschedulingForm(forms.Form):
         self.fields['to_meeting'].queryset = Meeting.objects.filter(started=None).exclude(pk__in=[m.pk for m in current_meetings]).order_by('start')
 
 
+class SubmissionSchedulingForm(forms.Form):
+    to_meeting = forms.ModelChoiceField(Meeting.objects.none(),
+        label=_('To meeting'))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['to_meeting'].queryset = Meeting.objects.filter(
+            started=None).order_by('start')
+
+
+class SubmissionUnschedulingForm(forms.Form):
+    from_meeting = forms.ModelChoiceField(Meeting.objects.none(),
+        label=_('From meeting'))
+
+    def __init__(self, *args, **kwargs):
+        submission = kwargs.pop('submission')
+        super().__init__(*args, **kwargs)
+        # a TOP that has been voted on is history, not a mistake to undo
+        self.fields['from_meeting'].queryset = Meeting.objects.filter(
+            started=None, timetable_entries__submission=submission,
+            timetable_entries__vote__isnull=True).order_by('start').distinct()
+
+
 class UserChoiceField(forms.ModelChoiceField):
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop('queryset', None)

@@ -28,7 +28,8 @@ from ecs.documents.views import handle_download
 from ecs.meetings.cache import cache_meeting_page
 from ecs.meetings.forms import (
     MeetingForm, TimetableEntryForm, FreeTimetableEntryForm,
-    UserConstraintFormSet, SubmissionReschedulingForm,
+    UserConstraintFormSet, SubmissionReschedulingForm, SubmissionSchedulingForm,
+    SubmissionUnschedulingForm,
     AssignedMedicalCategoryFormSet, MeetingAssistantForm, ExpeditedVoteFormSet,
     AmendmentVoteFormSet, ManualTimetableEntryCommentForm,
     ManualTimetableEntryCommentFormset, EkMemberMarkedForm, SendProtocolGroupsForm,
@@ -84,6 +85,64 @@ def past_meetings(request):
 
 
 @user_flag_required('is_executive')
+def schedule_submission(request, submission_pk=None):
+    submission = get_object_or_404(Submission, pk=submission_pk)
+    if not submission.is_schedulable:
+        raise Http404(_('This submission is not scheduled by hand.'))
+    form = SubmissionSchedulingForm(request.POST or None)
+    if form.is_valid():
+        meeting = submission.schedule_to_meeting(form.cleaned_data['to_meeting'])
+        meeting.update_assigned_categories()
+        return redirect('view_submission', submission_pk=submission.pk)
+
+    return render(request, 'meetings/submission_meeting_form.html', {
+        'title': 'Zu Sitzung hinzufügen',
+        'submit_label': _('Save and return to study'),
+        'submission': submission,
+        'form': form,
+    })
+
+
+@user_flag_required('is_executive')
+def remove_submission_from_meeting(request, submission_pk=None):
+    submission = get_object_or_404(Submission, pk=submission_pk)
+    if not submission.is_removable_from_meeting:
+        raise Http404(_('This submission is on no upcoming meeting.'))
+    form = SubmissionUnschedulingForm(request.POST or None,
+        submission=submission)
+    if form.is_valid():
+        meeting = form.cleaned_data['from_meeting']
+        entry = meeting.timetable_entries.get(submission=submission)
+        assert not hasattr(entry, 'vote')
+
+        # read before the entry goes: these reviews were asked for because
+        # this study was on this meeting
+        experts = set(meeting.medical_categories
+                      .exclude(specialist=None)
+                      .filter(category__in=submission.medical_categories.values('pk'))
+                      .values_list('specialist_id', flat=True))
+
+        entry.participations.all().delete()
+        entry.delete()
+        meeting.update_assigned_categories()
+
+        with sudo():
+            Task.objects.for_data(submission).filter(
+                task_type__workflow_node__uid='specialist_review',
+                assigned_to__in=experts
+            ).open().mark_deleted()
+
+        return redirect('view_submission', submission_pk=submission.pk)
+
+    return render(request, 'meetings/submission_meeting_form.html', {
+        'title': 'Von Sitzung entfernen',
+        'submit_label': 'Entfernen und zurück zur Studie',
+        'submission': submission,
+        'form': form,
+    })
+
+
+@user_flag_required('is_executive')
 def reschedule_submission(request, submission_pk=None):
     submission = get_object_or_404(Submission, pk=submission_pk)
     form = SubmissionReschedulingForm(request.POST or None, submission=submission)
@@ -117,7 +176,9 @@ def reschedule_submission(request, submission_pk=None):
 
         return redirect('view_submission', submission_pk=submission.pk)
 
-    return render(request, 'meetings/reschedule.html', {
+    return render(request, 'meetings/submission_meeting_form.html', {
+        'title': _('Reschedule Submission'),
+        'submit_label': _('Save and return to study'),
         'submission': submission,
         'form': form,
     })

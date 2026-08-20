@@ -263,6 +263,15 @@
             {% if user.profile.is_executive and submission.is_reschedulable %}
                 <a href="{% url 'meetings.reschedule_submission' submission_pk=submission.pk %}">{% trans 'Reschedule' %}</a>
             {% endif %}
+            {% comment %}Nothing schedules a CTIS study, so the office puts it
+            on the meeting it should be discussed at next itself.
+            {% endcomment %}
+            {% if user.profile.is_executive and submission.is_schedulable %}
+                <a href="{% url 'meetings.schedule_submission' submission_pk=submission.pk %}">Zu Sitzung hinzufügen</a>
+            {% endif %}
+            {% if user.profile.is_executive and submission.is_removable_from_meeting %}
+                <a class="ml-3" href="{% url 'meetings.remove_submission_from_meeting' submission_pk=submission.pk %}">Von Sitzung entfernen</a>
+            {% endif %}
         </td>
     </tr>
     {% if user.profile.is_internal %}

@@ -4,6 +4,8 @@ from ecs.meetings import views
 
 
 urlpatterns = (
+    path('schedule/submission/<int:submission_pk>/', views.schedule_submission, name='meetings.schedule_submission'),
+    path('unschedule/submission/<int:submission_pk>/', views.remove_submission_from_meeting, name='meetings.remove_submission_from_meeting'),
     path('reschedule/submission/<int:submission_pk>/', views.reschedule_submission, name='meetings.reschedule_submission'),
 
     path('new/', views.create_meeting, name='meetings.create_meeting'),

@@ -268,17 +268,29 @@ class Submission(models.Model):
         Task.unfiltered.for_submission(self).filter(
             task_type__is_dynamic=True).open().mark_deleted()
 
-    def schedule_to_meeting(self):
+    def schedule_to_meeting(self, meeting=None):
+        """Put this study on a meeting and return the meeting it is on.
+
+        Without an argument the next schedulable meeting is picked, and an
+        entry that is already on an unstarted meeting is refreshed rather
+        than duplicated. With one, the study goes on that meeting - the
+        office scheduling by hand, which is the only way a CTIS study ever
+        gets onto a further meeting.
+        """
         visible = self.workflow_lane == SUBMISSION_LANE_BOARD
 
-        def _schedule():
+        def _schedule(target=None):
             duration = timedelta(minutes=7, seconds=30)
             if not visible:
                 duration = timedelta(minutes=0)
             from ecs.meetings.models import Meeting
-            meeting = Meeting.objects.next_schedulable_meeting(self)
-            meeting.add_entry(submission=self, duration=duration, visible=visible)
-            return meeting
+            if target is None:
+                target = Meeting.objects.next_schedulable_meeting(self)
+            target.add_entry(submission=self, duration=duration, visible=visible)
+            return target
+
+        if meeting is not None:
+            return _schedule(meeting)
 
         top = self.timetable_entries.order_by('-meeting__start').first()
 
@@ -300,6 +312,23 @@ class Submission(models.Model):
     @property
     def is_reschedulable(self):
         return self.meetings.filter(started=None).exists()
+
+    @property
+    def is_schedulable(self):
+        # Nothing schedules a CTIS study: a « BCTIS Stellungnahme » ends
+        # nothing and triggers nothing, so to discuss the study again the
+        # office puts it on a meeting itself. Only when it is on no
+        # unstarted meeting yet - otherwise « Reschedule » is the action.
+        return self.uses_ctr_form and not self.is_reschedulable
+
+    @property
+    def is_removable_from_meeting(self):
+        # « Reschedule » is undo enough for a classic study, which always
+        # belongs on some meeting. A CTIS study may belong on none, and the
+        # next meeting can be a year out, so a wrong by-hand scheduling has
+        # to be undoable outright. A TOP that has been voted on is history.
+        return self.uses_ctr_form and self.timetable_entries.filter(
+            meeting__started=None, vote__isnull=True).exists()
 
     def get_filename_slice(self):
         return self.get_ec_number_display(separator='_')
