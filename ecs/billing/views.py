@@ -94,7 +94,12 @@ class SimpleXLS(object):
 def submission_billing(request):
     with sudo():
         categorization_tasks = Task.objects.filter(task_type__workflow_node__uid='categorization').closed()
-        submissions = Submission.objects.filter(pk__in=categorization_tasks.values('data_id').query)
+        # CTIS studies are not billable. Excluding them here is not cosmetic:
+        # they have no `current_submission_form`, so pricing this list and
+        # exporting it as XLS would both raise. It also keeps them off any
+        # invoice, and so out of `Invoice.stats`, which reads the same fields.
+        submissions = Submission.objects.filter(
+            pk__in=categorization_tasks.values('data_id').query).not_ctr()
     unbilled_submissions = list(submissions.filter(invoice=None).distinct().order_by('ec_number'))
     for submission in unbilled_submissions:
         submission.price = Price.objects.get_for_submission(submission)

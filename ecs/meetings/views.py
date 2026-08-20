@@ -906,6 +906,21 @@ def send_agenda_to_board(request, meeting_pk=None):
             send_system_message_template(u, subject, 'meetings/messages/primary_investigator_invitation.txt',
                                          {'top': top}, submission=top.submission)
 
+    # The same invitation for a CTIS study, where the investigators come from
+    # the ticked trial sites of the Austrian Part II instead of from a
+    # submission form. Its recipients are the investigators and the presenter -
+    # a CTIS study has no submitter and no sponsor user.
+    ctr_tops_with_investigators = meeting.timetable_entries.filter(
+        submission__invite_primary_investigator_to_meeting=True,
+        submission__current_ctr_form__isnull=False, timetable_index__isnull=False)
+    for top in ctr_tops_with_investigators:
+        investigators = top.submission.get_ctr_investigator_users()
+        if not investigators:
+            continue
+        for u in set(investigators) | {top.submission.presenter}:
+            send_system_message_template(u, subject, 'meetings/messages/primary_investigator_invitation.txt',
+                                         {'top': top}, submission=top.submission)
+
     meeting.agenda_sent_at = timezone.now()
     meeting.save()
 
@@ -1105,7 +1120,9 @@ def meeting_details(request, meeting_pk=None, active=None):
         'diploma_thesis_submissions': submissions.filter(current_submission_form__project_type_education_context=2),
         'amg_multi_main_submissions': submissions.amg().filter(
             current_submission_form__submission_type=SUBMISSION_TYPE_MULTICENTRIC),
-        'billable_submissions': submissions.exclude(remission=True),
+        # CTIS studies are not billable, and have no submission form for
+        # `Price.objects.get_for_submission()` to read.
+        'billable_submissions': submissions.not_ctr().exclude(remission=True),
         'b3_examined_submissions': submissions.filter(
             pk__in=Vote.objects.filter(result='3b').values('submission_form__submission').query),
         'b3_not_examined_submissions': submissions.filter(

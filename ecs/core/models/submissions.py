@@ -11,7 +11,7 @@ from django_countries import countries
 from django_countries.fields import CountryField
 
 from ecs.authorization.managers import AuthorizationManager
-from ecs.core.ctis_render import sorted_applications
+from ecs.core.ctis_render import austrian_trial_sites, sorted_applications
 from ecs.core.models.constants import (
     MIN_EC_NUMBER, SUBMISSION_INFORMATION_PRIVACY_CHOICES, SUBMISSION_LANE_CHOICES, SUBMISSION_LANE_EXPEDITED,
     SUBMISSION_LANE_RETROSPECTIVE_THESIS, SUBMISSION_LANE_LOCALEC, SUBMISSION_LANE_BOARD,
@@ -45,6 +45,13 @@ class Submission(models.Model):
     biased_board_members = models.ManyToManyField(User, blank=True, related_name='biased_for_submissions')
 
     invite_primary_investigator_to_meeting = models.BooleanField(default=False)
+    # The ticked rows of the « Hauptprüfer einladen » table of a CTIS study:
+    # `trialSite.id` keys into the current CTR form's Austrian Part II. The
+    # names and addresses stay in the payload and are read when the agenda
+    # goes out. `invite_primary_investigator_to_meeting` above is kept in sync
+    # as « at least one of these is ticked », so the existing invited markers
+    # need no branch.
+    ctr_invited_trial_sites = ArrayField(models.TextField(), default=list, blank=True)
 
     is_transient = models.BooleanField(default=False)
     is_finished = models.BooleanField(default=False)
@@ -169,6 +176,24 @@ class Submission(models.Model):
             return ctr_form.trial_title or 'CTR-Studie ({})'.format(
                 ctr_form.ctis_number)
         return self.german_project_title or self.project_title
+
+    @property
+    def ctr_trial_sites(self):
+        """The Austrian trial sites offered for invitation - [] for a classic
+        submission and for every CTIS payload that has none."""
+        ctr_form = self.current_ctr_form
+        return ctr_form.austrian_trial_sites if ctr_form else []
+
+    @property
+    def ctr_invited_investigators(self):
+        keys = set(self.ctr_invited_trial_sites or [])
+        return [s for s in self.ctr_trial_sites if s['key'] in keys]
+
+    def get_ctr_investigator_users(self):
+        """The accounts of the invited principal investigators, each created
+        on first use."""
+        return [get_or_create_ctr_investigator(s)
+                for s in self.ctr_invited_investigators]
 
     @property
     def is_active(self):
@@ -891,6 +916,19 @@ class CTRSubmissionForm(models.Model):
         return applications[0] if applications else {}
 
     @property
+    def austrian_trial_sites(self):
+        return austrian_trial_sites(self.current_application)
+
+    def get_type_display(self):
+        # Of the classic chips only the invited marker can apply: AMG/MPG,
+        # thesis and NIS are all submission form fields. Same condition as
+        # `SubmissionForm.get_type_display`, and it names nobody either.
+        if self.submission.invite_primary_investigator_to_meeting and \
+                self.submission.timetable_entries.filter(meeting__ended=None).exists():
+            return _('Investigator invited')
+        return ''
+
+    @property
     def trial_title(self):
         # The trial's own title. `part1.title` is the full one but CTIS may
         # deliver it as null, so degrade the way the Part I tab lists them.
@@ -943,6 +981,35 @@ def _post_ctr_submission_form_save(**kwargs):
         submission.save(update_fields=('workflow_lane',))
 
     on_study_change.send(Submission, submission=submission, old_form=old_form, new_form=new_form)
+
+
+def get_or_create_ctr_investigator(site):
+    """
+    The ECS account of a CTIS trial site's principal investigator, created on
+    first use.
+
+    Mirrors `Investigator.save()` below: the classic path creates the phantom
+    user while the submission form is saved, but a CTIS study has no
+    submission form, so it happens when the agenda goes out instead. The
+    'investigator' role deliberately suppresses the account-invitation mail
+    (see #4808).
+    """
+    email = site['email']
+    try:
+        return get_user(email)
+    except User.DoesNotExist:
+        pass
+
+    user = create_phantom_user(email, role='investigator')
+    user.first_name = site['first_name']
+    user.last_name = site['last_name']
+    user.save()
+    profile = user.profile
+    # CTIS types `titleName` as free text; the profile column is short.
+    profile.title = site['title'][:30]
+    profile.organisation = site['organisation']
+    profile.save()
+    return user
 
 
 class Investigator(models.Model):

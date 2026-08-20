@@ -44,6 +44,11 @@
                             <br />
                         <span class="bold">Prüfzentrum:</span>
                             {% if pi.organisation %}{{ pi.organisation }}{% endif %}<br />
+                    {% elif entry.submission.invite_primary_investigator_to_meeting %}
+                        {% comment %}A CTIS study has no submission form to
+                        name a Prüfer - the marker stays a marker and lists
+                        nobody.{% endcomment %}
+                        <span class="bold">Prüfer eingeladen um {{ entry.start|datetimeround:-10|date:'H:i' }} Uhr</span><br />
                     {% endif %}
                 {% endwith %}
             {% else %}
@@ -85,6 +90,11 @@
                             <br />
                         <span class="bold">Prüfzentrum:</span>
                             {% if pi.organisation %}{{ pi.organisation }}{% endif %}<br />
+                    {% elif entry.submission.invite_primary_investigator_to_meeting %}
+                        {% comment %}A CTIS study has no submission form to
+                        name a Prüfer - the marker stays a marker and lists
+                        nobody.{% endcomment %}
+                        <span class="bold">Prüfer eingeladen um {{ entry.start|datetimeround:-10|date:'H:i' }} Uhr</span><br />
                     {% endif %}
                 {% endwith %}
             </div>

@@ -16,8 +16,11 @@
                 {{ submission.project_title_display }}
             </div>
             {% if top.submission.invite_primary_investigator_to_meeting %}
+                {% comment %}A CTIS study has no submission form to name a
+                Prüfer - the marker stays a marker and lists nobody.
+                {% endcomment %}
                 {% with top.submission.current_submission_form.primary_investigator as pi %}
-                <b>Prüfer ({% if pi.user %}{{ pi.user }}{% else %}{{ pi.contact.full_name }}{% endif %}) eingeladen um {{ top.start|datetimeround:-10|date:'H:i' }} Uhr</b>
+                <b>Prüfer{% if pi %} ({% if pi.user %}{{ pi.user }}{% else %}{{ pi.contact.full_name }}{% endif %}){% endif %} eingeladen um {{ top.start|datetimeround:-10|date:'H:i' }} Uhr</b>
                 {% endwith %}
             {% endif %}
         {% endif %}

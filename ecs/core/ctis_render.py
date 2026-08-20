@@ -1091,6 +1091,66 @@ def _part2_available(part2):
     return bool(part2.get('submissionDate'))
 
 
+def austrian_trial_sites(application):
+    """
+    The invitable principal investigators of a CTIS application: every trial
+    site of its submitted Austrian Part II.
+
+    `TrialSite.principalInvestigator` is a single object, not a list - one
+    investigator per site, so a site row is a person. Sites are taken
+    regardless of their own address country; what makes them ours is the
+    Part II's `mscCountryCode`.
+
+    Every incomplete payload yields an empty list rather than an error: no
+    Austrian Part II, one that has not been submitted, and one without sites
+    are indistinguishable here on purpose - the Einstufung screen shows a
+    single hint for all of them.
+    """
+    if not isinstance(application, dict):
+        return []
+
+    sites = []
+    seen = set()
+    for part2 in application.get('part2s') or []:
+        if not isinstance(part2, dict):
+            continue
+        if part2.get('mscCountryCode') != OWN_COUNTRY:
+            continue
+        if not _part2_available(part2):
+            continue
+
+        for site in part2.get('trialSites') or []:
+            if not isinstance(site, dict):
+                continue
+            investigator = site.get('principalInvestigator') or {}
+            email = str(investigator.get('email') or '').strip()
+            # `trialSite.id` is a populated non-null string in real data;
+            # the e-mail is the fallback. Never `principalInvestigator.id`,
+            # which is '' in every payload seen so far.
+            key = str(site.get('id') or '').strip() or email
+            # Without an e-mail address there is nobody to invite, so the row
+            # would only be a checkbox that cannot do anything.
+            if not key or not email or key in seen:
+                continue
+            seen.add(key)
+
+            organisation = site.get('organisation') or {}
+            sites.append({
+                'key': key,
+                'name': _words(investigator.get('titleName'),
+                               investigator.get('firstName'),
+                               investigator.get('lastName')),
+                'email': email,
+                'title': str(investigator.get('titleName') or '').strip(),
+                'first_name': str(investigator.get('firstName') or '').strip(),
+                'last_name': str(investigator.get('lastName') or '').strip(),
+                'organisation': str(organisation.get('name') or '').strip(),
+                'department': str(site.get('departmentName') or '').strip(),
+            })
+
+    return sites
+
+
 def _trial_site_sections(part2):
     rows = []
     for site in part2.get('trialSites') or []:

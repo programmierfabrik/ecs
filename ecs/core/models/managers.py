@@ -25,6 +25,12 @@ class SubmissionQuerySet(models.QuerySet):
     def amg_mpg(self):
         return self.amg() & self.mpg()
 
+    def not_ctr(self):
+        # Everything that is not a CTIS study. Most of the classic queries
+        # reach through `current_submission_form` and so exclude CTIS studies
+        # by accident; this one says it on purpose.
+        return self.filter(current_ctr_form=None)
+
     def expedited(self):
         return self.filter(workflow_lane=SUBMISSION_LANE_EXPEDITED)
 

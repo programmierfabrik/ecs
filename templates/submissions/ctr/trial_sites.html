@@ -1,0 +1,33 @@
+{% if rows %}
+    <table class="table table-sm mb-0">
+        <thead>
+            <tr>
+                <th class="border-top-0"></th>
+                <th class="border-top-0">Name</th>
+                <th class="border-top-0">E-Mail</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                <tr>
+                    <td>
+                        <input type="checkbox" class="form-check-input position-static m-0"
+                               name="{{ name }}" id="id_{{ name }}_{{ forloop.counter0 }}"
+                               value="{{ row.key }}"
+                               {% if row.checked %}checked{% endif %}
+                               {% if disabled %}disabled{% endif %}>
+                    </td>
+                    <td>
+                        <label class="mb-0 font-weight-normal" for="id_{{ name }}_{{ forloop.counter0 }}">{{ row.name }}</label>
+                        {% if row.detail %}
+                            <div><small class="text-muted">{{ row.detail }}</small></div>
+                        {% endif %}
+                    </td>
+                    <td>{{ row.email }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p class="text-muted mb-0">Kein österreichisches Prüfzentrum vorhanden.</p>
+{% endif %}
