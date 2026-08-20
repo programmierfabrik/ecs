@@ -4,12 +4,29 @@ from django.utils.translation import gettext_lazy as _
 
 from ecs.core.forms.utils import ReadonlyFormMixin
 from ecs.votes.models import Vote
-from ecs.votes.constants import VOTE_PREPARATION_CHOICES, B2_VOTE_PREPARATION_CHOICES
+from ecs.votes.constants import (VOTE_PREPARATION_CHOICES,
+    B2_VOTE_PREPARATION_CHOICES, CLASSIC_VOTE_RESULT_CHOICES,
+    CTIS_VOTE_RESULT_CHOICES)
 from ecs.users.utils import get_current_user
 from ecs.core.forms.utils import mark_readonly
 
 def ResultField(**kwargs):
     return Vote._meta.get_field('result').formfield(widget=forms.RadioSelect(), **kwargs)
+
+
+def restrict_result_choices(field, submission):
+    """Offer only the results that make sense for this kind of study.
+
+    A CTIS study is only ever given a « BCTIS Stellungnahme », a classic
+    study never is. Whatever empty choice the field already carries is kept.
+    """
+    if submission is not None and submission.uses_ctr_form:
+        allowed = CTIS_VOTE_RESULT_CHOICES
+    else:
+        allowed = CLASSIC_VOTE_RESULT_CHOICES
+    allowed = [value for value, label in allowed]
+    field.choices = [(value, label) for value, label in field.choices
+        if not value or value in allowed]
 
 class SaveVoteForm(forms.ModelForm):
     result = ResultField(required=False)
@@ -18,6 +35,10 @@ class SaveVoteForm(forms.ModelForm):
     class Meta:
         model = Vote
         fields = ('result', 'text')
+
+    def __init__(self, *args, submission, **kwargs):
+        super().__init__(*args, **kwargs)
+        restrict_result_choices(self.fields['result'], submission)
 
     def save(self, top, *args, **kwargs):
         kwargs['commit'] = False
@@ -49,8 +70,11 @@ class VoteReviewForm(ReadonlyFormMixin, forms.ModelForm):
         super().__init__(*args, **kwargs)
         user = get_current_user()
         if not self.readonly and user.profile.is_executive:
-            self.fields['result'] = Vote._meta.get_field('result').formfield(
+            result = Vote._meta.get_field('result').formfield(
                 initial=self.instance.result)
+            restrict_result_choices(result,
+                self.instance.submission if self.instance.submission_id else None)
+            self.fields['result'] = result
 
             # reorder fields
             self.fields['text'] = self.fields.pop('text')

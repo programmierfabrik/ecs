@@ -757,7 +757,8 @@ def meeting_assistant_top(request, meeting_pk=None, top_pk=None):
 
     if top.submission and top.is_open:
         form_cls = SaveVoteForm if simple_save else VoteForm
-        form = form_cls(request.POST or None, instance=vote)
+        form = form_cls(request.POST or None, instance=vote,
+            submission=top.submission)
         if form.is_valid():
             vote = form.save(top)
             if autosave:
@@ -772,7 +773,8 @@ def meeting_assistant_top(request, meeting_pk=None, top_pk=None):
             return redirect('meetings.meeting_assistant_top',
                             meeting_pk=meeting.pk, top_pk=top.pk)
     elif top.submission and not top.is_open:
-        form = VoteForm(None, instance=vote, readonly=True)
+        form = VoteForm(None, instance=vote, readonly=True,
+            submission=top.submission)
     elif not top.submission and not top.is_break:
         form = ManualTimetableEntryCommentForm(request.POST or None, instance=top)
         if form.is_valid():

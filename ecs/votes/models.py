@@ -11,7 +11,7 @@ from django.utils import timezone
 from reversion.models import Version
 from reversion import revisions as reversion
 
-from ecs.votes.constants import (VOTE_RESULT_CHOICES, POSITIVE_VOTE_RESULTS, NEGATIVE_VOTE_RESULTS, PERMANENT_VOTE_RESULTS, RECESSED_VOTE_RESULTS)
+from ecs.votes.constants import (VOTE_RESULT_CHOICES, POSITIVE_VOTE_RESULTS, NEGATIVE_VOTE_RESULTS, PERMANENT_VOTE_RESULTS, RECESSED_VOTE_RESULTS, CTIS_VOTE_RESULTS)
 from ecs.votes.managers import VoteManager
 from ecs.votes.signals import on_vote_publication
 from ecs.users.utils import get_current_user
@@ -33,7 +33,7 @@ class Vote(models.Model):
     ctr_submission_form = models.ForeignKey('core.CTRSubmissionForm', related_name='votes', null=True, on_delete=models.CASCADE)
     top = models.OneToOneField('meetings.TimetableEntry', related_name='vote', null=True, on_delete=models.CASCADE)
     upgrade_for = models.OneToOneField('self', null=True, related_name='previous', on_delete=models.CASCADE)
-    result = models.CharField(max_length=2, choices=VOTE_RESULT_CHOICES, null=True, verbose_name=_('vote'))
+    result = models.CharField(max_length=4, choices=VOTE_RESULT_CHOICES, null=True, verbose_name=_('vote'))
     executive_review_required = models.BooleanField(blank=True, null=True)
     text = models.TextField(blank=True, verbose_name=_('comment'))
     is_draft = models.BooleanField(default=False)
@@ -172,6 +172,10 @@ class Vote(models.Model):
     @property
     def is_recessed(self):
         return self.result in RECESSED_VOTE_RESULTS
+
+    @property
+    def is_ctis(self):
+        return self.result in CTIS_VOTE_RESULTS
 
     @property
     def needs_signature(self):

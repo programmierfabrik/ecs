@@ -556,7 +556,14 @@ class SubmissionFilterForm(forms.Form, metaclass=SubmissionFilterFormMetaclass):
                 q &= Q(current_pending_vote=None)
             qs.append(q & (Q(current_submission_form__isnull=False) | Q(current_ctr_form__isnull=False)))
 
-        return submissions.filter(reduce(lambda x, y: x | y, qs))
+        # A CTIS study gets a « BCTIS Stellungnahme » instead of a B1-B5 vote,
+        # which matches no box in this row - and once it is published,
+        # current_published_vote is set, so « no votes » stops matching too.
+        # Rather than give a Stellungnahme a box of its own (it is not a vote),
+        # let CTIS studies always pass this dimension.
+        q = reduce(lambda x, y: x | y, qs) | Q(current_ctr_form__isnull=False)
+
+        return submissions.filter(q)
 
     def filter_submissions(self, submissions, user):
         self.is_valid()   # force clean
