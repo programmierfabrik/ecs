@@ -24,7 +24,7 @@ from ecs.documents.views import handle_download
 from ecs.utils.viewutils import redirect_to_next_url
 from ecs.core.models import (
     Submission, SubmissionForm, CTRSubmissionForm, Investigator, TemporaryAuthorization,
-    MedicalCategory, EthicsCommission,
+    MedicalCategory, EthicsCommission, AdvancedSettings,
 )
 from ecs.core.ctis import fetch_ctis_document
 from ecs.core.ctis_render import build_ctr_view
@@ -1101,16 +1101,25 @@ def submission_list(request, submissions, stashed_submission_forms=None, templat
 
     filterform = filter_form(request.POST or getattr(usersettings, filtername))
 
+    only_fields = [
+        'ec_number',
+
+        'current_submission_form__project_title',
+        'current_submission_form__german_project_title',
+        'current_ctr_form__ctis_number',
+    ]
+    # The optional CTIS identifiers next to the title read the payload, so the
+    # column is loaded only when one of them is switched on - all three are off
+    # by default, and it is a whole JSON blob per row of the page.
+    if any(AdvancedSettings.objects.values_list(
+            'display_ctis_eu_ct_number', 'display_ctis_application_id',
+            'display_ctis_aut_id')[0]):
+        only_fields.append('current_ctr_form__application')
+
     submissions = (filterform.filter_submissions(submissions, request.user)
         .exclude(current_submission_form=None, current_ctr_form=None)
         .select_related('current_submission_form', 'current_ctr_form')
-        .only(
-            'ec_number',
-
-            'current_submission_form__project_title',
-            'current_submission_form__german_project_title',
-            'current_ctr_form__ctis_number',
-        ).prefetch_related(
+        .only(*only_fields).prefetch_related(
             Prefetch('meetings', queryset=
                 Meeting.unfiltered.only('start', 'title').order_by('start')),
         ).distinct()

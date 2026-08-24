@@ -29,6 +29,11 @@
                     {% trans 'Vote Receivers' %}
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#ctis_tab">
+                    CTIS
+                </a>
+            </li>
             <li class="nav-item ml-auto">
                 <input class="btn btn-primary" type="submit" value="{% trans 'Save' %}"/>
             </li>
@@ -60,6 +65,12 @@
                 {% include 'bootstrap/form_field.html' with field=form.vote4_extra inline=True %}
                 {% include 'bootstrap/form_field.html' with field=form.vote5_extra inline=True %}
                 {% include 'bootstrap/form_field.html' with field=form.vote_pdf_extra inline=True %}
+            </div>
+            <div class="tab-pane container" id="ctis_tab">
+                {# Only CTIS studies are affected; a paper submission shows nothing extra. #}
+                {% include 'bootstrap/form_field.html' with field=form.display_ctis_eu_ct_number inline=True %}
+                {% include 'bootstrap/form_field.html' with field=form.display_ctis_application_id inline=True %}
+                {% include 'bootstrap/form_field.html' with field=form.display_ctis_aut_id inline=True %}
             </div>
             <div class="tab-pane container" id="vote_receivers_tab">
                 {{ ec_formset.management_form }}

@@ -968,6 +968,32 @@ class CTRSubmissionForm(models.Model):
                 return title
         return None
 
+    @staticmethod
+    def _identifier(value):
+        # CTIS delivers a missing identifier as null, '' or the « - » sentinel
+        # the render code uses for an empty cell. None of the three may reach
+        # a header, so they all read as « no identifier ».
+        text = str(value or '').strip()
+        return text if text and text != '-' else None
+
+    @property
+    def ctis_eu_ct_number(self):
+        # The trial's own number, not `ctis_number`: the two do not even agree
+        # on format (CTIS_NUMBER_RE wants a one-digit check digit, the payload
+        # carries two), and today's equality is an artifact of the mock.
+        trial = self.application if isinstance(self.application, dict) else {}
+        return self._identifier(trial.get('clinicalTrialId'))
+
+    @property
+    def ctis_application_id(self):
+        return self._identifier(self.current_application.get('applicationId'))
+
+    @property
+    def ctis_aut_id(self):
+        # Austria's own id for the application. Not in the interface contract
+        # yet, so this stays empty until the payload starts carrying it.
+        return self._identifier(self.current_application.get('autId'))
+
     def acknowledge(self, choice):
         self.is_acknowledged = choice
         self.save(update_fields=('is_acknowledged',))

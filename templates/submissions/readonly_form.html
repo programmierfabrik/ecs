@@ -14,6 +14,10 @@
             {{ submission_form.submission|ec_number }}
         </a>
     {% endif %}
+    {% db_setting 'display_ctis_eu_ct_number' as show_ctis_eu_ct_number %}
+    {% db_setting 'display_ctis_application_id' as show_ctis_application_id %}
+    {% db_setting 'display_ctis_aut_id' as show_ctis_aut_id %}
+    {% include "submissions/ctis_identifiers.html" %}
     <small title="{{ submission.project_title_display }}">
         {{ submission.project_title_display }}
         {% if submission.is_finished %}

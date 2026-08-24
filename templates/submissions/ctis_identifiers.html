@@ -1,0 +1,25 @@
+{% comment %}
+    The optional CTIS identifiers, rendered between the EC number and the
+    study title. Expects `submission` plus the three flags, which the caller
+    reads once with `db_setting` - reading them here would cost three queries
+    per row on the submission list.
+
+    Nothing renders and nothing raises: a paper submission, a payload without
+    applications, and an identifier CTIS delivers as null, '' or « - » all
+    produce no output at all rather than a bare dash.
+{% endcomment %}
+{% with form=submission.current_ctr_form %}
+    {% if form %}
+        {% if show_ctis_eu_ct_number and form.ctis_eu_ct_number %}
+            {# Self-identifying - it carries a year and dashes, so no prefix. #}
+            <span class="ctis-identifier">{{ form.ctis_eu_ct_number }}</span>
+        {% endif %}
+        {% if show_ctis_application_id and form.ctis_application_id %}
+            {# A bare five-digit number needs saying what it is. #}
+            <span class="ctis-identifier" title="Application ID">Application ID {{ form.ctis_application_id }}</span>
+        {% endif %}
+        {% if show_ctis_aut_id and form.ctis_aut_id %}
+            <span class="ctis-identifier" title="AUT ID">AUT ID {{ form.ctis_aut_id }}</span>
+        {% endif %}
+    {% endif %}
+{% endwith %}
