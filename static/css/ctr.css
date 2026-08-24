@@ -117,6 +117,54 @@
     display: block;
 }
 
+/* ─── header identifiers ─────────────────────────────────────────────── */
+
+/* The optional CTIS numbers between the EC number and the study title. The
+   size is absolute rather than relative because the two render sites are
+   headings of different sizes - a chip that scaled with its heading would
+   dwarf the title on the study page and shrink into the row on the list.
+   Tabular figures so a column of them lines up. */
+.ctis-identifier {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: .4rem;
+    padding: .1rem .7rem;
+    border: 1px solid transparent;
+    border-radius: 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+/* One hue per kind, so two bare five-digit numbers side by side can still be
+   told apart - the colour does the work a spelled-out prefix used to. */
+.ctis-identifier-eu-ct {
+    color: #0b5ed7;
+    background-color: #e8f1fd;
+    border-color: #c7dcfa;
+}
+
+.ctis-identifier-application {
+    color: #0f6b5c;
+    background-color: #e4f5f1;
+    border-color: #c0e6dd;
+}
+
+.ctis-identifier-aut {
+    color: #8a5300;
+    background-color: #fdf4e3;
+    border-color: #f5e1bd;
+}
+
+/* A prefix inside a chip is a caption, not part of the number. */
+.ctis-identifier-label {
+    font-weight: 400;
+    opacity: .75;
+    margin-right: .1rem;
+}
+
 .ctr-raw-json {
     max-height: 40rem;
     overflow: auto;

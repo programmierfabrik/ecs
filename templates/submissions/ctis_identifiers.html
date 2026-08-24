@@ -11,15 +11,15 @@
 {% with form=submission.current_ctr_form %}
     {% if form %}
         {% if show_ctis_eu_ct_number and form.ctis_eu_ct_number %}
-            {# Self-identifying - it carries a year and dashes, so no prefix. #}
-            <span class="ctis-identifier">{{ form.ctis_eu_ct_number }}</span>
+            {# Self-identifying - it carries a year and dashes. #}
+            <span class="ctis-identifier ctis-identifier-eu-ct" title="EU-CT-Nummer">{{ form.ctis_eu_ct_number }}</span>
         {% endif %}
         {% if show_ctis_application_id and form.ctis_application_id %}
-            {# A bare five-digit number needs saying what it is. #}
-            <span class="ctis-identifier" title="Application ID">Application ID {{ form.ctis_application_id }}</span>
+            {# Bare, like the EU-CT number: the chip's colour says which it is. #}
+            <span class="ctis-identifier ctis-identifier-application" title="Application ID">{{ form.ctis_application_id }}</span>
         {% endif %}
         {% if show_ctis_aut_id and form.ctis_aut_id %}
-            <span class="ctis-identifier" title="AUT ID">AUT ID {{ form.ctis_aut_id }}</span>
+            <span class="ctis-identifier ctis-identifier-aut" title="AUT ID"><span class="ctis-identifier-label">AUT</span>{{ form.ctis_aut_id }}</span>
         {% endif %}
     {% endif %}
 {% endwith %}

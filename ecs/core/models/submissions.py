@@ -11,7 +11,9 @@ from django_countries import countries
 from django_countries.fields import CountryField
 
 from ecs.authorization.managers import AuthorizationManager
-from ecs.core.ctis_render import austrian_trial_sites, sorted_applications
+from ecs.core.ctis_render import (
+    austrian_trial_sites, formatted_application_id, sorted_applications,
+)
 from ecs.core.models.constants import (
     MIN_EC_NUMBER, SUBMISSION_INFORMATION_PRIVACY_CHOICES, SUBMISSION_LANE_CHOICES, SUBMISSION_LANE_EXPEDITED,
     SUBMISSION_LANE_RETROSPECTIVE_THESIS, SUBMISSION_LANE_LOCALEC, SUBMISSION_LANE_BOARD,
@@ -987,6 +989,13 @@ class CTRSubmissionForm(models.Model):
     @property
     def ctis_application_id(self):
         return self._identifier(self.current_application.get('applicationId'))
+
+    @property
+    def ctis_formatted_application_id(self):
+        # « IN - 5700 »: what identifies this version of the study to the
+        # office, which is why the version table shows it instead of a count.
+        return self._identifier(
+            formatted_application_id(self.current_application))
 
     @property
     def ctis_aut_id(self):

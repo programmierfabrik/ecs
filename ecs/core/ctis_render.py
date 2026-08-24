@@ -626,12 +626,21 @@ def sorted_applications(trial):
 
 # ─── tab 1: Formular ─────────────────────────────────────────────────────
 
-def _formular_tab(trial, application, documents):
-    # CTR-ECS's Application.formattedId: the application's business key and
-    # its id, « IN - 5700 » for an initial application.
-    formatted_id = ' - '.join(
+def formatted_application_id(application):
+    """
+    CTR-ECS's Application.formattedId - « IN - 5700 » for an initial
+    application: the business key that says which kind of application it is,
+    then the application's own id.
+    """
+    if not isinstance(application, dict):
+        return ''
+    return ' - '.join(
         str(v).strip() for v in (application.get('businessKey'),
                                  application.get('applicationId')) if v)
+
+
+def _formular_tab(trial, application, documents):
+    formatted_id = formatted_application_id(application)
 
     details = Section(name=_words(formatted_id, 'Details'), level=4, entries=[
         _docs('', documents, APPLICATION_DOC_FAMILIES,

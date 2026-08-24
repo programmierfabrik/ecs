@@ -19,8 +19,15 @@
                     <th>Version</th>
                     <th>von</th>
                     <th>am</th>
-                    <th>Unterschiede</th>
-                    <th>{% trans 'Amendment' %}</th>
+                    {% comment %}
+                        A CTIS study has neither: the diff and amendment
+                        machinery is built on SubmissionForm, and a new
+                        revision arrives as its own import.
+                    {% endcomment %}
+                    {% if not is_ctr %}
+                        <th>Unterschiede</th>
+                        <th>{% trans 'Amendment' %}</th>
+                    {% endif %}
                     <th></th>
                 </tr>
             </thead>
@@ -53,11 +60,16 @@
                 {% with submission.newest_form as newest_form %}
                     {% for sf in submission_forms %}
                     <tr class="{% if not sf.is_acknowledged %}table-danger{% if sf.is_withdrawn %}-withdrawn{% endif %}{% elif sf.is_current %}table-info{% endif %} {% if forloop.counter0 > current_form_idx %}collapse{% endif %}">
-                        <td>{{ forloop.revcounter }}</td>
+                        {% comment %}
+                            A CTIS study names its versions after the
+                            application they were imported from - « IN - 5700 »
+                            - not after their position in the list.
+                        {% endcomment %}
+                        <td>{% if sf.ctis_formatted_application_id %}{{ sf.ctis_formatted_application_id }}{% else %}{{ forloop.revcounter }}{% endif %}</td>
                         <td>{{ sf.presenter }}</td>
                         <td>{{ sf.created_at|date:'d.m.Y, H:i' }} Uhr</td>
-                        <td>
-                            {% if not is_ctr %}
+                        {% if not is_ctr %}
+                            <td>
                                 {% if sf.previous_form %}
                                     <a href="{% url 'core.submission.diff' old_submission_form_pk=sf.previous_form.pk new_submission_form_pk=sf.pk %}">
                                         <span class="fa fa-pencil-square-o"></span>
@@ -70,22 +82,22 @@
                                         Unterschiede zur neuesten Version
                                     </a><br>
                                 {% endif %}
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if sf.is_notification_update %}
-                                {% with sf.new_for_notification.all.0 as notif %}
-                                    {% if notif %}
-                                        {% url 'notifications.view_notification' notification_pk=notif.pk as url %}
-                                        <a href="{{ url }}"> {% trans 'Amendment' %}</a>
-                                    {% else %}
-                                        <em>{% trans 'Not submitted yet.' %}</em>
-                                    {% endif %}
-                                {% endwith %}
-                            {% else %}
-                                –
-                            {% endif %}
-                        </td>
+                            </td>
+                            <td>
+                                {% if sf.is_notification_update %}
+                                    {% with sf.new_for_notification.all.0 as notif %}
+                                        {% if notif %}
+                                            {% url 'notifications.view_notification' notification_pk=notif.pk as url %}
+                                            <a href="{{ url }}"> {% trans 'Amendment' %}</a>
+                                        {% else %}
+                                            <em>{% trans 'Not submitted yet.' %}</em>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% else %}
+                                    –
+                                {% endif %}
+                            </td>
+                        {% endif %}
                         <td>
                             {% if not is_ctr %}
                                 {% if forloop.first %}
@@ -120,7 +132,7 @@
                     {% endfor %}
                     {% if current_form_idx < submission_forms|length|add:-1 %}
                         <tr class="expand_submission_forms">
-                            <td colspan=6 class="text-center text-muted">
+                            <td colspan="{% if is_ctr %}4{% else %}6{% endif %}" class="text-center text-muted">
                                 <span class="fa fa-caret-down"></span>
                             </td>
                         </tr>
@@ -143,6 +155,22 @@
             {% endif %}
         </td>
     </tr>
+    {% with ctr_form=submission.current_ctr_form %}
+        {% if ctr_form %}
+            {% comment %}
+                Always shown for a CTIS study. The advanced settings only
+                decide whether these also appear next to the study title.
+            {% endcomment %}
+            <tr>
+                <th class="text-nowrap">EU-CT-Nummer</th>
+                <td>{{ ctr_form.ctis_eu_ct_number|default:'-' }}</td>
+            </tr>
+            <tr>
+                <th class="text-nowrap">AUT ID</th>
+                <td>{{ ctr_form.ctis_aut_id|default:'-' }}</td>
+            </tr>
+        {% endif %}
+    {% endwith %}
     {% if not is_ctr %}
         <tr>
             <th class="text-nowrap">Sicherheitsmeldungsersteller</th>
