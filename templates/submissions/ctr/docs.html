@@ -10,8 +10,10 @@
     <div class="{% if entry.label %}col-md-9{% endif %}">
         {% for group in entry.groups %}
             <div class="ctr-doc-group">
-                {% if entry.groups|length > 1 or not entry.label %}
-                    <div class="ctr-doc-group-name">{{ group.name }}</div>
+                {% if group.name %}
+                    {% if entry.groups|length > 1 or not entry.label %}
+                        <div class="ctr-doc-group-name">{{ group.name }}</div>
+                    {% endif %}
                 {% endif %}
                 {% if group.documents %}
                     <ul class="list-unstyled mb-0">

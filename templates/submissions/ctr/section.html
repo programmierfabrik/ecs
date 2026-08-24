@@ -1,7 +1,9 @@
 {# One CTIS section: a heading plus its fields, tables and document lists. #}
 <div class="ctr-section"{% if section.anchor %} id="{{ section.anchor }}"{% endif %}>
     {% if section.name %}
-        {% if section.level == 5 %}
+        {% if section.level == 6 %}
+            <h6 class="my-2">{{ section.name }}</h6>
+        {% elif section.level == 5 %}
             <h5 class="my-3">{{ section.name }}</h5>
         {% elif section.level == 4 %}
             <h4 class="my-3">{{ section.name }}</h4>

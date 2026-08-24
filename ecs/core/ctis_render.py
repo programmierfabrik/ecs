@@ -363,27 +363,44 @@ APPLICATION_DOC_FAMILIES = (
     'PROOF_OF_PAYMENT',
 )
 
-# Part I « Protocol information ». CTR-ECS heads the PROTOCOL group with CTIS's
-# own Part I wording rather than the whitelist label, which is just « Protocol ».
+# CTR-ECS heads two of the four with its own capitalisation rather than the
+# whitelist's.
+APPLICATION_DOC_LABELS = {
+    'SUPPORTING_INFORMATION': 'Supporting Information',
+    'PROOF_OF_PAYMENT': 'Proof of Payment',
+}
+
+# « Compliance with regulation ». CTIS names the section after the regulation
+# and files both kinds under it, which is why they share one heading here
+# instead of getting one per kind - the section is what a reviewer looks for,
+# and « no document available » has to be answerable once, not twice.
+GDPR_DOC_FAMILIES = ('JOINT_CONTROLLERSHIP_AGREEMENT', 'PRIVACY_STATMENT')
+GDPR_DOC_LABEL = 'Compliance with Regulation (EU) 2016/679'
+
+# Part I « Protocol information ». CTIS files three kinds under « Clinical
+# trial protocol » - the protocol, its synopsis and the DSMB charter - so they
+# share one heading; « Study design » is its own.
+PROTOCOL_DOC_LABEL = 'Clinical trial protocol'
 PROTOCOL_DOC_FAMILIES = (
     'PROTOCOL',
-    'STUDY_DESIGN',
+    'SYNOPSIS_OF_THE_PROTOCOL',
+    'DATA_SAFETY_MONITORING_BOARD_CHARTER',
 )
-PROTOCOL_DOC_LABELS = {'PROTOCOL': 'Clinical trial protocol'}
+STUDY_DESIGN_DOC_LABEL = 'Study design'
+STUDY_DESIGN_DOC_FAMILIES = ('STUDY_DESIGN',)
 
-# TODO delete once confirmed: SYNOPSIS_OF_THE_PROTOCOL is a real whitelist kind
-# (codes 7, 57, 308 and 344), but CTR-ECS does not list it under « Protocol
-# information » - and since it does show empty groups, that absence is a
-# decision, not a trial without a synopsis. Hidden here rather than dropped
-# because nothing else confirms where the kind belongs. « Unterlagen » still
-# lists these documents.
-HIDDEN_PROTOCOL_DOC_FAMILIES = ('SYNOPSIS_OF_THE_PROTOCOL',)
+# Part I « Scientific advice and Paediatric Investigation Plan ». The advice
+# documents get no heading of their own - the group above them is the heading.
+# CTIS has no document kind for a PIP itself, only an opinion extract; a PIP's
+# own documents arrive through part1.paediatricInvestigationPlan[].documentIds.
+SCIENTIFIC_ADVICE_DOC_FAMILIES = ('SUMMARY_OF_SCIENTIFIC_ADVICE',
+                                  'SUMMARY_OF_SCIENTIFIC_ADVICE_REPORT')
 
-# Part I « Scientific advice and Paediatric Investigation Plan ». CTIS has no
-# document kind for a PIP itself, only an opinion extract - a PIP's own
-# documents arrive through part1.paediatricInvestigationPlan[].documentIds.
-SCIENTIFIC_ADVICE_DOC_FAMILIES = ('SUMMARY_OF_SCIENTIFIC_ADVICE',)
-PIP_DOC_FAMILIES = ('PIP_OPINION',)
+# Population groups CTIS counts as « incapable of giving consent personally »,
+# which is a row of its own rather than part of the recruitment groups.
+INCAPABLE_GIVING_CONSENT = ('Minors', 'Incapacitated population')
+SUBJECTS_IN_EMERGENCY_SITUATION = 'Subjects in emergency situation'
+POPULATION_GROUP_OTHER = 'Other'
 
 # Part I « Trial category », next to the low-intervention answer.
 LOW_INTERVENTION_DOC_FAMILIES = ('LOW_INTERVENTION_JUSTIFICATION',)
@@ -391,6 +408,49 @@ LOW_INTERVENTION_DOC_FAMILIES = ('LOW_INTERVENTION_JUSTIFICATION',)
 # Listed once for the whole trial even though the documents hang off the
 # individual products.
 CONTENT_LABELLING_DOC_FAMILIES = ('CONTENT_LABELLING_OF_THE_IMPS',)
+CONTENT_LABELLING_DOC_LABEL = "Content labeling of the IMP's"
+
+# Part I « Products »: the three document groups a product role lists, each
+# under one heading of CTR-ECS's own wording rather than one per kind.
+PRODUCT_IB_DOC_LABEL = 'Investigator brochure for the medicinal product'
+PRODUCT_IB_DOC_FAMILIES = ('INVESTIGATOR_BROCHURE',
+                           'SUMMARY_OF_PRODUCT_CHARACTERISTICS')
+
+PRODUCT_IMPD_DOC_LABEL = 'IMPD - Safety and Efficacy'
+PRODUCT_IMPD_DOC_FAMILIES = (
+    'INVESTIGATIONAL_MEDICAL_PRODUCT_DOSSIER_SAFETY_AND_EFFICACY',
+    'SIMPLIFIED_INVESTIGATIONAL_MEDICAL_PRODUCT_DOSSIER_SAFETY_EFFICACY',
+)
+
+# CTIS files « Authorisation of manufacturing and import » and « QP GMP
+# certification » under this heading. Neither kind is in our type whitelist,
+# so the group can only ever say « no document available » - the heading is
+# still shown, because a reviewer has to see that the question was asked.
+PRODUCT_GMP_DOC_LABEL = 'Compliance with (GMP) for the Medicinal Product'
+PRODUCT_GMP_DOC_FAMILIES = ()
+
+# Part II « Documents »: the fixed list of groups a member state's documents
+# are sorted into, in this order and under CTR-ECS's own headings rather than
+# the whitelist's. Every group is shown even when empty - the office has to be
+# able to see which of the eight a sponsor has not filed.
+PART2_DOC_GROUPS = (
+    ('Recruitment Arrangements', ('RECRUITMENT_ARRANGEMENTS',)),
+    ('Subject information and informed consent form',
+     ('SUBJECT_INFORMATION_AND_INFORMED_CONSENT_FORM',)),
+    ('Suitability of the investigator',
+     ('INVESTIGATOR_CURRICULUM_VITAE', 'SUITABILITY_OF_THE_INVESTIGATOR')),
+    ('Suitability of the facilities',
+     ('SUITABILITY_OF_THE_CLINICAL_TRIAL_SITES_FACILITIES',)),
+    ('Proof of insurance cover or indemnification', ('PROOF_OF_INSURANCE',)),
+    ('Financial and other arrangements', ('FINANCIAL_ARRANGEMENTS',)),
+    ('Compliance with national requirements on Data Protection',
+     ('COMPLIANCE_WITH_NATIONAL_REQUIREMENTS_ON_DATE_PROTECTION',)),
+    ('Compliance with use of Biological samples',
+     ('COMPLIANCE_WITH_USE_OF_BIOLOGICAL_SAMPLES',)),
+)
+
+# The ninth group, shown only when the eight above leave something over.
+PART2_OTHER_DOC_LABEL = 'Other documents'
 
 # « Roles: {role} Name: {product name} » - how the document service names the
 # section of a document that belongs to one product of the trial.
@@ -537,6 +597,18 @@ def _docs(label, documents, families=None, note='', labels=None, **filters):
     ])
 
 
+def _docs_as_one(name, documents, families, **filters):
+    """
+    Every kind of one CTIS section under a single heading, rather than one
+    heading per kind - what « Compliance with regulation » shows. Empty like
+    `_docs`, so the heading stays and answers « nothing here » itself.
+    """
+    return Docs(groups=[DocGroup(name=name, documents=sorted((
+        d for d in documents
+        if (d.family or d.type_code) in families and _doc_matches(d, **filters)
+    ), key=lambda d: d.title))])
+
+
 # ─── application selection ───────────────────────────────────────────────
 
 def _application_sort_key(item):
@@ -555,28 +627,43 @@ def sorted_applications(trial):
 # ─── tab 1: Formular ─────────────────────────────────────────────────────
 
 def _formular_tab(trial, application, documents):
-    details = Section(name='Application details', entries=[
-        Field('Application ID', _txt(application.get('applicationId'))),
-        Field('Application type', _txt(application.get('applicationType'))),
-        Field('Application status', _txt(application.get('status'))),
-        Field('Submission date', _date(application.get('submissionDate'))),
-        Field('Decision date', _date(application.get('decisionDate'))),
-        Field('Part II only application', _bool(application.get('part2OnlyApplication'))),
-        Field('Winter clock stop used', _bool(application.get('winterClockStopUsed'))),
-        Field('EU-CT number', _txt(trial.get('clinicalTrialId'))),
-        Field('Trial ID', _txt(application.get('trialId'))),
-        Field('Trial status', _txt(_get(trial, 'status', 'text'))),
-        Field('Referenced trials', _strings(application.get('referencedTrials')),
-              widget='list'),
+    # CTR-ECS's Application.formattedId: the application's business key and
+    # its id, « IN - 5700 » for an initial application.
+    formatted_id = ' - '.join(
+        str(v).strip() for v in (application.get('businessKey'),
+                                 application.get('applicationId')) if v)
+
+    details = Section(name=_words(formatted_id, 'Details'), level=4, entries=[
+        _docs('', documents, APPLICATION_DOC_FAMILIES,
+              labels=APPLICATION_DOC_LABELS),
     ])
 
-    docs = Section(name='Documents', entries=[
-        _docs('', documents, APPLICATION_DOC_FAMILIES),
+    # No heading of its own - the document heading names the regulation.
+    compliance = Section(level=4, entries=[
+        _docs_as_one(GDPR_DOC_LABEL, documents, GDPR_DOC_FAMILIES),
     ])
+
+    # Only the first trial category is shown, which is the one CTR-ECS reads.
+    classification = next(
+        (c for c in (application.get('part1') or {}).get('classification') or []
+         if isinstance(c, dict)), {})
+
+    deferral = [
+        Section(name='Deferral publication dates', level=4),
+        Section(name='Deferral of clinical trial information', level=5, entries=[
+            Field('Short title/ Trial category *',
+                  _txt(classification.get('trialCategory'))),
+            Field('Justification for trial category / Trial category *',
+                  _txt(classification.get('justification'))),
+            Field('Justification for deferral published at decision',
+                  NOT_RETRIEVABLE),
+        ]),
+    ]
 
     return Tab('formular', 'Formular', subtabs=[
         SubTab('formular-main', 'Formular', panes=[
-            Pane(sections=[details, docs]),
+            Pane(sections=[Section(name='Form Details', level=3),
+                           details, compliance] + deferral),
         ]),
     ])
 
@@ -656,14 +743,20 @@ def _identifier_lines(part1):
 
 
 def _trial_identifiers_sections(part1):
+    # The asterisks are CTIS's own « required » markers, part of the label.
+    entries = [
+        Field('Full title (English) *', _txt(part1.get('title')),
+              widget='textarea'),
+        Field('Public title (English) *', _txt(part1.get('publicTitle')),
+              widget='textarea'),
+    ]
+    # A trial without a protocol code shows no row at all, rather than an
+    # empty one - CTR-ECS omits it.
+    if part1.get('protocolCode'):
+        entries.append(Field('Protocol code', _txt(part1.get('protocolCode'))))
+
     return [
-        Section(name='Trial Identifiers', level=4, entries=[
-            Field('Full title (English)', _txt(part1.get('title')),
-                  widget='textarea'),
-            Field('Public title (English)', _txt(part1.get('publicTitle')),
-                  widget='textarea'),
-            Field('Protocol code', _txt(part1.get('protocolCode'))),
-        ]),
+        Section(name='Trial Identifiers', level=4, entries=entries),
         Section(name='Secondary identifying numbers', level=5, entries=[
             Field('Identifier', _identifier_lines(part1), widget='list'),
             Field('EudraCT number', _txt(part1.get('eudraCtCode'))),
@@ -684,12 +777,16 @@ def _endpoint_table(part1, is_primary, label):
 
 
 def _subject_gender(part1):
-    """The two sex flags read as one « Subject gender » value, as in CTIS."""
+    """
+    The two sex flags read as one « Subject gender » value, lower case and
+    female first, as CTIS words it.
+    """
     female = part1.get('containsFemaleSubjects')
     male = part1.get('containsMaleSubjects')
     if female is None and male is None:
         return NOT_PROVIDED
-    genders = [g for g, included in (('Female', female), ('Male', male)) if included]
+    genders = [g for g, included in (('female', female), ('male', male))
+               if included]
     return ', '.join(genders) or NOT_PROVIDED
 
 
@@ -700,17 +797,56 @@ def _trial_information_sections(part1, documents):
         else 'No low intervention trial'
     )
 
+    scopes = [s for s in part1.get('trialScopes') or [] if isinstance(s, dict)]
+    scope_descriptions = [s.get('description') for s in scopes
+                          if s.get('description')]
+
+    groups = [g for g in part1.get('recruitmentPopulationGroups') or []
+              if isinstance(g, dict)]
+
+    def group_named(name):
+        return next((g for g in groups
+                     if str(g.get('name') or '').lower() == name.lower()), None)
+
+    incapable = [g for g in groups if str(g.get('name') or '').lower()
+                 in [n.lower() for n in INCAPABLE_GIVING_CONSENT]]
+    recruitment = [g for g in groups if g not in incapable]
+
+    population = [
+        Field('Age range', _strings(part1.get('ageRanges')), widget='list'),
+        Field('Age range secondary identifier',
+              _strings(part1.get('ageRangeSecondaryIdentifiers')),
+              widget='list'),
+        Field('Subject gender', _subject_gender(part1)),
+        Field('Clinical trial group', NOT_RETRIEVABLE),
+        Field('Is vulnerable population?', NOT_RETRIEVABLE),
+        Field('Recruitment population group', _named(recruitment),
+              widget='list'),
+        Field('Subjects incapable of giving consent personally',
+              _named(incapable), widget='list'),
+    ]
+    # Two groups carry a free-text explanation, shown only when the group is
+    # one of the trial's own.
+    emergency = group_named(SUBJECTS_IN_EMERGENCY_SITUATION)
+    if emergency is not None:
+        population.append(Field('Emergency situation description',
+                                _txt(emergency.get('explanation'))))
+    other = group_named(POPULATION_GROUP_OTHER)
+    if other is not None:
+        population.append(Field('Other description',
+                                _txt(other.get('explanation'))))
+
     return [
         Section(name='Trial information', level=4),
-        Section(name='Trial category', level=5, entries=[
+        Section(name='Trial Category', level=5, entries=[
             Field('Category', category),
             _docs('Attachment of justification of low interventional '
                   'clinical trial', documents, LOW_INTERVENTION_DOC_FAMILIES),
-            Field('Trial phase', _txt(part1.get('phase'))),
+            Field('Trial Phase', _txt(part1.get('phase'))),
         ]),
-        Section(name='Medical condition', level=5, entries=[
+        Section(name='Medical Condition', level=5, entries=[
             _table('', [
-                'Medical condition (English)',
+                'Medical condition (english)',
                 'Is the medical condition considered to be a rare disease',
             ], [
                 [Cell(_txt(m.get('description'))), Cell(_bool(m.get('isRareDisease')))]
@@ -720,12 +856,17 @@ def _trial_information_sections(part1, documents):
                   widget='list'),
             Field('MedDRA codes', NOT_RETRIEVABLE),
         ]),
-        Section(name='Main objective', level=5, entries=[
-            Field('Trial scope', _named(part1.get('trialScopes')), widget='list'),
+        Section(name='Main Objective', level=5, entries=[
+            Field('Trial Scope', _named(scopes), widget='list'),
+            # Only asked about when a scope actually describes itself, which
+            # is the « Other » scope.
+            ] + ([Field('Other scope description',
+                        _strings(scope_descriptions), widget='list')]
+                 if scope_descriptions else []) + [
             Field('Main objective (English)', _txt(part1.get('mainObjective')),
                   widget='textarea'),
         ]),
-        Section(name='Secondary objectives', level=5, entries=[
+        Section(name='Secondary Objective', level=5, entries=[
             _table('', [
                 'New ID',
                 'Secondary objective (English)',
@@ -769,26 +910,15 @@ def _trial_information_sections(part1, documents):
                 for source in part1.get('monetaryMaterialSupport') or []
             ]),
         ]),
-        Section(name='Population of trial subjects', level=5, entries=[
-            Field('Age range', _strings(part1.get('ageRanges')), widget='list'),
-            Field('Age range secondary identifier',
-                  _strings(part1.get('ageRangeSecondaryIdentifiers')),
-                  widget='list'),
-            Field('Subject gender', _subject_gender(part1)),
-            Field('Clinical trial group',
-                  _strings(part1.get('recruitmentPopulationGroups')),
-                  widget='list'),
-        ]),
+        Section(name='Population of trial subjects', level=5, entries=population),
     ]
 
 
 def _protocol_information_sections(documents):
-    # CTR-ECS labels this « Clinical trial protocol » and « Study design »;
-    # the whitelist's own kinds are Protocol, Synopsis of the protocol and
-    # Study design. TODO: check the headings against a screenshot.
     return [Section(name='Protocol information', level=4, entries=[
-        _docs('', documents, PROTOCOL_DOC_FAMILIES,
-              labels=PROTOCOL_DOC_LABELS),
+        _docs_as_one(PROTOCOL_DOC_LABEL, documents, PROTOCOL_DOC_FAMILIES),
+        _docs_as_one(STUDY_DESIGN_DOC_LABEL, documents,
+                     STUDY_DESIGN_DOC_FAMILIES),
     ])]
 
 
@@ -802,35 +932,45 @@ def _scientific_advice_sections(part1, documents):
         if isinstance(advice, dict):
             rows.append([
                 Cell(_txt(advice.get('id'))),
-                Cell(_txt(advice.get('competentAuthorities')
+                Cell(_txt(advice.get('advice')
+                          or advice.get('competentAuthorities')
                           or advice.get('competentAuthority'))),
             ])
         else:
             rows.append([Cell(None), Cell(_txt(advice))])
 
-    # The group heading already names both halves, so the entries carry the
-    # labels instead of repeating « Scientific advice » as a sub-heading. Both
-    # document kinds are labelled rows like the table above them - CTR-ECS
-    # words the PIP one after the plan, not after the whitelist kind
-    # « PIP opinion ».
-    return [Section(
-        name='Scientific advice and Paediatric Investigation Plan (PIP)',
-        level=4, entries=[
-            _table('Scientific advice', [
+    # The advice documents get no heading - « Scientific advice » above them
+    # is the heading.
+    plans = [p for p in part1.get('paediatricInvestigationPlan') or []
+             if isinstance(p, dict)]
+    pip_entries = []
+    for plan in plans:
+        pip_entries.append(Field('EMA paediatric investigation number',
+                                 _txt(plan.get('number'))))
+        pip_entries.append(_docs('', documents,
+                                 ids=set(plan.get('documentIds') or [])))
+
+    return [
+        Section(name='Scientific advice and Paediatric Investigation Plan (PIP)',
+                level=4),
+        Section(name='Scientific advice', level=5, entries=[
+            _table('', [
                 'ID',
                 'Competent authorities that have provided scientific advice',
             ], rows),
-            _docs('Summary of scientific advice', documents,
-                  SCIENTIFIC_ADVICE_DOC_FAMILIES),
-            _docs('Paediatric investigation plan', documents,
-                  PIP_DOC_FAMILIES),
-        ])]
+            _docs_as_one('', documents, SCIENTIFIC_ADVICE_DOC_FAMILIES),
+        ]),
+        # A trial with no plan shows the heading and nothing under it, which is
+        # how CTR-ECS says « none registered ».
+        Section(name='Paediatric investigation plan', level=5,
+                entries=pip_entries),
+    ]
 
 
 def _associated_trials_sections(part1):
     return [Section(name='Associated clinical trials', level=4, entries=[
         _table('', [
-            'EU CT number',
+            'EU CT Number',
             'Title',
             'Sponsor',
         ], [
@@ -888,25 +1028,29 @@ def _sponsor_sections(application):
             entries=[
                 Field('Organisation name',
                       _txt(contact.get('organisationName'))),
-                # CTR-ECS shows an « Address » of its own next to the four
-                # address lines; the interface schema has no such key, so say
-                # so unless a later payload starts delivering one.
-                Field('Address', _txt(contact['address'])
-                      if 'address' in contact else NOT_RETRIEVABLE),
-                Field('Address line 1', _txt(contact.get('addressLine1'))),
+                # The four address lines as one line, comma-joined - CTR-ECS
+                # shows the whole address once and then line by line.
+                Field('Address', _txt(', '.join(
+                    str(contact.get(k)).strip()
+                    for k in ('addressLine1', 'addressLine2',
+                              'addressLine3', 'addressLine4')
+                    if contact.get(k) and str(contact.get(k)).strip()))),
+                # The asterisks are CTIS's own « required » markers, kept as
+                # part of the label the way CTR-ECS shows them.
+                Field('Address line 1*', _txt(contact.get('addressLine1'))),
                 Field('Address line 2', _txt(contact.get('addressLine2'))),
                 Field('Address line 3', _txt(contact.get('addressLine3'))),
                 Field('Address line 4', _txt(contact.get('addressLine4'))),
-                Field('Town/City', _txt(contact.get('city'))),
+                Field('Town/City*', _txt(contact.get('city'))),
                 Field('Post code', _txt(contact.get('postCode'))),
-                Field('Country', _country(contact.get('country'))
+                Field('Country*', _country(contact.get('country'))
                       if contact.get('country') else NOT_PROVIDED),
                 Field('Functional contact point name',
                       _txt(contact.get('functionalContactPointName'))),
-                Field('Firstname', _txt(contact.get('firstName'))),
-                Field('Lastname', _txt(contact.get('lastName'))),
-                Field('Phone', _txt(contact.get('phone'))),
-                Field('Email', _txt(contact.get('email'))),
+                Field('Firstname*', _txt(contact.get('firstName'))),
+                Field('Lastname*', _txt(contact.get('lastName'))),
+                Field('Phone*', _txt(contact.get('phone'))),
+                Field('Email*', _txt(contact.get('email'))),
             ]))
 
     if groups:
@@ -936,27 +1080,15 @@ def _product_title(role, product):
     return _txt(role.get('description') or details.get('medicinalProductName'))
 
 
-def _product_chip(role, product, documents):
+def _product_summary_row(product):
     details = product.get('productDetails') or {}
-    substances = product.get('substances') or []
-    dosage = product.get('dosage') or {}
     authorisation = product.get('authorisationDetails') or {}
-    title = _product_title(role, product)
-    number = details.get('medicinalProductNumber')
-
-    summary = _table('', [
-        'EU MP number',
-        'Marketing auth. no.',
-        'Product auth.',
-        'Product name',
-        'Pharmaceutical form',
-        'Strength',
-        'Sponsor product code',
-        'Active substance name',
-        'EU substance number',
-    ], [[
-        Cell(_txt(number)),
-        Cell(_txt(authorisation.get('marketingAuthorisationNumber'))),
+    substances = product.get('substances') or []
+    return [
+        Cell(_txt(details.get('medicinalProductNumber'))),
+        # One column, country then number - « NO EU/1/14/916/033 ».
+        Cell(_words(authorisation.get('marketingAuthorisationCountry'),
+                    authorisation.get('marketingAuthorisationNumber'))),
         Cell(_txt(details.get('authorisationStatus'))),
         Cell(_txt(details.get('medicinalProductName'))),
         Cell(_txt(details.get('pharmaceuticalForm'))),
@@ -964,98 +1096,250 @@ def _product_chip(role, product, documents):
         Cell(_txt(product.get('sponsorProductCode'))),
         Cell(_strings([s.get('activeSubstanceName') for s in substances])),
         Cell(_strings([s.get('substanceEvCode') for s in substances])),
-    ]])
+        Cell(_txt(product.get('atcName'))),
+        Cell(_txt(product.get('atcCode'))),
+        Cell(_txt(product.get('atcLevel'))),
+    ]
 
-    # The chip names the product, so the block below it does not repeat it.
-    return ChipGroup(label='{}: {}'.format(_txt(role.get('name')), title), sections=[
-        Section(level=4, entries=[summary]),
-        Section(name='Details for Product with EU MP number {}'.format(_txt(number)),
-                level=5, entries=[
-            Field('Role description', _txt(role.get('description'))),
-            Field('Role in trial', _txt(details.get('medicinalProductRoleInTrial'))),
-            Field('Product other name',
+
+def _advanced_therapy_fields(therapy):
+    gene = therapy.get('geneTherapyDescription') or {}
+    somatic = therapy.get('somaticCellTherapy') or {}
+    tissue = therapy.get('tissueEngineeredMedicinalProduct') or {}
+
+    fields = [Field('Therapy type', _txt(therapy.get('advancedTherapyTypeName')))]
+    # Only the therapy's own kind contributes rows - a gene therapy has no
+    # somatic cell origin to leave blank.
+    if gene:
+        fields += [
+            Field('Gene of interest', _txt(gene.get('geneOfInterest'))),
+            Field('Type of gene transfer product',
+                  _txt(gene.get('typeGeneTransferProduct'))),
+            Field('Gene therapy type', _txt(gene.get('geneTherapyType'))),
+            Field('Additional description', _txt(gene.get('additionalDescription'))),
+            Field('Genetically modified cells present?',
+                  _txt(gene.get('geneticallyModifiedCellsPresent'))),
+            Field('Specify type of cells', _txt(gene.get('specifyTypeCells'))),
+            Field('Origin of the genetically modified cells',
+                  _txt(gene.get('originGeneticallyModifiedCells'))),
+            Field('Species origin for the xenogeneic cells',
+                  _txt(gene.get('speciesOriginXenogeneicCells'))),
+        ]
+    if somatic:
+        fields += [
+            Field('Somatic cell origin', _txt(somatic.get('somaticCellOrigin'))),
+            Field('Somatic cell type', _txt(somatic.get('somaticCellType'))),
+            Field('Species origin for the xenogeneic cell',
+                  _txt(somatic.get('speciesOriginXenogeneicCell'))),
+            Field('Specify type of differentiated cells',
+                  _txt(somatic.get('specifyOtherSomaticCellType'))),
+        ]
+    if tissue:
+        fields += [
+            Field('Tissue engineered cell type',
+                  _txt(tissue.get('tissueEngineeredCellType'))),
+            Field('Origin of the engineered tissue',
+                  _txt(tissue.get('originEngineeredTissue'))),
+            Field('Cell specification', _txt(tissue.get('cellSpecification'))),
+            Field('Tissue Engineered xenogeneic species of origin',
+                  _txt(tissue.get('tissueEngineeredXenogeneicSpecies'))),
+        ]
+    return fields
+
+
+def _product_detail_sections(product):
+    details = product.get('productDetails') or {}
+    dosage = product.get('dosage') or {}
+    authorisation = product.get('authorisationDetails') or {}
+    characteristics = product.get('characteristics') or []
+    substances = product.get('substances') or []
+    therapies = product.get('advancedTherapies') or []
+
+    sections = [
+        Section(name='Details for Product with EU MP number {}'.format(
+            _txt(details.get('medicinalProductNumber'))), level=5),
+        Section(name='Medicinal Product Details', level=6, entries=[
+            Field('Medicinal name', _txt(details.get('medicinalProductName'))),
+            Field('EU medicinal product number/medicinal product unique ID',
+                  _txt(details.get('medicinalProductNumber'))),
+            Field('Pharmaceutical form', _txt(details.get('pharmaceuticalForm'))),
+            Field('Strength', _txt(details.get('strength'))),
+            Field('Medicinal product other name',
                   _txt(details.get('medicinalProductOtherName'))),
-            Field('Paediatric formulation',
+            Field('Is this a specific paediatric formulation?',
                   _txt(details.get('paediatricFormulation'))),
-            Field('Sponsor product code (edit)',
+            Field('Authorisation status', _txt(details.get('authorisationStatus'))),
+            Field('Medicinal product role in trial',
+                  _txt(details.get('medicinalProductRoleInTrial'))),
+            Field("Sponsor's product code",
                   _txt(details.get('sponsorProductCodeEdit'))),
-            Field('ATC code / level / name', _words(
-                      product.get('atcCode'), product.get('atcLevel'),
-                      product.get('atcName'))),
-            Field('Marketing authorisation holder',
-                  _txt(authorisation.get('maHolder'))),
+        ]),
+        Section(name='Product characteristics', level=6, entries=[
+            Field('Medicinal product characteristics',
+                  _strings([c.get('name') for c in characteristics]),
+                  widget='list'),
+            Field('Other medicinal product',
+                  _strings([c.get('description') for c in characteristics]),
+                  widget='list'),
+        ]),
+        Section(name='Dosage and administration details', level=6, entries=[
+            Field('Route of administration', _txt(dosage.get('routeAdministration'))),
+            Field('Maximum duration of treatment',
+                  _txt(dosage.get('maxTreatmentPeriod'))),
+            Field('Maximum Total dose allowed',
+                  _txt(dosage.get('maxTotalDoseAmount'))),
+            Field('Total dose unit of measure',
+                  _txt(dosage.get('maxTotalDoseUomEvCode'))),
+            Field('Maximum daily dose allowed',
+                  _txt(dosage.get('maxDailyDoseAmount'))),
+            Field('Daily dose unit of measure',
+                  _txt(dosage.get('maxDailyDoseUomEvCode'))),
+        ]),
+        Section(name='Information about the modification of the Medicinal Product',
+                level=6, entries=[
+            Field('Has the medicinal product been modified in relation to its '
+                  'Marketing Authorisation?',
+                  _txt(product.get('productChangedRelation'))),
+        ]),
+        Section(name='Product Classification', level=6, entries=[
+            Field('Anatomic therapeutic chemical (ATC) code',
+                  _txt(product.get('atcCode'))),
+            Field('Anatomic therapeutic chemical (ATC) name',
+                  _txt(product.get('atcName'))),
+            Field('Anatomic therapeutic chemical (ATC) level',
+                  _txt(product.get('atcLevel'))),
+        ]),
+        Section(name='Product authorisation details', level=6, entries=[
+            Field('MA holder', _txt(authorisation.get('maHolder'))),
             Field('Marketing authorisation country',
                   _txt(authorisation.get('marketingAuthorisationCountry'))),
-            Field('Centralised procedure number',
+            Field('Marketing authorisation number',
+                  _txt(authorisation.get('marketingAuthorisationNumber'))),
+            Field('Centralised procedure/MRP/DCP/registration procedure number',
                   _txt(authorisation.get('centralisedProcedureNumber'))),
-            Field('Orphan drug designer', _txt(product.get('orphanDrugDesigner'))),
-            Field('Product changed relation',
-                  _txt(product.get('productChangedRelation'))),
-            Field('Linked product names',
-                  _strings(product.get('linkedProductNames')), widget='list'),
-            Field('Advanced therapies', _strings(product.get('advancedTherapies')),
-                  widget='list'),
-            Field('Devices', _strings(product.get('devices')), widget='list'),
-            Field('Route of administration', _txt(dosage.get('routeAdministration'))),
-            Field('Max. daily dose', _amount(
-                      dosage.get('maxDailyDoseAmount'),
-                      dosage.get('maxDailyDoseUomEvCode'))),
-            Field('Max. total dose', _amount(
-                      dosage.get('maxTotalDoseAmount'),
-                      dosage.get('maxTotalDoseUomEvCode'))),
-            Field('Max. treatment period', _txt(dosage.get('maxTreatmentPeriod'))),
-            _table('Characteristics', [
-                'Characteristic',
-                'Description',
+        ]),
+        Section(name='Orphan Designation', level=6, entries=[
+            Field('Does this product have an orphan drug designation',
+                  _txt(product.get('orphanDrugDesigner'))),
+        ]),
+        Section(name='Active substance', level=6, entries=[
+            field
+            for substance in substances
+            for field in (
+                Field('Active substance name',
+                      _txt(substance.get('activeSubstanceName'))),
+                Field('Classification', _txt(substance.get('classification'))),
+                Field('Active substance name synonyms',
+                      _txt(substance.get('activeSubstanceNameSynonyms'))),
+                Field('Active substance other descriptive name',
+                      _txt(substance.get('otherDescriptiveName'))),
+                Field('EU active substance code',
+                      _txt(substance.get('substanceEvCode'))),
+                Field('Strength', _txt(substance.get('strength'))),
+                Field('Status', _txt(substance.get('status'))),
+            )
+        ]),
+        # No heading of its own - the field below carries the wording.
+        Section(level=6, entries=(
+            [field for therapy in therapies
+             for field in _advanced_therapy_fields(therapy)]
+            # A product that is no ATMP still answers the question.
+            or [Field('Advanced Therapy Medicinal Product', NOT_PROVIDED)]
+        )),
+        Section(name='Device associated with medicinal product', level=6, entries=[
+            _table('', [
+                'Product used in combination with a device',
+                'Product ID',
+                'Device Trade Name',
+                'Description of the device',
+                'Type of device',
+                'Device has CE mark',
+                'Device notified body',
             ], [
-                [Cell(_txt(c.get('name'))), Cell(_txt(c.get('description')))]
-                for c in product.get('characteristics') or []
+                [Cell(_txt(d.get('productUseDeviceName'))),
+                 Cell(_txt(d.get('productId'))),
+                 Cell(_txt(d.get('tradeName'))),
+                 Cell(_txt(d.get('description'))),
+                 Cell(_txt(d.get('deviceTypeName'))),
+                 Cell(_bool(d.get('hasCeMark'))),
+                 Cell(_txt(d.get('notifiedBody')))]
+                for d in product.get('devices') or []
             ]),
-            _table('Active substances', [
-                'Active substance name',
-                'Synonyms',
-                'Other descriptive name',
-                'Classification',
-                'Status',
+        ]),
+    ]
+    return sections
+
+
+def _product_chip(role, documents):
+    """
+    One chip per medicinal product role: its products in one summary table, a
+    details block per product, then the role's three document groups - the
+    shape CTR-ECS gives a product role group.
+    """
+    products = role.get('products') or []
+
+    sections = [
+        # The chip already names the role and its description; this heading is
+        # the description on its own, as CTR-ECS heads the group with.
+        Section(name=_txt(role.get('description')), level=4, entries=[
+            _table('', [
+                'EU MP Number',
+                'Marketing Auth. No.',
+                'Product Auth.',
+                'Product Name',
+                'Pharmaceutical Form',
                 'Strength',
-                'EU substance number',
-            ], [
-                [Cell(_txt(s.get('activeSubstanceName'))),
-                 Cell(_txt(s.get('activeSubstanceNameSynonyms'))),
-                 Cell(_txt(s.get('otherDescriptiveName'))),
-                 Cell(_txt(s.get('classification'))),
-                 Cell(_txt(s.get('status'))),
-                 Cell(_txt(s.get('strength'))),
-                 Cell(_txt(s.get('substanceEvCode')))]
-                for s in substances
-            ]),
+                'Sponsor Product Code',
+                'Active Substance Name',
+                'EU Substance Number',
+                'ATC Name',
+                'ATC Code',
+                'ATC Level',
+            ], [_product_summary_row(p) for p in products]),
         ]),
-        # CTR-ECS shows each document kind as a heading of its own over its
-        # cards, not as a labelled row - the one place a non-section gets a
-        # heading. Content labelling is sectioned per product like the rest
-        # but listed once for the trial, so it is not repeated here.
-        # TODO: which kinds a product shows, and in what order, still needs a
-        # screenshot; for now they are whichever kinds its documents have.
+    ]
+
+    for product in products:
+        sections += _product_detail_sections(product)
+
+    # The documents belong to the role, not to one of its products.
+    names = set()
+    for product in products:
+        names |= _product_names(role, product)
+
+    sections += [
         Section(level=5, entries=[
-            _docs('', documents, product_names=_product_names(role, product),
-                  exclude_families=CONTENT_LABELLING_DOC_FAMILIES),
+            _docs_as_one(PRODUCT_IB_DOC_LABEL, documents,
+                         PRODUCT_IB_DOC_FAMILIES, product_names=names),
+            _docs_as_one(PRODUCT_GMP_DOC_LABEL, documents,
+                         PRODUCT_GMP_DOC_FAMILIES, product_names=names),
+            _docs_as_one(PRODUCT_IMPD_DOC_LABEL, documents,
+                         PRODUCT_IMPD_DOC_FAMILIES, product_names=names),
         ]),
-    ])
+    ]
+
+    return ChipGroup(label='{}: {}'.format(_txt(role.get('name')),
+                                          _txt(role.get('description'))),
+                     sections=sections)
 
 
 def _product_sections(part1, documents):
-    chips = [_product_chip(role, product, documents)
-             for role in part1.get('medicinalProductRoles') or []
-             for product in role.get('products') or []]
+    roles = part1.get('medicinalProductRoles') or []
+    chips = [_product_chip(role, documents) for role in roles]
+    linked = [name for role in roles
+              for product in role.get('products') or []
+              for name in product.get('linkedProductNames') or []]
 
     return [
         Section(name='Products', level=3,
                 entries=[Chips(groups=chips)] if chips else []),
-        # Content labelling is a trial-wide document list, so it stays outside
-        # the per-product chips - and it is nothing but that list, which is why
-        # it carries one heading rather than a heading over a heading.
+        # A trial-wide list, so it stays outside the per-role chips even though
+        # the documents hang off the individual products.
         Section(name='Content Labelling', level=4, entries=[
-            _docs('', documents, CONTENT_LABELLING_DOC_FAMILIES),
+            _docs_as_one(CONTENT_LABELLING_DOC_LABEL, documents,
+                         CONTENT_LABELLING_DOC_FAMILIES),
+            Field('Linked products', _strings(dict.fromkeys(linked)),
+                  widget='list'),
         ]),
     ]
 
@@ -1157,14 +1441,16 @@ def _trial_site_sections(part2):
         organisation = site.get('organisation') or {}
         address = organisation.get('address') or {}
         investigator = site.get('principalInvestigator') or {}
-        street = _lines(address.get('line1'), address.get('line2'),
-                        address.get('line3'), address.get('line4'))
+        street = _txt(', '.join(
+            str(address.get(k)).strip()
+            for k in ('line1', 'line2', 'line3', 'line4')
+            if address.get(k) and str(address.get(k)).strip()))
         rows.append([
             Cell(_words(investigator.get('titleName'),
                         investigator.get('firstName'),
                         investigator.get('lastName'))),
             Cell(_txt(organisation.get('name'))),
-            # « Site location » and « Site street address » both show the
+            # « Site Location » and « Site Street Address » both show the
             # address lines - a trial site has only the one address, and
             # CTR-ECS repeats it in both columns.
             Cell(street),
@@ -1180,31 +1466,45 @@ def _trial_site_sections(part2):
             Cell(_txt(organisation.get('id'))),
         ])
 
-    return [Section(name='Trial sites', level=4, entries=[
+    return [Section(name='Trial Sites', level=4, entries=[
         _table('', [
             'Contact',
-            'Org name',
-            'Site location',
-            'Site street address',
-            'Site city',
-            'Site post code',
-            'Site country',
+            'Org Name',
+            'Site Location',
+            'Site Street Address',
+            'Site City',
+            'Site Post Code',
+            'Site Country',
             'Department',
             'Phone',
-            'E-mail',
+            'Email',
             'Org ID',
         ], rows),
     ])]
 
 
 def _part2_document_sections(part2, documents):
-    # The country's Part II documents are the ones it references by id. Only
-    # the kinds it actually holds are shown - CTR-ECS lists no empty group
-    # here, unlike the Part I sections with their fixed kind lists.
+    # The country's Part II documents are the ones it references by id.
     ids = set(part2.get('documentIds') or [])
-    return [Section(name='Documents', level=4, entries=[
-        _docs('', documents, ids=ids),
-    ])]
+    own = [d for d in documents if d.id in ids]
+
+    entries = []
+    claimed = set()
+    for label, families in PART2_DOC_GROUPS:
+        group = _docs_as_one(label, own, families)
+        claimed |= {d.id for d in group.groups[0].documents}
+        entries.append(group)
+
+    # Whatever the eight groups do not claim. Unlike them it is left out when
+    # empty, the way CTR-ECS omits it - an empty « Other documents » would be
+    # a heading for a question nobody asked.
+    leftovers = sorted((d for d in own if d.id not in claimed),
+                       key=lambda d: d.title)
+    if leftovers:
+        entries.append(Docs(groups=[
+            DocGroup(name=PART2_OTHER_DOC_LABEL, documents=leftovers)]))
+
+    return [Section(name='Documents', level=4, entries=entries)]
 
 
 def _part2_label(part2, duplicate_country):
