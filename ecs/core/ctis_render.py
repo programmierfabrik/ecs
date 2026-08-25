@@ -452,6 +452,21 @@ PART2_DOC_GROUPS = (
 # The ninth group, shown only when the eight above leave something over.
 PART2_OTHER_DOC_LABEL = 'Other documents'
 
+# What a viewer who is not office, executive or signing sees of a CTIS study -
+# a Spezialist doing a « Spezialistenbewertung », a board member, the presenter,
+# a « Beteiligte Partei ». Two things and nothing else: the Synopsis, and the
+# Austrian Part II's consent form.
+#
+# Both are narrowed to the variant CTIS marks « not for publication », which is
+# the unredacted one: 7 and 57 are the published Synopsis and its extract, 15
+# and 64 the published consent form and its extract.
+EXTERNAL_SYNOPSIS_DOC_LABEL = 'Synopsis of the protocol'
+EXTERNAL_SYNOPSIS_DOC_FAMILIES = ('SYNOPSIS_OF_THE_PROTOCOL',)
+EXTERNAL_SYNOPSIS_DOC_TYPE_CODES = ('308', '344')
+EXTERNAL_PART2_DOC_LABEL = 'Subject information and informed consent form'
+EXTERNAL_PART2_DOC_FAMILIES = ('SUBJECT_INFORMATION_AND_INFORMED_CONSENT_FORM',)
+EXTERNAL_PART2_DOC_TYPE_CODES = ('323', '350')
+
 # « Roles: {role} Name: {product name} » - how the document service names the
 # section of a document that belongs to one product of the trial.
 _PRODUCT_SECTION_RE = re.compile(
@@ -535,12 +550,14 @@ def build_document_entries(documents, download_url=None):
 
 
 def _doc_matches(doc, parts=None, ids=None, product_names=None,
-                 is_product=None, exclude_families=()):
+                 is_product=None, exclude_families=(), type_codes=None):
     """
     `parts` is the set of `estimatedPart` values to keep - None is a value of
     its own there, so it has to be passed explicitly rather than meaning
     « any ». `ids` scopes to a Part II's `documentIds`, `product_names` to the
-    names one product answers to.
+    names one product answers to. `type_codes` scopes below the document kind,
+    to single publication variants - CTIS issues « (for publication) » and
+    « (not for publication) » as separate codes of the same kind.
     """
     if ids is not None and doc.id not in ids:
         return False
@@ -549,6 +566,8 @@ def _doc_matches(doc, parts=None, ids=None, product_names=None,
     if is_product is not None and doc.is_product_document != is_product:
         return False
     if product_names is not None and doc.product_name not in product_names:
+        return False
+    if type_codes is not None and doc.type_code not in type_codes:
         return False
     if doc.family in exclude_families:
         return False
@@ -1570,6 +1589,91 @@ def _part2_tab(part2s, documents, selected_country=None):
     ])
 
 
+# ─── the restricted view ─────────────────────────────────────────────────
+# Two tabs instead of five, built from the whitelist above rather than by
+# pruning the full ones: a section that is never assembled cannot leak, and
+# the internal tabs stay free to change without dragging the permission
+# boundary along with them.
+
+def _external_synopsis_documents(documents):
+    return _docs_as_one(
+        EXTERNAL_SYNOPSIS_DOC_LABEL, documents, EXTERNAL_SYNOPSIS_DOC_FAMILIES,
+        type_codes=EXTERNAL_SYNOPSIS_DOC_TYPE_CODES)
+
+
+def _external_part1_tab(documents):
+    return Tab('part1', 'Part I', subtabs=[
+        SubTab('part1-all', 'Part I', panes=[
+            Pane(sections=[
+                Section(name='Protocol information', level=4, entries=[
+                    _external_synopsis_documents(documents),
+                ]),
+            ]),
+        ]),
+    ])
+
+
+def _external_part2_documents(part2, documents):
+    return _docs_as_one(
+        EXTERNAL_PART2_DOC_LABEL, documents, EXTERNAL_PART2_DOC_FAMILIES,
+        ids=set(part2.get('documentIds') or []),
+        type_codes=EXTERNAL_PART2_DOC_TYPE_CODES)
+
+
+def _external_part2_tab(part2s, documents):
+    # Austria only, and only its documents - no country details, no trial
+    # sites. Another member state is not rendered at all, not as a locked chip.
+    part2s = [p for p in part2s
+              if _part2_available(p) and p.get('mscCountryCode') == OWN_COUNTRY]
+
+    if not part2s:
+        return Tab('part2', 'Part II', subtabs=[
+            SubTab('part2-all', 'Part II', panes=[
+                Pane(sections=[Section(entries=[
+                    Field('Member state', NOT_PROVIDED)])])]),
+        ])
+
+    groups = [
+        ChipGroup(label=_part2_label(part2, len(part2s) > 1), sections=[
+            Section(name='Documents', level=4, entries=[
+                _external_part2_documents(part2, documents)]),
+        ])
+        for part2 in part2s
+    ]
+
+    return Tab('part2', 'Part II', subtabs=[
+        SubTab('part2-all', 'Part II', panes=[
+            Pane(sections=[Section(entries=[Chips(groups=groups)])]),
+        ]),
+    ])
+
+
+def external_documents(trial, documents):
+    """
+    Every document the restricted view shows, for gating the download route.
+
+    Built from the same two calls the restricted tabs make, so a document can
+    never be listed on the page without being downloadable, or the reverse.
+    """
+    trial = trial if isinstance(trial, dict) else {}
+    applications = sorted_applications(trial)
+    if not applications:
+        return []
+
+    entries = build_document_entries(documents or [])
+    part2s = (applications[0].get('part2s') or [])
+
+    permitted = list(
+        _external_synopsis_documents(entries).groups[0].documents)
+    for part2 in part2s:
+        if not _part2_available(part2):
+            continue
+        if part2.get('mscCountryCode') != OWN_COUNTRY:
+            continue
+        permitted += _external_part2_documents(part2, entries).groups[0].documents
+    return permitted
+
+
 # ─── tab 5: Unterlagen (flat document list) ──────────────────────────────
 
 def _document_filters(documents):
@@ -1603,13 +1707,18 @@ def _unterlagen_tab(documents):
 # ─── entry point ─────────────────────────────────────────────────────────
 
 def build_ctr_view(trial, documents=None, selected_country=None,
-                   download_url=None):
+                   download_url=None, restricted=False):
     """
     Build the CTIS view model for one imported trial payload.
 
     `trial` is the raw payload and `documents` the accompanying entries from
     the document service. `download_url` is called with a document id and
     returns the URL to download it. Returns a dict of template context.
+
+    With `restricted`, only what a viewer outside the ethics commission may
+    see is assembled - see the EXTERNAL_* whitelist above. Everyone who is not
+    office, executive or signing gets that view; there is no tier between it
+    and the full one.
 
     Only the payload's newest application is rendered. Versioning is the
     data model's job - each import is its own CTRSubmissionForm of the
@@ -1632,15 +1741,21 @@ def build_ctr_view(trial, documents=None, selected_country=None,
     part1 = application.get('part1') or {}
     part2s = list(application.get('part2s') or [])
 
-    # The document list is fetched per application, so every entry in it
-    # belongs to this one - a document carries no application of its own.
-    tabs = [
-        _formular_tab(trial, application, entries),
-        _msc_tab(application, part1, part2s),
-        _part1_tab(application, part1, entries),
-        _part2_tab(part2s, entries, selected_country),
-        _unterlagen_tab(entries),
-    ]
+    if restricted:
+        tabs = [
+            _external_part1_tab(entries),
+            _external_part2_tab(part2s, entries),
+        ]
+    else:
+        # The document list is fetched per application, so every entry in it
+        # belongs to this one - a document carries no application of its own.
+        tabs = [
+            _formular_tab(trial, application, entries),
+            _msc_tab(application, part1, part2s),
+            _part1_tab(application, part1, entries),
+            _part2_tab(part2s, entries, selected_country),
+            _unterlagen_tab(entries),
+        ]
 
     return {
         'ctr_tabs': tabs,

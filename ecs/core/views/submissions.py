@@ -27,7 +27,7 @@ from ecs.core.models import (
     MedicalCategory, EthicsCommission, AdvancedSettings,
 )
 from ecs.core.ctis import fetch_ctis_document
-from ecs.core.ctis_render import build_ctr_view
+from ecs.core.ctis_render import build_ctr_view, external_documents
 from ecs.core.tasks import generate_submission_preview
 from ecs.checklists.models import ChecklistBlueprint, Checklist
 from ecs.meetings.models import Meeting
@@ -181,6 +181,19 @@ def view_submission(request, submission_pk=None):
     if submission.current_ctr_form_id:
         return redirect('core.submission.readonly_ctr_submission_form', ctr_submission_form_pk=submission.current_ctr_form_id)
     return redirect('readonly_submission_form', submission_form_pk=submission.current_submission_form.pk)
+
+
+def sees_full_ctr_form(user):
+    """
+    Who may see a CTIS study whole: the ethics commission itself.
+
+    Everyone else reaches a study through a task, through being its presenter,
+    or through a temporary authorization - a Spezialist doing a
+    « Spezialistenbewertung », a board member, a « Beteiligte Partei » - and
+    they all get the same restricted view. One predicate covers every one of
+    those paths, which is why it is the right one.
+    """
+    return user.is_staff or user.profile.is_internal
 
 
 def readonly_submission_form(request, submission_form_pk=None, submission_form=None, ctr_submission_form_pk=None, ctr_submission_form=None, extra_context=None, template='submissions/readonly_form.html', checklist_overwrite=None):
@@ -367,6 +380,7 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
             ctr_submission_form.application,
             ctr_submission_form.documents,
             selected_country=request.GET.get('country') or None,
+            restricted=not sees_full_ctr_form(request.user),
             download_url=lambda document_id: reverse(
                 'core.submission.download_ctr_document', kwargs={
                     'ctr_submission_form_pk': ctr_submission_form.pk,
@@ -451,8 +465,20 @@ def download_ctr_document(request, ctr_submission_form_pk=None, document_id=None
     # view would be an open proxy to the whole CTIS document service. A
     # document's content hangs off its versions, each with its own
     # `documentUrl` handle; the document itself is not downloadable.
+    #
+    # A viewer outside the ethics commission is narrowed further, to the
+    # documents their restricted view of the form actually lists - hiding the
+    # row without gating the route would only be cosmetic, since the handles
+    # are the same for everyone.
+    documents = ctr_submission_form.documents or []
+    if not sees_full_ctr_form(request.user):
+        permitted = {d.id for d in external_documents(
+            ctr_submission_form.application, documents)}
+        documents = [d for d in documents
+                     if str(d.get('documentId') or '') in permitted]
+
     known_ids = set()
-    for document in ctr_submission_form.documents or []:
+    for document in documents:
         for version in document.get('versions') or []:
             known_ids.add(version.get('documentUrl'))
     if document_id not in known_ids:
