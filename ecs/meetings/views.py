@@ -1178,6 +1178,9 @@ def meeting_details(request, meeting_pk=None, active=None):
         'retrospective_thesis_submissions': submissions.for_thesis_lane(),
         'expedited_submissions': submissions.expedited(),
         'localec_submissions': submissions.localec(),
+        # One flat row for now; a finer breakdown comes later. A CTIS study
+        # runs in the board lane, so it is also counted under « board » above.
+        'ctr_submissions': submissions.ctr(),
 
         'dissertation_submissions': submissions.filter(current_submission_form__project_type_education_context=1),
         'diploma_thesis_submissions': submissions.filter(current_submission_form__project_type_education_context=2),

@@ -31,6 +31,10 @@ class SubmissionQuerySet(models.QuerySet):
         # by accident; this one says it on purpose.
         return self.filter(current_ctr_form=None)
 
+    def ctr(self):
+        # The CTIS studies themselves - the counterpart of `not_ctr`.
+        return self.exclude(current_ctr_form=None)
+
     def expedited(self):
         return self.filter(workflow_lane=SUBMISSION_LANE_EXPEDITED)
 
