@@ -15,6 +15,14 @@ SUITABILITY_OF_THE_CLINICAL_TRIAL_SITES_FACILITIES - so those are folded. And
 codes 100, 109, 257 and 365 carry documentation_name STUDY_DESIGN while their
 labels read « Sponsor discussion response supporting document »; the label is
 trusted, so they form their own family rather than joining Study design.
+
+Not every kind CTIS delivers has a code here, and a missing one is not always
+a gap to fill. « Authorisation of manufacturing and import » and « QP GMP
+certification » have none, and are reached in ctis_render by their type string
+instead - see PRODUCT_GMP_DOC_TYPE_PREFIXES. The codes 26 and 27 those two
+documents carry in ctis_fixtures/single_product.json are **placeholders,
+invented for the fixture**: plausible, never read off the CTIS type list, and
+matched on by nothing. Do not add them here on the strength of the fixture.
 """
 
 # typeCode -> the label CTIS gives it. Note that a payload's own `type` string
