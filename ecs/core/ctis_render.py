@@ -145,6 +145,7 @@ class DocEntry:
     id: str = ''                    # documentId
     title: str = ''
     type_code: str = ''             # the stable CTIS document-type code
+    type: str = ''                  # the payload's own type string, as sent
     category: str = ''              # its label, as shown
     family: str = ''                # the document kind the code is a variant of
     part: object = None             # 1 | 2 | None, as CTIS estimates it
@@ -423,11 +424,14 @@ PRODUCT_IMPD_DOC_FAMILIES = (
 )
 
 # CTIS files « Authorisation of manufacturing and import » and « QP GMP
-# certification » under this heading. Neither kind is in our type whitelist,
-# so the group can only ever say « no document available » - the heading is
-# still shown, because a reviewer has to see that the question was asked.
+# certification » under this heading. Neither has a code in our type whitelist,
+# and neither needs one: CTR-ECS matches these two on the document's own `type`
+# string rather than on a code, which is why it finds them without knowing the
+# codes either. Matched by prefix, so the « (for publication) » and « (not for
+# publication) » qualifier CTIS appends is included without being named.
 PRODUCT_GMP_DOC_LABEL = 'Compliance with (GMP) for the Medicinal Product'
-PRODUCT_GMP_DOC_FAMILIES = ()
+PRODUCT_GMP_DOC_TYPE_PREFIXES = ('Authorisation of manufacturing and import',
+                                 'QP GMP certification')
 
 # Part II « Documents »: the fixed list of groups a member state's documents
 # are sorted into, in this order and under CTR-ECS's own headings rather than
@@ -528,6 +532,7 @@ def build_document_entries(documents, download_url=None):
             id=str(doc.get('documentId') or ''),
             title=doc.get('title') or NOT_PROVIDED,
             type_code=str(doc.get('typeCode') or ''),
+            type=doc.get('type') or '',
             category=_doc_type_label(doc),
             family=ctis_document_types.FAMILIES.get(
                 str(doc.get('typeCode') or ''), ''),
@@ -549,8 +554,19 @@ def build_document_entries(documents, download_url=None):
     return entries
 
 
+def _doc_type_starts_with(doc, prefixes):
+    """
+    Whether the document's type string begins with one of `prefixes`. The
+    payload's own `type` is what is matched - a whitelisted code's label is
+    only the fallback, for a payload that sends the code and no type.
+    """
+    text = (doc.type or doc.category or '').lower()
+    return any(text.startswith(p.lower()) for p in prefixes)
+
+
 def _doc_matches(doc, parts=None, ids=None, product_names=None,
-                 is_product=None, exclude_families=(), type_codes=None):
+                 is_product=None, exclude_families=(), type_codes=None,
+                 type_prefixes=None):
     """
     `parts` is the set of `estimatedPart` values to keep - None is a value of
     its own there, so it has to be passed explicitly rather than meaning
@@ -558,8 +574,15 @@ def _doc_matches(doc, parts=None, ids=None, product_names=None,
     names one product answers to. `type_codes` scopes below the document kind,
     to single publication variants - CTIS issues « (for publication) » and
     « (not for publication) » as separate codes of the same kind.
+
+    `type_prefixes` selects on the document's own type string instead of its
+    kind, which is what CTR-ECS does throughout and the only way to reach a
+    kind CTIS issues no whitelisted code for. Case-insensitive and by prefix,
+    so the publication qualifier does not have to be spelled out.
     """
     if ids is not None and doc.id not in ids:
+        return False
+    if type_prefixes is not None and not _doc_type_starts_with(doc, type_prefixes):
         return False
     if parts is not None and doc.part not in parts:
         return False
@@ -616,15 +639,20 @@ def _docs(label, documents, families=None, note='', labels=None, **filters):
     ])
 
 
-def _docs_as_one(name, documents, families, **filters):
+def _docs_as_one(name, documents, families=None, **filters):
     """
     Every kind of one CTIS section under a single heading, rather than one
     heading per kind - what « Compliance with regulation » shows. Empty like
     `_docs`, so the heading stays and answers « nothing here » itself.
+
+    With no `families` the kinds are not constrained at all and the filters
+    alone select - `type_prefixes` is the one that does, for a section whose
+    documents CTIS issues no whitelisted code for.
     """
     return Docs(groups=[DocGroup(name=name, documents=sorted((
         d for d in documents
-        if (d.family or d.type_code) in families and _doc_matches(d, **filters)
+        if (families is None or (d.family or d.type_code) in families)
+        and _doc_matches(d, **filters)
     ), key=lambda d: d.title))])
 
 
@@ -1340,7 +1368,8 @@ def _product_chip(role, documents):
             _docs_as_one(PRODUCT_IB_DOC_LABEL, documents,
                          PRODUCT_IB_DOC_FAMILIES, product_names=names),
             _docs_as_one(PRODUCT_GMP_DOC_LABEL, documents,
-                         PRODUCT_GMP_DOC_FAMILIES, product_names=names),
+                         type_prefixes=PRODUCT_GMP_DOC_TYPE_PREFIXES,
+                         product_names=names),
             _docs_as_one(PRODUCT_IMPD_DOC_LABEL, documents,
                          PRODUCT_IMPD_DOC_FAMILIES, product_names=names),
         ]),

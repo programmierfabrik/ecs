@@ -518,6 +518,48 @@
    ]
   },
   {
+   "documentId": "70000141",
+   "estimatedLanguageCode": "EN",
+   "estimatedPart": 1,
+   "section": "Roles: Test Name: EXA-4711",
+   "title": "QP GMP certification (not for publication)",
+   "type": "QP GMP certification (not for publication)",
+   "typeCode": "27",
+   "versions": [
+    {
+     "comment": null,
+     "documentUrl": "11111111-2222-4333-8444-000000000741",
+     "fromDate": "2024-01-10",
+     "mimeType": "PDF",
+     "submissionDate": "2025-01-10",
+     "systemVersion": 1,
+     "title": "QP GMP certification (not for publication)",
+     "version": "1"
+    }
+   ]
+  },
+  {
+   "documentId": "70000142",
+   "estimatedLanguageCode": "EN",
+   "estimatedPart": 1,
+   "section": "Roles: Test Name: EXA-4711",
+   "title": "Authorisation of manufacturing and import (not for publication)",
+   "type": "Authorisation of manufacturing and import (not for publication)",
+   "typeCode": "26",
+   "versions": [
+    {
+     "comment": null,
+     "documentUrl": "11111111-2222-4333-8444-000000000742",
+     "fromDate": "2024-01-10",
+     "mimeType": "PDF",
+     "submissionDate": "2025-01-10",
+     "systemVersion": 1,
+     "title": "Authorisation of manufacturing and import (not for publication)",
+     "version": "1"
+    }
+   ]
+  },
+  {
    "documentId": "70000130",
    "estimatedLanguageCode": "EN",
    "estimatedPart": 1,
