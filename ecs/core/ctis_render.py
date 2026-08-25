@@ -14,6 +14,7 @@ German.
 """
 
 import re
+import unicodedata
 from dataclasses import dataclass, field as dc_field
 from datetime import date, datetime
 
@@ -301,6 +302,18 @@ def _country(code):
     return str(countries.name(code)) or code
 
 
+def _sort_text(value):
+    """
+    A sort key that reads as a German list does: « Österreich » belongs with
+    the O's, not after « Spanien », which is where sorting by code point puts
+    it. Umlauts and the like are folded to their base letter and case is
+    ignored.
+    """
+    decomposed = unicodedata.normalize('NFKD', str(value or ''))
+    return ''.join(c for c in decomposed
+                   if not unicodedata.combining(c)).casefold()
+
+
 def _lines(*parts):
     """Join the non-null parts of a multi-line value (addresses, names)."""
     joined = '\n'.join(str(p).strip() for p in parts if p and str(p).strip())
@@ -338,6 +351,26 @@ def _get(mapping, *keys):
             return None
         current = current.get(key)
     return current
+
+
+def _by_number(items, key='id'):
+    """
+    CTIS numbers its objectives, criteria, end points and advices, and CTR-ECS
+    reads every one of those tables in that order rather than in the payload's.
+    The number arrives as a string, so « 10 » has to sort after « 2 ». An entry
+    whose number is not a number sorts last and keeps its payload order, the
+    way an unparseable date does in `_application_sort_key`.
+    """
+    def sort_key(pair):
+        index, item = pair
+        raw = item.get(key) if isinstance(item, dict) else None
+        try:
+            return (0, int(str(raw).strip()), index)
+        except (TypeError, ValueError):
+            return (1, 0, index)
+
+    entries = [i for i in (items or []) if isinstance(i, dict)]
+    return [i for _, i in sorted(enumerate(entries), key=sort_key)]
 
 
 # ─── tables ──────────────────────────────────────────────────────────────
@@ -734,17 +767,33 @@ def _member_states_sections(application, part1, part2s):
     for part2 in part2s:
         by_country.setdefault(part2.get('mscCountryCode'), []).append(part2)
 
+    # By the country name as it is shown, which is the order CTR-ECS lists the
+    # member states in - the payload's own order is the interface's, not one a
+    # reviewer can read a page by twice.
+    member_states = sorted(
+        (m for m in application.get('memberStates') or [] if isinstance(m, dict)),
+        key=lambda m: _sort_text(_country(m.get('countryCode'))))
+
     rows = []
-    for member_state in application.get('memberStates') or []:
+    for member_state in member_states:
         code = member_state.get('countryCode')
         country_part2s = by_country.get(code) or []
         dates = [d for d in (_parse_date(p.get('submissionDate'))
                              for p in country_part2s) if d]
         subjects = [p.get('recruitmentSubjectCount') for p in country_part2s
                     if p.get('recruitmentSubjectCount') is not None]
+        # A reporting member state is « Selected » once it is settled and
+        # « Proposed » while it is still only put forward. A state that is not
+        # the RMS answers the question with a dash either way.
+        if not member_state.get('isRms'):
+            rms = '–'
+        elif member_state.get('isProposed'):
+            rms = 'Proposed'
+        else:
+            rms = 'Selected'
         rows.append([
             Cell(_country(code)),
-            Cell('Selected' if member_state.get('isRms') else '–'),
+            Cell(rms),
             Cell(_date(min(dates)) if dates else None),
             Cell(_txt(sum(subjects)) if subjects else None),
         ])
@@ -786,13 +835,31 @@ def _msc_tab(application, part1, part2s):
 # One page, no third-level tabs: « Trial Details » with its seven groups,
 # then « Sponsors », then « Products » - the structure CTR-ECS shows.
 
+# The three registries CTIS abbreviates in `identifiers[].key`, named in full
+# the way CTR-ECS names them. Its own spelling of the first two carries two
+# typos (« trail », « ClinicalTrails »); they are corrected here rather than
+# reproduced on screen.
+IDENTIFIER_LABELS = {
+    'UTN': 'WHO universal trial number (UTN)',
+    'NCT': 'ClinicalTrials.gov identifier (NCT number)',
+    'ISRCTN': 'ISRCTN number',
+}
+
+# The EudraCT number is not a secondary identifier: it has a row of its own,
+# from `eudraCtCode`, and listing it here as well would show it twice.
+IDENTIFIER_EXCLUDED_KEY = 'eudract'
+
+
 def _identifier_lines(part1):
-    """Each secondary identifying number as « type: number », one per line."""
+    """Each secondary identifying number as « registry: number », one per line."""
     lines = []
     for identifier in part1.get('identifiers') or []:
         if isinstance(identifier, dict):
             key, number = identifier.get('key'), identifier.get('number')
-            lines.append(': '.join(str(v) for v in (key, number) if v))
+            if str(key or '').lower() == IDENTIFIER_EXCLUDED_KEY:
+                continue
+            label = IDENTIFIER_LABELS.get(str(key or '').upper(), key)
+            lines.append(': '.join(str(v) for v in (label, number) if v))
         else:
             lines.append(identifier)
     return _strings(lines)
@@ -827,7 +894,7 @@ def _endpoint_table(part1, is_primary, label):
         label,
     ], [
         [Cell(_txt(e.get('sequenceNumber'))), Cell(_txt(e.get('description')))]
-        for e in part1.get('endpoints') or []
+        for e in _by_number(part1.get('endpoints'), 'sequenceNumber')
         if bool(e.get('isPrimary')) is is_primary
     ])
 
@@ -868,8 +935,19 @@ def _trial_information_sections(part1, documents):
                  in [n.lower() for n in INCAPABLE_GIVING_CONSENT]]
     recruitment = [g for g in groups if g not in incapable]
 
+    # CTIS can send the same age range twice, spelled differently - « 18-64
+    # years » and « 18-64 Years » are one range, and CTR-ECS shows it once.
+    seen = set()
+    age_ranges = []
+    for age_range in part1.get('ageRanges') or []:
+        text = str(age_range).strip() if age_range is not None else ''
+        if not text or text.lower() in seen:
+            continue
+        seen.add(text.lower())
+        age_ranges.append(text)
+
     population = [
-        Field('Age range', _strings(part1.get('ageRanges')), widget='list'),
+        Field('Age range', _strings(age_ranges), widget='list'),
         Field('Age range secondary identifier',
               _strings(part1.get('ageRangeSecondaryIdentifiers')),
               widget='list'),
@@ -928,7 +1006,7 @@ def _trial_information_sections(part1, documents):
                 'Secondary objective (English)',
             ], [
                 [Cell(_txt(o.get('id'))), Cell(_txt(o.get('description')))]
-                for o in part1.get('secondaryObjectives') or []
+                for o in _by_number(part1.get('secondaryObjectives'))
             ]),
         ]),
         Section(name='Eligibility criteria', level=5, entries=[
@@ -937,14 +1015,14 @@ def _trial_information_sections(part1, documents):
                 'Principal inclusion criteria (English)',
             ], [
                 [Cell(_txt(c.get('id'))), Cell(_txt(c.get('description')))]
-                for c in part1.get('principalInclusionCriteria') or []
+                for c in _by_number(part1.get('principalInclusionCriteria'))
             ]),
             _table('Principal exclusion criteria', [
                 'New ID',
                 'Principal exclusion criteria (English)',
             ], [
                 [Cell(_txt(c.get('id'))), Cell(_txt(c.get('description')))]
-                for c in part1.get('principalExclusionCriteria') or []
+                for c in _by_number(part1.get('principalExclusionCriteria'))
             ]),
         ]),
         Section(name='End points', level=5, entries=[
@@ -983,16 +1061,19 @@ def _scientific_advice_sections(part1, documents):
     # paediatricInvestigationPlan[] without an item shape, so read both
     # tolerantly: a dict contributes its known keys, anything else is shown
     # as-is rather than dropped.
+    advices = part1.get('scientificAdvices') or []
+    # Sorted by the id CTIS numbers them with, as CTR-ECS reads the table;
+    # anything that is not a dict has no id to sort on and goes last.
     rows = []
-    for advice in part1.get('scientificAdvices') or []:
-        if isinstance(advice, dict):
-            rows.append([
-                Cell(_txt(advice.get('id'))),
-                Cell(_txt(advice.get('advice')
-                          or advice.get('competentAuthorities')
-                          or advice.get('competentAuthority'))),
-            ])
-        else:
+    for advice in _by_number(advices):
+        rows.append([
+            Cell(_txt(advice.get('id'))),
+            Cell(_txt(advice.get('advice')
+                      or advice.get('competentAuthorities')
+                      or advice.get('competentAuthority'))),
+        ])
+    for advice in advices:
+        if not isinstance(advice, dict):
             rows.append([Cell(None), Cell(_txt(advice))])
 
     # The advice documents get no heading - « Scientific advice » above them
@@ -1037,14 +1118,38 @@ def _associated_trials_sections(part1):
     ])]
 
 
+def _sponsor_active(sponsor):
+    """
+    Whether the sponsor's active period covers today, both ends inclusive - a
+    period that has not started yet is as inactive as one that has ended. A
+    sponsor with no `activeFrom` at all is taken as active, the way CTR-ECS
+    takes it: the interface leaves the field empty for the trial's own sponsor.
+    """
+    active_from = _parse_date(sponsor.get('activeFrom'))
+    active_to = _parse_date(sponsor.get('activeTo'))
+    if active_from is None:
+        return True
+    today = date.today()
+    return active_from <= today and (active_to is None or active_to >= today)
+
+
 def _sponsor_sections(application):
     sponsors = application.get('sponsors') or []
+    # One organisation can arrive more than once - CTR-ECS shows it once per
+    # name and country, and the contact-point chips below follow the same list.
+    seen = set()
+    unique = []
+    for sponsor in sponsors:
+        key = (sponsor.get('name'), sponsor.get('country'))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(sponsor)
+    sponsors = unique
 
     rows = []
     for sponsor in sponsors:
         commercial = sponsor.get('isCommercial')
-        active_from = sponsor.get('activeFrom')
-        active_to = sponsor.get('activeTo')
         rows.append([
             Cell(_txt(sponsor.get('name'))),
             Cell(_txt(sponsor.get('organisationType'))),
@@ -1053,8 +1158,7 @@ def _sponsor_sections(application):
             # CTR-ECS shows neither as a raw boolean or a date range.
             Cell(None if commercial is None else
                  ('Commercial' if commercial else 'Non-commercial')),
-            Cell(None if not (active_from or active_to) else
-                 ('Inactive' if active_to else 'Active')),
+            Cell('Active' if _sponsor_active(sponsor) else 'Not active'),
             Cell(_txt(sponsor.get('legalRepresentative'))),
             Cell(_txt(sponsor.get('scientificContactPoint'))),
             Cell(_txt(sponsor.get('publicContactPoint'))),
