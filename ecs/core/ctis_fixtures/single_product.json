@@ -524,7 +524,6 @@
    "section": "Roles: Test Name: EXA-4711",
    "title": "QP GMP certification (not for publication)",
    "type": "QP GMP certification (not for publication)",
-   "typeCode": "27",
    "versions": [
     {
      "comment": null,
@@ -545,7 +544,6 @@
    "section": "Roles: Test Name: EXA-4711",
    "title": "Authorisation of manufacturing and import (not for publication)",
    "type": "Authorisation of manufacturing and import (not for publication)",
-   "typeCode": "26",
    "versions": [
     {
      "comment": null,
