@@ -1,3 +1,4 @@
+import datetime
 import os
 import tempfile
 import re
@@ -716,6 +717,43 @@ def ctis_overview(request):
         'title': 'CTIS-Übersicht',
         'submissions': page,
         'filter_form': filter_form,
+    })
+
+
+@user_group_required('CTIS Importer')
+def ctis_deadline_widget(request):
+    """
+    Dashboard widget for the CTIS Importer group: CTIS studies whose Draft
+    Assessment Report is still outstanding and due within the next 7 days.
+    Links through to `ctis_overview` for anything beyond that.
+    """
+    today = timezone.localdate()
+    content_type = ContentType.objects.get_for_model(Submission)
+    uploaded_subquery = Document.objects.filter(
+        content_type=content_type,
+        object_id=OuterRef('pk'),
+        doctype__identifier='draft_assessment_report',
+    )
+
+    submissions = (Submission.objects
+        .filter(
+            current_ctr_form__isnull=False,
+            draft_assessment_report_deadline__gte=today,
+            draft_assessment_report_deadline__lte=today + datetime.timedelta(days=7),
+        )
+        .select_related('current_ctr_form')
+        .annotate(draft_assessment_report_uploaded=Exists(uploaded_subquery))
+        .filter(draft_assessment_report_uploaded=False)
+        .order_by('draft_assessment_report_deadline', 'ec_number'))
+
+    for submission in submissions:
+        days = (submission.draft_assessment_report_deadline - today).days
+        submission.dar_days_remaining = (
+            'heute fällig' if days == 0
+            else 'in {} Tag{}'.format(days, 'en' if days != 1 else ''))
+
+    return render(request, 'submissions/ctis_deadline_widget.html', {
+        'submissions': submissions,
     })
 
 

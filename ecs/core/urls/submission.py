@@ -19,6 +19,7 @@ urlpatterns = (
     path('list/assigned/', views.assigned_submissions, name='core.submission.assigned_submissions'),
     path('list/mine/', views.my_submissions, name='core.submission.my_submissions'),
     path('list/ctis/', views.ctis_overview, name='core.submission.ctis_overview'),
+    path('list/ctis/deadlines-widget/', views.ctis_deadline_widget, name='core.submission.ctis_deadline_widget'),
 
     path('import/', views.import_submission_form, name='core.submission.import_submission_form'),
     path('ctis/import/', ctis_views.import_ctis_study, name='core.submission.import_ctis_study'),
