@@ -31,8 +31,23 @@
                 </li>
             {% endfor %}
         </ul>
+        <ul class="list-unstyled mb-0 mr-5">
+            <li class="text-muted mb-2">{{ filter_form.days_ahead.label }}</li>
+            {% for radio in filter_form.days_ahead %}
+                <li class="form-check justify-content-start mb-2">
+                    <label class="form-check-label">
+                        {{ radio.tag }}
+                        {{ radio.choice_label }}
+                    </label>
+                </li>
+            {% endfor %}
+        </ul>
         <button type="submit" class="btn btn-primary">Filtern</button>
     </form>
+
+    <p class="text-muted">{{ submissions.paginator.count }} Studie{{ submissions.paginator.count|pluralize:"n" }} gefunden</p>
+
+    {% include 'paginator.html' with page=submissions %}
 
     <div class="table-responsive">
         <table class="table table-striped">
@@ -42,11 +57,12 @@
                     <th>CTIS-Nummer</th>
                     <th>Titel</th>
                     <th>Draft Assessment Report Deadline</th>
+                    <th>Verbleibende Tage</th>
                     <th>Hochgeladen</th>
                 </tr>
             </thead>
             <tbody>
-                {% for submission in submissions %}
+                {% for submission in submissions.object_list %}
                     <tr>
                         <td>
                             <a href="{% url 'view_submission' submission_pk=submission.pk %}">
@@ -64,17 +80,20 @@
                                 <span class="badge badge-success">Fällig seit {{ submission.draft_assessment_report_deadline|date:'d.m.Y' }}</span>
                             {% endif %}
                         </td>
+                        <td>{{ submission.dar_days_remaining|default:'–' }}</td>
                         <td>
                             {% if submission.draft_assessment_report_uploaded %}Ja{% else %}Nein{% endif %}
                         </td>
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center text-muted">Keine CTIS-Studien gefunden.</td>
+                        <td colspan="6" class="text-center text-muted">Keine CTIS-Studien gefunden.</td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+
+    {% include 'paginator.html' with page=submissions %}
 </div>
 {% endblock %}

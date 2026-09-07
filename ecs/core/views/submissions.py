@@ -9,7 +9,7 @@ from django.http import HttpResponse, Http404, JsonResponse, FileResponse, HttpR
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.forms.models import model_to_dict
-from django.db.models import Q, Prefetch, Min, F, Case, When, Value, CharField, Exists, OuterRef
+from django.db.models import Q, Prefetch, Min, F, Case, When, Value, CharField, IntegerField, Exists, OuterRef
 from django.utils.translation import gettext as _
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
@@ -668,8 +668,19 @@ def ctis_overview(request):
                 default=Value(DAR_DEADLINE_PASSED),
                 output_field=CharField(),
             ),
+            # A plain date sort would interleave "passed" and "upcoming" by
+            # raw value, since a passed deadline is numerically smaller than
+            # an upcoming one. Group by urgency instead: no deadline set
+            # first (nothing scheduled at all), then the soonest upcoming
+            # deadlines, then the longest-overdue passed ones.
+            deadline_sort_priority=Case(
+                When(draft_assessment_report_deadline=None, then=Value(0)),
+                When(draft_assessment_report_deadline__gt=today, then=Value(1)),
+                default=Value(2),
+                output_field=IntegerField(),
+            ),
         )
-        .order_by(F('draft_assessment_report_deadline').asc(nulls_first=True), 'ec_number'))
+        .order_by('deadline_sort_priority', 'draft_assessment_report_deadline', 'ec_number'))
 
     # Same convention as `submission_list`: POST carries a real submission,
     # otherwise fall back to what this user filtered by last time - no query
@@ -681,13 +692,29 @@ def ctis_overview(request):
         usersettings.ctis_overview_filter = filter_form.cleaned_data
         usersettings.save()
 
-    # No pagination: the whole point of this page is seeing every CTIS
-    # study's status in one screen without clicking through. Paginating
-    # would also lose the filter selection on page 2+, since it's carried in
-    # the query string rather than a saved per-user setting.
+    paginator = Paginator(submissions, 50, allow_empty_first_page=True)
+    try:
+        page = paginator.page(request.GET.get('page', 1))
+    except (EmptyPage, InvalidPage):
+        page = paginator.page(1)
+
+    for submission in page.object_list:
+        deadline = submission.draft_assessment_report_deadline
+        if not deadline:
+            submission.dar_days_remaining = None
+        elif deadline >= today:
+            days = (deadline - today).days
+            submission.dar_days_remaining = (
+                'heute fällig' if days == 0
+                else 'in {} Tag{}'.format(days, 'en' if days != 1 else ''))
+        else:
+            days = (today - deadline).days
+            submission.dar_days_remaining = 'seit {} Tag{}'.format(
+                days, 'en' if days != 1 else '')
+
     return render(request, 'submissions/ctis_overview.html', {
         'title': 'CTIS-Übersicht',
-        'submissions': submissions,
+        'submissions': page,
         'filter_form': filter_form,
     })
 

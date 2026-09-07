@@ -1,9 +1,11 @@
+import datetime
 from collections import Counter
 
 from django import forms
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from ecs.core.forms.fields import DateField
@@ -163,17 +165,29 @@ class CTISOverviewFilterForm(forms.Form):
         ),
         widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
     )
+    days_ahead = forms.ChoiceField(
+        required=False,
+        label='Anstehend fällig innerhalb von',
+        choices=(
+            ('', 'Egal'),
+            ('7', '7 Tagen'),
+            ('14', '14 Tagen'),
+        ),
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+    )
 
     def __init__(self, data=None, *args, **kwargs):
         # Nothing submitted yet, and nothing saved for this user yet either
         # (`ecs_settings.ctis_overview_filter` starts as `{}`): default every
-        # box to ticked, the same "everything on until you narrow it down"
-        # convention `SubmissionFilterForm` uses, and for the same reason -
-        # so an unfiltered visit isn't indistinguishable from "show nothing".
+        # checkbox to ticked and the days-ahead radio to "Egal" (no cutoff) -
+        # the same "everything on until you narrow it down" convention
+        # `SubmissionFilterForm` uses, and for the same reason, so an
+        # unfiltered visit isn't indistinguishable from "show nothing".
         if not data:
             data = {
-                name: [c for c, _ in field.choices]
-                for name, field in self.base_fields.items()
+                'deadline_status': [c for c, _ in self.base_fields['deadline_status'].choices],
+                'uploaded': [c for c, _ in self.base_fields['uploaded'].choices],
+                'days_ahead': '',
             }
         super().__init__(data, *args, **kwargs)
 
@@ -188,6 +202,15 @@ class CTISOverviewFilterForm(forms.Form):
         if uploaded and len(uploaded) == 1:
             submissions = submissions.filter(
                 draft_assessment_report_uploaded=(uploaded[0] == 'yes'))
+        # Only narrows the "upcoming" rows - "not entered" and "passed" rows
+        # have no "days ahead" to speak of, so they pass through untouched
+        # and are still governed by the checkboxes above.
+        days_ahead = self.cleaned_data.get('days_ahead')
+        if days_ahead:
+            cutoff = timezone.localdate() + datetime.timedelta(days=int(days_ahead))
+            submissions = submissions.filter(
+                ~Q(deadline_status=DAR_DEADLINE_UPCOMING) |
+                Q(draft_assessment_report_deadline__lte=cutoff))
         return submissions
 
 
