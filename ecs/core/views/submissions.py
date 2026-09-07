@@ -43,7 +43,8 @@ from ecs.core.forms import (
     CTISNumberForm,
 )
 from ecs.core.forms.review import (
-    CategorizationForm, BiasedBoardMemberForm, SubmissionDocumentForm,
+    CategorizationForm, BiasedBoardMemberForm, DraftAssessmentReportDeadlineForm,
+    SubmissionDocumentForm,
 )
 from ecs.core.forms.layout import SUBMISSION_FORM_TABS
 from ecs.votes.forms import VoteReviewForm, VotePreparationForm, B2VotePreparationForm
@@ -415,6 +416,9 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
         vote = submission.current_pending_vote or submission.current_published_vote
         context['vote_review_form'] = VoteReviewForm(instance=vote, readonly=True)
         context['categorization_form'] = CategorizationForm(instance=submission, readonly=True)
+        if ctr_submission_form:
+            context['draft_assessment_report_deadline_form'] = \
+                DraftAssessmentReportDeadlineForm(instance=submission, readonly=True)
         if request.user.profile.is_executive and \
             submission.allows_categorization():
             task = Task.unfiltered.for_data(submission).filter(
@@ -550,6 +554,21 @@ def reopen_categorization(request, submission_pk=None):
             submission=submission, reply_receiver=request.user)
 
     return redirect(new_task.url)
+
+
+@task_required
+@with_task_management
+def set_draft_assessment_report_deadline(request, submission_pk=None):
+    submission = get_object_or_404(Submission, pk=submission_pk)
+    form = DraftAssessmentReportDeadlineForm(request.POST or None, instance=submission)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+
+    response = readonly_submission_form(request,
+        extra_context={'draft_assessment_report_deadline_form': form},
+        **submission.current_form_kwargs())
+    response.has_errors = not form.is_valid()
+    return response
 
 
 def ctr_documents(request, submission_pk=None):

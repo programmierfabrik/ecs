@@ -82,6 +82,9 @@
                     {% if categorization_form %}
                         <li class="nav-item"><a class="nav-link {% if not categorization_form.readonly or categorization_review %}active{% endif %}" href="#categorization_tab">{% trans "Categorization" %}</a></li>
                     {% endif %}
+                    {% if draft_assessment_report_deadline_form %}
+                        <li class="nav-item"><a class="nav-link {% if not draft_assessment_report_deadline_form.readonly %}active{% endif %}" href="#draft_assessment_report_deadline_tab">Draft Assessment Report Deadline</a></li>
+                    {% endif %}
                     {% if user.profile.show_task_widget %}
                         <li class="nav-item"><a class="nav-link" href="#tasks_tab">{% trans 'Tasks' %}</a></li>
                         {% if user.profile.is_internal %}
@@ -173,6 +176,14 @@
             {% if user.profile.is_internal %}
                 <div data-widget-url="{% url 'checklists.categorization_tasks' submission_pk=submission.pk %}"></div>
             {% endif %}
+        </div>
+    {% endif %}
+
+    {% if draft_assessment_report_deadline_form %}
+        <div id="draft_assessment_report_deadline_tab" class="container collapse">
+            {% with draft_assessment_report_deadline_form as review_form %}
+                {% include 'submissions/review_form.html' %}
+            {% endwith %}
         </div>
     {% endif %}
 

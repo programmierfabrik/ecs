@@ -58,6 +58,7 @@ urlpatterns = (
     path('form/<int:submission_form_pk>/review/checklist/drop/<int:checklist_pk>/', views.drop_checklist_review, name='core.submission.drop_checklist_review'),
     path('<int:submission_pk>/categorization/', views.categorization, name='core.submission.categorization'),
     path('<int:submission_pk>/categorization/reopen/', views.reopen_categorization, name='core.submission.reopen_categorization'),
+    path('<int:submission_pk>/ctr/deadline/', views.set_draft_assessment_report_deadline, name='core.submission.set_draft_assessment_report_deadline'),
     path('<int:submission_pk>/ctr/documents/', views.ctr_documents, name='core.submission.ctr_documents'),
     path('<int:submission_pk>/ctr/documents/delete/', views.delete_ctr_document, name='core.submission.delete_ctr_document'),
     path('<int:submission_pk>/ctr/documents/<int:document_pk>/', views.download_ctr_upload, name='core.submission.download_ctr_upload'),

@@ -32,6 +32,13 @@ def is_initial_submission(wf):
 def is_acknowledged_and_initial_submission(wf):
     return is_acknowledged(wf) and is_initial_submission(wf)
 
+##############
+# CTR guards #
+##############
+@guard(model=Submission)
+def uses_ctr_form(wf):
+    return wf.data.uses_ctr_form
+
 ###############
 # lane guards #
 ###############
@@ -138,6 +145,15 @@ class InitialReview(Activity):
         form = s.newest_form
         form.acknowledge(choice)
         on_initial_review.send(Submission, submission=s, form=form)
+
+
+class SetDraftAssessmentReportDeadline(Activity):
+    class Meta:
+        model = Submission
+
+    def get_url(self):
+        return reverse('core.submission.set_draft_assessment_report_deadline',
+            kwargs={'submission_pk': self.workflow.data_id})
 
 
 class Resubmission(Activity):

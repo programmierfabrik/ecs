@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 
+from ecs.core.forms.fields import DateField
 from ecs.core.forms.utils import ReadonlyFormMixin
 from ecs.core.models import Submission
 from ecs.core.models.clinic import Clinic
@@ -123,6 +124,15 @@ class CategorizationForm(ReadonlyFormMixin, forms.ModelForm):
         elif lane != SUBMISSION_LANE_BOARD:
             cd['invite_primary_investigator_to_meeting'] = False
         return cd
+
+
+class DraftAssessmentReportDeadlineForm(ReadonlyFormMixin, forms.ModelForm):
+    draft_assessment_report_deadline = DateField(
+        label=_('Draft Assessment Report deadline'), required=False)
+
+    class Meta:
+        model = Submission
+        fields = ('draft_assessment_report_deadline',)
 
 
 class SubmissionDocumentForm(DocumentForm):

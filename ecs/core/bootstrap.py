@@ -14,7 +14,7 @@ from ecs.core.workflow import (
     InitialReview, Resubmission, Categorization, CategorizationReview,
     PaperSubmissionReview, VotePreparation, ChecklistReview,
     ExpeditedRecommendationSplit, B2ResubmissionReview,
-    InitialB2ResubmissionReview,
+    InitialB2ResubmissionReview, SetDraftAssessmentReportDeadline,
 )
 from ecs.core.workflow import (
     is_retrospective_thesis, is_acknowledged, is_expedited,
@@ -23,6 +23,7 @@ from ecs.core.workflow import (
     is_still_b2, needs_executive_b2_review, needs_thesis_vote_preparation,
     needs_expedited_vote_preparation, needs_localec_recommendation,
     needs_localec_vote_preparation, needs_categorization_review,
+    uses_ctr_form,
 )
 
 
@@ -52,6 +53,7 @@ def submission_workflow():
     GCP_REVIEW_GROUP = 'GCP Reviewer'
     SPECIALIST_GROUP = 'Specialist'
     LEGAL_AND_PATIENT_REVIEW_GROUP = 'Legal and Patient Reviewer'
+    CTIS_IMPORTER_GROUP = 'CTIS Importer'
 
     setup_workflow_graph(Submission,
         auto_start=True,
@@ -63,6 +65,7 @@ def submission_workflow():
             'executive_b2_review': Args(B2ResubmissionReview, name=_("Executive B2 Resubmission Review"), group=EXECUTIVE_GROUP),
             'initial_review': Args(InitialReview, group=OFFICE_GROUP, name=_("Initial Review")),
             'initial_review_barrier': Args(Generic, name="Initial Review Barrier"),
+            'draft_assessment_report_deadline': Args(SetDraftAssessmentReportDeadline, group=CTIS_IMPORTER_GROUP, name=_("Set Draft Assessment Report Deadline")),
             'categorization': Args(Categorization, group=EXECUTIVE_GROUP, name=_("Categorization")),
             'categorization_review': Args(CategorizationReview, group=OFFICE_GROUP, name=_("Categorization Review")),
             'paper_submission_review': Args(PaperSubmissionReview, group=OFFICE_GROUP, name=_("Paper Submission Review")),
@@ -90,6 +93,7 @@ def submission_workflow():
         edges={
             ('start', 'initial_review'): Args(guard=is_retrospective_thesis, negated=True),
             ('start', 'initial_thesis_review'): Args(guard=is_retrospective_thesis),
+            ('start', 'draft_assessment_report_deadline'): Args(guard=uses_ctr_form),
 
             ('initial_review', 'initial_review_barrier'): None,
             ('initial_thesis_review', 'initial_review_barrier'): None,

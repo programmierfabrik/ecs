@@ -55,6 +55,12 @@ class Submission(models.Model):
     # need no branch.
     ctr_invited_trial_sites = ArrayField(models.TextField(), default=list, blank=True)
 
+    # The date by which the office should have the study's Draft Assessment
+    # Report - set from the auto-created `draft_assessment_report_deadline`
+    # task, CTIS studies only. The report itself is uploaded separately as a
+    # `Document`, not stored here.
+    draft_assessment_report_deadline = models.DateField(null=True, blank=True)
+
     is_transient = models.BooleanField(default=False)
     is_finished = models.BooleanField(default=False)
     is_expired = models.BooleanField(default=False)
