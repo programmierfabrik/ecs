@@ -420,6 +420,10 @@
             ecs.setupWidgets();
             ecs.ctr.init();
 
+            {% if show_ctr_uploads %}
+                $('.upload_container').load('{% url "core.submission.ctr_documents" submission_pk=submission.pk %}');
+            {% endif %}
+
             $('#checklist_summary_tab textarea').each(function() {
                 new ecs.textarea.TextArea(this);
             });

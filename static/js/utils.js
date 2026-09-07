@@ -333,7 +333,7 @@ ecs.setupDocumentUploadForms = function(){
 
         form.find('select[name="document-doctype"]')
             .val(link.data('documentType'))
-            .attr('readonly', true);
+            .attr('disabled', true);
     });
 
     $('#tabs-11 input.reset_document').click(function(ev) {

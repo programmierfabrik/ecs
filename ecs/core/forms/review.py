@@ -11,6 +11,8 @@ from ecs.core.models import Submission
 from ecs.core.models.clinic import Clinic
 from ecs.core.models.constants import SUBMISSION_LANE_BOARD, SUBMISSION_LANE_EXPEDITED
 from ecs.core.models.core import MedicalCategory
+from ecs.documents.forms import DocumentForm
+from ecs.documents.models import DocumentType
 from ecs.utils.formutils import require_fields
 
 
@@ -121,6 +123,19 @@ class CategorizationForm(ReadonlyFormMixin, forms.ModelForm):
         elif lane != SUBMISSION_LANE_BOARD:
             cd['invite_primary_investigator_to_meeting'] = False
         return cd
+
+
+class SubmissionDocumentForm(DocumentForm):
+    """
+    The classic per-application `DocumentForm` - same fields, same upload/
+    replace/correct-metadata behaviour, same `ecs.setupDocumentUploadForms()`
+    JS - restricted to the handful of types this study-level tab is for,
+    since it isn't the classic per-application document list.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['doctype'].queryset = DocumentType.objects.filter(
+            identifier__in=('draft_assessment_report', 'other'))
 
 
 class BiasedBoardMemberForm(forms.Form):

@@ -1,3 +1,4 @@
+{% load core i18n %}
 {% comment %}
     The CTIS tab panels. Like the classic tabs the panel itself is full
     width and only the content sits in a container, so the third-level tab
@@ -52,3 +53,11 @@
         </div>
     </div>
 {% endfor %}
+
+{% if show_ctr_uploads %}
+    <div id="ctr-uploads" class="collapse ctr-tab">
+        <div class="container">
+            <div class="upload_container"></div>
+        </div>
+    </div>
+{% endif %}

@@ -42,7 +42,9 @@ from ecs.core.forms import (
     AssignedSubmissionsFilterForm, AllSubmissionsFilterForm,
     CTISNumberForm,
 )
-from ecs.core.forms.review import CategorizationForm, BiasedBoardMemberForm
+from ecs.core.forms.review import (
+    CategorizationForm, BiasedBoardMemberForm, SubmissionDocumentForm,
+)
 from ecs.core.forms.layout import SUBMISSION_FORM_TABS
 from ecs.votes.forms import VoteReviewForm, VotePreparationForm, B2VotePreparationForm
 from ecs.core.forms.utils import submission_form_to_dict
@@ -63,7 +65,7 @@ from ecs.core.diff import diff_submission_forms
 from ecs.communication.utils import send_message_template
 from ecs.utils import forceauth
 from ecs.users.models import UserProfile
-from ecs.users.utils import sudo, user_flag_required, get_user
+from ecs.users.utils import sudo, user_flag_required, user_group_required, get_user
 from ecs.tasks.models import Task
 from ecs.tasks.utils import get_obj_tasks, task_required, with_task_management
 
@@ -387,6 +389,11 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
                     'document_id': document_id,
                 }),
         ))
+        # The doclist/upload widget itself is loaded asynchronously into
+        # `.upload_container` (see ctr/tabs.html), the same way the classic
+        # document upload widget loads into `submissions/form.html` - so it
+        # only needs a flag here, not the documents/form themselves.
+        context['show_ctr_uploads'] = sees_full_ctr_form(request.user)
 
     if not ctr_submission_form:
         center_close_notifications = CenterCloseNotification.objects.filter(
@@ -543,6 +550,74 @@ def reopen_categorization(request, submission_pk=None):
             submission=submission, reply_receiver=request.user)
 
     return redirect(new_task.url)
+
+
+def ctr_documents(request, submission_pk=None):
+    """
+    The « Hochgeladene Dokumente » tab's own widget - loaded into
+    `.upload_container` via AJAX (`ctr/tabs.html`), and re-loaded the same
+    way after every upload/delete, exactly as the classic per-application
+    document upload widget works (`ecs.documents.views.upload_document`).
+    Kept out of the classic `Document.parent_object` per-application flow -
+    these attach to the `Submission` itself, generically, restricted here to
+    the two types this tab is for.
+    """
+    submission = get_object_or_404(Submission, pk=submission_pk)
+    if not sees_full_ctr_form(request.user):
+        raise Http404()
+
+    content_type = ContentType.objects.get_for_model(Submission)
+    form = None
+    if request.user.groups.filter(name='CTIS Importer').exists():
+        form = SubmissionDocumentForm(request.POST or None, request.FILES or None, prefix='document')
+        if request.method == 'POST' and form.is_valid():
+            document = form.save()
+            Document.objects.filter(pk=document.pk).update(
+                content_type=content_type, object_id=submission.id, stamp_on_download=False)
+            form = SubmissionDocumentForm(prefix='document')
+
+    documents = Document.objects.filter(content_type=content_type, object_id=submission.id)
+    documents = documents.exclude(
+        pk__in=documents.exclude(replaces_document=None).values('replaces_document').query)
+
+    return render(request, 'submissions/ctr/upload_form.html', {
+        'submission': submission,
+        'form': form,
+        'documents': documents.order_by('doctype__identifier', 'date', 'name'),
+    })
+
+
+@user_group_required('CTIS Importer')
+def delete_ctr_document(request, submission_pk=None):
+    document = get_object_or_404(Document,
+        pk=request.GET.get('document_pk'),
+        content_type=ContentType.objects.get_for_model(Submission),
+        object_id=submission_pk,
+    )
+    document.delete()
+    return ctr_documents(request, submission_pk=submission_pk)
+
+
+def view_ctr_upload(request, submission_pk=None, document_pk=None):
+    document = get_object_or_404(Document,
+        pk=document_pk,
+        content_type=ContentType.objects.get_for_model(Submission),
+        object_id=submission_pk,
+    )
+    if not sees_full_ctr_form(request.user):
+        raise Http404()
+    return handle_download(request, document, view=True)
+
+
+def download_ctr_upload(request, submission_pk=None, document_pk=None):
+    document = get_object_or_404(Document,
+        pk=document_pk,
+        content_type=ContentType.objects.get_for_model(Submission),
+        object_id=submission_pk,
+    )
+    if not sees_full_ctr_form(request.user):
+        raise Http404()
+    return handle_download(request, document)
 
 
 def reopen_checklist(request, submission_pk=None, blueprint_pk=None):

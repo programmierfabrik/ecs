@@ -9,3 +9,8 @@
         <a class="nav-link" href="#ctr-{{ tab.slug }}">{{ tab.name }}</a>
     </li>
 {% endfor %}
+{% if show_ctr_uploads %}
+    <li class="nav-item">
+        <a class="nav-link" href="#ctr-uploads">Hochgeladene Dokumente</a>
+    </li>
+{% endif %}
