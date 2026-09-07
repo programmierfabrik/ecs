@@ -135,6 +135,62 @@ class DraftAssessmentReportDeadlineForm(ReadonlyFormMixin, forms.ModelForm):
         fields = ('draft_assessment_report_deadline',)
 
 
+# The three states a study's Draft Assessment Report deadline can be in,
+# shared between the CTIS overview's filter and its annotated queryset
+# (`ecs/core/views/submissions.py:ctis_overview`).
+DAR_DEADLINE_NOT_ENTERED = 'not_entered'
+DAR_DEADLINE_UPCOMING = 'upcoming'
+DAR_DEADLINE_PASSED = 'passed'
+
+
+class CTISOverviewFilterForm(forms.Form):
+    deadline_status = forms.MultipleChoiceField(
+        required=False,
+        label='Deadline-Status',
+        choices=(
+            (DAR_DEADLINE_NOT_ENTERED, 'Keine Deadline gesetzt'),
+            (DAR_DEADLINE_UPCOMING, 'Anstehend'),
+            (DAR_DEADLINE_PASSED, 'Fällig'),
+        ),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+    )
+    uploaded = forms.MultipleChoiceField(
+        required=False,
+        label='Hochgeladen',
+        choices=(
+            ('yes', 'Ja'),
+            ('no', 'Nein'),
+        ),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+    )
+
+    def __init__(self, data=None, *args, **kwargs):
+        # Nothing submitted yet, and nothing saved for this user yet either
+        # (`ecs_settings.ctis_overview_filter` starts as `{}`): default every
+        # box to ticked, the same "everything on until you narrow it down"
+        # convention `SubmissionFilterForm` uses, and for the same reason -
+        # so an unfiltered visit isn't indistinguishable from "show nothing".
+        if not data:
+            data = {
+                name: [c for c, _ in field.choices]
+                for name, field in self.base_fields.items()
+            }
+        super().__init__(data, *args, **kwargs)
+
+    def filter(self, submissions):
+        statuses = self.cleaned_data.get('deadline_status')
+        if statuses:
+            submissions = submissions.filter(deadline_status__in=statuses)
+        # Checking neither or both means "don't care" - only a single ticked
+        # box actually narrows anything, same as the checkbox groups on the
+        # classic study list filter.
+        uploaded = self.cleaned_data.get('uploaded')
+        if uploaded and len(uploaded) == 1:
+            submissions = submissions.filter(
+                draft_assessment_report_uploaded=(uploaded[0] == 'yes'))
+        return submissions
+
+
 class SubmissionDocumentForm(DocumentForm):
     """
     The classic per-application `DocumentForm` - same fields, same upload/

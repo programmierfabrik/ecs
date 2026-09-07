@@ -18,6 +18,7 @@ urlpatterns = (
     re_path(r'^list/xls/(?P<shasum>[0-9a-f]{40})/$', views.xls_export_download, name='core.submission.xls_export_download'),
     path('list/assigned/', views.assigned_submissions, name='core.submission.assigned_submissions'),
     path('list/mine/', views.my_submissions, name='core.submission.my_submissions'),
+    path('list/ctis/', views.ctis_overview, name='core.submission.ctis_overview'),
 
     path('import/', views.import_submission_form, name='core.submission.import_submission_form'),
     path('ctis/import/', ctis_views.import_ctis_study, name='core.submission.import_ctis_study'),

@@ -1,0 +1,80 @@
+{% extends 'core.html' %}
+{% load i18n core %}
+
+{% block htmltitle %}{{ title }} | {{ block.super }}{% endblock %}
+{% block headertitle %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+
+    <form method="post" action="{{ request.path }}" class="form-inline justify-content-between align-items-center mb-5">
+        {% csrf_token %}
+        <ul class="list-unstyled mb-0 mr-5">
+            <li class="text-muted mb-2">{{ filter_form.deadline_status.label }}</li>
+            {% for checkbox in filter_form.deadline_status %}
+                <li class="form-check justify-content-start mb-2">
+                    <label class="form-check-label">
+                        {{ checkbox.tag }}
+                        {{ checkbox.choice_label }}
+                    </label>
+                </li>
+            {% endfor %}
+        </ul>
+        <ul class="list-unstyled mb-0 mr-5">
+            <li class="text-muted mb-2">{{ filter_form.uploaded.label }}</li>
+            {% for checkbox in filter_form.uploaded %}
+                <li class="form-check justify-content-start mb-2">
+                    <label class="form-check-label">
+                        {{ checkbox.tag }}
+                        {{ checkbox.choice_label }}
+                    </label>
+                </li>
+            {% endfor %}
+        </ul>
+        <button type="submit" class="btn btn-primary">Filtern</button>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>EC-Nummer</th>
+                    <th>CTIS-Nummer</th>
+                    <th>Titel</th>
+                    <th>Draft Assessment Report Deadline</th>
+                    <th>Hochgeladen</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for submission in submissions %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'view_submission' submission_pk=submission.pk %}">
+                                {{ submission|ec_number }}
+                            </a>
+                        </td>
+                        <td>{{ submission.current_ctr_form.ctis_number }}</td>
+                        <td>{{ submission.project_title_display }}</td>
+                        <td>
+                            {% if submission.deadline_status == 'not_entered' %}
+                                <span class="badge badge-danger">Keine Deadline gesetzt</span>
+                            {% elif submission.deadline_status == 'upcoming' %}
+                                <span class="badge badge-warning">Anstehend bis {{ submission.draft_assessment_report_deadline|date:'d.m.Y' }}</span>
+                            {% else %}
+                                <span class="badge badge-success">Fällig seit {{ submission.draft_assessment_report_deadline|date:'d.m.Y' }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if submission.draft_assessment_report_uploaded %}Ja{% else %}Nein{% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">Keine CTIS-Studien gefunden.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

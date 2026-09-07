@@ -9,7 +9,7 @@ from django.http import HttpResponse, Http404, JsonResponse, FileResponse, HttpR
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.forms.models import model_to_dict
-from django.db.models import Q, Prefetch, Min, F
+from django.db.models import Q, Prefetch, Min, F, Case, When, Value, CharField, Exists, OuterRef
 from django.utils.translation import gettext as _
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
@@ -44,7 +44,8 @@ from ecs.core.forms import (
 )
 from ecs.core.forms.review import (
     CategorizationForm, BiasedBoardMemberForm, DraftAssessmentReportDeadlineForm,
-    SubmissionDocumentForm,
+    SubmissionDocumentForm, CTISOverviewFilterForm,
+    DAR_DEADLINE_NOT_ENTERED, DAR_DEADLINE_UPCOMING, DAR_DEADLINE_PASSED,
 )
 from ecs.core.forms.layout import SUBMISSION_FORM_TABS
 from ecs.votes.forms import VoteReviewForm, VotePreparationForm, B2VotePreparationForm
@@ -637,6 +638,58 @@ def download_ctr_upload(request, submission_pk=None, document_pk=None):
     if not sees_full_ctr_form(request.user):
         raise Http404()
     return handle_download(request, document)
+
+
+@user_flag_required('is_internal')
+def ctis_overview(request):
+    """
+    The one-page CTIS report: every CTIS study with its Draft Assessment
+    Report deadline status and whether the report has been uploaded, so the
+    office doesn't have to open each study to find out. Supersedes relying
+    on `all_submissions`/`AllSubmissionsFilterForm` for this, which has no
+    notion of a deadline at all.
+    """
+    today = timezone.localdate()
+    content_type = ContentType.objects.get_for_model(Submission)
+    uploaded_subquery = Document.objects.filter(
+        content_type=content_type,
+        object_id=OuterRef('pk'),
+        doctype__identifier='draft_assessment_report',
+    )
+
+    submissions = (Submission.objects
+        .filter(current_ctr_form__isnull=False)
+        .select_related('current_ctr_form')
+        .annotate(
+            draft_assessment_report_uploaded=Exists(uploaded_subquery),
+            deadline_status=Case(
+                When(draft_assessment_report_deadline=None, then=Value(DAR_DEADLINE_NOT_ENTERED)),
+                When(draft_assessment_report_deadline__gt=today, then=Value(DAR_DEADLINE_UPCOMING)),
+                default=Value(DAR_DEADLINE_PASSED),
+                output_field=CharField(),
+            ),
+        )
+        .order_by(F('draft_assessment_report_deadline').asc(nulls_first=True), 'ec_number'))
+
+    # Same convention as `submission_list`: POST carries a real submission,
+    # otherwise fall back to what this user filtered by last time - no query
+    # params, so the filter survives a plain reload or revisit.
+    usersettings = request.user.ecs_settings
+    filter_form = CTISOverviewFilterForm(request.POST or usersettings.ctis_overview_filter)
+    if filter_form.is_valid():
+        submissions = filter_form.filter(submissions)
+        usersettings.ctis_overview_filter = filter_form.cleaned_data
+        usersettings.save()
+
+    # No pagination: the whole point of this page is seeing every CTIS
+    # study's status in one screen without clicking through. Paginating
+    # would also lose the filter selection on page 2+, since it's carried in
+    # the query string rather than a saved per-user setting.
+    return render(request, 'submissions/ctis_overview.html', {
+        'title': 'CTIS-Übersicht',
+        'submissions': submissions,
+        'filter_form': filter_form,
+    })
 
 
 def reopen_checklist(request, submission_pk=None, blueprint_pk=None):
