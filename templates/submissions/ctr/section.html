@@ -1,5 +1,5 @@
 {# One CTIS section: a heading plus its fields, tables and document lists. #}
-<div class="ctr-section"{% if section.anchor %} id="{{ section.anchor }}"{% endif %}>
+<div class="ctr-section ctr-section-l{{ section.level }}"{% if section.anchor %} id="{{ section.anchor }}"{% endif %}>
     {% if section.name %}
         {% if section.level == 6 %}
             <h6 class="my-2">{{ section.name }}</h6>

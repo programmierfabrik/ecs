@@ -18,13 +18,16 @@ import unicodedata
 from dataclasses import dataclass, field as dc_field
 from datetime import date, datetime
 
+from django.utils import translation
 from django_countries import countries
 
 from ecs.core import ctis_document_types
 
 # A value CTIS delivered as null/empty. The field stays visible with this
 # placeholder so a reviewer can tell nothing was silently dropped.
-NOT_PROVIDED = '– Keine Angaben –'
+# An empty value reads as a dash, not as a sentence: a form this dense is
+# easier to scan when « nothing here » takes one character.
+NOT_PROVIDED = '–'
 
 # The same, inside a table, where CTR-ECS shows a dash per cell and one
 # « no data available » line for a table with no rows at all.
@@ -297,17 +300,20 @@ def _date(value):
 
 
 def _country(code):
+    # In English, like every other value CTIS delivers: django_countries
+    # translates by the active language, which is German here, and the
+    # reference system names the state « Austria ».
     if not code:
         return NOT_PROVIDED
-    return str(countries.name(code)) or code
+    with translation.override('en'):
+        return str(countries.name(code)) or code
 
 
 def _sort_text(value):
     """
-    A sort key that reads as a German list does: « Österreich » belongs with
-    the O's, not after « Spanien », which is where sorting by code point puts
-    it. Umlauts and the like are folded to their base letter and case is
-    ignored.
+    A sort key that reads as a list of names does: a leading umlaut or accent
+    belongs with its base letter, not after Z, which is where sorting by code
+    point puts it. Case is ignored.
     """
     decomposed = unicodedata.normalize('NFKD', str(value or ''))
     return ''.join(c for c in decomposed
@@ -336,6 +342,11 @@ def _strings(values):
     """A list-widget value: plain strings, or the placeholder when empty."""
     items = [str(v).strip() for v in (values or []) if v is not None and str(v).strip()]
     return items or NOT_PROVIDED
+
+
+def _joined(value):
+    """A list-widget value read back as one « a, b » line."""
+    return ', '.join(value) if isinstance(value, list) else value
 
 
 def _named(values, key='name'):
@@ -523,9 +534,46 @@ def _doc_type_label(doc):
 
 
 def _doc_versions(doc):
-    """The entry's versions, newest system version first."""
+    """
+    The entry's versions, newest system version first.
+
+    An entry with no versions at all is the CTR-ECS shape: EcsDocumentDto
+    carries `documentId` and `name` and nothing else, and the download
+    endpoint takes that documentId directly. One version standing in for the
+    document itself is what gives such an entry a file to point at.
+    """
     versions = [v for v in doc.get('versions') or [] if isinstance(v, dict)]
+    if not versions:
+        document_id = str(doc.get('documentId') or '')
+        return [{'documentUrl': document_id}] if document_id else []
     return sorted(versions, key=lambda v: v.get('systemVersion') or 0, reverse=True)
+
+
+def _doc_file_type(doc):
+    """
+    « PDF » - the file kind the list shows. A version states it outright; for
+    an entry that has none, the document's name is the only place it is
+    written down.
+    """
+    name = doc.get('name') or ''
+    suffix = name.rsplit('.', 1)[-1] if '.' in name else ''
+    return suffix.upper() if suffix.isalnum() and len(suffix) <= 4 else ''
+
+
+def document_handles(documents):
+    """
+    Every key the download route may be asked for. A file hangs off a version,
+    not off the document, so there is one key per version - and for an entry
+    with no versions, the stand-in documentId `_doc_versions` supplies. Kept
+    beside that function so the route trusts exactly the keys the rendered
+    entries link to.
+    """
+    return {
+        version['documentUrl']
+        for doc in documents or []
+        for version in _doc_versions(doc)
+        if version.get('documentUrl')
+    }
 
 
 def build_document_entries(documents, download_url=None):
@@ -563,7 +611,8 @@ def build_document_entries(documents, download_url=None):
         product = _PRODUCT_SECTION_RE.match(section)
         entries.append(DocEntry(
             id=str(doc.get('documentId') or ''),
-            title=doc.get('title') or NOT_PROVIDED,
+            # `name` is what the CTR-ECS shape calls the title.
+            title=doc.get('title') or doc.get('name') or NOT_PROVIDED,
             type_code=str(doc.get('typeCode') or ''),
             type=doc.get('type') or '',
             category=_doc_type_label(doc),
@@ -579,7 +628,7 @@ def build_document_entries(documents, download_url=None):
             from_date=latest.from_date,
             version=latest.version,
             comment=latest.comment,
-            mime_type=latest.mime_type,
+            mime_type=latest.mime_type or _doc_file_type(doc),
             source=doc.get('source') or 'CTIS',
             url=latest.url,
             versions=[as_version(v) for v in versions[1:]],
@@ -760,12 +809,14 @@ def _formular_tab(trial, application, documents):
 # ─── tab 2: MSC (member states concerned) ────────────────────────────────
 
 def _member_states_sections(application, part1, part2s):
-    # One member state can carry more than one Part II, so collect them all
-    # rather than letting the last one win: the first submission is the date
-    # shown, and the subject counts add up.
+    # A country can appear more than once - one member state entry per Part II
+    # it has, each with its own subject count. They are paired up in payload
+    # order, so the second Austrian row reports the second Austrian Part II
+    # rather than both rows repeating the country's total.
     by_country = {}
     for part2 in part2s:
         by_country.setdefault(part2.get('mscCountryCode'), []).append(part2)
+    seen_per_country = {}
 
     # By the country name as it is shown, which is the order CTR-ECS lists the
     # member states in - the payload's own order is the interface's, not one a
@@ -778,9 +829,15 @@ def _member_states_sections(application, part1, part2s):
     for member_state in member_states:
         code = member_state.get('countryCode')
         country_part2s = by_country.get(code) or []
+        # The nth member state entry of a country takes its nth Part II. A
+        # country listed more often than it has Part IIs - one not submitted
+        # yet - leaves the surplus rows with nothing to report.
+        index = seen_per_country.get(code, 0)
+        seen_per_country[code] = index + 1
+        own = country_part2s[index:index + 1]
         dates = [d for d in (_parse_date(p.get('submissionDate'))
-                             for p in country_part2s) if d]
-        subjects = [p.get('recruitmentSubjectCount') for p in country_part2s
+                             for p in own) if d]
+        subjects = [p.get('recruitmentSubjectCount') for p in own
                     if p.get('recruitmentSubjectCount') is not None]
         # A reporting member state is « Selected » once it is settled and
         # « Proposed » while it is still only put forward. A state that is not
@@ -850,19 +907,25 @@ IDENTIFIER_LABELS = {
 IDENTIFIER_EXCLUDED_KEY = 'eudract'
 
 
-def _identifier_lines(part1):
-    """Each secondary identifying number as « registry: number », one per line."""
-    lines = []
+def _identifier_fields(part1):
+    """
+    One row per secondary identifying number, headed by its registry - the
+    reference system gives each registry a field of its own rather than
+    stacking « registry: number » lines in a single « Identifier » row.
+    """
+    fields = []
     for identifier in part1.get('identifiers') or []:
         if isinstance(identifier, dict):
             key, number = identifier.get('key'), identifier.get('number')
             if str(key or '').lower() == IDENTIFIER_EXCLUDED_KEY:
                 continue
             label = IDENTIFIER_LABELS.get(str(key or '').upper(), key)
-            lines.append(': '.join(str(v) for v in (label, number) if v))
+            fields.append(Field(_txt(label), _txt(number)))
         else:
-            lines.append(identifier)
-    return _strings(lines)
+            # A registry CTIS names in the entry itself and nowhere else.
+            fields.append(Field('Identifier', _txt(identifier)))
+    # An empty section would drop the heading's question altogether.
+    return fields or [Field('Identifier', NOT_PROVIDED)]
 
 
 def _trial_identifiers_sections(part1):
@@ -880,8 +943,8 @@ def _trial_identifiers_sections(part1):
 
     return [
         Section(name='Trial Identifiers', level=4, entries=entries),
-        Section(name='Secondary identifying numbers', level=5, entries=[
-            Field('Identifier', _identifier_lines(part1), widget='list'),
+        Section(name='Secondary identifying numbers', level=5,
+                entries=_identifier_fields(part1) + [
             Field('EudraCT number', _txt(part1.get('eudraCtCode'))),
         ]),
     ]
@@ -947,7 +1010,7 @@ def _trial_information_sections(part1, documents):
         age_ranges.append(text)
 
     population = [
-        Field('Age range', _strings(age_ranges), widget='list'),
+        Field('Age range', _joined(_strings(age_ranges))),
         Field('Age range secondary identifier',
               _strings(part1.get('ageRangeSecondaryIdentifiers')),
               widget='list'),
@@ -991,7 +1054,9 @@ def _trial_information_sections(part1, documents):
             Field('MedDRA codes', NOT_RETRIEVABLE),
         ]),
         Section(name='Main Objective', level=5, entries=[
-            Field('Trial Scope', _named(scopes), widget='list'),
+            # One value, comma-separated - « Therapy, Safety » - as the
+            # reference system words a trial's scope.
+            Field('Trial Scope', _joined(_named(scopes))),
             # Only asked about when a scope actually describes itself, which
             # is the « Other » scope.
             ] + ([Field('Other scope description',
@@ -1179,43 +1244,42 @@ def _sponsor_sections(application):
         ], rows),
     ])]
 
-    # One contact point on screen at a time, picked by sponsor name.
-    groups = []
-    for i, sponsor in enumerate(sponsors):
-        contact = sponsor.get('unionContactPoint') or {}
-        groups.append(ChipGroup(
-            label=sponsor.get('name') or 'Sponsor {}'.format(i + 1),
-            entries=[
-                Field('Organisation name',
-                      _txt(contact.get('organisationName'))),
-                # The four address lines as one line, comma-joined - CTR-ECS
-                # shows the whole address once and then line by line.
-                Field('Address', _txt(', '.join(
-                    str(contact.get(k)).strip()
-                    for k in ('addressLine1', 'addressLine2',
-                              'addressLine3', 'addressLine4')
-                    if contact.get(k) and str(contact.get(k)).strip()))),
-                # The asterisks are CTIS's own « required » markers, kept as
-                # part of the label the way CTR-ECS shows them.
-                Field('Address line 1*', _txt(contact.get('addressLine1'))),
-                Field('Address line 2', _txt(contact.get('addressLine2'))),
-                Field('Address line 3', _txt(contact.get('addressLine3'))),
-                Field('Address line 4', _txt(contact.get('addressLine4'))),
-                Field('Town/City*', _txt(contact.get('city'))),
-                Field('Post code', _txt(contact.get('postCode'))),
-                Field('Country*', _country(contact.get('country'))
-                      if contact.get('country') else NOT_PROVIDED),
-                Field('Functional contact point name',
-                      _txt(contact.get('functionalContactPointName'))),
-                Field('Firstname*', _txt(contact.get('firstName'))),
-                Field('Lastname*', _txt(contact.get('lastName'))),
-                Field('Phone*', _txt(contact.get('phone'))),
-                Field('Email*', _txt(contact.get('email'))),
-            ]))
-
-    if groups:
-        sections.append(Section(name='Contact Point for Union', level=4,
-                                entries=[Chips(groups=groups)]))
+    # The union contact point is who the authorities address about the trial,
+    # and the payload names one sponsor for it - the others send
+    # `unionContactPoint: null`. Shown as a plain section rather than one chip
+    # per sponsor: a chip strip suggests a choice to make, and the block names
+    # the organisation it belongs to in its first field anyway.
+    for sponsor in sponsors:
+        contact = sponsor.get('unionContactPoint')
+        if not contact:
+            continue
+        sections.append(Section(name='Contact Point for Union', level=4, entries=[
+            Field('Organisation name',
+                  _txt(contact.get('organisationName'))),
+            # The four address lines as one line, comma-joined - CTR-ECS
+            # shows the whole address once and then line by line.
+            Field('Address', _txt(', '.join(
+                str(contact.get(k)).strip()
+                for k in ('addressLine1', 'addressLine2',
+                          'addressLine3', 'addressLine4')
+                if contact.get(k) and str(contact.get(k)).strip()))),
+            # The asterisks are CTIS's own « required » markers, kept as
+            # part of the label the way CTR-ECS shows them.
+            Field('Address line 1*', _txt(contact.get('addressLine1'))),
+            Field('Address line 2', _txt(contact.get('addressLine2'))),
+            Field('Address line 3', _txt(contact.get('addressLine3'))),
+            Field('Address line 4', _txt(contact.get('addressLine4'))),
+            Field('Town/City*', _txt(contact.get('city'))),
+            Field('Post code', _txt(contact.get('postCode'))),
+            Field('Country*', _country(contact.get('country'))
+                  if contact.get('country') else NOT_PROVIDED),
+            Field('Functional contact point name',
+                  _txt(contact.get('functionalContactPointName'))),
+            Field('Firstname*', _txt(contact.get('firstName'))),
+            Field('Lastname*', _txt(contact.get('lastName'))),
+            Field('Phone*', _txt(contact.get('phone'))),
+            Field('Email*', _txt(contact.get('email'))),
+        ]))
     return sections
 
 
@@ -1668,57 +1732,79 @@ def _part2_document_sections(part2, documents):
     return [Section(name='Documents', level=4, entries=entries)]
 
 
-def _part2_label(part2, duplicate_country):
+def _own_part2s(part2s):
     """
-    A member state names its own chip. Two Part IIs can name the same state,
-    so those carry their submission date as well rather than reading as two
-    identical chips.
+    The Austrian Part IIs worth showing. Another member state's Part II is not
+    this commission's to assess, and one that has not been submitted carries
+    nothing to assess yet.
     """
-    label = _country(part2.get('mscCountryCode'))
-    if duplicate_country:
-        label = '{} ({})'.format(label, _date(part2.get('submissionDate')))
-    return label
+    return [p for p in part2s
+            if _part2_available(p) and p.get('mscCountryCode') == OWN_COUNTRY]
 
 
-def _part2_tab(part2s, documents, selected_country=None):
-    # A member state that has not submitted has nothing to assess yet.
-    part2s = [p for p in part2s if _part2_available(p)]
+def _merged_part2(part2s):
+    """
+    Several Part IIs of one country read as one.
 
-    if not part2s:
-        return Tab('part2', 'Part II', subtabs=[
-            SubTab('part2-all', 'Part II', panes=[
-                Pane(sections=[Section(entries=[
-                    Field('Member state', NOT_PROVIDED)])])]),
-        ])
+    CTIS can carry a country more than once - MSC lists each of them, because
+    they are separate submissions with their own subject counts and dates. The
+    Part II tab is not about the submissions though, it is about what Austria
+    holds for this trial: its sites and its documents, in one list rather than
+    split across selectable copies of the same country.
 
-    counts = {}
+    Sites are deduplicated by `trialSite.id`, the way `austrian_trial_sites`
+    does it - the same site can be filed under two Part IIs. A site without an
+    id is kept as it is; dropping it would lose a row rather than a repeat.
+    """
+    sites, seen = [], set()
+    document_ids, seen_documents = [], set()
     for part2 in part2s:
-        code = part2.get('mscCountryCode')
-        counts[code] = counts.get(code, 0) + 1
+        for site in part2.get('trialSites') or []:
+            key = str(site.get('id') or '').strip() if isinstance(site, dict) else ''
+            if key and key in seen:
+                continue
+            if key:
+                seen.add(key)
+            sites.append(site)
+        for document_id in part2.get('documentIds') or []:
+            if document_id in seen_documents:
+                continue
+            seen_documents.add(document_id)
+            document_ids.append(document_id)
 
-    # The first chip is the open one: the country asked for, else the ethics
-    # commission's own, else whichever the interface delivered first. A country
-    # with two Part IIs opens on the first of them.
-    def order(part2):
-        code = part2.get('mscCountryCode')
-        rank = 0 if code == selected_country else 1 if code == OWN_COUNTRY else 2
-        return (rank, _part2_label(part2, counts[code] > 1))
+    return {
+        'mscCountryCode': OWN_COUNTRY,
+        # The date the country first submitted, as the MSC table reads it.
+        'submissionDate': min(
+            (p.get('submissionDate') for p in part2s if p.get('submissionDate')),
+            default=None),
+        'trialSites': sites,
+        'documentIds': document_ids,
+    }
 
-    groups = []
-    for part2 in sorted(part2s, key=order):
-        country = _country(part2.get('mscCountryCode'))
-        label = _part2_label(part2, counts[part2.get('mscCountryCode')] > 1)
-        # The heading names the member state; telling two of them apart is the
-        # chip's job, so the submission date does not repeat here.
-        groups.append(ChipGroup(label=label, sections=(
-            [Section(name='Country specific details (Part II - {})'.format(country))]
-            + _trial_site_sections(part2)
-            + _part2_document_sections(part2, documents))))
 
+def _empty_part2_tab():
     return Tab('part2', 'Part II', subtabs=[
         SubTab('part2-all', 'Part II', panes=[
-            Pane(sections=[Section(entries=[Chips(groups=groups)])]),
-        ]),
+            Pane(sections=[Section(entries=[
+                Field('Member state', NOT_PROVIDED)])])]),
+    ])
+
+
+def _part2_tab(part2s, documents):
+    part2s = _own_part2s(part2s)
+    if not part2s:
+        return _empty_part2_tab()
+
+    part2 = _merged_part2(part2s)
+    country = _country(OWN_COUNTRY)
+    sections = (
+        [Section(name='Country specific details (Part II - {})'.format(country))]
+        + _trial_site_sections(part2)
+        + _part2_document_sections(part2, documents))
+
+    return Tab('part2', 'Part II', subtabs=[
+        SubTab('part2-all', 'Part II', panes=[Pane(sections=sections)]),
     ])
 
 
@@ -1756,28 +1842,15 @@ def _external_part2_documents(part2, documents):
 def _external_part2_tab(part2s, documents):
     # Austria only, and only its documents - no country details, no trial
     # sites. Another member state is not rendered at all, not as a locked chip.
-    part2s = [p for p in part2s
-              if _part2_available(p) and p.get('mscCountryCode') == OWN_COUNTRY]
-
+    part2s = _own_part2s(part2s)
     if not part2s:
-        return Tab('part2', 'Part II', subtabs=[
-            SubTab('part2-all', 'Part II', panes=[
-                Pane(sections=[Section(entries=[
-                    Field('Member state', NOT_PROVIDED)])])]),
-        ])
-
-    groups = [
-        ChipGroup(label=_part2_label(part2, len(part2s) > 1), sections=[
-            Section(name='Documents', level=4, entries=[
-                _external_part2_documents(part2, documents)]),
-        ])
-        for part2 in part2s
-    ]
+        return _empty_part2_tab()
 
     return Tab('part2', 'Part II', subtabs=[
-        SubTab('part2-all', 'Part II', panes=[
-            Pane(sections=[Section(entries=[Chips(groups=groups)])]),
-        ]),
+        SubTab('part2-all', 'Part II', panes=[Pane(sections=[
+            Section(name='Documents', level=4, entries=[
+                _external_part2_documents(_merged_part2(part2s), documents)]),
+        ])]),
     ])
 
 
@@ -1839,8 +1912,8 @@ def _unterlagen_tab(documents):
 
 # ─── entry point ─────────────────────────────────────────────────────────
 
-def build_ctr_view(trial, documents=None, selected_country=None,
-                   download_url=None, restricted=False):
+def build_ctr_view(trial, documents=None, download_url=None,
+                   restricted=False):
     """
     Build the CTIS view model for one imported trial payload.
 
@@ -1886,7 +1959,7 @@ def build_ctr_view(trial, documents=None, selected_country=None,
             _formular_tab(trial, application, entries),
             _msc_tab(application, part1, part2s),
             _part1_tab(application, part1, entries),
-            _part2_tab(part2s, entries, selected_country),
+            _part2_tab(part2s, entries),
             _unterlagen_tab(entries),
         ]
 

@@ -6,6 +6,11 @@
 
 {% block content %}
 <div class="my-3 container">
+    {% if not ctis_configured %}
+        <div class="alert alert-danger">
+            Die CTIS-Schnittstelle ist für diese Installation nicht konfiguriert.
+        </div>
+    {% endif %}
     <form action="{{ request.path }}" method="post">
         {% csrf_token %}
         <div class="row">
@@ -13,7 +18,8 @@
                 {% include 'bootstrap/form_field.html' with field=form.ctis_number inline=True %}
             </div>
             <div class="col-md-3">
-                <button type="submit" class="mx-3 btn btn-block btn-primary">
+                <button type="submit" class="mx-3 btn btn-block btn-primary"
+                        {% if not ctis_configured %}disabled{% endif %}>
                     Verknüpfen
                 </button>
             </div>
@@ -28,8 +34,8 @@
     }
 
     function formatCtis(raw) {
-        var digits = raw.replace(/\D/g, '').slice(0, 13);
-        var groups = [digits.slice(0, 4), digits.slice(4, 10), digits.slice(10, 12), digits.slice(12, 13)];
+        var digits = raw.replace(/\D/g, '').slice(0, 14);
+        var groups = [digits.slice(0, 4), digits.slice(4, 10), digits.slice(10, 12), digits.slice(12, 14)];
         return groups.filter(function (group) { return group.length; }).join('-');
     }
 

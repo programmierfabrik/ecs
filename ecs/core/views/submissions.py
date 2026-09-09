@@ -27,8 +27,9 @@ from ecs.core.models import (
     Submission, SubmissionForm, CTRSubmissionForm, Investigator, TemporaryAuthorization,
     MedicalCategory, EthicsCommission, AdvancedSettings,
 )
-from ecs.core.ctis import fetch_ctis_document
-from ecs.core.ctis_render import build_ctr_view, external_documents
+from ecs.core.ctis import CTISError, fetch_ctis_document
+from ecs.core.ctis_render import (
+    build_ctr_view, document_handles, external_documents)
 from ecs.core.tasks import generate_submission_preview
 from ecs.checklists.models import ChecklistBlueprint, Checklist
 from ecs.meetings.models import Meeting
@@ -384,7 +385,6 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
         context.update(build_ctr_view(
             ctr_submission_form.application,
             ctr_submission_form.documents,
-            selected_country=request.GET.get('country') or None,
             restricted=not sees_full_ctr_form(request.user),
             download_url=lambda document_id: reverse(
                 'core.submission.download_ctr_document', kwargs={
@@ -475,9 +475,9 @@ def download_ctr_document(request, ctr_submission_form_pk=None, document_id=None
     ctr_submission_form = get_object_or_404(CTRSubmissionForm, pk=ctr_submission_form_pk)
 
     # Only keys this form actually references may be fetched - otherwise the
-    # view would be an open proxy to the whole CTIS document service. A
-    # document's content hangs off its versions, each with its own
-    # `documentUrl` handle; the document itself is not downloadable.
+    # view would be an open proxy to the whole CTIS document service.
+    # `document_handles` is what the rendered entries link to, so the route
+    # accepts a key exactly when some row on the page offers it.
     #
     # A viewer outside the ethics commission is narrowed further, to the
     # documents their restricted view of the form actually lists - hiding the
@@ -490,14 +490,18 @@ def download_ctr_document(request, ctr_submission_form_pk=None, document_id=None
         documents = [d for d in documents
                      if str(d.get('documentId') or '') in permitted]
 
-    known_ids = set()
-    for document in documents:
-        for version in document.get('versions') or []:
-            known_ids.add(version.get('documentUrl'))
-    if document_id not in known_ids:
+    if document_id not in document_handles(documents):
         raise Http404
 
-    document = fetch_ctis_document(document_id)
+    try:
+        document = fetch_ctis_document(document_id)
+    except CTISError:
+        messages.error(request, (
+            'Das Dokument konnte nicht von CTIS abgerufen werden. Bitte '
+            'versuchen Sie es später erneut.'))
+        return redirect('view_submission',
+            submission_pk=ctr_submission_form.submission_id)
+
     response = HttpResponse(document['content'], content_type=document['mime_type'])
     response['Content-Disposition'] = 'attachment; filename="{}"'.format(
         document['filename'])

@@ -14,11 +14,68 @@
     overflow: hidden;
 }
 
+/* ─── section hierarchy ──────────────────────────────────────────────── */
+
+/*
+ * A CTIS pane is a long stack of headings with no chrome between them, and
+ * the deeper two levels sit close enough in size to read as one. The level is
+ * carried by a rule and by the space above it instead - the type sizes stay
+ * the Bootstrap ones the classic submission form uses.
+ */
+
+/* The rule belongs to the chapter titles alone - « Trial Details »,
+   « Sponsors », « Products ». One of those is always followed straight away
+   by a subsection, so ruling both levels drew two lines back to back. */
+.ctr-pane > .ctr-section > h3 {
+    margin-top: 2.75rem;
+    padding-bottom: .4rem;
+    border-bottom: 2px solid rgba(0, 0, 0, .2);
+}
+
+.ctr-pane > .ctr-section > h4 {
+    margin-top: 2.25rem;
+}
+
+.ctr-pane > .ctr-section > h5 {
+    margin-top: 1.75rem;
+    color: #555;
+}
+
+.ctr-pane > .ctr-section > h6 {
+    margin-top: 1.25rem;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+/* The first heading of a pane sits right under the tab strip, which is a
+   rule of its own - a second one directly below it reads as a mistake. */
+.ctr-pane > .ctr-section:first-child > h3,
+.ctr-pane > .ctr-section:first-child > h4,
+.ctr-pane > .ctr-section:first-child > h5,
+.ctr-pane > .ctr-section:first-child > h6 {
+    margin-top: 0;
+}
+
+/* The two deepest levels are subordinate to the heading above them, so their
+   fields step in rather than starting at the same margin. */
+.ctr-pane > .ctr-section-l5,
+.ctr-pane > .ctr-section-l6 {
+    padding-left: 1rem;
+    border-left: 1px solid rgba(0, 0, 0, .06);
+}
+
 /* ─── data tables ────────────────────────────────────────────────────── */
 
 .ctr-data-table th {
     vertical-align: bottom;
     white-space: nowrap;
+}
+
+/* A table usually follows a heading, and Bootstrap's border above the header
+   row would sit right under that heading's own rule as a second line. */
+.ctr-data-table thead th {
+    border-top: 0;
 }
 
 .ctr-data-table td {

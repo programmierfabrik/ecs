@@ -909,7 +909,7 @@ class CTRSubmissionForm(models.Model):
     submission = models.ForeignKey('core.Submission', related_name='ctr_forms', on_delete=models.CASCADE)
     application = models.JSONField()
     documents = models.JSONField(default=list)
-    # full CTIS number as imported, e.g. "2024-123456-00-1" - one specific
+    # full CTIS number as imported, e.g. "2026-503364-87-00" - one specific
     # revision, globally unique (a revision is only ever imported once).
     ctis_number = models.CharField(max_length=20, unique=True)
     # the "JJJJ-NNNNNN" part identifying the trial itself, independent of
@@ -986,9 +986,8 @@ class CTRSubmissionForm(models.Model):
 
     @property
     def ctis_eu_ct_number(self):
-        # The trial's own number, not `ctis_number`: the two do not even agree
-        # on format (CTIS_NUMBER_RE wants a one-digit check digit, the payload
-        # carries two), and today's equality is an artifact of the mock.
+        # The trial's own number, which is what `ctis_number` is asked for
+        # too - the API takes it as its clinicalTrialId path segment.
         trial = self.application if isinstance(self.application, dict) else {}
         return self._identifier(trial.get('clinicalTrialId'))
 

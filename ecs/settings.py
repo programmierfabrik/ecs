@@ -348,6 +348,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 # used by ecs.pki
 ECS_CA_ROOT = os.path.join(PROJECT_DIR, 'data', 'ca')
 
+# CTR-ECS interface (CTIS). The API is protected by Keycloak; ecs.core.ctis
+# trades these client credentials for a bearer token. Unset (the default)
+# means this instance has no CTIS connection and says so when asked to import.
+CTIS_API = os.getenv('ECS_CTIS_API', '').rstrip('/')
+CTIS_CLIENT_ID = os.getenv('ECS_CTIS_CLIENT_ID', '')
+CTIS_CLIENT_SECRET = os.getenv('ECS_CTIS_CLIENT_SECRET', '')
+CTIS_TOKEN_ENDPOINT = os.getenv('ECS_CTIS_TOKEN_ENDPOINT', '')
+
 # users in these groups receive messages even when they are not related to studies
 ECS_MEETING_AGENDA_RECEIVER_GROUPS = (
     'Resident Board Member', 'Omniscient Board Member',

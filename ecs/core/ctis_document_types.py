@@ -23,9 +23,7 @@ guesswork, and a code must be read off the CTIS type list before it is added.
 
 « Authorisation of manufacturing and import » and « QP GMP certification » are
 two such kinds. They are reached by their type string instead of by a code -
-see PRODUCT_GMP_DOC_TYPE_PREFIXES in ctis_render - and the pair of them in
-ctis_fixtures/single_product.json deliberately carries no `typeCode` at all,
-so that nothing in the fixture can be mistaken for a code CTIS assigned.
+see PRODUCT_GMP_DOC_TYPE_PREFIXES in ctis_render.
 """
 
 # typeCode -> the label CTIS gives it. Note that a payload's own `type` string

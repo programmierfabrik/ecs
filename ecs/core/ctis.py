@@ -1,25 +1,20 @@
-import json
 import re
-from pathlib import Path
+from urllib.parse import quote, unquote
 
+import requests
+from django.conf import settings
+from django.core.cache import cache
 from django.db import transaction
 
+from ecs.core.ctis_render import sorted_applications
 from ecs.core.models import Submission, CTRSubmissionForm
 
-_FIXTURE_DIR = Path(__file__).parent / 'ctis_fixtures'
-
-# The example trials the mock serves, in the order the revision part of a CTIS
-# number picks them. Each is one {"application": …, "documents": […]} payload.
-CTIS_FIXTURES = (
-    'single_product.json',      # the ordinary case
-    'multi_product.json',       # several role groups, documents per product
-    'edge_cases.json',          # nulls, sentinels, ATMP, an unsubmitted Part II
-)
-
-# JJJJ-NNNNNN-XX-Y: year, 6-digit sequence, 2-digit revision (application
-# sequence number), 1-digit check digit. The check digit's computation is a
-# CTIS-internal detail we don't have - we can only validate the shape here.
-CTIS_NUMBER_RE = re.compile(r'^\d{4}-\d{6}-\d{2}-\d$')
+# JJJJ-NNNNNN-CC-SS: the EU CT number - year, 6-digit sequence and 2-digit
+# check digit - followed by the 2-digit application sequence number, which is
+# what makes one revision of a trial. The check digit's computation is a
+# CTIS-internal detail we don't have, so we can only validate the shape here.
+# The whole string is what the API takes as its clinicalTrialId path segment.
+CTIS_NUMBER_RE = re.compile(r'^\d{4}-\d{6}-\d{2}-\d{2}$')
 
 # Document-service entries are not part of the trial schema; the interface's
 # Kotlin contract (contracts/model/Document.kt) is what defines them:
@@ -44,60 +39,164 @@ CTIS_NUMBER_RE = re.compile(r'^\d{4}-\d{6}-\d{2}-\d$')
 #   versions[].url - overrides the CTIS download URL.
 
 
+class CTISError(Exception):
+    """The CTR-ECS interface could not be reached or refused to answer."""
+
+
+class CTISNotConfigured(CTISError):
+    """This instance has no CTR-ECS credentials - see ecs.settings."""
+
+
+# Renew once this much of the token's advertised lifetime has passed, so a
+# request never sets off carrying a token that expires mid-flight.
+_TOKEN_RENEW_FRACTION = 0.8
+_TOKEN_CACHE_KEY = 'ctis_access_token'
+_TIMEOUT = 30
+
+
+def ctis_configured():
+    """Whether this instance has CTR-ECS credentials (see ecs.settings)."""
+    return bool(
+        settings.CTIS_API and
+        settings.CTIS_TOKEN_ENDPOINT and
+        settings.CTIS_CLIENT_ID and
+        settings.CTIS_CLIENT_SECRET
+    )
+
+
+def _request_access_token():
+    try:
+        response = requests.post(settings.CTIS_TOKEN_ENDPOINT, timeout=_TIMEOUT, data={
+            'grant_type': 'client_credentials',
+            'client_id': settings.CTIS_CLIENT_ID,
+            'client_secret': settings.CTIS_CLIENT_SECRET,
+        })
+        response.raise_for_status()
+        payload = response.json()
+        # expires_in is optional in the spec; without it we can only assume a
+        # short life and pay for a fresh token on the next call.
+        return payload['access_token'], float(payload.get('expires_in') or 60)
+    except (requests.RequestException, ValueError, KeyError, TypeError) as e:
+        raise CTISError('could not obtain a CTIS access token: {}'.format(e))
+
+
+def ctis_access_token(renew=False):
+    """
+    The bearer token for the CTR-ECS API, shared through the cache so the
+    workers don't each keep their own. It is cached for 80% of the lifetime
+    the token server advertises, and so expires out of the cache before the
+    token itself does. Pass renew=True to discard the cached one - the server
+    can retire a token early, which only shows up as a 401 on a real call.
+    """
+    if not ctis_configured():
+        raise CTISNotConfigured('the CTR-ECS interface is not configured')
+    if not renew:
+        access_token = cache.get(_TOKEN_CACHE_KEY)
+        if access_token:
+            return access_token
+    access_token, expires_in = _request_access_token()
+    cache.set(_TOKEN_CACHE_KEY, access_token,
+        timeout=int(expires_in * _TOKEN_RENEW_FRACTION))
+    return access_token
+
+
+def ctis_request(method, url, **kwargs):
+    """
+    A CTR-ECS API call carrying the bearer token, retried once with a fresh
+    token if the API rejects the cached one. Returns the requests.Response;
+    anything but a 2xx raises CTISError.
+    """
+    kwargs.setdefault('timeout', _TIMEOUT)
+    caller_headers = kwargs.pop('headers', None) or {}
+    for renew in (False, True):
+        headers = dict(caller_headers)
+        headers['Authorization'] = 'Bearer ' + ctis_access_token(renew=renew)
+        try:
+            response = requests.request(method, url, headers=headers, **kwargs)
+        except requests.RequestException as e:
+            raise CTISError('CTIS request to {} failed: {}'.format(url, e))
+        if response.status_code == 401 and not renew:
+            continue
+        if not response.ok:
+            raise CTISError('CTIS request to {} returned {}'.format(
+                url, response.status_code))
+        return response
+
+
 def ctis_base_number(ctis_number):
-    """The "JJJJ-NNNNNN" part identifying the trial, independent of revision."""
-    year, sequence, _revision, _check_digit = ctis_number.split('-')
+    """
+    The "JJJJ-NNNNNN" part identifying the trial across its revisions. The
+    check digit is fixed per trial and would identify it just as well, but is
+    left out so the value keeps fitting CTRSubmissionForm.ctis_base_number.
+    """
+    year, sequence, _check_digit, _application_sequence = ctis_number.split('-')
     return f'{year}-{sequence}'
+
+
+def _filename(response, fallback):
+    # RFC 6266: filename* wins over filename when the server sends both, and
+    # carries its own percent-encoding.
+    disposition = response.headers.get('Content-Disposition') or ''
+    match = re.search(r"filename\*=(?:[\w-]+'[\w-]*')?([^;]+)", disposition, re.I)
+    if match:
+        return unquote(match.group(1).strip().strip('"')) or fallback
+    match = re.search(r'filename=("([^"]*)"|[^;]+)', disposition, re.I)
+    if match:
+        return (match.group(2) or match.group(1)).strip() or fallback
+    return fallback
 
 
 def fetch_ctis_study(ctis_number):
     """
-    Mock for the CTR-ECS interface, which is still in development. Accepts
-    any well-formed CTIS number and returns a payload shaped like the real
-    API is expected to: {"application": {...}, "documents": [...]}, where
-    "application" is the CTIS trial object described by the interface's JSON
-    schema and "documents" the accompanying document-service entries.
+    The CTIS trial behind a CTIS number, as
+    {"application": {...}, "documents": [...]} - "application" being the trial
+    object (EcsTrialDto, the one carrying `applications`) and "documents" the
+    document entries of the one application that gets rendered.
 
-    The payload comes from ctis_fixtures/ - example trials, not real trial
-    data - with the requested CTIS number patched in so the imported study
-    identifies itself as the one that was asked for. Which example is served
-    follows the revision part of the number, so all of them are reachable:
-    « 2026-123456-00-0 » gives the first, « …-01-0 » the second, and so on,
-    wrapping round.
-
-    TODO: replace with the real CTR-ECS API client once it's available.
+    Documents hang off each application, not off the trial. Collecting them
+    across all of a trial's applications would fill the Application Documents
+    tab, which lists whatever it is given, with documents belonging to
+    applications the UI never shows - build_ctr_view renders the newest
+    application alone. So the newest application's documents are what is
+    stored, picked with the same ordering the renderer uses.
     """
-    revision = int(ctis_number.split('-')[2])
-    with open(_FIXTURE_DIR / CTIS_FIXTURES[revision % len(CTIS_FIXTURES)]) as f:
-        payload = json.load(f)
-    trial, documents = payload['application'], payload['documents']
+    response = ctis_request('GET', '{}/api/v1/ecs/trials/{}'.format(
+        settings.CTIS_API, quote(ctis_number, safe='')))
+    try:
+        trial = response.json()
+    except ValueError as e:
+        raise CTISError('CTIS returned no readable trial for {}: {}'.format(
+            ctis_number, e))
+    if not isinstance(trial, dict):
+        raise CTISError('CTIS returned no trial object for {}'.format(ctis_number))
 
-    trial['clinicalTrialId'] = ctis_number
-    trial_id = ctis_base_number(ctis_number) + '-' + ctis_number.split('-')[2]
-    for application in trial.get('applications') or []:
-        application['trialId'] = trial_id
-
+    applications = sorted_applications(trial)
+    documents = applications[0].get('documents') or [] if applications else []
     return {'application': trial, 'documents': documents}
 
 
 def fetch_ctis_document(document_id):
     """
-    Mock for downloading a single CTIS document by id.
-
-    TODO: replace with the real CTR-ECS document-download endpoint once
-    it's available.
+    One CTIS document version, by the `documentUrl` handle that identifies it,
+    as {"filename": str, "mime_type": str, "content": bytes}. The endpoint
+    answers with the bytes themselves; what the file is called and what type
+    it has are only in the response headers.
     """
-    content = (
-        f'Mock content for document {document_id}\n'
-        '(CTR-ECS document API is not yet available)'
-    ).encode()
-    return {'filename': f'{document_id}.txt', 'mime_type': 'text/plain', 'content': content}
+    response = ctis_request('GET', '{}/api/v1/ecs/documents/{}'.format(
+        settings.CTIS_API, quote(document_id, safe='')))
+    # Content-Type may carry a charset, which is not part of the type.
+    mime_type = (response.headers.get('Content-Type') or '').split(';')[0].strip()
+    return {
+        'filename': _filename(response, document_id),
+        'mime_type': mime_type or 'application/octet-stream',
+        'content': response.content,
+    }
 
 
 @transaction.atomic
 def import_or_sync_ctis_study(ctis_number):
     """
-    Fetches a CTIS study (mocked for now) and links it to an ECS submission.
+    Fetches a CTIS study and links it to an ECS submission.
 
     - The exact same CTIS number (incl. revision) was already imported ->
       no-op, return the existing submission unchanged.
