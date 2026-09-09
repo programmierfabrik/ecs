@@ -2,7 +2,8 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
 
 from ecs.core.ctis import (
-    CTISError, CTISNotConfigured, ctis_configured, import_or_sync_ctis_study,
+    CTISError, CTISNoInitialApplication, CTISNotConfigured, ctis_configured,
+    import_or_sync_ctis_study,
 )
 from ecs.core.forms import CTISNumberForm
 from ecs.core.models import Submission
@@ -10,6 +11,10 @@ from ecs.users.utils import user_group_required
 
 NOT_CONFIGURED_MESSAGE = (
     'Die CTIS-Schnittstelle ist für diese Installation nicht konfiguriert.'
+)
+NO_INITIAL_APPLICATION_MESSAGE = (
+    'Diese CTIS-Studie enthält keine Initialbewerbung (IN) und kann daher '
+    'nicht importiert werden.'
 )
 FAILED_MESSAGE = (
     'Die CTIS-Studie konnte nicht abgerufen werden. Bitte versuchen Sie es '
@@ -32,6 +37,8 @@ def import_ctis_study(request):
                     form.cleaned_data['ctis_number'])
             except CTISNotConfigured:
                 messages.error(request, NOT_CONFIGURED_MESSAGE)
+            except CTISNoInitialApplication:
+                messages.error(request, NO_INITIAL_APPLICATION_MESSAGE)
             except CTISError:
                 messages.error(request, FAILED_MESSAGE)
             else:
@@ -56,6 +63,8 @@ def sync_ctis_study(request, submission_pk=None):
                     form.cleaned_data['ctis_number'])
             except CTISNotConfigured:
                 messages.error(request, NOT_CONFIGURED_MESSAGE)
+            except CTISNoInitialApplication:
+                messages.error(request, NO_INITIAL_APPLICATION_MESSAGE)
             except CTISError:
                 messages.error(request, FAILED_MESSAGE)
             else:

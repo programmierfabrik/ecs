@@ -537,15 +537,16 @@ def _doc_versions(doc):
     """
     The entry's versions, newest system version first.
 
-    An entry with no versions at all is the CTR-ECS shape: EcsDocumentDto
-    carries `documentId` and `name` and nothing else, and the download
-    endpoint takes that documentId directly. One version standing in for the
-    document itself is what gives such an entry a file to point at.
+    An entry with no versions at all is an older/thinner EcsDocumentDto -
+    carrying only `documentId` and `name`, from before the interface grew
+    per-version download paths. One version standing in for the document
+    itself, pointing at the documented bare-document endpoint, is what gives
+    such an entry a file to point at.
     """
     versions = [v for v in doc.get('versions') or [] if isinstance(v, dict)]
     if not versions:
         document_id = str(doc.get('documentId') or '')
-        return [{'documentUrl': document_id}] if document_id else []
+        return [{'downloadUrl': 'api/v1/ecs/documents/' + document_id}] if document_id else []
     return sorted(versions, key=lambda v: v.get('systemVersion') or 0, reverse=True)
 
 
@@ -560,19 +561,29 @@ def _doc_file_type(doc):
     return suffix.upper() if suffix.isalnum() and len(suffix) <= 4 else ''
 
 
+def _download_path(version):
+    """
+    A version's CTR-ECS download path, without its leading slash - stripped
+    once here so it embeds cleanly into ECS's own /doc/<path> URL instead of
+    doubling up into « /doc//api/... ». fetch_ctis_document strips it again
+    regardless, but the ECS-facing URL should not carry it either.
+    """
+    return str(version.get('downloadUrl') or '').lstrip('/')
+
+
 def document_handles(documents):
     """
     Every key the download route may be asked for. A file hangs off a version,
     not off the document, so there is one key per version - and for an entry
-    with no versions, the stand-in documentId `_doc_versions` supplies. Kept
-    beside that function so the route trusts exactly the keys the rendered
-    entries link to.
+    with no versions, the stand-in `_doc_versions` supplies. Kept beside that
+    function so the route trusts exactly the keys the rendered entries link
+    to.
     """
     return {
-        version['documentUrl']
+        _download_path(version)
         for doc in documents or []
         for version in _doc_versions(doc)
-        if version.get('documentUrl')
+        if version.get('downloadUrl')
     }
 
 
@@ -581,14 +592,15 @@ def build_document_entries(documents, download_url=None):
     Convert the document service's raw entries into display data, once.
 
     An entry carries its file only inside `versions[]`, each with its own
-    `documentUrl`; the newest version is what the document is shown as. A
-    version that already carries a `url` keeps it (that is how ECS-own
-    documents arrive), CTIS ones get one built from their `documentUrl`.
+    `downloadUrl` - CTR-ECS's own download path for that version, taken as
+    given rather than reconstructed, since nothing pins its shape down as
+    stable. A version that already carries a `url` keeps it instead (that is
+    how ECS-own uploads arrive); those never go through fetch_ctis_document.
     """
     def url_for(version):
         if version.get('url'):
             return version['url']
-        key = version.get('documentUrl')
+        key = _download_path(version) if version.get('downloadUrl') else ''
         return download_url(key) if download_url and key else ''
 
     def as_version(version):

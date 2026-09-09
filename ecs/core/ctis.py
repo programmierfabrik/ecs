@@ -16,9 +16,9 @@ from ecs.core.models import Submission, CTRSubmissionForm
 # The whole string is what the API takes as its clinicalTrialId path segment.
 CTIS_NUMBER_RE = re.compile(r'^\d{4}-\d{6}-\d{2}-\d{2}$')
 
-# Document-service entries are not part of the trial schema; the interface's
-# Kotlin contract (contracts/model/Document.kt) is what defines them:
-#   documentId, title, type, typeCode, section, estimatedPart,
+# EcsDocumentDto (part of the OpenAPI schema, not a separate document
+# service as first assumed):
+#   documentId, name, type, typeCode, section, estimatedPart,
 #   estimatedLanguageCode,
 #   versions: [{documentUrl, systemVersion, fromDate, submissionDate,
 #               version, mimeType, title, comment}]
@@ -33,6 +33,10 @@ CTIS_NUMBER_RE = re.compile(r'^\d{4}-\d{6}-\d{2}-\d{2}$')
 #                    same code arrives with differently worded labels.
 #   documentUrl    - a UUID handle, not a URL, and it hangs off the version
 #                    rather than the document.
+# The version fields themselves are still unconfirmed against a real
+# payload - EcsDocumentVersionDto's schema was not part of what CTR-ECS sent,
+# so ctis_render.py's handling of `versions[]` wants a check against one once
+# an import actually carries them.
 #   mimeType       - a file extension ('PDF'), not a MIME type.
 # ecs.core.ctis_render additionally honours, for ECS-own documents:
 #   source         - defaults to 'CTIS',
@@ -45,6 +49,10 @@ class CTISError(Exception):
 
 class CTISNotConfigured(CTISError):
     """This instance has no CTR-ECS credentials - see ecs.settings."""
+
+
+class CTISNoInitialApplication(CTISError):
+    """The trial carries no Initial (IN) application - see _initial_application."""
 
 
 # Renew once this much of the token's advertised lifetime has passed, so a
@@ -146,19 +154,39 @@ def _filename(response, fallback):
     return fallback
 
 
+def _initial_application(trial):
+    """
+    The trial's Initial application (CTIS business key « IN »), the only kind
+    ecs.core.ctis_render currently knows how to show - a modification (SM,
+    NSM, a subsequent addition of MSC, ...) carries no guarantee that Part I
+    or Part II restate the trial in full, so it is not rendered.
+
+    A trial is believed to carry exactly one, but that is not documented as a
+    guarantee CTIS enforces - so, defensively, more than one Initial
+    application is not an error: the newest of them wins, the same way
+    ctis_render picks among applications elsewhere. None at all is an error;
+    there is nothing supported to show.
+    """
+    applications = [a for a in trial.get('applications') or []
+                    if isinstance(a, dict)
+                    and str(a.get('applicationType') or '').strip().upper() == 'INITIAL']
+    if not applications:
+        raise CTISNoInitialApplication(
+            'the trial carries no Initial (IN) application')
+    return sorted_applications({'applications': applications})[0]
+
+
 def fetch_ctis_study(ctis_number):
     """
     The CTIS trial behind a CTIS number, as
     {"application": {...}, "documents": [...]} - "application" being the trial
-    object (EcsTrialDto, the one carrying `applications`) and "documents" the
-    document entries of the one application that gets rendered.
+    object (EcsTrialDto), narrowed to its Initial application alone, and
+    "documents" that application's document entries.
 
-    Documents hang off each application, not off the trial. Collecting them
-    across all of a trial's applications would fill the Application Documents
-    tab, which lists whatever it is given, with documents belonging to
-    applications the UI never shows - build_ctr_view renders the newest
-    application alone. So the newest application's documents are what is
-    stored, picked with the same ordering the renderer uses.
+    Only the Initial application is stored - see _initial_application for
+    why. Storing the rest alongside it would serve no purpose today and would
+    only grow every future payload; ecs.core.ctis_render can go back to
+    picking among several once modifications are supported.
     """
     response = ctis_request('GET', '{}/api/v1/ecs/trials/{}'.format(
         settings.CTIS_API, quote(ctis_number, safe='')))
@@ -170,24 +198,34 @@ def fetch_ctis_study(ctis_number):
     if not isinstance(trial, dict):
         raise CTISError('CTIS returned no trial object for {}'.format(ctis_number))
 
-    applications = sorted_applications(trial)
-    documents = applications[0].get('documents') or [] if applications else []
-    return {'application': trial, 'documents': documents}
+    initial = _initial_application(trial)
+    trial['applications'] = [initial]
+    return {'application': trial, 'documents': initial.get('documents') or []}
 
 
-def fetch_ctis_document(document_id):
+def fetch_ctis_document(download_path):
     """
-    One CTIS document version, by the `documentUrl` handle that identifies it,
-    as {"filename": str, "mime_type": str, "content": bytes}. The endpoint
+    One CTIS document version, by the download path its own `downloadUrl`
+    gave it - e.g. « api/v1/ecs/documents/193821/versions/1 » - as
+    {"filename": str, "mime_type": str, "content": bytes}. The endpoint
     answers with the bytes themselves; what the file is called and what type
     it has are only in the response headers.
+
+    Taken as CTIS gave it, not rebuilt from a documentId: nothing pins its
+    shape down as stable, and a version's download path is not necessarily
+    the bare-document endpoint the OpenAPI spec documents on its own.
     """
-    response = ctis_request('GET', '{}/api/v1/ecs/documents/{}'.format(
-        settings.CTIS_API, quote(document_id, safe='')))
+    response = ctis_request('GET', '{}/{}'.format(
+        settings.CTIS_API, download_path.lstrip('/')))
     # Content-Type may carry a charset, which is not part of the type.
     mime_type = (response.headers.get('Content-Type') or '').split(';')[0].strip()
+    # documentId out of its own download path, for a response without a
+    # Content-Disposition to name the file by - the path's own last segment
+    # would be a version number instead, which names nothing.
+    match = re.search(r'documents/([^/]+)', download_path)
+    fallback = match.group(1) if match else download_path.rsplit('/', 1)[-1]
     return {
-        'filename': _filename(response, document_id),
+        'filename': _filename(response, fallback),
         'mime_type': mime_type or 'application/octet-stream',
         'content': response.content,
     }

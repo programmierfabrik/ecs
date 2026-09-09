@@ -46,7 +46,10 @@ urlpatterns = (
 
     path('form/<int:submission_form_pk>/', views.readonly_submission_form, name='readonly_submission_form'),
     path('form/ctr/<int:ctr_submission_form_pk>/', views.readonly_submission_form, name='core.submission.readonly_ctr_submission_form'),
-    path('form/ctr/<int:ctr_submission_form_pk>/doc/<str:document_id>/', views.download_ctr_document, name='core.submission.download_ctr_document'),
+    # `path`, not `str`: a document's handle is the CTR-ECS download path
+    # verbatim (see fetch_ctis_document), and that path carries its own
+    # slashes - .../documents/<id>/versions/<n>.
+    path('form/ctr/<int:ctr_submission_form_pk>/doc/<path:document_id>/', views.download_ctr_document, name='core.submission.download_ctr_document'),
     path('form/<int:submission_form_pk>/pdf/', views.submission_form_pdf, name='core.submission.submission_form_pdf'),
     path('form/<int:submission_form_pk>/pdf/view/', views.submission_form_pdf_view, name='core.submission.submission_form_pdf_view'),
     path('form/<int:submission_form_pk>/doc/<int:document_pk>/', views.download_document, name='core.submission.download_document'),

@@ -1004,9 +1004,11 @@ class CTRSubmissionForm(models.Model):
 
     @property
     def ctis_aut_id(self):
-        # Austria's own id for the application. Not in the interface contract
-        # yet, so this stays empty until the payload starts carrying it.
-        return self._identifier(self.current_application.get('autId'))
+        # Austria's own id for the trial - a property of the trial object
+        # itself (EcsTrialDto), alongside `id` and `clinicalTrialId`, not of
+        # one of its applications.
+        trial = self.application if isinstance(self.application, dict) else {}
+        return self._identifier(trial.get('autId'))
 
     def acknowledge(self, choice):
         self.is_acknowledged = choice
