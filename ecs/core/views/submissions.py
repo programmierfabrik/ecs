@@ -189,17 +189,18 @@ def view_submission(request, submission_pk=None):
     return redirect('readonly_submission_form', submission_form_pk=submission.current_submission_form.pk)
 
 
-def sees_full_ctr_form(user):
+def sees_full_ctr_form(user, submission):
     """
-    Who may see a CTIS study whole: the ethics commission itself.
-
-    Everyone else reaches a study through a task, through being its presenter,
-    or through a temporary authorization - a Spezialist doing a
-    « Spezialistenbewertung », a board member, a « Beteiligte Partei » - and
-    they all get the same restricted view. One predicate covers every one of
-    those paths, which is why it is the right one.
+    Who may see a CTIS study whole: anyone with real study-level access to
+    it - the ethics commission itself, a task, being its presenter, a
+    temporary authorization, a Spezialist doing a « Spezialistenbewertung »,
+    a « Beteiligte Partei ». A board/resident/omniscient board member with no
+    such access does not reach this page at all - only their meeting (see
+    `write_submission_zip_entries`) - so this only ever has to tell a real
+    access holder from another; there is no restricted page view to fall
+    back to.
     """
-    return user.is_staff or user.profile.is_internal
+    return Submission.objects.filter(pk=submission.pk).exists()
 
 
 def readonly_submission_form(request, submission_form_pk=None, submission_form=None, ctr_submission_form_pk=None, ctr_submission_form=None, extra_context=None, template='submissions/readonly_form.html', checklist_overwrite=None):
@@ -382,10 +383,11 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
     }
 
     if ctr_submission_form:
+        full_ctr_form = sees_full_ctr_form(request.user, submission)
         context.update(build_ctr_view(
             ctr_submission_form.application,
             ctr_submission_form.documents,
-            restricted=not sees_full_ctr_form(request.user),
+            restricted=not full_ctr_form,
             download_url=lambda document_id: reverse(
                 'core.submission.download_ctr_document', kwargs={
                     'ctr_submission_form_pk': ctr_submission_form.pk,
@@ -396,7 +398,7 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
         # `.upload_container` (see ctr/tabs.html), the same way the classic
         # document upload widget loads into `submissions/form.html` - so it
         # only needs a flag here, not the documents/form themselves.
-        context['show_ctr_uploads'] = sees_full_ctr_form(request.user)
+        context['show_ctr_uploads'] = full_ctr_form
 
     if not ctr_submission_form:
         center_close_notifications = CenterCloseNotification.objects.filter(
@@ -479,12 +481,12 @@ def download_ctr_document(request, ctr_submission_form_pk=None, document_id=None
     # `document_handles` is what the rendered entries link to, so the route
     # accepts a key exactly when some row on the page offers it.
     #
-    # A viewer outside the ethics commission is narrowed further, to the
+    # A viewer without real study access is narrowed further, to the
     # documents their restricted view of the form actually lists - hiding the
     # row without gating the route would only be cosmetic, since the handles
     # are the same for everyone.
     documents = ctr_submission_form.documents or []
-    if not sees_full_ctr_form(request.user):
+    if not sees_full_ctr_form(request.user, ctr_submission_form.submission):
         permitted = {d.id for d in external_documents(
             ctr_submission_form.application, documents)}
         documents = [d for d in documents
@@ -588,7 +590,7 @@ def ctr_documents(request, submission_pk=None):
     the two types this tab is for.
     """
     submission = get_object_or_404(Submission, pk=submission_pk)
-    if not sees_full_ctr_form(request.user):
+    if not sees_full_ctr_form(request.user, submission):
         raise Http404()
 
     content_type = ContentType.objects.get_for_model(Submission)
@@ -624,23 +626,25 @@ def delete_ctr_document(request, submission_pk=None):
 
 
 def view_ctr_upload(request, submission_pk=None, document_pk=None):
+    submission = get_object_or_404(Submission, pk=submission_pk)
     document = get_object_or_404(Document,
         pk=document_pk,
         content_type=ContentType.objects.get_for_model(Submission),
         object_id=submission_pk,
     )
-    if not sees_full_ctr_form(request.user):
+    if not sees_full_ctr_form(request.user, submission):
         raise Http404()
     return handle_download(request, document, view=True)
 
 
 def download_ctr_upload(request, submission_pk=None, document_pk=None):
+    submission = get_object_or_404(Submission, pk=submission_pk)
     document = get_object_or_404(Document,
         pk=document_pk,
         content_type=ContentType.objects.get_for_model(Submission),
         object_id=submission_pk,
     )
-    if not sees_full_ctr_form(request.user):
+    if not sees_full_ctr_form(request.user, submission):
         raise Http404()
     return handle_download(request, document)
 

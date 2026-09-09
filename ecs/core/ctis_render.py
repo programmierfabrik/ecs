@@ -587,6 +587,23 @@ def document_handles(documents):
     }
 
 
+def latest_download_path(doc):
+    """
+    The download path for one document's newest version - what
+    `fetch_ctis_document` needs to retrieve its bytes, for building a zip of
+    a study's documents outside the page/route pairing `document_handles` and
+    `download_ctr_document` normally go through. Empty for a document with no
+    version, or whose newest version already carries its own `url` - an
+    ECS-own upload, not a document to fetch from CTIS (see
+    `build_document_entries`).
+    """
+    versions = _doc_versions(doc)
+    if not versions:
+        return ''
+    latest = versions[0]
+    return '' if latest.get('url') else _download_path(latest)
+
+
 def build_document_entries(documents, download_url=None):
     """
     Convert the document service's raw entries into display data, once.

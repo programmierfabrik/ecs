@@ -39,7 +39,7 @@ from ecs.meetings.signals import on_meeting_start, on_meeting_end, on_meeting_to
     on_meeting_date_changed
 from ecs.meetings.tasks import optimize_timetable_task
 from ecs.meetings.utils import render_protocol_pdf_for_submission, send_submission_protocol_pdf, \
-    get_users_for_protocol
+    get_users_for_protocol, write_submission_zip_entries
 from ecs.notifications.models import NotificationAnswer
 from ecs.tasks.models import Task
 from ecs.users.models import UserProfile
@@ -390,23 +390,11 @@ def download_zipped_documents(request, meeting_pk=None, submission_pk=None):
 
     submission = get_object_or_404(meeting.submissions(manager='unfiltered'),
                                    pk=submission_pk)
-    sf = submission.current_submission_form
-
-    docs = []
-    if sf.pdf_document:
-        docs.append(sf.pdf_document)
-    docs += sf.documents.filter(doctype__identifier='patientinformation')
-    docs += Document.objects.filter(
-        content_type=ContentType.objects.get_for_model(Checklist),
-        object_id__in=submission.checklists.filter(status='review_ok'),
-    )
 
     zip_buf = io.BytesIO()
     with zipfile.ZipFile(zip_buf, 'w', compression=zipfile.ZIP_DEFLATED) as zf:
-        path = [submission.get_filename_slice()]
-        for doc in docs:
-            zf.writestr('/'.join(path + [doc.get_filename()]),
-                        doc.retrieve(request.user, 'meeting-zip').read())
+        write_submission_zip_entries(zf, submission,
+            [submission.get_filename_slice()], user=request.user)
 
     response = HttpResponse(zip_buf.getvalue(), content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename="{}_{}.zip"'.format(

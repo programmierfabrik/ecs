@@ -74,7 +74,7 @@
                 {{ top.submission.project_title_display }}
             </div>
 
-            {% if user.profile.is_omniscient_member %}
+            {% if user.profile.is_omniscient_member and top.submission.current_submission_form %}
                 <dl class="row mt-2">
                     {% with doc=top.submission.current_submission_form.pdf_document %}
                         <dt class="col-md-3">{{ doc.doctype }}</dt>

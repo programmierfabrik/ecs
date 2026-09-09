@@ -81,20 +81,26 @@ class Submission(models.Model):
 
     @property
     def newest_submission_form(self):
-        return self.forms.all().order_by('-pk')[0]
+        # The submission's own form history, not the viewer's filtered
+        # access to it - a board/resident/omniscient board member reaching a
+        # study through their meeting has none of the latter, but this is
+        # still a fact about the study, so `manager='unfiltered'` throughout.
+        return self.forms(manager='unfiltered').order_by('-pk')[0]
 
     @property
     def submission_form_to_copy(self):
-        return self.forms.all().filter(is_withdrawn=False).order_by('-pk').first()
+        return self.forms(manager='unfiltered').filter(
+            is_withdrawn=False).order_by('-pk').first()
 
     @property
     def newest_ctr_form(self):
-        return self.ctr_forms.all().order_by('-pk')[0]
+        return self.ctr_forms(manager='unfiltered').order_by('-pk')[0]
 
     @property
     def uses_ctr_form(self):
         return bool(self.current_ctr_form_id) or (
-            not self.current_submission_form_id and self.ctr_forms.exists()
+            not self.current_submission_form_id
+            and self.ctr_forms(manager='unfiltered').exists()
         )
 
     @property
@@ -108,8 +114,8 @@ class Submission(models.Model):
     @property
     def acknowledged_form_count(self):
         if self.uses_ctr_form:
-            return self.ctr_forms.filter(is_acknowledged=True).count()
-        return self.forms.filter(is_acknowledged=True).count()
+            return self.ctr_forms(manager='unfiltered').filter(is_acknowledged=True).count()
+        return self.forms(manager='unfiltered').filter(is_acknowledged=True).count()
 
     def current_form_kwargs(self):
         if self.uses_ctr_form:
@@ -322,12 +328,24 @@ class Submission(models.Model):
         return self.meetings.filter(started=None).exists()
 
     @property
+    def _has_had_first_meeting(self):
+        # The study's first meeting follows deterministically from its
+        # deadline; only once that meeting has happened does "which
+        # meeting next" stop being determined, which is when by-hand
+        # scheduling on/off a meeting becomes this office's call.
+        return self.meetings.filter(started__isnull=False).exists()
+
+    @property
     def is_schedulable(self):
         # Nothing schedules a CTIS study: a « BCTIS Stellungnahme » ends
         # nothing and triggers nothing, so to discuss the study again the
         # office puts it on a meeting itself. Only when it is on no
         # unstarted meeting yet - otherwise « Reschedule » is the action.
-        return self.uses_ctr_form and not self.is_reschedulable
+        return (
+            self.uses_ctr_form
+            and not self.is_reschedulable
+            and self._has_had_first_meeting
+        )
 
     @property
     def is_removable_from_meeting(self):
@@ -335,8 +353,12 @@ class Submission(models.Model):
         # belongs on some meeting. A CTIS study may belong on none, and the
         # next meeting can be a year out, so a wrong by-hand scheduling has
         # to be undoable outright. A TOP that has been voted on is history.
-        return self.uses_ctr_form and self.timetable_entries.filter(
-            meeting__started=None, vote__isnull=True).exists()
+        return (
+            self.uses_ctr_form
+            and self._has_had_first_meeting
+            and self.timetable_entries.filter(
+                meeting__started=None, vote__isnull=True).exists()
+        )
 
     def get_filename_slice(self):
         return self.get_ec_number_display(separator='_')
@@ -641,7 +663,8 @@ class SubmissionForm(models.Model):
     @property
     def version(self):
         assert self.pk is not None      # already saved
-        return self.submission.forms.filter(created_at__lte=self.created_at).count()
+        return self.submission.forms(manager='unfiltered').filter(
+            created_at__lte=self.created_at).count()
 
     def __str__(self):
         try:
@@ -939,7 +962,8 @@ class CTRSubmissionForm(models.Model):
     @property
     def version(self):
         assert self.pk is not None      # already saved
-        return self.submission.ctr_forms.filter(created_at__lte=self.created_at).count()
+        return self.submission.ctr_forms(manager='unfiltered').filter(
+            created_at__lte=self.created_at).count()
 
     @property
     def is_current(self):

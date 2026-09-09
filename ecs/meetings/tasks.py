@@ -6,12 +6,11 @@ from celery.schedules import crontab
 from celery.utils.log import get_task_logger
 
 from django.db import transaction
-from django.contrib.contenttypes.models import ContentType
 
 from ecs.utils.genetic_sort import GeneticSorter, inversion_mutation, swap_mutation, displacement_mutation, \
     random_replacement_mutation
 from ecs.meetings.models import Meeting
-from ecs.checklists.models import Checklist
+from ecs.meetings.utils import write_submission_zip_entries
 from ecs.documents.models import Document
 from ecs.celery import app as celery_app
 
@@ -136,29 +135,14 @@ def gen_meeting_zip():
     except Meeting.DoesNotExist:
         return
 
-    checklist_ct = ContentType.objects.get_for_model(Checklist)
-
     zip_buf = io.BytesIO()
     with zipfile.ZipFile(zip_buf, 'w', compression=zipfile.ZIP_DEFLATED) as zf:
         for submission in meeting.submissions(manager='unfiltered').all():
-            sf = submission.current_submission_form
-
-            docs = []
-            if sf.pdf_document:
-                docs.append(sf.pdf_document)
-            docs += sf.documents.filter(doctype__identifier='patientinformation')
-            docs += Document.objects.filter(
-                content_type=checklist_ct,
-                object_id__in=submission.checklists.filter(status='review_ok'),
-            )
-
             path = [
                 submission.get_workflow_lane_display(),
                 submission.get_filename_slice(),
             ]
-            for doc in docs:
-                zf.writestr('/'.join(path + [doc.get_filename()]),
-                            doc.retrieve_raw().read())
+            write_submission_zip_entries(zf, submission, path)
 
     if meeting.documents_zip:
         meeting.documents_zip.delete()
