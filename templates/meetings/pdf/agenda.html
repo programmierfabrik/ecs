@@ -19,19 +19,21 @@
             {% if entry.submission %}
                 <span class="bold">EK Nr.</span>
                     {{ entry.submission.get_ec_number_display }}{% with entry|last_recessed_vote as vote %}{% if vote %} ({% trans "Recessed" %}, {% if vote.result == '3a' %}{% trans "not examined" %}{% else %}{% trans "examined" %}{% endif %}){% endif %}{% endwith %}
-                    {{ entry.submission.current_submission_form.get_type_display }}
+                    {{ entry.submission.current_form.get_type_display }}
                     <br />
-                <span class="bold">Antragsteller:</span>
-                    {% with entry.submission.current_submission_form.submitter as submitter %}
-                        {% if not submitter.first_name or not submitter.last_name %}
-                            {{ entry.submission.current_submission_form.submitter_contact }}
-                        {% else %}
-                            {{ submitter }}
-                        {% endif %}
-                    {% endwith %}
-                    <br />
-                <span class="bold">Einreichende Institution:</span>
-                    {{ entry.submission.current_submission_form.submitter_organisation }}<br />
+                {% if entry.submission.current_submission_form %}
+                    <span class="bold">Antragsteller:</span>
+                        {% with entry.submission.current_submission_form.submitter as submitter %}
+                            {% if not submitter.first_name or not submitter.last_name %}
+                                {{ entry.submission.current_submission_form.submitter_contact }}
+                            {% else %}
+                                {{ submitter }}
+                            {% endif %}
+                        {% endwith %}
+                        <br />
+                    <span class="bold">Einreichende Institution:</span>
+                        {{ entry.submission.current_submission_form.submitter_organisation }}<br />
+                {% endif %}
                 <span class="bold">Projekttitel:</span>
                     {{ entry.submission.project_title_display }}<br />
                 {% with entry.submission.current_submission_form.primary_investigator as pi %}
@@ -65,19 +67,21 @@
                 <span class="bold">#{{ entry }}</span>
                 <span class="bold">EK Nr.</span>
                     {{ entry.submission.get_ec_number_display }}{% with entry|last_recessed_vote as vote %}{% if vote %} ({% trans "Recessed" %}, {% if vote.result == '3a' %}{% trans "not examined" %}{% else %}{% trans "examined" %}{% endif %}){% endif %}{% endwith %}
-                    {{ entry.submission.current_submission_form.get_type_display }}
+                    {{ entry.submission.current_form.get_type_display }}
                     <br />
-                <span class="bold">Antragsteller:</span>
-                    {% with entry.submission.current_submission_form.submitter as submitter %}
-                        {% if not submitter.first_name or not submitter.last_name %}
-                            {{ entry.submission.current_submission_form.submitter_contact }}
-                        {% else %}
-                            {{ submitter }}
-                        {% endif %}
-                    {% endwith %}
-                    <br />
-                <span class="bold">Einreichende Institution:</span>
-                    {{ entry.submission.current_submission_form.submitter_organisation }}<br />
+                {% if entry.submission.current_submission_form %}
+                    <span class="bold">Antragsteller:</span>
+                        {% with entry.submission.current_submission_form.submitter as submitter %}
+                            {% if not submitter.first_name or not submitter.last_name %}
+                                {{ entry.submission.current_submission_form.submitter_contact }}
+                            {% else %}
+                                {{ submitter }}
+                            {% endif %}
+                        {% endwith %}
+                        <br />
+                    <span class="bold">Einreichende Institution:</span>
+                        {{ entry.submission.current_submission_form.submitter_organisation }}<br />
+                {% endif %}
                 <span class="bold">Projekttitel:</span>
                     {{ entry.submission.project_title_display }}<br />
                 {% with entry.submission.current_submission_form.primary_investigator as pi %}
