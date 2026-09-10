@@ -286,12 +286,19 @@ class PresenterChangeForm(forms.Form):
         widget=EmailUserSelectWidget()
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, submission=None, **kwargs):
         super().__init__(*args, **kwargs)
+        queryset = User.objects.filter(is_active=True)
+        queryset_name = 'users'
+        if submission is not None and submission.uses_ctr_form:
+            queryset = queryset.filter(groups__name='CTIS Importer')
+            queryset_name = 'ctis-importers'
         if get_current_user().profile.is_internal:
             self.fields['presenter'] = AutocompleteModelChoiceField(
-                'users', User.objects.filter(is_active=True),
+                queryset_name, queryset,
                 label=_('Presenter'))
+        else:
+            self.fields['presenter'].queryset = queryset
 
 
 class SusarPresenterChangeForm(forms.Form):

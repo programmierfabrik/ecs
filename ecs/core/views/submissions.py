@@ -1249,7 +1249,7 @@ def change_submission_presenter(request, submission_pk=None):
         submission = get_object_or_404(Submission, pk=submission_pk, presenter=request.user)
 
     previous_presenter = submission.presenter
-    form = PresenterChangeForm(request.POST or None)
+    form = PresenterChangeForm(request.POST or None, submission=submission)
 
     valid = form.is_valid()
     if request.method == 'POST' and valid:
