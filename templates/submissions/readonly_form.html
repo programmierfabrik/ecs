@@ -66,7 +66,9 @@
             <li class="nav-item"><a class="nav-link" href="#tabs_checklists">{% trans "Evaluations" %}</a></li>
         {% endif %}
         <li class="nav-item"><a class="nav-link" href="#tabs_votes">{% trans "Votes" %}</a></li>
-        <li class="nav-item"><a class="nav-link" href="#tabs_notifications">{% trans "Notifications" %}</a></li>
+        {% if not is_ctr %}
+            <li class="nav-item"><a class="nav-link" href="#tabs_notifications">{% trans "Notifications" %}</a></li>
+        {% endif %}
         <li class="nav-item"><a class="nav-link" href="#tabs_communication">{% trans "Communication" %}</a></li>
     {% endblock %}
     </ul>
@@ -121,12 +123,14 @@
                 </ul>
             </div>
 
-            <div id="tabs_notifications" class="collapse">
-                <ul class="nav nav-tabs flex-wrap mb-3 tab_headers">
-                    <li class="nav-item"><a class="nav-link" href="#pending_notifications_tab">{% trans "Pending Notifications" %}</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#answered_notifications_tab">{% trans "Answered Notifications" %}</a></li>
-                </ul>
-            </div>
+            {% if not is_ctr %}
+                <div id="tabs_notifications" class="collapse">
+                    <ul class="nav nav-tabs flex-wrap mb-3 tab_headers">
+                        <li class="nav-item"><a class="nav-link" href="#pending_notifications_tab">{% trans "Pending Notifications" %}</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#answered_notifications_tab">{% trans "Answered Notifications" %}</a></li>
+                    </ul>
+                </div>
+            {% endif %}
 
             <div id="tabs_communication" class="collapse">
                 <ul class="nav nav-tabs flex-wrap mb-3 tab_headers">
@@ -192,42 +196,12 @@
             {% include 'submissions/tabs/involved_parties.html' %}
         </div>
     {% endif %}
-    <div id="pending_notifications_tab" class="container collapse">
-        <h3>{% trans "Open Notifications" %}</h3>
-        <ul class="list-group">
-            {% for notification in open_notifications %}
-                <li class="list-group-item d-block">
-                    <h5>
-                        {{ notification.timestamp|date:'d.m.Y' }}
-                        <a href="{% url 'notifications.view_notification' notification_pk=notification.pk %}">
-                            <strong>{{ notification.short_name }}</strong>
-                        </a>
-                    </h5>
-                    von {{ notification.user }}
-                </li>
-            {% empty %}
-                <li class="list-group-item d-block text-center">
-                    <em>{% trans "There are no open notifications." %}</em>
-                </li>
-            {% endfor %}
-        </ul>
-        {% if stashed_notifications %}
-            <h3 class="mt-3">Nicht eingereichte Meldungen</h3>
-            {% include 'notifications/stashed_notification_list.html' %}
-        {% endif %}
-        {% if submission.presenter == user or submission.susar_presenter == user %}
-            {% url 'notification.select_notification_creation_type' as create_url %}
-            <a class="btn btn-outline-primary mt-3" href="{{ create_url }}">
-                {% trans "Create a new notification" %}
-            </a>
-        {% endif %}
-    </div>
-    <div id="answered_notifications_tab" class="container collapse">
-        <h3>{% trans "Answered Notifications" %}</h3>
-        <ul class="list-group">
-            {% for notification in answered_notifications %}
-                <li class="list-group-item align-items-start {% if notification.answer.is_rejected %}list-group-item-danger{% endif %}">
-                    <div>
+    {% if not is_ctr %}
+        <div id="pending_notifications_tab" class="container collapse">
+            <h3>{% trans "Open Notifications" %}</h3>
+            <ul class="list-group">
+                {% for notification in open_notifications %}
+                    <li class="list-group-item d-block">
                         <h5>
                             {{ notification.timestamp|date:'d.m.Y' }}
                             <a href="{% url 'notifications.view_notification' notification_pk=notification.pk %}">
@@ -235,28 +209,60 @@
                             </a>
                         </h5>
                         von {{ notification.user }}
-                        {% if notification.is_rejected %}({% trans 'rejected' %}){% endif %}
-                    </div>
-                    {% if user.profile.is_internal %}
-                        <a class="ml-auto" href="javascript:void(ecs.fieldhistory.show('{% url 'core.field_history' model_name='notification_answer' pk=notification.answer.pk %}'))">
-                            <span class="fa fa-history"></span>
-                            {% trans 'History' %}
-                        </a>
-                    {% endif %}
-                </li>
-            {% empty %}
-                <li class="list-group-item d-block text-center">
-                    <em>{% trans "There are no answered notifications." %}</em>
-                </li>
-            {% endfor %}
-        </ul>
-        {% if submission.presenter == user %}
-            {% url 'notification.select_notification_creation_type' as create_url %}
-            <a class="btn btn-outline-primary mt-3" href="{{ create_url }}">
-                {% trans "Create a new notification" %}
-            </a>
-        {% endif %}
-    </div>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item d-block text-center">
+                        <em>{% trans "There are no open notifications." %}</em>
+                    </li>
+                {% endfor %}
+            </ul>
+            {% if stashed_notifications %}
+                <h3 class="mt-3">Nicht eingereichte Meldungen</h3>
+                {% include 'notifications/stashed_notification_list.html' %}
+            {% endif %}
+            {% if submission.presenter == user or submission.susar_presenter == user %}
+                {% url 'notification.select_notification_creation_type' as create_url %}
+                <a class="btn btn-outline-primary mt-3" href="{{ create_url }}">
+                    {% trans "Create a new notification" %}
+                </a>
+            {% endif %}
+        </div>
+        <div id="answered_notifications_tab" class="container collapse">
+            <h3>{% trans "Answered Notifications" %}</h3>
+            <ul class="list-group">
+                {% for notification in answered_notifications %}
+                    <li class="list-group-item align-items-start {% if notification.answer.is_rejected %}list-group-item-danger{% endif %}">
+                        <div>
+                            <h5>
+                                {{ notification.timestamp|date:'d.m.Y' }}
+                                <a href="{% url 'notifications.view_notification' notification_pk=notification.pk %}">
+                                    <strong>{{ notification.short_name }}</strong>
+                                </a>
+                            </h5>
+                            von {{ notification.user }}
+                            {% if notification.is_rejected %}({% trans 'rejected' %}){% endif %}
+                        </div>
+                        {% if user.profile.is_internal %}
+                            <a class="ml-auto" href="javascript:void(ecs.fieldhistory.show('{% url 'core.field_history' model_name='notification_answer' pk=notification.answer.pk %}'))">
+                                <span class="fa fa-history"></span>
+                                {% trans 'History' %}
+                            </a>
+                        {% endif %}
+                    </li>
+                {% empty %}
+                    <li class="list-group-item d-block text-center">
+                        <em>{% trans "There are no answered notifications." %}</em>
+                    </li>
+                {% endfor %}
+            </ul>
+            {% if submission.presenter == user %}
+                {% url 'notification.select_notification_creation_type' as create_url %}
+                <a class="btn btn-outline-primary mt-3" href="{{ create_url }}">
+                    {% trans "Create a new notification" %}
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
     {% if vote_review_form %}
         <div id="vote_review_tab" class="container collapse">
             {% with vote=vote_review_form.instance %}
