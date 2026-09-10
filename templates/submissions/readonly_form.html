@@ -116,7 +116,7 @@
                 <ul class="nav nav-tabs flex-wrap mb-3 tab_headers">
                     <li class="nav-item"><a class="nav-link" href="#published_votes_tab">{% if is_ctr %}Stellungnahmen{% else %}{% trans "Published Votes" %}{% endif %}</a></li>
                     {% if vote_review_form %}
-                        <li class="nav-item"><a class="nav-link {% if not vote_review_form.readonly %}active{% endif %}" href="#vote_review_tab">Votum</a></li>
+                        <li class="nav-item"><a class="nav-link {% if not vote_review_form.readonly %}active{% endif %}" href="#vote_review_tab">{% if is_ctr %}Stellungnahme{% else %}Votum{% endif %}</a></li>
                     {% endif %}
                 </ul>
             </div>
@@ -260,7 +260,7 @@
     {% if vote_review_form %}
         <div id="vote_review_tab" class="container collapse">
             {% with vote=vote_review_form.instance %}
-                <h3>B{{ vote.result }} Votum{% if vote.top %} der Sitzung {{ vote.top.meeting.title }} am {{ vote.top.meeting.start|date:'d.m.Y' }}{% endif %}{% if vote.changed_after_voting %} <span class="text-danger">!!{% trans 'Changed after voting' %}!</span>{% endif %}</h3>
+                <h3>{% if is_ctr %}{{ vote.result_text }}{% else %}B{{ vote.result }} Votum{% endif %}{% if vote.top %} der Sitzung {{ vote.top.meeting.title }} am {{ vote.top.meeting.start|date:'d.m.Y' }}{% endif %}{% if vote.changed_after_voting %} <span class="text-danger">!!{% trans 'Changed after voting' %}!</span>{% endif %}</h3>
             {% endwith %}
 
             {% with vote_review_form as review_form %}
