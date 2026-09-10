@@ -548,7 +548,11 @@ class SubmissionFilterForm(forms.Form, metaclass=SubmissionFilterFormMetaclass):
         if self.cleaned_data['b3']:
             results += ['3a', '3b']
         if self.cleaned_data['other_votes']:
-            results += ['1', '4', '5']
+            from ecs.votes.constants import CTIS_VOTE_RESULTS
+            # A CTIS study gets a « BCTIS Stellungnahme » instead of a
+            # B1-B5 vote; it has no box of its own in this row and falls
+            # under « Andere Voten » like a B1/B4/B5 result.
+            results += ['1', '4', '5'] + list(CTIS_VOTE_RESULTS)
 
         qs = []
         if results:
@@ -563,14 +567,7 @@ class SubmissionFilterForm(forms.Form, metaclass=SubmissionFilterFormMetaclass):
                 q &= Q(current_pending_vote=None)
             qs.append(q & (Q(current_submission_form__isnull=False) | Q(current_ctr_form__isnull=False)))
 
-        # A CTIS study gets a « BCTIS Stellungnahme » instead of a B1-B5 vote,
-        # which matches no box in this row - and once it is published,
-        # current_published_vote is set, so « no votes » stops matching too.
-        # Rather than give a Stellungnahme a box of its own (it is not a vote),
-        # let CTIS studies always pass this dimension.
-        q = reduce(lambda x, y: x | y, qs) | Q(current_ctr_form__isnull=False)
-
-        return submissions.filter(q)
+        return submissions.filter(reduce(lambda x, y: x | y, qs))
 
     def filter_submissions(self, submissions, user):
         self.is_valid()   # force clean
