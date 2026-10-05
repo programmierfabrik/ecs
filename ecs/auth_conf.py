@@ -135,7 +135,7 @@ class ChecklistQFactory(authorization.QFactory):
         )
 
         q = self.make_q(last_edited_by=user)
-        q |= (involved_by_task | temporary_authorized) & ~involved_as_presenting_party & self.make_q(status__in=['completed', 'review_ok'])
+        q |= (involved_by_task | temporary_authorized) & ~involved_as_presenting_party & self.make_q(status__in=['completed', 'review_ok', 'review_ok_internal'])
         q |= involved_as_presenting_party & self.make_q(status='review_ok')
         return q
 
