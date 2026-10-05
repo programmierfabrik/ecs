@@ -50,6 +50,15 @@ ecs.Widget.prototype = {
                 this.element.html(data);
                 this.element.scrollTop(0);
             },
+            error: function(xhr, status) {
+                // aborted by a newer load(), not a failure
+                if (status === 'abort')
+                    return;
+                this.element.find('.widget-error').remove();
+                $('<div class="alert alert-danger widget-error" role="alert"></div>')
+                    .text('Das Speichern ist fehlgeschlagen. Bitte laden Sie die Seite neu und versuchen Sie es erneut. Wenn das Problem weiterhin besteht, wenden Sie sich bitte an den Support.')
+                    .prependTo(this.element);
+            },
             complete: function(data) {
                 if (this.reload_interval) {
                     setTimeout((function(){
