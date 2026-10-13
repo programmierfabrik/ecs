@@ -12,7 +12,7 @@ ENV LANG=en_US.UTF-8
 RUN apt-get update -y && \
     apt-get install -y \
     # Python
-    python3 python3-pip \
+    python3 python3-pip python3-venv \
     # ecs
     gettext tzdata \
     # Weasyprint
@@ -20,7 +20,9 @@ RUN apt-get update -y && \
     && rm -rf /var/lib/apt/lists/*
 
 # Install poetry
-RUN pip install --no-cache-dir --break-system-packages poetry
+RUN python3 -m venv /opt/poetry && \
+    /opt/poetry/bin/pip install --no-cache-dir poetry && \
+    ln -s /opt/poetry/bin/poetry /usr/local/bin/poetry
 
 # Create ecs user with uid 1000
 RUN useradd ecs -m -u 1000 -o
