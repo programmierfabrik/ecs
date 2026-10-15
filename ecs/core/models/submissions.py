@@ -928,6 +928,19 @@ def _post_submission_form_save(**kwargs):
     on_study_change.send(Submission, submission=submission, old_form=old_sf, new_form=new_sf)
 
 
+class CTISHiddenDocument(models.Model):
+    """
+    A CTIS document the CTIS Importer hid. Keyed by CTIS's own documentId on
+    the Submission rather than stored on a CTRSubmissionForm, so the choice
+    survives every re-import of the trial.
+    """
+    submission = models.ForeignKey('core.Submission', related_name='ctis_hidden_documents', on_delete=models.CASCADE)
+    document_id = models.CharField(max_length=64)
+
+    class Meta:
+        unique_together = (('submission', 'document_id'),)
+
+
 class CTRSubmissionForm(models.Model):
     submission = models.ForeignKey('core.Submission', related_name='ctr_forms', on_delete=models.CASCADE)
     application = models.JSONField()
@@ -984,10 +997,11 @@ class CTRSubmissionForm(models.Model):
         # Of the classic chips only the invited marker can apply: AMG/MPG,
         # thesis and NIS are all submission form fields. Same condition as
         # `SubmissionForm.get_type_display`, and it names nobody either.
+        bits = ['CTIS-Studie']
         if self.submission.invite_primary_investigator_to_meeting and \
                 self.submission.timetable_entries.filter(meeting__ended=None).exists():
-            return _('Investigator invited')
-        return ''
+            bits.append(_('Investigator invited'))
+        return ', '.join(bits)
 
     @property
     def trial_title(self):

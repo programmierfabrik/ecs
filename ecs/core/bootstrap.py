@@ -23,7 +23,7 @@ from ecs.core.workflow import (
     is_still_b2, needs_executive_b2_review, needs_thesis_vote_preparation,
     needs_expedited_vote_preparation, needs_localec_recommendation,
     needs_localec_vote_preparation, needs_categorization_review,
-    uses_ctr_form,
+    uses_ctr_form, needs_signature_review,
 )
 
 
@@ -100,7 +100,7 @@ def submission_workflow():
             ('initial_review_barrier', 'resubmission'): Args(guard=is_acknowledged, negated=True),
             ('initial_review_barrier', 'categorization'): Args(guard=is_acknowledged_and_initial_submission),
             ('categorization', 'categorization_review'): Args(guard=needs_categorization_review),
-            ('initial_review_barrier', 'paper_submission_review'): Args(guard=is_acknowledged_and_initial_submission),
+            ('initial_review_barrier', 'paper_submission_review'): Args(guard=needs_signature_review),
             ('b2_resubmission', 'b2_review'): None,
             ('b2_review', 'executive_b2_review'): Args(guard=needs_executive_b2_review),
             ('b2_review', 'b2_resubmission'): Args(guard=is_still_b2),

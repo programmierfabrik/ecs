@@ -15,6 +15,7 @@ from django.utils.translation import gettext as _
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.core.cache import cache
+from django.views.decorators.http import require_POST
 from django.views.decorators.cache import cache_page
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -388,6 +389,8 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
             ctr_submission_form.application,
             ctr_submission_form.documents,
             restricted=not full_ctr_form,
+            hidden_ids=set(submission.ctis_hidden_documents.values_list('document_id', flat=True)),
+            can_hide=request.user.groups.filter(name='CTIS Importer').exists(),
             download_url=lambda document_id: reverse(
                 'core.submission.download_ctr_document', kwargs={
                     'ctr_submission_form_pk': ctr_submission_form.pk,
@@ -485,10 +488,18 @@ def download_ctr_document(request, ctr_submission_form_pk=None, document_id=None
     # documents their restricted view of the form actually lists - hiding the
     # row without gating the route would only be cosmetic, since the handles
     # are the same for everyone.
+    #
+    # A hidden document is gone for everyone but the CTIS Importers who
+    # manage it.
     documents = ctr_submission_form.documents or []
+    hidden_ids = set(ctr_submission_form.submission.ctis_hidden_documents
+                     .values_list('document_id', flat=True))
+    if hidden_ids and not request.user.groups.filter(name='CTIS Importer').exists():
+        documents = [d for d in documents
+                     if str(d.get('documentId') or '') not in hidden_ids]
     if not sees_full_ctr_form(request.user, ctr_submission_form.submission):
         permitted = {d.id for d in external_documents(
-            ctr_submission_form.application, documents)}
+            ctr_submission_form.application, documents, hidden_ids)}
         documents = [d for d in documents
                      if str(d.get('documentId') or '') in permitted]
 
@@ -612,6 +623,18 @@ def ctr_documents(request, submission_pk=None):
         'form': form,
         'documents': documents.order_by('doctype__identifier', 'date', 'name'),
     })
+
+
+@user_group_required('CTIS Importer')
+@require_POST
+def set_ctr_document_hidden(request, submission_pk=None):
+    submission = get_object_or_404(Submission, pk=submission_pk)
+    document_id = request.POST.get('document_id', '')
+    if request.POST.get('hidden') == '1':
+        submission.ctis_hidden_documents.get_or_create(document_id=document_id)
+    else:
+        submission.ctis_hidden_documents.filter(document_id=document_id).delete()
+    return JsonResponse({'hidden': request.POST.get('hidden') == '1'})
 
 
 @user_group_required('CTIS Importer')

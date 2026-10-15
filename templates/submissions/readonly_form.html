@@ -33,7 +33,12 @@
 
 {% block submission_action_buttons %}
     <li class="nav-item ml-auto">
-        {% if not is_ctr %}
+        {% if is_ctr %}
+            <span class="ctr-filter-tag">
+                <span class="ctr-filter-dot"></span>
+                Show only DE and EN documents
+            </span>
+        {% else %}
             {% if submission_form|allows_edits_by:user %}
                 <a class="btn btn-primary" href="{% url 'core.submission.copy_latest_submission_form' submission_pk=submission.pk %}">
                     {% trans 'Edit' %}

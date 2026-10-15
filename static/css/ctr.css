@@ -226,3 +226,56 @@
     max-height: 40rem;
     overflow: auto;
 }
+
+/* ─── hidden documents ───────────────────────────────────────────────── */
+
+.ctr-doclist-hidden-toggle {
+    cursor: pointer;
+    list-style: none;
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: .35rem .5rem;
+    border-radius: .25rem;
+    user-select: none;
+}
+
+.ctr-doclist-hidden-toggle::-webkit-details-marker {
+    display: none;
+}
+
+.ctr-doclist-hidden-toggle:hover {
+    background-color: rgba(0, 0, 0, .06);
+}
+
+.ctr-doclist-hidden-chevron {
+    display: inline-block;
+    width: 1em;
+    margin-right: .25rem;
+    font-size: .8em;
+    transition: transform .15s;
+}
+
+.ctr-doclist-hidden[open] > .ctr-doclist-hidden-toggle .ctr-doclist-hidden-chevron {
+    transform: rotate(90deg);
+}
+
+/* ─── static language-filter tag in the tab strip ────────────────────── */
+
+.ctr-filter-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: .4rem .75rem;
+    border-radius: .25rem;
+    font-size: .85rem;
+    color: #495057;
+    background-color: #f3f4f6;
+    cursor: default;
+}
+
+.ctr-filter-dot {
+    width: .6rem;
+    height: .6rem;
+    margin-right: .5rem;
+    border-radius: 50%;
+    background-color: #28a745;
+}

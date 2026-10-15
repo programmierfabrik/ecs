@@ -66,6 +66,7 @@ urlpatterns = (
     path('<int:submission_pk>/ctr/deadline/', views.set_draft_assessment_report_deadline, name='core.submission.set_draft_assessment_report_deadline'),
     path('<int:submission_pk>/ctr/documents/', views.ctr_documents, name='core.submission.ctr_documents'),
     path('<int:submission_pk>/ctr/documents/delete/', views.delete_ctr_document, name='core.submission.delete_ctr_document'),
+    path('<int:submission_pk>/ctr/documents/hide/', views.set_ctr_document_hidden, name='core.submission.set_ctr_document_hidden'),
     path('<int:submission_pk>/ctr/documents/<int:document_pk>/', views.download_ctr_upload, name='core.submission.download_ctr_upload'),
     path('<int:submission_pk>/ctr/documents/<int:document_pk>/view/', views.view_ctr_upload, name='core.submission.view_ctr_upload'),
     path('<int:submission_pk>/review/categorization/', views.categorization_review, name='core.submission.categorization_review'),

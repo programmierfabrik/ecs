@@ -39,6 +39,12 @@ def is_acknowledged_and_initial_submission(wf):
 def uses_ctr_form(wf):
     return wf.data.uses_ctr_form
 
+@guard(model=Submission)
+def needs_signature_review(wf):
+    # The « Unterschrift Prüfung » checks the signed paper submission; a CTIS
+    # study is never submitted on paper.
+    return is_acknowledged_and_initial_submission(wf) and not uses_ctr_form(wf)
+
 ###############
 # lane guards #
 ###############
@@ -135,6 +141,10 @@ class InitialReview(Activity):
         return reverse('core.submission.initial_review', kwargs={'submission_pk': self.workflow.data_id})
 
     def get_choices(self):
+        # A rejected CTIS study could never be resubmitted: there is no form
+        # for the submitter to correct, so the process would stop.
+        if self.workflow.data.uses_ctr_form:
+            return ((True, _('Acknowledge'), 'success'),)
         return (
             (True, _('Acknowledge'), 'success'),
             (False, _('Reject'), 'danger'),

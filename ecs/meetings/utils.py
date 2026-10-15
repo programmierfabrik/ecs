@@ -53,10 +53,13 @@ def write_submission_zip_entries(zf, submission, path, user=None):
     if submission.uses_ctr_form:
         ctr_submission_form = submission.current_ctr_form
         documents = ctr_submission_form.documents or []
+        hidden_ids = set(submission.ctis_hidden_documents.values_list('document_id', flat=True))
+        documents = [d for d in documents
+                     if str(d.get('documentId') or '') not in hidden_ids]
         full_access = user is not None and sees_full_ctr_form(user, submission)
         if not full_access:
             permitted = {d.id for d in external_documents(
-                ctr_submission_form.application, documents)}
+                ctr_submission_form.application, documents, hidden_ids)}
             documents = [d for d in documents
                          if str(d.get('documentId') or '') in permitted]
         for doc in documents:

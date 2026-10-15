@@ -166,6 +166,8 @@ class DocEntry:
     source: str = 'CTIS'
     url: str = ''
     versions: list = dc_field(default_factory=list)
+    hidden: bool = False            # hidden by the CTIS Importer, see CTISHiddenDocument
+    manageable: bool = False        # whether the viewer may hide/unhide it
 
     @property
     def is_product_document(self):
@@ -217,6 +219,8 @@ class Filter:
 class DocList:
     """The flat, filterable « Unterlagen » list - the « I just need the PDF » view."""
     documents: list = dc_field(default_factory=list)
+    hidden_documents: list = dc_field(default_factory=list)
+    manageable: bool = False
     filters: list = dc_field(default_factory=list)
     widget: str = 'doclist'
 
@@ -602,6 +606,15 @@ def latest_download_path(doc):
         return ''
     latest = versions[0]
     return '' if latest.get('url') else _download_path(latest)
+
+
+# Part I and Part II list only the documents readable in the EC's working
+# languages; a document that states no language is kept.
+WORKING_LANGUAGES = ('EN', 'DE')
+
+
+def _in_working_language(doc):
+    return not doc.language or doc.language in WORKING_LANGUAGES
 
 
 def build_document_entries(documents, download_url=None):
@@ -1883,7 +1896,7 @@ def _external_part2_tab(part2s, documents):
     ])
 
 
-def external_documents(trial, documents):
+def external_documents(trial, documents, hidden_ids=()):
     """
     Every document the restricted view shows, for gating the download route.
 
@@ -1895,7 +1908,8 @@ def external_documents(trial, documents):
     if not applications:
         return []
 
-    entries = build_document_entries(documents or [])
+    entries = [e for e in build_document_entries(documents or [])
+               if e.id not in hidden_ids and _in_working_language(e)]
     part2s = (applications[0].get('part2s') or [])
 
     permitted = list(
@@ -1930,8 +1944,11 @@ def _document_filters(documents):
     return [f for f in candidates if len(f.options) > 1]
 
 
-def _unterlagen_tab(documents):
-    doclist = DocList(documents=documents, filters=_document_filters(documents))
+def _unterlagen_tab(documents, hidden_documents=(), manageable=False):
+    doclist = DocList(documents=documents,
+                      hidden_documents=list(hidden_documents),
+                      manageable=manageable,
+                      filters=_document_filters(documents))
     return Tab('unterlagen', 'Application Documents', subtabs=[
         SubTab('unterlagen-all', 'Application Documents', panes=[
             Pane(sections=[Section(name='All documents', entries=[doclist])]),
@@ -1942,7 +1959,7 @@ def _unterlagen_tab(documents):
 # ─── entry point ─────────────────────────────────────────────────────────
 
 def build_ctr_view(trial, documents=None, download_url=None,
-                   restricted=False):
+                   restricted=False, hidden_ids=(), can_hide=False):
     """
     Build the CTIS view model for one imported trial payload.
 
@@ -1960,7 +1977,15 @@ def build_ctr_view(trial, documents=None, download_url=None,
     submission, listed in the Status tab - so there is no version switch here.
     """
     trial = trial if isinstance(trial, dict) else {}
-    entries = build_document_entries(documents or [], download_url)
+    all_entries = build_document_entries(documents or [], download_url)
+    for e in all_entries:
+        e.hidden = e.id in hidden_ids
+        e.manageable = can_hide
+    # A hidden document is gone from every view but the « Unterlagen » list
+    # the importer manages it from; Part I and II also drop the languages the
+    # EC does not work in.
+    entries = [e for e in all_entries if not e.hidden]
+    part_entries = [e for e in entries if _in_working_language(e)]
     applications = sorted_applications(trial)
 
     if not applications:
@@ -1978,8 +2003,8 @@ def build_ctr_view(trial, documents=None, download_url=None,
 
     if restricted:
         tabs = [
-            _external_part1_tab(entries),
-            _external_part2_tab(part2s, entries),
+            _external_part1_tab(part_entries),
+            _external_part2_tab(part2s, part_entries),
         ]
     else:
         # The document list is fetched per application, so every entry in it
@@ -1987,9 +2012,10 @@ def build_ctr_view(trial, documents=None, download_url=None,
         tabs = [
             _formular_tab(trial, application, entries),
             _msc_tab(application, part1, part2s),
-            _part1_tab(application, part1, entries),
-            _part2_tab(part2s, entries),
-            _unterlagen_tab(entries),
+            _part1_tab(application, part1, part_entries),
+            _part2_tab(part2s, part_entries),
+            _unterlagen_tab(
+                entries, [e for e in all_entries if e.hidden], can_hide),
         ]
 
     return {

@@ -78,7 +78,11 @@ ecs.ctr = {
             return;
 
         var filters = $('.ctr-doc-filter');
-        var rows = table.find('tbody tr').not('.ctr-doclist-empty, .ctr-doclist-nomatch');
+        // Looked up on every draw: hiding or restoring a document moves its
+        // row between this table and the « Ausgeblendet » one.
+        function allRows() {
+            return table.find('tbody tr').not('.ctr-doclist-empty, .ctr-doclist-nomatch');
+        }
         var nomatch = table.find('.ctr-doclist-nomatch');
         var pager = $('.ctr-doclist-pager');
         var perPage = parseInt(pager.data('per-page'), 10) || 20;
@@ -92,7 +96,7 @@ ecs.ctr = {
                     selected[$(this).data('filter')] = value;
             });
 
-            return rows.filter(function() {
+            return allRows().filter(function() {
                 var row = $(this);
                 for (var key in selected) {
                     if (String(row.data(key)) !== selected[key])
@@ -159,6 +163,7 @@ ecs.ctr = {
             if (page > pages - 1)
                 page = pages - 1;
 
+            var rows = allRows();
             rows.prop('hidden', true);
             visible.slice(page * perPage, (page + 1) * perPage)
                    .prop('hidden', false);
@@ -174,5 +179,45 @@ ecs.ctr = {
         });
 
         draw();
+
+        var list = table.closest('.ctr-doclist');
+        var hiddenTable = list.find('.ctr-doclist-hidden-table');
+        if (!hiddenTable.length)
+            return;
+
+        function syncHidden() {
+            var count = hiddenTable.find('tbody tr[data-document-id]').length;
+            list.find('.ctr-doclist-hidden-count').text(count);
+            hiddenTable.find('.ctr-doclist-hidden-empty').prop('hidden', count > 0);
+            table.find('.ctr-doclist-empty').prop('hidden',
+                table.find('tbody tr[data-document-id]').length > 0);
+        }
+
+        // Hide and restore save at once and move the row; nothing reloads.
+        list.on('click', '.ctr-doc-hide, .ctr-doc-restore', function() {
+            var button = $(this);
+            var row = button.closest('tr');
+            var hide = button.hasClass('ctr-doc-hide');
+            button.prop('disabled', true);
+            $.post(list.data('hide-url'), {
+                document_id: row.data('document-id'),
+                hidden: hide ? '1' : '0',
+                csrfmiddlewaretoken: list.data('csrf')
+            }).done(function() {
+                row.find('.ctr-doc-hide').prop('hidden', hide);
+                row.find('.ctr-doc-restore').prop('hidden', !hide);
+                row.prop('hidden', false);
+                if (hide)
+                    hiddenTable.find('tbody').prepend(row);
+                else
+                    table.find('tbody').prepend(row);
+                draw();
+                syncHidden();
+            }).fail(function() {
+                alert('Speichern fehlgeschlagen. Bitte erneut versuchen.');
+            }).always(function() {
+                button.prop('disabled', false);
+            });
+        });
     }
 };
