@@ -137,6 +137,16 @@ class DraftAssessmentReportDeadlineForm(ReadonlyFormMixin, forms.ModelForm):
         fields = ('draft_assessment_report_deadline',)
 
 
+class PartIITimelineForm(ReadonlyFormMixin, forms.ModelForm):
+    doc_cons_from = DateField(label=_('Doc Cons von'), required=False)
+    doc_cons_to = DateField(label=_('Doc Cons bis'), required=False)
+    response_expected = DateField(label=_('Response Expected'), required=False)
+
+    class Meta:
+        model = Submission
+        fields = ('doc_cons_from', 'doc_cons_to', 'response_expected')
+
+
 # The three states a study's Draft Assessment Report deadline can be in,
 # shared between the CTIS overview's filter and its annotated queryset
 # (`ecs/core/views/submissions.py:ctis_overview`).
@@ -211,6 +221,63 @@ class CTISOverviewFilterForm(forms.Form):
             submissions = submissions.filter(
                 ~Q(deadline_status=DAR_DEADLINE_UPCOMING) |
                 Q(draft_assessment_report_deadline__lte=cutoff))
+        return submissions
+
+
+PART_II_DATE_FIELDS = (
+    ('doc_cons_from', 'Doc Cons von'),
+    ('doc_cons_to', 'Doc Cons bis'),
+    ('response_expected', 'Response Expected'),
+)
+PART_II_REVIEWER_ME = 'me'
+
+
+class CTISPartIIOverviewFilterForm(forms.Form):
+    """
+    The Part II view of the CTIS overview. `date_field` picks which of the
+    three dates the list is ordered by, `reviewer` narrows it to the owner of
+    the study's Part II task - a plain filter, every row stays visible to
+    everyone who may open the page.
+    """
+    date_field = forms.ChoiceField(
+        required=False,
+        label='Sortieren nach',
+        choices=PART_II_DATE_FIELDS,
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+    )
+    reviewer = forms.ChoiceField(required=False, label='Reviewer',
+        widget=forms.Select(attrs={'class': 'custom-select'}))
+
+    def __init__(self, data=None, *args, user=None, **kwargs):
+        reviewers = self.reviewers()
+        # Only CTIS Importers can own a Part II task, so "Meine" is pointless
+        # for everyone else; for them it also covers the user's own entry.
+        is_importer = bool(user) and user.groups.filter(name='CTIS Importer').exists()
+        if is_importer:
+            reviewers = reviewers.exclude(pk=user.pk)
+        super().__init__(data or {'date_field': 'response_expected', 'reviewer': ''},
+            *args, **kwargs)
+        self.fields['reviewer'].choices = (
+            [('', 'Alle')] + ([(PART_II_REVIEWER_ME, 'Meine')] if is_importer else []) +
+            [(str(u.pk), u.get_full_name() or u.email) for u in reviewers])
+
+    @staticmethod
+    def reviewers():
+        from ecs.tasks.models import Task
+        return (User.objects
+            .filter(tasks__task_type__workflow_node__uid='part_ii_timeline',
+                tasks__deleted_at=None)
+            .distinct().order_by('last_name', 'first_name', 'email'))
+
+    def clean_date_field(self):
+        return self.cleaned_data.get('date_field') or 'response_expected'
+
+    def filter(self, submissions, user):
+        reviewer = self.cleaned_data.get('reviewer')
+        if reviewer == PART_II_REVIEWER_ME:
+            submissions = submissions.filter(part_ii_reviewer_id=user.pk)
+        elif reviewer:
+            submissions = submissions.filter(part_ii_reviewer_id=int(reviewer))
         return submissions
 
 

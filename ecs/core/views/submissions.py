@@ -10,7 +10,7 @@ from django.http import HttpResponse, Http404, JsonResponse, FileResponse, HttpR
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.forms.models import model_to_dict
-from django.db.models import Q, Prefetch, Min, F, Case, When, Value, CharField, IntegerField, Exists, OuterRef
+from django.db.models import Q, Prefetch, Min, F, Case, When, Value, CharField, IntegerField, Exists, OuterRef, Subquery
 from django.utils.translation import gettext as _
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
@@ -48,6 +48,7 @@ from ecs.core.forms import (
 from ecs.core.forms.review import (
     CategorizationForm, BiasedBoardMemberForm, DraftAssessmentReportDeadlineForm,
     SubmissionDocumentForm, CTISOverviewFilterForm,
+    PartIITimelineForm, CTISPartIIOverviewFilterForm,
     DAR_DEADLINE_NOT_ENTERED, DAR_DEADLINE_UPCOMING, DAR_DEADLINE_PASSED,
 )
 from ecs.core.forms.layout import SUBMISSION_FORM_TABS
@@ -69,6 +70,7 @@ from ecs.votes.models import Vote
 from ecs.core.diff import diff_submission_forms
 from ecs.communication.utils import send_message_template
 from ecs.utils import forceauth
+from django.contrib.auth.decorators import user_passes_test
 from ecs.users.models import UserProfile
 from ecs.users.utils import sudo, user_flag_required, user_group_required, get_user
 from ecs.tasks.models import Task
@@ -419,13 +421,25 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
                     break
 
     presenting_users = current_form.get_presenting_parties().get_users().union([submission.presenter, submission.susar_presenter])
-    if not request.user in presenting_users:
+    # A CTIS study's presenter is just the internal user who imported it, not
+    # a party to the study, so nobody is hidden these tabs on that account.
+    if ctr_submission_form or not request.user in presenting_users:
         vote = submission.current_pending_vote or submission.current_published_vote
         context['vote_review_form'] = VoteReviewForm(instance=vote, readonly=True)
         context['categorization_form'] = CategorizationForm(instance=submission, readonly=True)
         if ctr_submission_form:
             context['draft_assessment_report_deadline_form'] = \
                 DraftAssessmentReportDeadlineForm(instance=submission, readonly=True)
+            context['part_ii_timeline_form'] = \
+                PartIITimelineForm(instance=submission, readonly=True)
+            if request.user.groups.filter(name='CTIS Importer').exists():
+                for form, uid in (
+                    (context['draft_assessment_report_deadline_form'], 'draft_assessment_report_deadline'),
+                    (context['part_ii_timeline_form'], 'part_ii_timeline'),
+                ):
+                    task = _latest_ctis_task(submission, uid)
+                    if task and task.closed_at:
+                        form.allow_reopen = True
         if request.user.profile.is_executive and \
             submission.allows_categorization():
             task = Task.unfiltered.for_data(submission).filter(
@@ -590,6 +604,58 @@ def set_draft_assessment_report_deadline(request, submission_pk=None):
     return response
 
 
+@task_required
+@with_task_management
+def set_part_ii_timeline(request, submission_pk=None):
+    submission = get_object_or_404(Submission, pk=submission_pk)
+    form = PartIITimelineForm(request.POST or None, instance=submission)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+
+    response = readonly_submission_form(request,
+        extra_context={'part_ii_timeline_form': form},
+        **submission.current_form_kwargs())
+    response.has_errors = not form.is_valid()
+    return response
+
+
+def _latest_ctis_task(submission, uid):
+    return Task.unfiltered.for_data(submission).filter(
+        task_type__workflow_node__uid=uid,
+        deleted_at=None,
+    ).order_by('-created_at').first()
+
+
+def _reopen_ctis_task(request, submission_pk, uid):
+    submission = get_object_or_404(Submission.unfiltered.select_for_update(),
+        pk=submission_pk)
+
+    task = _latest_ctis_task(submission, uid)
+    if not task or not task.closed_at:
+        raise Http404()
+
+    new_task = task.reopen(request.user)
+
+    if task.assigned_to and task.assigned_to != request.user:
+        sender = get_user('root@system.local')
+        subject = _('{task} reopened').format(task=task.task_type)
+        send_message_template(sender, task.assigned_to, subject,
+            'tasks/messages/reopen.txt', {'user': request.user, 'task': task},
+            submission=submission, reply_receiver=request.user)
+
+    return redirect(new_task.url)
+
+
+@user_group_required('CTIS Importer')
+def reopen_draft_assessment_report_deadline(request, submission_pk=None):
+    return _reopen_ctis_task(request, submission_pk, 'draft_assessment_report_deadline')
+
+
+@user_group_required('CTIS Importer')
+def reopen_part_ii_timeline(request, submission_pk=None):
+    return _reopen_ctis_task(request, submission_pk, 'part_ii_timeline')
+
+
 def ctr_documents(request, submission_pk=None):
     """
     The « Hochgeladene Dokumente » tab's own widget - loaded into
@@ -672,7 +738,8 @@ def download_ctr_upload(request, submission_pk=None, document_pk=None):
     return handle_download(request, document)
 
 
-@user_flag_required('is_internal')
+@user_passes_test(lambda u: u.profile.is_internal or
+    u.groups.filter(name='CTIS Importer').exists())
 def ctis_overview(request):
     """
     The one-page CTIS report: every CTIS study with its Draft Assessment
@@ -681,6 +748,9 @@ def ctis_overview(request):
     on `all_submissions`/`AllSubmissionsFilterForm` for this, which has no
     notion of a deadline at all.
     """
+    if request.GET.get('part') == '2':
+        return _ctis_overview_part_ii(request)
+
     today = timezone.localdate()
     content_type = ContentType.objects.get_for_model(Submission)
     uploaded_subquery = Document.objects.filter(
@@ -718,10 +788,17 @@ def ctis_overview(request):
     # otherwise fall back to what this user filtered by last time - no query
     # params, so the filter survives a plain reload or revisit.
     usersettings = request.user.ecs_settings
-    filter_form = CTISOverviewFilterForm(request.POST or usersettings.ctis_overview_filter)
+    # The Part II view keeps its own filter state under the `part_ii` key of
+    # the same setting, so leave it alone here.
+    saved_filter = usersettings.ctis_overview_filter
+    part_ii_filter = saved_filter.get('part_ii')
+    filter_form = CTISOverviewFilterForm(request.POST or
+        {k: v for k, v in saved_filter.items() if k != 'part_ii'})
     if filter_form.is_valid():
         submissions = filter_form.filter(submissions)
-        usersettings.ctis_overview_filter = filter_form.cleaned_data
+        usersettings.ctis_overview_filter = dict(filter_form.cleaned_data)
+        if part_ii_filter:
+            usersettings.ctis_overview_filter['part_ii'] = part_ii_filter
         usersettings.save()
 
     paginator = Paginator(submissions, 50, allow_empty_first_page=True)
@@ -746,8 +823,61 @@ def ctis_overview(request):
 
     return render(request, 'submissions/ctis_overview.html', {
         'title': 'CTIS-Übersicht',
+        'part': 1,
         'submissions': page,
         'filter_form': filter_form,
+    })
+
+
+def _ctis_overview_part_ii(request):
+    """
+    The Part II view of `ctis_overview`: the three timeline dates, the
+    application type and the reviewer (the owner of the study's Part II
+    task). Ordered by whichever date the filter picks, studies without that
+    date last.
+    """
+    from ecs.tasks.models import Task
+    reviewer_subquery = (Task.unfiltered
+        .filter(content_type=ContentType.objects.get_for_model(Submission),
+            data_id=OuterRef('pk'),
+            task_type__workflow_node__uid='part_ii_timeline',
+            deleted_at=None)
+        .order_by('-created_at')
+        .values('assigned_to')[:1])
+    submissions = (Submission.objects
+        .filter(current_ctr_form__isnull=False)
+        .select_related('current_ctr_form')
+        .annotate(part_ii_reviewer_id=Subquery(reviewer_subquery)))
+
+    usersettings = request.user.ecs_settings
+    saved_filter = usersettings.ctis_overview_filter
+    filter_form = CTISPartIIOverviewFilterForm(request.POST or saved_filter.get('part_ii'),
+        user=request.user)
+    if filter_form.is_valid():
+        submissions = filter_form.filter(submissions, request.user)
+        usersettings.ctis_overview_filter = dict(saved_filter,
+            part_ii=filter_form.cleaned_data)
+        usersettings.save()
+    date_field = filter_form.cleaned_data.get('date_field') or 'response_expected'
+    submissions = submissions.order_by(F(date_field).asc(nulls_last=True), 'ec_number')
+
+    paginator = Paginator(submissions, 50, allow_empty_first_page=True)
+    try:
+        page = paginator.page(request.GET.get('page', 1))
+    except (EmptyPage, InvalidPage):
+        page = paginator.page(1)
+
+    reviewers = User.objects.select_related('profile').in_bulk(
+        [s.part_ii_reviewer_id for s in page.object_list if s.part_ii_reviewer_id])
+    for submission in page.object_list:
+        submission.part_ii_reviewer = reviewers.get(submission.part_ii_reviewer_id)
+
+    return render(request, 'submissions/ctis_overview.html', {
+        'title': 'CTIS-Übersicht',
+        'part': 2,
+        'submissions': page,
+        'filter_form': filter_form,
+        'date_field': date_field,
     })
 
 

@@ -161,8 +161,23 @@ class SetDraftAssessmentReportDeadline(Activity):
     class Meta:
         model = Submission
 
+    def is_repeatable(self):
+        return True
+
     def get_url(self):
         return reverse('core.submission.set_draft_assessment_report_deadline',
+            kwargs={'submission_pk': self.workflow.data_id})
+
+
+class SetPartIITimeline(Activity):
+    class Meta:
+        model = Submission
+
+    def is_repeatable(self):
+        return True
+
+    def get_url(self):
+        return reverse('core.submission.set_part_ii_timeline',
             kwargs={'submission_pk': self.workflow.data_id})
 
 

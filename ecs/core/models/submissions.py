@@ -61,6 +61,13 @@ class Submission(models.Model):
     # `Document`, not stored here.
     draft_assessment_report_deadline = models.DateField(null=True, blank=True)
 
+    # The Part II timeline of a CTIS study, typed in by hand from the
+    # auto-created `part_ii_timeline` task (CTIS studies only). Each date is
+    # optional and independent of the others.
+    doc_cons_from = models.DateField(null=True, blank=True)
+    doc_cons_to = models.DateField(null=True, blank=True)
+    response_expected = models.DateField(null=True, blank=True)
+
     is_transient = models.BooleanField(default=False)
     is_finished = models.BooleanField(default=False)
     is_expired = models.BooleanField(default=False)
@@ -1039,6 +1046,19 @@ class CTRSubmissionForm(models.Model):
         # office, which is why the version table shows it instead of a count.
         return self._identifier(
             formatted_application_id(self.current_application))
+
+    @property
+    def ctis_application_type_tag(self):
+        # « IN » for the initial application, « SM (5701) » for a substantial
+        # modification: only the initial one is unique, the rest need their id.
+        application = self.current_application
+        key = self._identifier(application.get('businessKey'))
+        if not key:
+            return None
+        application_id = self._identifier(application.get('applicationId'))
+        if key == 'IN' or not application_id:
+            return key
+        return '{} ({})'.format(key, application_id)
 
     @property
     def ctis_aut_id(self):

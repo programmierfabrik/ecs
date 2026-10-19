@@ -14,7 +14,7 @@ from ecs.core.workflow import (
     InitialReview, Resubmission, Categorization, CategorizationReview,
     PaperSubmissionReview, VotePreparation, ChecklistReview,
     ExpeditedRecommendationSplit, B2ResubmissionReview,
-    InitialB2ResubmissionReview, SetDraftAssessmentReportDeadline,
+    InitialB2ResubmissionReview, SetDraftAssessmentReportDeadline, SetPartIITimeline,
 )
 from ecs.core.workflow import (
     is_retrospective_thesis, is_acknowledged, is_expedited,
@@ -66,6 +66,7 @@ def submission_workflow():
             'initial_review': Args(InitialReview, group=OFFICE_GROUP, name=_("Initial Review")),
             'initial_review_barrier': Args(Generic, name="Initial Review Barrier"),
             'draft_assessment_report_deadline': Args(SetDraftAssessmentReportDeadline, group=CTIS_IMPORTER_GROUP, name=_("Set Draft Assessment Report Deadline")),
+            'part_ii_timeline': Args(SetPartIITimeline, group=CTIS_IMPORTER_GROUP, name=_("Set Document Consideration")),
             'categorization': Args(Categorization, group=EXECUTIVE_GROUP, name=_("Categorization")),
             'categorization_review': Args(CategorizationReview, group=OFFICE_GROUP, name=_("Categorization Review")),
             'paper_submission_review': Args(PaperSubmissionReview, group=OFFICE_GROUP, name=_("Paper Submission Review")),
@@ -94,6 +95,7 @@ def submission_workflow():
             ('start', 'initial_review'): Args(guard=is_retrospective_thesis, negated=True),
             ('start', 'initial_thesis_review'): Args(guard=is_retrospective_thesis),
             ('start', 'draft_assessment_report_deadline'): Args(guard=uses_ctr_form),
+            ('start', 'part_ii_timeline'): Args(guard=uses_ctr_form),
 
             ('initial_review', 'initial_review_barrier'): None,
             ('initial_thesis_review', 'initial_review_barrier'): None,

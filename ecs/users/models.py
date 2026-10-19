@@ -78,6 +78,7 @@ class UserProfile(models.Model):
             'External Reviewer',
             'Specialist',
             'Legal and Patient Reviewer',
+            'CTIS Importer',
         })
         self.can_have_open_tasks = bool(groups & {
             'Board Member',
@@ -88,6 +89,7 @@ class UserProfile(models.Model):
             'Insurance Reviewer',
             'Statistic Reviewer',
             'Legal and Patient Reviewer',
+            'CTIS Importer',
         })
 
     @property

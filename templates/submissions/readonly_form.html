@@ -92,6 +92,9 @@
                     {% if draft_assessment_report_deadline_form %}
                         <li class="nav-item"><a class="nav-link {% if not draft_assessment_report_deadline_form.readonly %}active{% endif %}" href="#draft_assessment_report_deadline_tab">Draft Assessment Report Deadline</a></li>
                     {% endif %}
+                    {% if part_ii_timeline_form %}
+                        <li class="nav-item"><a class="nav-link {% if not part_ii_timeline_form.readonly %}active{% endif %}" href="#part_ii_timeline_tab">Document Consideration</a></li>
+                    {% endif %}
                     {% if user.profile.show_task_widget %}
                         <li class="nav-item"><a class="nav-link" href="#tasks_tab">{% trans 'Tasks' %}</a></li>
                         {% if user.profile.is_internal %}
@@ -193,6 +196,30 @@
             {% with draft_assessment_report_deadline_form as review_form %}
                 {% include 'submissions/review_form.html' %}
             {% endwith %}
+            {% if draft_assessment_report_deadline_form.allow_reopen %}
+                <div class="my-3">
+                    {% url 'core.submission.reopen_draft_assessment_report_deadline' submission_pk=submission.pk as reopen_url %}
+                    <a class="btn btn-outline-primary" href="{{ reopen_url }}">
+                        {% trans 'Reopen' %}
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if part_ii_timeline_form %}
+        <div id="part_ii_timeline_tab" class="container collapse">
+            {% with part_ii_timeline_form as review_form %}
+                {% include 'submissions/review_form.html' %}
+            {% endwith %}
+            {% if part_ii_timeline_form.allow_reopen %}
+                <div class="my-3">
+                    {% url 'core.submission.reopen_part_ii_timeline' submission_pk=submission.pk as reopen_url %}
+                    <a class="btn btn-outline-primary" href="{{ reopen_url }}">
+                        {% trans 'Reopen' %}
+                    </a>
+                </div>
+            {% endif %}
         </div>
     {% endif %}
 
