@@ -44,6 +44,8 @@ class SimpleXLS(object):
         self.sheet.horz_split_pos = 1
         self.widths = []
         self.characters = []
+        self.style = xlwt.easyxf('align: wrap on, vert top;')
+        self.header_style = xlwt.easyxf('font: bold on; align: horiz center;')
         
     def write_row(self, r, cells, header=False):
         for c, cell in enumerate(cells):
@@ -68,15 +70,11 @@ class SimpleXLS(object):
             self.characters[r] = max(self.characters[r], len(str(cell)))
             
     def write(self, r, c, cell, header=False):
-        style = xlwt.easyxf('align: wrap on, vert top;')
-        if header:
-            style = xlwt.easyxf('font: bold on; align: horiz center;')
+        style = self.header_style if header else self.style
         self.sheet.write(r, c, cell, style)
 
     def write_merge(self, r1, r2, c1, c2, cell, header=False):
-        style = xlwt.easyxf('align: wrap on, vert top;')
-        if header:
-            style = xlwt.easyxf('font: bold on; align: horiz center;')
+        style = self.header_style if header else self.style
         self.sheet.write_merge(r1, r2, c1, c2, cell, style)
             
     def save(self, f):
