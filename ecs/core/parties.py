@@ -68,12 +68,15 @@ def get_presenting_parties(sf):
     parties = PartyList()
     parties.add(user=sf.submission.presenter, involvement=_("Presenter"))
     parties.add(user=sf.submission.susar_presenter, involvement=_("Susar Presenter"))
-    parties.add(organization=sf.submitter_organisation, name=sf.submitter_contact.full_name,
-        email=sf.submitter_email, user=sf.submitter, involvement=_("Submitter"))
-    parties.add(organization=sf.sponsor_name, name=sf.sponsor_contact.full_name,
-        email=sf.sponsor_email, user=sf.sponsor, involvement=_("Sponsor"))
-    for i in sf.investigators.filter(main=True):
-        parties.add(organization=i.organisation, name=i.contact.full_name, user=i.user, email=i.email, involvement=_("Primary Investigator"))
+    # CTRSubmissionForm doesn't (yet) model submitter/sponsor/investigators as
+    # relational fields - its data lives in the `application` JSON blob.
+    if hasattr(sf, 'submitter_organisation'):
+        parties.add(organization=sf.submitter_organisation, name=sf.submitter_contact.full_name,
+            email=sf.submitter_email, user=sf.submitter, involvement=_("Submitter"))
+        parties.add(organization=sf.sponsor_name, name=sf.sponsor_contact.full_name,
+            email=sf.sponsor_email, user=sf.sponsor, involvement=_("Sponsor"))
+        for i in sf.investigators.filter(main=True):
+            parties.add(organization=i.organisation, name=i.contact.full_name, user=i.user, email=i.email, involvement=_("Primary Investigator"))
     return parties
 
 def get_reviewing_parties(sf, active=None):

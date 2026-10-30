@@ -333,7 +333,7 @@ ecs.setupDocumentUploadForms = function(){
 
         form.find('select[name="document-doctype"]')
             .val(link.data('documentType'))
-            .attr('readonly', true);
+            .attr('disabled', true);
     });
 
     $('#tabs-11 input.reset_document').click(function(ev) {
@@ -343,7 +343,8 @@ ecs.setupDocumentUploadForms = function(){
 
     $('.doclist a.delete_document').click(function(ev) {
         ev.preventDefault();
-        $('.upload_container').load($(this).attr('href'));
+        // A `data-post` payload makes jQuery's load() send a POST.
+        $('.upload_container').load($(this).attr('href'), $(this).data('post'));
     });
 
     $('.doclist a.edit_document').click(function(ev) {

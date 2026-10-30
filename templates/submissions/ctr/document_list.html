@@ -1,0 +1,89 @@
+{% comment %}
+    The flat, filterable and paged « Application Documents » list - every
+    document the application delivered, including the ones a Part I or Part II
+    section already shows inline. `entry` is a ctis_render.DocList.
+
+    Filtering and paging are both client-side: the whole list is in the page
+    already, and the columns it filters on are on the row as data attributes
+    whether or not they are shown.
+{% endcomment %}
+<li class="ctr-doclist" data-hide-url="{% if entry.manageable %}{% url 'core.submission.set_ctr_document_hidden' submission_pk=submission.pk %}{% endif %}" data-csrf="{{ csrf_token }}">
+    <div class="ctr-doclist-filters form-inline">
+        {% for filter in entry.filters %}
+            <label class="mr-3 mb-2">
+                <span class="mr-1">{{ filter.label }}</span>
+                <select class="form-control form-control-sm ctr-doc-filter" data-filter="{{ filter.key }}">
+                    <option value="">All</option>
+                    {% for option in filter.options %}
+                        <option value="{{ option }}">{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        {% endfor %}
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm ctr-data-table ctr-doclist-table">
+            <thead>
+                <tr>
+                    <th>Document title</th>
+                    <th>Section</th>
+                    <th>Document type</th>
+                    <th>Document comment</th>
+                    <th>Version</th>
+                    <th>From date</th>
+                    <th>Download</th>
+                    {% if entry.manageable %}<th></th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for document in entry.documents %}
+                    {% include 'submissions/ctr/document_row.html' with manageable=entry.manageable hidden=False %}
+                {% empty %}
+                    <tr class="ctr-doclist-empty">
+                        <td colspan="{% if entry.manageable %}8{% else %}7{% endif %}" class="text-center text-muted">–</td>
+                    </tr>
+                {% endfor %}
+                <tr class="ctr-doclist-nomatch" hidden>
+                    <td colspan="{% if entry.manageable %}8{% else %}7{% endif %}" class="text-center text-muted">
+                        Keine Unterlagen entsprechen der Filterauswahl.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="ctr-doclist-pager" data-per-page="20"></div>
+
+    {% if entry.manageable %}
+        <details class="ctr-doclist-hidden mt-4">
+            <summary class="ctr-doclist-hidden-toggle" title="Ausgeblendete Dokumente ein-/ausklappen">
+                <span class="fa fa-chevron-right ctr-doclist-hidden-chevron"></span>
+                Ausgeblendet <span class="badge badge-secondary ctr-doclist-hidden-count">{{ entry.hidden_documents|length }}</span>
+            </summary>
+            <p class="text-muted small my-2">Diese Dokumente sind für alle anderen nicht sichtbar. Sie bleiben auch bei einer erneuten Synchronisierung mit CTIS ausgeblendet.</p>
+        <div class="table-responsive">
+            <table class="table table-sm ctr-data-table ctr-doclist-hidden-table">
+                <thead>
+                    <tr>
+                        <th>Document title</th>
+                        <th>Section</th>
+                        <th>Document type</th>
+                        <th>Document comment</th>
+                        <th>Version</th>
+                        <th>From date</th>
+                        <th>Download</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for document in entry.hidden_documents %}
+                        {% include 'submissions/ctr/document_row.html' with manageable=True hidden=True %}
+                    {% endfor %}
+                    <tr class="ctr-doclist-hidden-empty"{% if entry.hidden_documents %} hidden{% endif %}>
+                        <td colspan="8" class="text-center text-muted">Keine ausgeblendeten Dokumente.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        </details>
+    {% endif %}
+</li>

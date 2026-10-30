@@ -2,6 +2,7 @@ from django.conf import settings
 from django.urls import path, re_path
 
 from ecs.core.views import submissions as views
+from ecs.core.views import ctis as ctis_views
 from ecs.tasks.views import task_backlog, delete_task
 from ecs.communication.views import new_thread
 
@@ -17,8 +18,11 @@ urlpatterns = (
     re_path(r'^list/xls/(?P<shasum>[0-9a-f]{40})/$', views.xls_export_download, name='core.submission.xls_export_download'),
     path('list/assigned/', views.assigned_submissions, name='core.submission.assigned_submissions'),
     path('list/mine/', views.my_submissions, name='core.submission.my_submissions'),
+    path('list/ctis/', views.ctis_overview, name='core.submission.ctis_overview'),
+    path('list/ctis/deadlines-widget/', views.ctis_deadline_widget, name='core.submission.ctis_deadline_widget'),
 
     path('import/', views.import_submission_form, name='core.submission.import_submission_form'),
+    path('ctis/import/', ctis_views.import_ctis_study, name='core.submission.import_ctis_study'),
     path('new/', views.create_submission_form, name='core.submission.create_submission_form'),
     path('new/<str:docstash_key>/', views.create_submission_form, name='core.submission.create_submission_form_by_docstash_key'),
     path('delete/<str:docstash_key>/', views.delete_docstash_entry, name='core.submission.delete_docstash_entry'),
@@ -29,6 +33,7 @@ urlpatterns = (
     path('diff/forms/<int:old_submission_form_pk>/<int:new_submission_form_pk>/', views.diff, name='core.submission.diff'),
 
     path('<int:submission_pk>/', views.view_submission, name='view_submission'),
+    path('<int:submission_pk>/ctis/sync/', ctis_views.sync_ctis_study, name='core.submission.sync_ctis_study'),
     path('<int:submission_pk>/copy/', views.copy_latest_submission_form, name='core.submission.copy_latest_submission_form'),
     path('<int:submission_pk>/amend/<int:notification_type_pk>/', views.copy_latest_submission_form, name='core.submission.copy_latest_submission_form_by_notification_pk'),
     path('<int:submission_pk>/export/', views.export_submission, name='core.submission.export_submission'),
@@ -40,6 +45,11 @@ urlpatterns = (
     path('<int:submission_pk>/review/checklist/<int:blueprint_pk>/reopen/', views.reopen_checklist, name='core.submission.reopen_checklist'),
 
     path('form/<int:submission_form_pk>/', views.readonly_submission_form, name='readonly_submission_form'),
+    path('form/ctr/<int:ctr_submission_form_pk>/', views.readonly_submission_form, name='core.submission.readonly_ctr_submission_form'),
+    # `path`, not `str`: a document's handle is the CTR-ECS download path
+    # verbatim (see fetch_ctis_document), and that path carries its own
+    # slashes - .../documents/<id>/versions/<n>.
+    path('form/ctr/<int:ctr_submission_form_pk>/doc/<path:document_id>/', views.download_ctr_document, name='core.submission.download_ctr_document'),
     path('form/<int:submission_form_pk>/pdf/', views.submission_form_pdf, name='core.submission.submission_form_pdf'),
     path('form/<int:submission_form_pk>/pdf/view/', views.submission_form_pdf_view, name='core.submission.submission_form_pdf_view'),
     path('form/<int:submission_form_pk>/doc/<int:document_pk>/', views.download_document, name='core.submission.download_document'),
@@ -47,18 +57,32 @@ urlpatterns = (
     path('form/<int:submission_form_pk>/copy/', views.copy_submission_form),
     path('form/<int:submission_form_pk>/amend/<int:notification_type_pk>/', views.copy_submission_form),
     path('form/<int:submission_form_pk>/review/checklist/<int:blueprint_pk>/', views.checklist_review, name='core.submission.checklist_review'),
+    path('form/ctr/<int:ctr_submission_form_pk>/review/checklist/<int:blueprint_pk>/', views.checklist_review, name='core.submission.checklist_review'),
     path('form/<int:submission_form_pk>/review/checklist/show/<int:checklist_pk>/', views.show_checklist_review, name='core.submission.show_checklist_review'),
+    path('form/ctr/<int:ctr_submission_form_pk>/review/checklist/show/<int:checklist_pk>/', views.show_checklist_review, name='core.submission.show_checklist_review'),
     path('form/<int:submission_form_pk>/review/checklist/drop/<int:checklist_pk>/', views.drop_checklist_review, name='core.submission.drop_checklist_review'),
     path('<int:submission_pk>/categorization/', views.categorization, name='core.submission.categorization'),
     path('<int:submission_pk>/categorization/reopen/', views.reopen_categorization, name='core.submission.reopen_categorization'),
+    path('<int:submission_pk>/ctr/deadline/reopen/', views.reopen_draft_assessment_report_deadline, name='core.submission.reopen_draft_assessment_report_deadline'),
+    path('<int:submission_pk>/ctr/deadline/', views.set_draft_assessment_report_deadline, name='core.submission.set_draft_assessment_report_deadline'),
+    path('<int:submission_pk>/ctr/part-ii-timeline/reopen/', views.reopen_part_ii_timeline, name='core.submission.reopen_part_ii_timeline'),
+    path('<int:submission_pk>/ctr/part-ii-timeline/', views.set_part_ii_timeline, name='core.submission.set_part_ii_timeline'),
+    path('<int:submission_pk>/ctr/documents/', views.ctr_documents, name='core.submission.ctr_documents'),
+    path('<int:submission_pk>/ctr/documents/delete/', views.delete_ctr_document, name='core.submission.delete_ctr_document'),
+    path('<int:submission_pk>/ctr/documents/hide/', views.set_ctr_document_hidden, name='core.submission.set_ctr_document_hidden'),
+    path('<int:submission_pk>/ctr/documents/<int:document_pk>/', views.download_ctr_upload, name='core.submission.download_ctr_upload'),
+    path('<int:submission_pk>/ctr/documents/<int:document_pk>/view/', views.view_ctr_upload, name='core.submission.view_ctr_upload'),
     path('<int:submission_pk>/review/categorization/', views.categorization_review, name='core.submission.categorization_review'),
     path('form/<int:submission_pk>/review/initial/', views.initial_review, name='core.submission.initial_review'),
     path('form/<int:submission_pk>/review/paper_submission/', views.paper_submission_review, name='core.submission.paper_submission_review'),
     path('form/<int:submission_pk>/biased/', views.biased_board_members, name='core.submission.biased_board_members'),
     path('form/<int:submission_pk>/biased/remove/<int:user_pk>/', views.remove_biased_board_member, name='core.submission.remove_biased_board_member'),
     path('form/<int:submission_form_pk>/review/vote/', views.vote_review, name='core.submission.vote_review'),
+    path('form/ctr/<int:ctr_submission_form_pk>/review/vote/', views.vote_review, name='core.submission.vote_review'),
     path('form/<int:submission_form_pk>/vote/prepare/', views.vote_preparation, name='core.submission.vote_preparation'),
+    path('form/ctr/<int:ctr_submission_form_pk>/vote/prepare/', views.vote_preparation, name='core.submission.vote_preparation'),
     path('form/<int:submission_form_pk>/vote/b2-prepare/', views.b2_vote_preparation, name='core.submission.b2_vote_preparation'),
+    path('form/ctr/<int:ctr_submission_form_pk>/vote/b2-prepare/', views.b2_vote_preparation, name='core.submission.b2_vote_preparation'),
     path('form/<int:submission_form_pk>/toggle-mpg/', views.toggle_mpg, name='core.submission.toggle_mpg'),
 )
 

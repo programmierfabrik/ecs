@@ -97,6 +97,17 @@
                 </div>
             {% endif %}
         </form>
+        {% if keycloak_sso_enabled %}
+            <a href="{% url 'oidc_authentication_init' %}" id="sso_login_button" class="btn btn-secondary btn-block mt-2">
+                SSO für Geschäftsstellen-Mitarbeiter
+            </a>
+            {% if oidc_sso_error %}
+                <div class="alert alert-warning mt-3">
+                    Ihr SSO-Konto ist nicht mit einem ECS-Benutzerkonto verknüpft. Bitte melden Sie sich mit
+                    Benutzername/Passwort an oder kontaktieren Sie die Administration.
+                </div>
+            {% endif %}
+        {% endif %}
     </div>
 
 {% endblock %}

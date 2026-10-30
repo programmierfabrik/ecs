@@ -1,26 +1,77 @@
 {% extends "core.html" %}
 {% load i18n %}
 
-{% block htmltitle %}{% trans 'Batch Signature' %} | {{ block.super }}{% endblock %}
-{% block headertitle %}{% trans 'Batch Signature' %}{% endblock %}
+{% block htmltitle %}{% trans 'Stapelsignatur' %} | {{ block.super }}{% endblock %}
+{% block headertitle %}{% trans 'Stapelsignatur' %}{% endblock %}
 
 {% block content %}
 <div id="batch_sign">
     <div class="sign-nav">
         {% block actions %}
-            {% url 'signature.batch_action' pdf_id=pdf_id action="skip" as skip_url %}
-            <a class="btn btn-secondary btn-block mb-3" href="{{ skip_url }}">
-                {% trans 'Skip' %}
-            </a>
+            <div class="mb-3 text-center">
+                <strong>{% trans "Unterlage" %} {{ index|add:1 }} / {{ task_count }}</strong>
+                {% if is_selected %}
+                    <div class="mt-1">
+                        <span class="badge badge-success"><i class="fa fa-check"></i> {% trans "Ausgewählt" %}</span>
+                    </div>
+                {% endif %}
+            </div>
 
-            {% url 'signature.batch_action' pdf_id=pdf_id action="pushback" as pushback_url %}
-            <a class="btn btn-secondary btn-block mb-3" href="{{ pushback_url }}">
-                {% trans 'Push back' %}
+            <div class="btn-group d-flex mb-3">
+                {% if has_prev %}
+                    <a class="btn btn-secondary w-100" href="{% url 'signature.batch_action' pdf_id=pdf_id action="prev" %}?index={{ index }}">
+                        <i class="fa fa-chevron-left"></i> {% trans 'Zurück' %}
+                    </a>
+                {% else %}
+                    <button class="btn btn-secondary w-100" disabled><i class="fa fa-chevron-left"></i> {% trans 'Zurück' %}</button>
+                {% endif %}
+
+                {% if has_next %}
+                    <a class="btn btn-secondary w-100" href="{% url 'signature.batch_action' pdf_id=pdf_id action="next" %}?index={{ index }}">
+                        {% trans 'Weiter' %} <i class="fa fa-chevron-right"></i>
+                    </a>
+                {% else %}
+                    <button class="btn btn-secondary w-100" disabled>{% trans 'Weiter' %} <i class="fa fa-chevron-right"></i></button>
+                {% endif %}
+            </div>
+
+            <hr>
+
+            <div class="mb-3">
+                <a class="btn btn-block mb-2 {% if is_selected %}btn-success{% else %}btn-outline-success{% endif %}" href="{% url 'signature.batch_action' pdf_id=pdf_id action=is_selected|yesno:"deselect,select" %}?index={{ index }}">
+                    {% if is_selected %}
+                        <i class="fa fa-check-square-o"></i> {% trans "Ausgewählt" %}
+                    {% else %}
+                        <i class="fa fa-square-o"></i> {% trans "Auswählen" %}
+                    {% endif %}
+                </a>
+
+                {% if is_selected %}
+                    <button class="btn btn-secondary btn-block mb-2" disabled>
+                        {% trans 'Überspringen' %}
+                    </button>
+                    <button class="btn btn-secondary btn-block mb-2" disabled>
+                        {% trans 'Zurückwerfen' %}
+                    </button>
+                {% else %}
+                    <a class="btn btn-secondary btn-block mb-2" href="{% url 'signature.batch_action' pdf_id=pdf_id action="skip" %}?index={{ index }}">
+                        {% trans 'Überspringen' %}
+                    </a>
+                    <a class="btn btn-secondary btn-block mb-2" href="{% url 'signature.batch_action' pdf_id=pdf_id action="pushback" %}?index={{ index }}">
+                        {% trans 'Zurückwerfen' %}
+                    </a>
+                {% endif %}
+            </div>
+
+            <hr>
+
+            <a class="btn btn-primary btn-block mb-3 {% if selected_count == 0 %}disabled{% endif %}" href="{% url 'signature.bulk_sign' sign_session_id=request.sign_session.id %}">
+                {% trans 'Ausgewählte signieren' %} ({{ selected_count }})
             </a>
 
             {% url 'signature.batch_action' pdf_id=pdf_id action="cancel" as cancel_url %}
-            <a class="btn btn-secondary btn-block mb-3" href="{{ cancel_url }}">
-                {% trans 'Cancel' %}
+            <a class="btn btn-warning btn-block mb-3" href="{{ cancel_url }}?index={{ index }}">
+                {% trans 'Abbrechen' %}
             </a>
         {% endblock %}
     </div>

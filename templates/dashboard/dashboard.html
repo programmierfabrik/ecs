@@ -1,5 +1,5 @@
 {% extends "core.html" %}
-{% load i18n %}
+{% load i18n core %}
 
 {% block menuSelection %}dashboard{% endblock %}
 
@@ -18,6 +18,11 @@
             </div>
         {% endif %}
     </div>
+    {% if user|is_ctis_importer %}
+        <div class="clearfix" style="padding: 0 8px">
+            <div data-widget-url="{% url 'core.submission.ctis_deadline_widget' %}"></div>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block jsbottom %}

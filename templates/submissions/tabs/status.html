@@ -19,8 +19,15 @@
                     <th>Version</th>
                     <th>von</th>
                     <th>am</th>
-                    <th>Unterschiede</th>
-                    <th>{% trans 'Amendment' %}</th>
+                    {% comment %}
+                        A CTIS study has neither: the diff and amendment
+                        machinery is built on SubmissionForm, and a new
+                        revision arrives as its own import.
+                    {% endcomment %}
+                    {% if not is_ctr %}
+                        <th>Unterschiede</th>
+                        <th>{% trans 'Amendment' %}</th>
+                    {% endif %}
                     <th></th>
                 </tr>
             </thead>
@@ -50,65 +57,74 @@
                         </td>
                     </tr>
                 {% endif %}
-                {% with submission.newest_submission_form as newest_form %}
+                {% with submission.newest_form as newest_form %}
                     {% for sf in submission_forms %}
-                    <tr class="{% if not sf.is_acknowledged %}table-danger{% if sf.is_withdrawn %}-withdrawn{% endif %}{% elif sf == submission.current_submission_form %}table-info{% endif %} {% if forloop.counter0 > current_form_idx %}collapse{% endif %}">
-                        <td>{{ forloop.revcounter }}</td>
+                    <tr class="{% if not sf.is_acknowledged %}table-danger{% if sf.is_withdrawn %}-withdrawn{% endif %}{% elif sf.is_current %}table-info{% endif %} {% if forloop.counter0 > current_form_idx %}collapse{% endif %}">
+                        {% comment %}
+                            A CTIS study names its versions after the
+                            application they were imported from - « IN - 5700 »
+                            - not after their position in the list.
+                        {% endcomment %}
+                        <td>{% if sf.ctis_formatted_application_id %}{{ sf.ctis_formatted_application_id }}{% else %}{{ forloop.revcounter }}{% endif %}</td>
                         <td>{{ sf.presenter }}</td>
                         <td>{{ sf.created_at|date:'d.m.Y, H:i' }} Uhr</td>
-                        <td>
-                            {% if sf.previous_form %}
-                                <a href="{% url 'core.submission.diff' old_submission_form_pk=sf.previous_form.pk new_submission_form_pk=sf.pk %}">
-                                    <span class="fa fa-pencil-square-o"></span>
-                                    Unterschiede zur Vorversion
-                                </a><br>
-                            {% endif %}
-                            {% if sf != newest_form %}
-                                <a href="{% url 'core.submission.diff' old_submission_form_pk=sf.pk new_submission_form_pk=newest_form.pk %}">
-                                    <span class="fa fa-pencil-square-o"></span>
-                                    Unterschiede zur neuesten Version
-                                </a><br>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if sf.is_notification_update %}
-                                {% with sf.new_for_notification.all.0 as notif %}
-                                    {% if notif %}
-                                        {% url 'notifications.view_notification' notification_pk=notif.pk as url %}
-                                        <a href="{{ url }}"> {% trans 'Amendment' %}</a>
-                                    {% else %}
-                                        <em>{% trans 'Not submitted yet.' %}</em>
-                                    {% endif %}
-                                {% endwith %}
-                            {% else %}
-                                –
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if forloop.first %}
-                                {% if sf.pdf_document_id %}
-                                    <a href="{% url 'core.submission.submission_form_pdf' submission_form_pk=sf.pk %}">
-                                        <span class="fa fa-file-pdf-o"></span>
-                                        {% trans 'Download PDF' %}
-                                    </a>
-                                {% else %}
-                                    {% trans 'PDF is being rendered' %}
-                                    <i class="fa fa-spinner fa-spin"></i>
-                                {% endif %}
-                                <br>
-                            {% endif %}
-                            {% if debug %}
-                                <a href="{% url 'core.submission.submission_form_pdf_debug' submission_form_pk=sf.pk %}" target="_blank">
-                                    <span class="fa fa-file-pdf-o"></span>
-                                    PDF Debug
-                                </a><br>
-                            {% endif %}
-                            {% if sf == submission.current_submission_form %}
-                                {% if user.profile.is_internal or user == submission.presenter %}
-                                    <a href="{% url 'core.submission.export_submission' submission_pk=submission.pk %}">
-                                        <span class="fa fa-file-archive-o"></span>
-                                        {% trans "Export" %}
+                        {% if not is_ctr %}
+                            <td>
+                                {% if sf.previous_form %}
+                                    <a href="{% url 'core.submission.diff' old_submission_form_pk=sf.previous_form.pk new_submission_form_pk=sf.pk %}">
+                                        <span class="fa fa-pencil-square-o"></span>
+                                        Unterschiede zur Vorversion
                                     </a><br>
+                                {% endif %}
+                                {% if sf != newest_form %}
+                                    <a href="{% url 'core.submission.diff' old_submission_form_pk=sf.pk new_submission_form_pk=newest_form.pk %}">
+                                        <span class="fa fa-pencil-square-o"></span>
+                                        Unterschiede zur neuesten Version
+                                    </a><br>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if sf.is_notification_update %}
+                                    {% with sf.new_for_notification.all.0 as notif %}
+                                        {% if notif %}
+                                            {% url 'notifications.view_notification' notification_pk=notif.pk as url %}
+                                            <a href="{{ url }}"> {% trans 'Amendment' %}</a>
+                                        {% else %}
+                                            <em>{% trans 'Not submitted yet.' %}</em>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% else %}
+                                    –
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                        <td>
+                            {% if not is_ctr %}
+                                {% if forloop.first %}
+                                    {% if sf.pdf_document_id %}
+                                        <a href="{% url 'core.submission.submission_form_pdf' submission_form_pk=sf.pk %}">
+                                            <span class="fa fa-file-pdf-o"></span>
+                                            {% trans 'Download PDF' %}
+                                        </a>
+                                    {% else %}
+                                        {% trans 'PDF is being rendered' %}
+                                        <i class="fa fa-spinner fa-spin"></i>
+                                    {% endif %}
+                                    <br>
+                                {% endif %}
+                                {% if debug %}
+                                    <a href="{% url 'core.submission.submission_form_pdf_debug' submission_form_pk=sf.pk %}" target="_blank">
+                                        <span class="fa fa-file-pdf-o"></span>
+                                        PDF Debug
+                                    </a><br>
+                                {% endif %}
+                                {% if sf.is_current %}
+                                    {% if user.profile.is_internal or user == submission.presenter %}
+                                        <a href="{% url 'core.submission.export_submission' submission_pk=submission.pk %}">
+                                            <span class="fa fa-file-archive-o"></span>
+                                            {% trans "Export" %}
+                                        </a><br>
+                                    {% endif %}
                                 {% endif %}
                             {% endif %}
                         </td>
@@ -116,7 +132,7 @@
                     {% endfor %}
                     {% if current_form_idx < submission_forms|length|add:-1 %}
                         <tr class="expand_submission_forms">
-                            <td colspan=6 class="text-center text-muted">
+                            <td colspan="{% if is_ctr %}4{% else %}6{% endif %}" class="text-center text-muted">
                                 <span class="fa fa-caret-down"></span>
                             </td>
                         </tr>
@@ -139,68 +155,99 @@
             {% endif %}
         </td>
     </tr>
-    <tr>
-        <th class="text-nowrap">Sicherheitsmeldungsersteller</th>
-        <td>
-            {% with submission.susar_presenter.profile.organisation as organisation %}
-                {{ submission.susar_presenter }}{% if organisation %} ({{ organisation }}){% endif %}
-            {% endwith %}
-            {% if user.profile.is_executive or user == submission.susar_presenter %}
-                <a class="ml-2" href="{% url 'core.submission.change_submission_susar_presenter' submission_pk=submission.pk %}">
-                    <span class="fa fa-pencil"></span>
-                    {% trans "change" %}
-                </a>
-            {% endif %}
-        </td>
-    </tr>
-    <tr>
-        <th class="text-nowrap">Antragsteller</th>
-        {% with submission_form.submitter_organisation as organisation %}
-            <td>{{ submission_form.submitter }}{% if organisation %} ({{ organisation }}){% endif %}</td>
-        {% endwith %}
-    </tr>
-    <tr>
-        <th class="text-nowrap">Sponsor</th>
-        {% with submission_form.sponsor_name as organisation %}
-            <td>{{ submission_form.sponsor }}{% if organisation %} ({{ organisation }}){% endif %}</td>
-        {% endwith %}
-    </tr>
-    <tr>
-        <th class="text-nowrap">Rechnungsempfänger</th>
-        {% with submission_form.invoice_name as organisation %}
+    {% with ctr_form=submission.current_ctr_form %}
+        {% if ctr_form %}
+            {% comment %}
+                Always shown for a CTIS study. The advanced settings only
+                decide whether these also appear next to the study title.
+            {% endcomment %}
+            <tr>
+                <th class="text-nowrap">EU-CT-Nummer</th>
+                <td>{{ ctr_form.ctis_eu_ct_number|default:'-' }}</td>
+            </tr>
+            <tr>
+                <th class="text-nowrap">AUT ID</th>
+                <td>{{ ctr_form.ctis_aut_id|default:'-' }}</td>
+            </tr>
+        {% endif %}
+    {% endwith %}
+    {% if not is_ctr %}
+        <tr>
+            <th class="text-nowrap">Sicherheitsmeldungsersteller</th>
             <td>
-            {% if organisation %}
-                {{ submission_form.invoice_contact }}{% if organisation %} ({{ organisation }}){% endif %}
-            {% else %}
-                <em>{% trans "same as sponsor" %}</em>
-            {% endif %}
-            </td>
-        {% endwith %}
-    </tr>
-    <tr>
-        <th class="text-nowrap">Hauptprüfer</th>
-        <td>
-            {% with submission_form.primary_investigator as pi %}
-                {% if pi %}
-                    {{ pi.contact.full_name }}{% if pi.organisation %} ({{ pi.organisation }}){% endif %}
-                {% else %}
-                    <em>{% trans "No Primary Investigator" %}</em>
+                {% with submission.susar_presenter.profile.organisation as organisation %}
+                    {{ submission.susar_presenter }}{% if organisation %} ({{ organisation }}){% endif %}
+                {% endwith %}
+                {% if user.profile.is_executive or user == submission.susar_presenter %}
+                    <a class="ml-2" href="{% url 'core.submission.change_submission_susar_presenter' submission_pk=submission.pk %}">
+                        <span class="fa fa-pencil"></span>
+                        {% trans "change" %}
+                    </a>
                 {% endif %}
+            </td>
+        </tr>
+    {% endif %}
+    {% if is_ctr %}
+        {% comment %}
+            The CTIS counterparts of the rows below go here. Which values from
+            the payload belong in the status overview is not decided yet, so
+            this stays empty - a CTRSubmissionForm has none of the classic
+            form's fields, and asking it for them renders blank rows and
+            defaults (« wie Sponsor », « Kein/e koordinierende/r Prüfärztin/arzt »)
+            that state something untrue about the trial.
+        {% endcomment %}
+    {% else %}
+        <tr>
+            <th class="text-nowrap">Antragsteller</th>
+            {% with submission_form.submitter_organisation as organisation %}
+                <td>{{ submission_form.submitter }}{% if organisation %} ({{ organisation }}){% endif %}</td>
             {% endwith %}
-        </td>
-    </tr>
+        </tr>
+        <tr>
+            <th class="text-nowrap">Sponsor</th>
+            {% with submission_form.sponsor_name as organisation %}
+                <td>{{ submission_form.sponsor }}{% if organisation %} ({{ organisation }}){% endif %}</td>
+            {% endwith %}
+        </tr>
+        <tr>
+            <th class="text-nowrap">Rechnungsempfänger</th>
+            {% with submission_form.invoice_name as organisation %}
+                <td>
+                {% if organisation %}
+                    {{ submission_form.invoice_contact }}{% if organisation %} ({{ organisation }}){% endif %}
+                {% else %}
+                    <em>{% trans "same as sponsor" %}</em>
+                {% endif %}
+                </td>
+            {% endwith %}
+        </tr>
+        <tr>
+            <th class="text-nowrap">Hauptprüfer</th>
+            <td>
+                {% with submission_form.primary_investigator as pi %}
+                    {% if pi %}
+                        {{ pi.contact.full_name }}{% if pi.organisation %} ({{ pi.organisation }}){% endif %}
+                    {% else %}
+                        <em>{% trans "No Primary Investigator" %}</em>
+                    {% endif %}
+                {% endwith %}
+            </td>
+        </tr>
+    {% endif %}
     <tr>
         <th class="text-nowrap">Phase</th>
         <td>
             {{ submission.lifecycle_phase }}
         </td>
     </tr>
-    <tr>
-        <th class="text-nowrap">Typ</th>
-        <td>
-            {{ submission_form.get_type_display }}
-        </td>
-    </tr>
+    {% if not is_ctr %}
+        <tr>
+            <th class="text-nowrap">Typ</th>
+            <td>
+                {{ submission_form.get_type_display }}
+            </td>
+        </tr>
+    {% endif %}
     <tr>
         <th class="text-nowrap">Kategorien</th>
         <td>
@@ -209,10 +256,12 @@
             {% endfor %}
         </td>
     </tr>
-    <tr>
-        <th class="text-nowrap">Ethikkommission</th>
-        <td>{{ submission_form.main_ethics_commission|default:'<em>Keine Angabe</em>' }}</td>
-    </tr>
+    {% if not is_ctr %}
+        <tr>
+            <th class="text-nowrap">Ethikkommission</th>
+            <td>{{ submission_form.main_ethics_commission|default:'<em>Keine Angabe</em>' }}</td>
+        </tr>
+    {% endif %}
     {% if user.profile.is_internal %}
     <tr>
         <th class="text-nowrap">Arbeitsablauf</th>
@@ -242,6 +291,15 @@
             {% if user.profile.is_executive and submission.is_reschedulable %}
                 <a href="{% url 'meetings.reschedule_submission' submission_pk=submission.pk %}">{% trans 'Reschedule' %}</a>
             {% endif %}
+            {% comment %}Nothing schedules a CTIS study, so the office puts it
+            on the meeting it should be discussed at next itself.
+            {% endcomment %}
+            {% if user.profile.is_executive and submission.is_schedulable %}
+                <a href="{% url 'meetings.schedule_submission' submission_pk=submission.pk %}">Zu Sitzung hinzufügen</a>
+            {% endif %}
+            {% if user.profile.is_executive and submission.is_removable_from_meeting %}
+                <a class="ml-3" href="{% url 'meetings.remove_submission_from_meeting' submission_pk=submission.pk %}">Von Sitzung entfernen</a>
+            {% endif %}
         </td>
     </tr>
     {% if user.profile.is_internal %}
@@ -262,10 +320,12 @@
         <td>
             {% for checklist in external_review_checklists %}
                 <div>{{ checklist }} [{{ checklist.get_status_display }}]
-                {% if checklist.status == 'new' or checklist.status == 'review_fail' %}
-                    <a class="ml-2" href="{% url 'core.submission.drop_checklist_review' submission_form_pk=submission_form.pk checklist_pk=checklist.pk %}">
-                        {% trans "drop" %}
-                    </a>
+                {% if not is_ctr %}
+                    {% if checklist.status == 'new' or checklist.status == 'review_fail' %}
+                        <a class="ml-2" href="{% url 'core.submission.drop_checklist_review' submission_form_pk=submission_form.pk checklist_pk=checklist.pk %}">
+                            {% trans "drop" %}
+                        </a>
+                    {% endif %}
                 {% endif %}</div>
             {% endfor %}
         </td>

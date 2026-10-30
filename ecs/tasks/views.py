@@ -228,7 +228,7 @@ def my_tasks(request, template=None, submission_pk=None, ignore_task_types=True)
             vote_tasks_q = Q(
                 content_type=vote_ct,
                 data_id__in=Vote.objects.filter(
-                    submission_form__submission__in=submission_q
+                    submission__in=submission_q
                 ).values('pk'))
 
             notification_tasks_q = Q(

@@ -1,14 +1,26 @@
+from django.contrib.sessions.exceptions import SessionInterrupted
 from django.urls import include, path, re_path
 from django.conf import settings
-from django.views.static import serve
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.views.defaults import bad_request
 from django.views.generic.base import RedirectView
+from django.views.static import serve
 
 from ecs.utils import forceauth
 
 def handler500(request):
     ''' 500 error handler which includes ``request`` in the context '''
     return render(request, '500.html', status=500)
+
+
+def handler400(request, exception=None):
+    ''' 400 error handler. A SessionInterrupted (the session was deleted by
+    a concurrent request, e.g. logging out and starting a new login within
+    the same moment) isn't a real error - just bounce back to the login
+    page instead of showing an error page. '''
+    if isinstance(exception, SessionInterrupted):
+        return redirect(settings.LOGIN_URL)
+    return bad_request(request, exception)
 
 
 urlpatterns = [

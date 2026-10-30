@@ -15,22 +15,35 @@ from ecs.checklists.utils import get_checklist_answer
 from ecs.tasks.models import Task
 from ecs.tasks.utils import block_duplicate_task, block_if_task_exists
 
-register(Submission, autostart_if=lambda s, created: bool(s.current_submission_form_id) and not s.workflow and not s.is_transient)
+register(Submission, autostart_if=lambda s, created: bool(s.current_submission_form_id or s.current_ctr_form_id) and not s.workflow and not s.is_transient)
 
 ##########################
 # acknowledgement guards #
 ##########################
 @guard(model=Submission)
 def is_acknowledged(wf):
-    return wf.data.newest_submission_form.is_acknowledged
+    return wf.data.newest_form.is_acknowledged
 
 @guard(model=Submission)
 def is_initial_submission(wf):
-    return wf.data.forms.filter(is_acknowledged=True).count() == 1
+    return wf.data.acknowledged_form_count == 1
 
 @guard(model=Submission)
 def is_acknowledged_and_initial_submission(wf):
     return is_acknowledged(wf) and is_initial_submission(wf)
+
+##############
+# CTR guards #
+##############
+@guard(model=Submission)
+def uses_ctr_form(wf):
+    return wf.data.uses_ctr_form
+
+@guard(model=Submission)
+def needs_signature_review(wf):
+    # The « Unterschrift Prüfung » checks the signed paper submission; a CTIS
+    # study is never submitted on paper.
+    return is_acknowledged_and_initial_submission(wf) and not uses_ctr_form(wf)
 
 ###############
 # lane guards #
@@ -128,6 +141,10 @@ class InitialReview(Activity):
         return reverse('core.submission.initial_review', kwargs={'submission_pk': self.workflow.data_id})
 
     def get_choices(self):
+        # A rejected CTIS study could never be resubmitted: there is no form
+        # for the submitter to correct, so the process would stop.
+        if self.workflow.data.uses_ctr_form:
+            return ((True, _('Acknowledge'), 'success'),)
         return (
             (True, _('Acknowledge'), 'success'),
             (False, _('Reject'), 'danger'),
@@ -135,9 +152,33 @@ class InitialReview(Activity):
 
     def pre_perform(self, choice):
         s = self.workflow.data
-        sf = s.newest_submission_form
-        sf.acknowledge(choice)
-        on_initial_review.send(Submission, submission=s, form=sf)
+        form = s.newest_form
+        form.acknowledge(choice)
+        on_initial_review.send(Submission, submission=s, form=form)
+
+
+class SetDraftAssessmentReportDeadline(Activity):
+    class Meta:
+        model = Submission
+
+    def is_repeatable(self):
+        return True
+
+    def get_url(self):
+        return reverse('core.submission.set_draft_assessment_report_deadline',
+            kwargs={'submission_pk': self.workflow.data_id})
+
+
+class SetPartIITimeline(Activity):
+    class Meta:
+        model = Submission
+
+    def is_repeatable(self):
+        return True
+
+    def get_url(self):
+        return reverse('core.submission.set_part_ii_timeline',
+            kwargs={'submission_pk': self.workflow.data_id})
 
 
 class Resubmission(Activity):
@@ -164,7 +205,7 @@ class B2ResubmissionReview(Activity):
         model = Submission
 
     def get_url(self):
-        return reverse('core.submission.b2_vote_preparation', kwargs={'submission_form_pk': self.workflow.data.newest_submission_form.pk})
+        return reverse('core.submission.b2_vote_preparation', kwargs=self.workflow.data.newest_form_url_kwargs())
 
     def receive_token(self, source, trail=(), repeated=False):
         token = super().receive_token(source, trail=trail, repeated=repeated)
@@ -196,8 +237,9 @@ class InitialB2ResubmissionReview(B2ResubmissionReview):
                 vote.is_draft = False
             vote.save()
             if is_upgrade:
-                vote.submission_form.acknowledge(True)
-                vote.submission_form.mark_current()
+                form = vote.submission_form or vote.ctr_submission_form
+                form.acknowledge(True)
+                form.mark_current()
 
 
 class Categorization(Activity):
@@ -311,8 +353,9 @@ class ChecklistReview(Activity):
 
     def get_url(self):
         blueprint_id = self.node.data_id
-        submission_form_id = self.workflow.data.current_submission_form_id
-        return reverse('core.submission.checklist_review', kwargs={'submission_form_pk': submission_form_id, 'blueprint_pk': blueprint_id})
+        submission = self.workflow.data
+        return reverse('core.submission.checklist_review',
+            kwargs={'blueprint_pk': blueprint_id, **submission.current_form_url_kwargs()})
 
     def pre_perform(self, choice):
         blueprint = self.node.data
@@ -338,7 +381,7 @@ class VotePreparation(Activity):
         model = Submission
 
     def get_url(self):
-        return reverse('core.submission.vote_preparation', kwargs={'submission_form_pk': self.workflow.data.current_submission_form_id})
+        return reverse('core.submission.vote_preparation', kwargs=self.workflow.data.current_form_url_kwargs())
 
 
 ### to be deleted

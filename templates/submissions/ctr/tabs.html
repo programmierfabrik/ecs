@@ -1,0 +1,63 @@
+{% load core i18n %}
+{% comment %}
+    The CTIS tab panels. Like the classic tabs the panel itself is full
+    width and only the content sits in a container, so the third-level tab
+    strip spans the whole view the way the strips above it do.
+
+    A tab holding more than one subtab gets a third-level Bootstrap tab strip;
+    anything selectable below that is a chip strip inside the content.
+{% endcomment %}
+{% if ctr_payload_unusable %}
+    <div id="ctr-payload" class="container collapse">
+        <div class="alert alert-warning mt-3">
+            <strong>Diese Studie enthält noch keine auswertbaren CTIS-Daten.</strong>
+            <div>
+                Der Import lieferte kein Antragsobjekt. Bitte die Studie erneut
+                mit der CTIS-Nummer synchronisieren.
+            </div>
+        </div>
+        <h3 class="my-4">Antragsdaten (roh)</h3>
+        <pre class="ctr-raw-json">{{ submission_form.application|pprint }}</pre>
+    </div>
+{% endif %}
+
+{% for tab in ctr_tabs %}
+    <div id="ctr-{{ tab.slug }}" class="collapse ctr-tab">
+        {% if tab.has_subtab_strip %}
+            <ul class="nav nav-tabs flex-wrap mb-3">
+                {% for subtab in tab.subtabs %}
+                    <li class="nav-item">
+                        <a class="nav-link{% if forloop.first %} active{% endif %}"
+                           data-toggle="tab" href="#ctr-{{ subtab.slug }}">
+                            {{ subtab.name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <div class="tab-content">
+            {% for subtab in tab.subtabs %}
+                <div class="tab-pane{% if forloop.first %} active{% endif %}" id="ctr-{{ subtab.slug }}">
+                    <div class="container">
+                        {% for pane in subtab.panes %}
+                            <div class="ctr-pane">
+                                {% for section in pane.sections %}
+                                    {% include "submissions/ctr/section.html" %}
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endfor %}
+
+{% if show_ctr_uploads %}
+    <div id="ctr-uploads" class="collapse ctr-tab">
+        <div class="container">
+            <div class="upload_container"></div>
+        </div>
+    </div>
+{% endif %}

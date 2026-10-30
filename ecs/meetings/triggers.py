@@ -32,13 +32,14 @@ def on_meeting_end(sender, **kwargs):
     ):
         # update eventual existing vote from vote preperation
         defaults = {"top": top, "result": "3a", "is_draft": False}
+        form_kwargs = top.submission.current_form_kwargs()
         try:
-            vote = Vote.objects.get(submission_form=top.submission.current_submission_form)
+            vote = Vote.objects.get(**form_kwargs)
             for key, value in defaults.items():
                 setattr(vote, key, value)
             vote.save()
         except Vote.DoesNotExist:
-            new_values = {'submission_form': top.submission.current_submission_form}
+            new_values = dict(form_kwargs)
             new_values.update(defaults)
             vote = Vote(**new_values)
             vote.save()

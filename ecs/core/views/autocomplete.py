@@ -14,6 +14,7 @@ def autocomplete(request, queryset_name=None):
         'internal-users': Q(profile__is_internal=True),
         'pki-users':
             Q(profile__is_internal=True) | Q(profile__is_omniscient_member=True),
+        'ctis-importers': Q(groups__name='CTIS Importer'),
     }
 
     users = (User.objects

@@ -16,6 +16,7 @@
         <link rel="stylesheet" type="text/css" href={% static 'css/boilerplate.css' %} />
         <link rel="stylesheet" type="text/css" href={% static 'css/signature.css' %} />
         <link rel="stylesheet" type="text/css" href={% static 'css/tags.css' %} />
+        <link rel="stylesheet" type="text/css" href={% static 'css/ctr.css' %} />
     {% endcompress %}
 {% endblock %}
 
@@ -61,6 +62,9 @@
                                 <a class="dropdown-item" href="{% url 'core.submission.all_submissions' %}">
                                     {% trans "All Studies" %}
                                 </a>
+                                <a class="dropdown-item" href="{% url 'core.submission.ctis_overview' %}">
+                                    CTIS-Übersicht
+                                </a>
                             {% endif %}
                             {% if user|has_assigned_submissions %}
                                 <a class="dropdown-item" href="{% url 'core.submission.assigned_submissions' %}">
@@ -78,6 +82,11 @@
                             <a class="dropdown-item" href="{% url 'core.submission.import_submission_form' %}">
                                 {% trans "Import" %}
                             </a>
+                            {% if user|is_ctis_importer %}
+                                <a class="dropdown-item" href="{% url 'core.submission.import_ctis_study' %}">
+                                    CTIS-Studie verknüpfen
+                                </a>
+                            {% endif %}
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="{% url 'notifications.open_notifications' %}">
                                 {% trans 'Open Notifications' %}
@@ -281,6 +290,7 @@
         <script type="text/javascript" src={% static 'js/widgets.js' %}></script>
         <script type="text/javascript" src={% static 'js/tasks.js' %}></script>
         <script type="text/javascript" src={% static 'js/communication.js' %}></script>
+        <script type="text/javascript" src={% static 'js/ctr.js' %}></script>
     {% endcompress %}
 
     <script type="text/javascript">

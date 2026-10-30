@@ -19,6 +19,11 @@
     </div>
 {% endif %}
 
+{# Read once for the whole page, not once per row. #}
+{% db_setting 'display_ctis_eu_ct_number' as show_ctis_eu_ct_number %}
+{% db_setting 'display_ctis_application_id' as show_ctis_application_id %}
+{% db_setting 'display_ctis_aut_id' as show_ctis_aut_id %}
+
 <ul class="list-group mb-3">
     {% for submission in submissions.object_list %}
         <li class="list-group-item d-block">
@@ -47,6 +52,7 @@
                     <a href="{% url 'view_submission' submission_pk=submission.pk %}">
                         {{ submission|ec_number }}
                     </a>
+                    {% include "submissions/ctis_identifiers.html" %}
                     {{ submission.project_title_display }}
                 </h5>
 

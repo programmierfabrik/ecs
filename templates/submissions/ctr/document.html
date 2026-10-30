@@ -1,0 +1,34 @@
+{# One document card. `document` is a ctis_render.DocEntry. #}
+<li class="ctr-doc">
+    <div class="d-flex flex-wrap align-items-baseline">
+        <span class="ctr-doc-title">{{ document.title }}</span>
+        <span class="ctr-doc-meta ml-auto">
+            {% if document.language %}{{ document.language }} · {% endif %}
+            System Version: {{ document.system_version }} · From date: {{ document.from_date }}
+            {% if document.url %}
+                <a class="ml-3" href="{{ document.url }}">
+                    <span class="fa fa-download"></span>
+                    Download latest Version
+                </a>
+            {% endif %}
+        </span>
+    </div>
+    {% if document.versions %}
+        <a class="ctr-doc-versions-toggle" href="#" data-count="{{ document.versions|length }}">
+            Show {{ document.versions|length }} previous version{{ document.versions|length|pluralize }}
+        </a>
+        <ul class="ctr-doc-versions list-unstyled">
+            {% for version in document.versions %}
+                <li>
+                    System Version: {{ version.system_version }} · From date: {{ version.from_date }}
+                    {% if version.url %}
+                        <a class="ml-3" href="{{ version.url }}">
+                            <span class="fa fa-download"></span>
+                            Download
+                        </a>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</li>

@@ -15,7 +15,7 @@ from ecs.votes.models import Vote
 from ecs.core.models.constants import SUBMISSION_LANE_LOCALEC
 from ecs.users.utils import get_user, get_office_user
 from ecs.communication.utils import send_message_template, send_system_message_template
-from ecs.votes.constants import PERMANENT_VOTE_RESULTS
+from ecs.votes.constants import PERMANENT_VOTE_RESULTS, CTIS_VOTE_RESULTS
 from ecs.celery import app as celery_app
 
 
@@ -106,8 +106,13 @@ def send_reminder_messages(today=None):
         assert vote.result == '1'
         send_vote_expired(vote)
 
+    # A « BCTIS Stellungnahme » is non-permanent by design and ends nothing,
+    # so it is not a temporary vote waiting to be upgraded - and the reminders
+    # below go to the presenting parties of a current_submission_form a CTIS
+    # study does not have.
     tmp_votes = (Vote.objects
                  .exclude(result__in=PERMANENT_VOTE_RESULTS)
+                 .exclude(result__in=CTIS_VOTE_RESULTS)
                  .exclude(_currently_published_for=None)
                  .annotate(published_date=Func(F('published_at'), function='DATE')))
 

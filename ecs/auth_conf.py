@@ -2,7 +2,7 @@ from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 
 from ecs import authorization
-from ecs.core.models import (Submission, SubmissionForm,
+from ecs.core.models import (Submission, SubmissionForm, CTRSubmissionForm,
     TemporaryAuthorization, MySubmission)
 from ecs.checklists.models import Checklist
 from ecs.votes.models import Vote
@@ -53,11 +53,12 @@ class SubmissionQFactory(authorization.QFactory):
 
 authorization.register(Submission, factory=SubmissionQFactory)
 authorization.register(SubmissionForm, lookup='submission')
+authorization.register(CTRSubmissionForm, lookup='submission')
 
 class VoteQFactory(authorization.QFactory):
     def get_q(self, user):
         q = self.make_q(
-            submission_form__submission__pk__in=Submission.objects.values('pk')
+            submission__pk__in=Submission.objects.values('pk')
         )
         if not user.profile.is_internal:
             q &= self.make_q(published_at__isnull=False)

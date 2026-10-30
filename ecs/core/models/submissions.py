@@ -11,6 +11,9 @@ from django_countries import countries
 from django_countries.fields import CountryField
 
 from ecs.authorization.managers import AuthorizationManager
+from ecs.core.ctis_render import (
+    austrian_trial_sites, formatted_application_id, sorted_applications,
+)
 from ecs.core.models.constants import (
     MIN_EC_NUMBER, SUBMISSION_INFORMATION_PRIVACY_CHOICES, SUBMISSION_LANE_CHOICES, SUBMISSION_LANE_EXPEDITED,
     SUBMISSION_LANE_RETROSPECTIVE_THESIS, SUBMISSION_LANE_LOCALEC, SUBMISSION_LANE_BOARD,
@@ -44,6 +47,26 @@ class Submission(models.Model):
     biased_board_members = models.ManyToManyField(User, blank=True, related_name='biased_for_submissions')
 
     invite_primary_investigator_to_meeting = models.BooleanField(default=False)
+    # The ticked rows of the « Hauptprüfer einladen » table of a CTIS study:
+    # `trialSite.id` keys into the current CTR form's Austrian Part II. The
+    # names and addresses stay in the payload and are read when the agenda
+    # goes out. `invite_primary_investigator_to_meeting` above is kept in sync
+    # as « at least one of these is ticked », so the existing invited markers
+    # need no branch.
+    ctr_invited_trial_sites = ArrayField(models.TextField(), default=list, blank=True)
+
+    # The date by which the office should have the study's Draft Assessment
+    # Report - set from the auto-created `draft_assessment_report_deadline`
+    # task, CTIS studies only. The report itself is uploaded separately as a
+    # `Document`, not stored here.
+    draft_assessment_report_deadline = models.DateField(null=True, blank=True)
+
+    # The Part II timeline of a CTIS study, typed in by hand from the
+    # auto-created `part_ii_timeline` task (CTIS studies only). Each date is
+    # optional and independent of the others.
+    doc_cons_from = models.DateField(null=True, blank=True)
+    doc_cons_to = models.DateField(null=True, blank=True)
+    response_expected = models.DateField(null=True, blank=True)
 
     is_transient = models.BooleanField(default=False)
     is_finished = models.BooleanField(default=False)
@@ -56,6 +79,7 @@ class Submission(models.Model):
 
     # denormalization
     current_submission_form = models.OneToOneField('core.SubmissionForm', null=True, related_name='current_for_submission', on_delete=models.CASCADE)
+    current_ctr_form = models.OneToOneField('core.CTRSubmissionForm', null=True, related_name='current_for_submission', on_delete=models.CASCADE)
     current_published_vote = models.OneToOneField('votes.Vote', null=True, related_name='_currently_published_for', on_delete=models.CASCADE)
     current_pending_vote = models.OneToOneField('votes.Vote', null=True, related_name='_currently_pending_for', on_delete=models.CASCADE)
 
@@ -64,11 +88,56 @@ class Submission(models.Model):
 
     @property
     def newest_submission_form(self):
-        return self.forms.all().order_by('-pk')[0]
+        # The submission's own form history, not the viewer's filtered
+        # access to it - a board/resident/omniscient board member reaching a
+        # study through their meeting has none of the latter, but this is
+        # still a fact about the study, so `manager='unfiltered'` throughout.
+        return self.forms(manager='unfiltered').order_by('-pk')[0]
 
     @property
     def submission_form_to_copy(self):
-        return self.forms.all().filter(is_withdrawn=False).order_by('-pk').first()
+        return self.forms(manager='unfiltered').filter(
+            is_withdrawn=False).order_by('-pk').first()
+
+    @property
+    def newest_ctr_form(self):
+        return self.ctr_forms(manager='unfiltered').order_by('-pk')[0]
+
+    @property
+    def uses_ctr_form(self):
+        return bool(self.current_ctr_form_id) or (
+            not self.current_submission_form_id
+            and self.ctr_forms(manager='unfiltered').exists()
+        )
+
+    @property
+    def current_form(self):
+        return self.current_submission_form or self.current_ctr_form
+
+    @property
+    def newest_form(self):
+        return self.newest_ctr_form if self.uses_ctr_form else self.newest_submission_form
+
+    @property
+    def acknowledged_form_count(self):
+        if self.uses_ctr_form:
+            return self.ctr_forms(manager='unfiltered').filter(is_acknowledged=True).count()
+        return self.forms(manager='unfiltered').filter(is_acknowledged=True).count()
+
+    def current_form_kwargs(self):
+        if self.uses_ctr_form:
+            return {'ctr_submission_form': self.current_ctr_form}
+        return {'submission_form': self.current_submission_form}
+
+    def current_form_url_kwargs(self):
+        if self.uses_ctr_form:
+            return {'ctr_submission_form_pk': self.current_ctr_form_id}
+        return {'submission_form_pk': self.current_submission_form_id}
+
+    def newest_form_url_kwargs(self):
+        if self.uses_ctr_form:
+            return {'ctr_submission_form_pk': self.newest_ctr_form.pk}
+        return {'submission_form_pk': self.newest_submission_form.pk}
 
     @property
     def is_expedited(self):
@@ -106,7 +175,7 @@ class Submission(models.Model):
    
     @property
     def votes(self):
-        return Vote.objects.filter(submission_form__submission=self)
+        return Vote.objects.filter(submission=self)
 
     # XXX: Is this used anywhere?
     @property
@@ -123,7 +192,29 @@ class Submission(models.Model):
         return self.current_submission_form.german_project_title
 
     def project_title_display(self):
+        if self.current_ctr_form_id and not self.current_submission_form_id:
+            ctr_form = self.current_ctr_form
+            return ctr_form.trial_title or 'CTR-Studie ({})'.format(
+                ctr_form.ctis_number)
         return self.german_project_title or self.project_title
+
+    @property
+    def ctr_trial_sites(self):
+        """The Austrian trial sites offered for invitation - [] for a classic
+        submission and for every CTIS payload that has none."""
+        ctr_form = self.current_ctr_form
+        return ctr_form.austrian_trial_sites if ctr_form else []
+
+    @property
+    def ctr_invited_investigators(self):
+        keys = set(self.ctr_invited_trial_sites or [])
+        return [s for s in self.ctr_trial_sites if s['key'] in keys]
+
+    def get_ctr_investigator_users(self):
+        """The accounts of the invited principal investigators, each created
+        on first use."""
+        return [get_or_create_ctr_investigator(s)
+                for s in self.ctr_invited_investigators]
 
     @property
     def is_active(self):
@@ -144,7 +235,7 @@ class Submission(models.Model):
             if self.is_localec:
                 return _('Unknown (local EC)')
             return _('Active')
-        elif self.current_submission_form.is_acknowledged:
+        elif self.current_form.is_acknowledged:
             return _('Acknowledged')
         return _('New')
         
@@ -198,17 +289,29 @@ class Submission(models.Model):
         Task.unfiltered.for_submission(self).filter(
             task_type__is_dynamic=True).open().mark_deleted()
 
-    def schedule_to_meeting(self):
+    def schedule_to_meeting(self, meeting=None):
+        """Put this study on a meeting and return the meeting it is on.
+
+        Without an argument the next schedulable meeting is picked, and an
+        entry that is already on an unstarted meeting is refreshed rather
+        than duplicated. With one, the study goes on that meeting - the
+        office scheduling by hand, which is the only way a CTIS study ever
+        gets onto a further meeting.
+        """
         visible = self.workflow_lane == SUBMISSION_LANE_BOARD
 
-        def _schedule():
+        def _schedule(target=None):
             duration = timedelta(minutes=7, seconds=30)
             if not visible:
                 duration = timedelta(minutes=0)
             from ecs.meetings.models import Meeting
-            meeting = Meeting.objects.next_schedulable_meeting(self)
-            meeting.add_entry(submission=self, duration=duration, visible=visible)
-            return meeting
+            if target is None:
+                target = Meeting.objects.next_schedulable_meeting(self)
+            target.add_entry(submission=self, duration=duration, visible=visible)
+            return target
+
+        if meeting is not None:
+            return _schedule(meeting)
 
         top = self.timetable_entries.order_by('-meeting__start').first()
 
@@ -230,6 +333,39 @@ class Submission(models.Model):
     @property
     def is_reschedulable(self):
         return self.meetings.filter(started=None).exists()
+
+    @property
+    def _has_had_first_meeting(self):
+        # The study's first meeting follows deterministically from its
+        # deadline; only once that meeting has happened does "which
+        # meeting next" stop being determined, which is when by-hand
+        # scheduling on/off a meeting becomes this office's call.
+        return self.meetings.filter(started__isnull=False).exists()
+
+    @property
+    def is_schedulable(self):
+        # Nothing schedules a CTIS study: a « BCTIS Stellungnahme » ends
+        # nothing and triggers nothing, so to discuss the study again the
+        # office puts it on a meeting itself. Only when it is on no
+        # unstarted meeting yet - otherwise « Reschedule » is the action.
+        return (
+            self.uses_ctr_form
+            and not self.is_reschedulable
+            and self._has_had_first_meeting
+        )
+
+    @property
+    def is_removable_from_meeting(self):
+        # « Reschedule » is undo enough for a classic study, which always
+        # belongs on some meeting. A CTIS study may belong on none, and the
+        # next meeting can be a year out, so a wrong by-hand scheduling has
+        # to be undoable outright. A TOP that has been voted on is history.
+        return (
+            self.uses_ctr_form
+            and self._has_had_first_meeting
+            and self.timetable_entries.filter(
+                meeting__started=None, vote__isnull=True).exists()
+        )
 
     def get_filename_slice(self):
         return self.get_ec_number_display(separator='_')
@@ -534,7 +670,8 @@ class SubmissionForm(models.Model):
     @property
     def version(self):
         assert self.pk is not None      # already saved
-        return self.submission.forms.filter(created_at__lte=self.created_at).count()
+        return self.submission.forms(manager='unfiltered').filter(
+            created_at__lte=self.created_at).count()
 
     def __str__(self):
         try:
@@ -796,6 +933,212 @@ def _post_submission_form_save(**kwargs):
         ))
 
     on_study_change.send(Submission, submission=submission, old_form=old_sf, new_form=new_sf)
+
+
+class CTISHiddenDocument(models.Model):
+    """
+    A CTIS document the CTIS Importer hid. Keyed by CTIS's own documentId on
+    the Submission rather than stored on a CTRSubmissionForm, so the choice
+    survives every re-import of the trial.
+    """
+    submission = models.ForeignKey('core.Submission', related_name='ctis_hidden_documents', on_delete=models.CASCADE)
+    document_id = models.CharField(max_length=64)
+
+    class Meta:
+        unique_together = (('submission', 'document_id'),)
+
+
+class CTRSubmissionForm(models.Model):
+    submission = models.ForeignKey('core.Submission', related_name='ctr_forms', on_delete=models.CASCADE)
+    application = models.JSONField()
+    documents = models.JSONField(default=list)
+    # full CTIS number as imported, e.g. "2026-503364-87-00" - one specific
+    # revision, globally unique (a revision is only ever imported once).
+    ctis_number = models.CharField(max_length=20, unique=True)
+    # the "JJJJ-NNNNNN" part identifying the trial itself, independent of
+    # revision - shared across all CTRSubmissionForm versions of one
+    # submission, used to find the submission a new revision belongs to.
+    ctis_base_number = models.CharField(max_length=13, db_index=True)
+    is_transient = models.BooleanField(default=False)
+    is_withdrawn = models.BooleanField(default=False)
+    is_acknowledged = models.BooleanField(default=False)
+    presenter = models.ForeignKey(User, related_name='presented_ctr_submission_forms', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = AuthorizationManager()
+    unfiltered = models.Manager()
+
+    def save(self, **kwargs):
+        if not self.presenter_id:
+            self.presenter = get_current_user()
+        return super().save(**kwargs)
+
+    def __str__(self):
+        return "%s: CTR" % self.submission.get_ec_number_display()
+
+    def get_filename_slice(self):
+        return self.submission.get_filename_slice()
+
+    @property
+    def version(self):
+        assert self.pk is not None      # already saved
+        return self.submission.ctr_forms(manager='unfiltered').filter(
+            created_at__lte=self.created_at).count()
+
+    @property
+    def is_current(self):
+        return self.submission.current_ctr_form_id == self.id
+
+    @property
+    def current_application(self):
+        # The payload's newest application - the one the tabs render.
+        applications = sorted_applications(
+            self.application if isinstance(self.application, dict) else {})
+        return applications[0] if applications else {}
+
+    @property
+    def austrian_trial_sites(self):
+        return austrian_trial_sites(self.current_application)
+
+    def get_type_display(self):
+        # Of the classic chips only the invited marker can apply: AMG/MPG,
+        # thesis and NIS are all submission form fields. Same condition as
+        # `SubmissionForm.get_type_display`, and it names nobody either.
+        bits = ['CTIS-Studie']
+        if self.submission.invite_primary_investigator_to_meeting and \
+                self.submission.timetable_entries.filter(meeting__ended=None).exists():
+            bits.append(_('Investigator invited'))
+        return ', '.join(bits)
+
+    @property
+    def trial_title(self):
+        # The trial's own title. `part1.title` is the full one but CTIS may
+        # deliver it as null, so degrade the way the Part I tab lists them.
+        part1 = self.current_application.get('part1') or {}
+        for key in ('title', 'publicTitle', 'protocolCode'):
+            title = str(part1.get(key) or '').strip()
+            if title:
+                return title
+        return None
+
+    @staticmethod
+    def _identifier(value):
+        # CTIS delivers a missing identifier as null, '' or the « - » sentinel
+        # the render code uses for an empty cell. None of the three may reach
+        # a header, so they all read as « no identifier ».
+        text = str(value or '').strip()
+        return text if text and text != '-' else None
+
+    @property
+    def ctis_eu_ct_number(self):
+        # The trial's own number, which is what `ctis_number` is asked for
+        # too - the API takes it as its clinicalTrialId path segment.
+        trial = self.application if isinstance(self.application, dict) else {}
+        return self._identifier(trial.get('clinicalTrialId'))
+
+    @property
+    def ctis_application_id(self):
+        return self._identifier(self.current_application.get('applicationId'))
+
+    @property
+    def ctis_formatted_application_id(self):
+        # « IN - 5700 »: what identifies this version of the study to the
+        # office, which is why the version table shows it instead of a count.
+        return self._identifier(
+            formatted_application_id(self.current_application))
+
+    @property
+    def ctis_application_type_tag(self):
+        # « IN » for the initial application, « SM (5701) » for a substantial
+        # modification: only the initial one is unique, the rest need their id.
+        application = self.current_application
+        key = self._identifier(application.get('businessKey'))
+        if not key:
+            return None
+        application_id = self._identifier(application.get('applicationId'))
+        if key == 'IN' or not application_id:
+            return key
+        return '{} ({})'.format(key, application_id)
+
+    @property
+    def ctis_aut_id(self):
+        # Austria's own id for the trial - a property of the trial object
+        # itself (EcsTrialDto), alongside `id` and `clinicalTrialId`, not of
+        # one of its applications.
+        trial = self.application if isinstance(self.application, dict) else {}
+        return self._identifier(trial.get('autId'))
+
+    def acknowledge(self, choice):
+        self.is_acknowledged = choice
+        self.save(update_fields=('is_acknowledged',))
+
+    def mark_current(self):
+        self.submission.current_ctr_form = self
+        self.submission.save(update_fields=('current_ctr_form',))
+
+    def allows_edits(self, user):
+        s = self.submission
+        return s.presenter == user and self.is_current and not s.has_permanent_vote and not s.is_finished
+
+    def allows_amendments(self, user):
+        # amendment/diff notifications for CTR forms are not built yet
+        return False
+
+    def get_involved_parties(self):
+        return get_involved_parties(self)
+
+    def get_presenting_parties(self):
+        return get_presenting_parties(self)
+
+    def get_reviewing_parties(self, active=None):
+        return get_reviewing_parties(self, active=active)
+
+
+@receiver(post_save, sender=CTRSubmissionForm)
+def _post_ctr_submission_form_save(**kwargs):
+    new_form = kwargs['instance']
+
+    if not kwargs['created'] or new_form.is_transient:
+        return
+
+    submission = new_form.submission
+    old_form = submission.current_ctr_form
+
+    if not old_form:
+        new_form.mark_current()
+        submission.workflow_lane = SUBMISSION_LANE_BOARD
+        submission.save(update_fields=('workflow_lane',))
+
+    on_study_change.send(Submission, submission=submission, old_form=old_form, new_form=new_form)
+
+
+def get_or_create_ctr_investigator(site):
+    """
+    The ECS account of a CTIS trial site's principal investigator, created on
+    first use.
+
+    Mirrors `Investigator.save()` below: the classic path creates the phantom
+    user while the submission form is saved, but a CTIS study has no
+    submission form, so it happens when the agenda goes out instead. The
+    'investigator' role deliberately suppresses the account-invitation mail
+    (see #4808).
+    """
+    email = site['email']
+    try:
+        return get_user(email)
+    except User.DoesNotExist:
+        pass
+
+    user = create_phantom_user(email, role='investigator')
+    user.first_name = site['first_name']
+    user.last_name = site['last_name']
+    user.save()
+    profile = user.profile
+    # CTIS types `titleName` as free text; the profile column is short.
+    profile.title = site['title'][:30]
+    profile.organisation = site['organisation']
+    profile.save()
+    return user
 
 
 class Investigator(models.Model):

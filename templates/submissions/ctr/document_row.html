@@ -1,0 +1,30 @@
+{# One row of the « Application Documents » list. `document` is a ctis_render.DocEntry. #}
+<tr data-category="{{ document.category }}"
+    data-section="{{ document.section }}"
+    data-part="{{ document.part_label }}"
+    data-language="{{ document.language }}"
+    data-source="{{ document.source }}"
+    data-document-id="{{ document.id }}">
+    <td>{{ document.title }}</td>
+    <td>{{ document.section }}</td>
+    <td>{{ document.category }}</td>
+    <td>{{ document.comment }}</td>
+    <td>{{ document.version|default:'–' }}</td>
+    <td>{{ document.from_date }}</td>
+    <td>
+        {% if document.url %}
+            <a href="{{ document.url }}">
+                <span class="fa fa-download"></span>
+                Download
+            </a>
+        {% else %}
+            –
+        {% endif %}
+    </td>
+    {% if manageable %}
+        <td class="text-nowrap">
+            <button type="button" class="btn btn-sm btn-outline-danger ctr-doc-hide"{% if hidden %} hidden{% endif %}>Ausblenden</button>
+            <button type="button" class="btn btn-sm btn-primary ctr-doc-restore"{% if not hidden %} hidden{% endif %}>Wiederherstellen</button>
+        </td>
+    {% endif %}
+</tr>

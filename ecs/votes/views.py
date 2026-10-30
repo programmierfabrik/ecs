@@ -42,7 +42,7 @@ def get_vote_sign_data(request, task):
         'parent_pk': vote.pk,
         'parent_type': Vote,
         'document_uuid': uuid4().hex,
-        'document_name': vote.submission_form.submission.get_ec_number_display(separator='-'),
+        'document_name': vote.submission.get_ec_number_display(separator='-'),
         'document_type': "votes",
         'document_version': 'signed-at',
         'document_filename': vote.pdf_filename,
@@ -55,7 +55,11 @@ def sign_success(request, document=None):
     vote = document.parent_object
     vote.signed_at = document.date
     vote.save()
-    return reverse('readonly_submission_form', kwargs={'submission_form_pk': vote.submission_form.pk}) + '#vote_review_tab'
+    if vote.ctr_submission_form_id:
+        url = reverse('core.submission.readonly_ctr_submission_form', kwargs={'ctr_submission_form_pk': vote.ctr_submission_form_id})
+    else:
+        url = reverse('readonly_submission_form', kwargs={'submission_form_pk': vote.submission_form_id})
+    return url + '#vote_review_tab'
 
 
 def vote_pdf_debug(request, vote_pk=None):

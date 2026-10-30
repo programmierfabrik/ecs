@@ -78,6 +78,7 @@ class UserProfile(models.Model):
             'External Reviewer',
             'Specialist',
             'Legal and Patient Reviewer',
+            'CTIS Importer',
         })
         self.can_have_open_tasks = bool(groups & {
             'Board Member',
@@ -88,6 +89,7 @@ class UserProfile(models.Model):
             'Insurance Reviewer',
             'Statistic Reviewer',
             'Legal and Patient Reviewer',
+            'CTIS Importer',
         })
 
     @property
@@ -107,6 +109,7 @@ class UserSettings(models.Model):
     submission_filter_widget_internal = JSONField(default=dict)
     submission_filter_mine = JSONField(default=dict)
     submission_filter_assigned = JSONField(default=dict)
+    ctis_overview_filter = JSONField(default=dict)
     task_filter = models.TextField(null=True)
     useradministration_filter = JSONField(default=dict)
 

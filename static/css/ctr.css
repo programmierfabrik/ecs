@@ -1,0 +1,281 @@
+/*
+ * CTIS submission path: read-only rendering of an imported CTIS trial.
+ *
+ * Fields, tables and headings deliberately carry no sizing of their own -
+ * they use the same Bootstrap classes and readonly form controls as the
+ * classic submission form so both paths look the same. Only what the
+ * classic form has no equivalent for is styled here.
+ */
+
+/* Readonly values are never editable, so don't invite a resize drag.
+   ecs.textarea.TextArea sets the height from the content. */
+.ctr-textarea {
+    resize: none;
+    overflow: hidden;
+}
+
+/* ─── section hierarchy ──────────────────────────────────────────────── */
+
+/*
+ * A CTIS pane is a long stack of headings with no chrome between them, and
+ * the deeper two levels sit close enough in size to read as one. The level is
+ * carried by a rule and by the space above it instead - the type sizes stay
+ * the Bootstrap ones the classic submission form uses.
+ */
+
+/* The rule belongs to the chapter titles alone - « Trial Details »,
+   « Sponsors », « Products ». One of those is always followed straight away
+   by a subsection, so ruling both levels drew two lines back to back. */
+.ctr-pane > .ctr-section > h3 {
+    margin-top: 2.75rem;
+    padding-bottom: .4rem;
+    border-bottom: 2px solid rgba(0, 0, 0, .2);
+}
+
+.ctr-pane > .ctr-section > h4 {
+    margin-top: 2.25rem;
+}
+
+.ctr-pane > .ctr-section > h5 {
+    margin-top: 1.75rem;
+    color: #555;
+}
+
+.ctr-pane > .ctr-section > h6 {
+    margin-top: 1.25rem;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+/* The first heading of a pane sits right under the tab strip, which is a
+   rule of its own - a second one directly below it reads as a mistake. */
+.ctr-pane > .ctr-section:first-child > h3,
+.ctr-pane > .ctr-section:first-child > h4,
+.ctr-pane > .ctr-section:first-child > h5,
+.ctr-pane > .ctr-section:first-child > h6 {
+    margin-top: 0;
+}
+
+/* The two deepest levels are subordinate to the heading above them, so their
+   fields step in rather than starting at the same margin. */
+.ctr-pane > .ctr-section-l5,
+.ctr-pane > .ctr-section-l6 {
+    padding-left: 1rem;
+    border-left: 1px solid rgba(0, 0, 0, .06);
+}
+
+/* ─── data tables ────────────────────────────────────────────────────── */
+
+.ctr-data-table th {
+    vertical-align: bottom;
+    white-space: nowrap;
+}
+
+/* A table usually follows a heading, and Bootstrap's border above the header
+   row would sit right under that heading's own rule as a second line. */
+.ctr-data-table thead th {
+    border-top: 0;
+}
+
+.ctr-data-table td {
+    vertical-align: top;
+}
+
+/* Trial-site and product tables are wide enough to scroll horizontally,
+   and the contact/role column is what orients you while it does. */
+.ctr-data-table th:first-child,
+.ctr-data-table td:first-child {
+    position: sticky;
+    left: 0;
+    background-color: #fff;
+    box-shadow: 1px 0 0 rgba(0, 0, 0, .08);
+}
+
+/* ─── document cards ─────────────────────────────────────────────────── */
+
+.ctr-doc-group {
+    margin-bottom: .75rem;
+}
+
+.ctr-doc-group-name {
+    font-weight: 600;
+    color: #555;
+    margin-bottom: .25rem;
+}
+
+.ctr-doc {
+    padding: .5rem .75rem;
+    border: 1px solid rgba(0, 0, 0, .1);
+    border-radius: .25rem;
+    background-color: #fbfbfb;
+    margin-bottom: .35rem;
+}
+
+.ctr-doc-title {
+    font-weight: 600;
+}
+
+.ctr-doc-meta {
+    color: #777;
+}
+
+.ctr-doc-empty {
+    display: inline-block;
+    padding: .2rem .6rem;
+    font-style: italic;
+    color: #8a8a8a;
+    background-color: #f1f1f1;
+    border-radius: 1rem;
+}
+
+/* Previous versions stay folded away until asked for. */
+.ctr-doc-versions {
+    display: none;
+    color: #777;
+    margin: .25rem 0 0 1rem;
+}
+
+.ctr-doc-versions.show {
+    display: block;
+}
+
+.ctr-doclist-filters {
+    margin-bottom: .75rem;
+}
+
+/* ─── member-state selector ──────────────────────────────────────────── */
+
+.ctr-doclist-pager {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: .5rem;
+}
+
+/* Chip strip, laid out like the classic centres tab's jump list - but the
+   labels are never truncated: products share a « Comparator: » prefix and
+   differ only at the end, so a cut-off chip is an unreadable chip. */
+.ctr-chip-list {
+    margin-bottom: 1rem;
+}
+
+.ctr-chip-list button {
+    white-space: normal;
+    text-align: left;
+}
+
+/* Only the chosen chip's fields are on screen. */
+.ctr-chip-pane {
+    display: none;
+}
+
+.ctr-chip-pane.ctr-chip-pane-active {
+    display: block;
+}
+
+/* ─── header identifiers ─────────────────────────────────────────────── */
+
+/* The optional CTIS numbers between the EC number and the study title. The
+   size is absolute rather than relative because the two render sites are
+   headings of different sizes - a chip that scaled with its heading would
+   dwarf the title on the study page and shrink into the row on the list.
+   Tabular figures so a column of them lines up. */
+.ctis-identifier {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: .4rem;
+    padding: .1rem .7rem;
+    border: 1px solid transparent;
+    border-radius: 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+/* One hue per kind, so two bare five-digit numbers side by side can still be
+   told apart - the colour does the work a spelled-out prefix used to. */
+.ctis-identifier-eu-ct {
+    color: #0b5ed7;
+    background-color: #e8f1fd;
+    border-color: #c7dcfa;
+}
+
+.ctis-identifier-application {
+    color: #0f6b5c;
+    background-color: #e4f5f1;
+    border-color: #c0e6dd;
+}
+
+.ctis-identifier-aut {
+    color: #8a5300;
+    background-color: #fdf4e3;
+    border-color: #f5e1bd;
+}
+
+/* A prefix inside a chip is a caption, not part of the number. */
+.ctis-identifier-label {
+    font-weight: 400;
+    opacity: .75;
+    margin-right: .1rem;
+}
+
+.ctr-raw-json {
+    max-height: 40rem;
+    overflow: auto;
+}
+
+/* ─── hidden documents ───────────────────────────────────────────────── */
+
+.ctr-doclist-hidden-toggle {
+    cursor: pointer;
+    list-style: none;
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: .35rem .5rem;
+    border-radius: .25rem;
+    user-select: none;
+}
+
+.ctr-doclist-hidden-toggle::-webkit-details-marker {
+    display: none;
+}
+
+.ctr-doclist-hidden-toggle:hover {
+    background-color: rgba(0, 0, 0, .06);
+}
+
+.ctr-doclist-hidden-chevron {
+    display: inline-block;
+    width: 1em;
+    margin-right: .25rem;
+    font-size: .8em;
+    transition: transform .15s;
+}
+
+.ctr-doclist-hidden[open] > .ctr-doclist-hidden-toggle .ctr-doclist-hidden-chevron {
+    transform: rotate(90deg);
+}
+
+/* ─── static language-filter tag in the tab strip ────────────────────── */
+
+.ctr-filter-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: .4rem .75rem;
+    border-radius: .25rem;
+    font-size: .85rem;
+    color: #495057;
+    background-color: #f3f4f6;
+    cursor: default;
+}
+
+.ctr-filter-dot {
+    width: .6rem;
+    height: .6rem;
+    margin-right: .5rem;
+    border-radius: 50%;
+    background-color: #28a745;
+}

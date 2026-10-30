@@ -28,7 +28,8 @@ from ecs.documents.views import handle_download
 from ecs.meetings.cache import cache_meeting_page
 from ecs.meetings.forms import (
     MeetingForm, TimetableEntryForm, FreeTimetableEntryForm,
-    UserConstraintFormSet, SubmissionReschedulingForm,
+    UserConstraintFormSet, SubmissionReschedulingForm, SubmissionSchedulingForm,
+    SubmissionUnschedulingForm,
     AssignedMedicalCategoryFormSet, MeetingAssistantForm, ExpeditedVoteFormSet,
     AmendmentVoteFormSet, ManualTimetableEntryCommentForm,
     ManualTimetableEntryCommentFormset, EkMemberMarkedForm, SendProtocolGroupsForm,
@@ -38,7 +39,7 @@ from ecs.meetings.signals import on_meeting_start, on_meeting_end, on_meeting_to
     on_meeting_date_changed
 from ecs.meetings.tasks import optimize_timetable_task
 from ecs.meetings.utils import render_protocol_pdf_for_submission, send_submission_protocol_pdf, \
-    get_users_for_protocol
+    get_users_for_protocol, write_submission_zip_entries
 from ecs.notifications.models import NotificationAnswer
 from ecs.tasks.models import Task
 from ecs.users.models import UserProfile
@@ -84,6 +85,64 @@ def past_meetings(request):
 
 
 @user_flag_required('is_executive')
+def schedule_submission(request, submission_pk=None):
+    submission = get_object_or_404(Submission, pk=submission_pk)
+    if not submission.is_schedulable:
+        raise Http404(_('This submission is not scheduled by hand.'))
+    form = SubmissionSchedulingForm(request.POST or None)
+    if form.is_valid():
+        meeting = submission.schedule_to_meeting(form.cleaned_data['to_meeting'])
+        meeting.update_assigned_categories()
+        return redirect('view_submission', submission_pk=submission.pk)
+
+    return render(request, 'meetings/submission_meeting_form.html', {
+        'title': 'Zu Sitzung hinzufügen',
+        'submit_label': _('Save and return to study'),
+        'submission': submission,
+        'form': form,
+    })
+
+
+@user_flag_required('is_executive')
+def remove_submission_from_meeting(request, submission_pk=None):
+    submission = get_object_or_404(Submission, pk=submission_pk)
+    if not submission.is_removable_from_meeting:
+        raise Http404(_('This submission is on no upcoming meeting.'))
+    form = SubmissionUnschedulingForm(request.POST or None,
+        submission=submission)
+    if form.is_valid():
+        meeting = form.cleaned_data['from_meeting']
+        entry = meeting.timetable_entries.get(submission=submission)
+        assert not hasattr(entry, 'vote')
+
+        # read before the entry goes: these reviews were asked for because
+        # this study was on this meeting
+        experts = set(meeting.medical_categories
+                      .exclude(specialist=None)
+                      .filter(category__in=submission.medical_categories.values('pk'))
+                      .values_list('specialist_id', flat=True))
+
+        entry.participations.all().delete()
+        entry.delete()
+        meeting.update_assigned_categories()
+
+        with sudo():
+            Task.objects.for_data(submission).filter(
+                task_type__workflow_node__uid='specialist_review',
+                assigned_to__in=experts
+            ).open().mark_deleted()
+
+        return redirect('view_submission', submission_pk=submission.pk)
+
+    return render(request, 'meetings/submission_meeting_form.html', {
+        'title': 'Von Sitzung entfernen',
+        'submit_label': 'Entfernen und zurück zur Studie',
+        'submission': submission,
+        'form': form,
+    })
+
+
+@user_flag_required('is_executive')
 def reschedule_submission(request, submission_pk=None):
     submission = get_object_or_404(Submission, pk=submission_pk)
     form = SubmissionReschedulingForm(request.POST or None, submission=submission)
@@ -117,7 +176,9 @@ def reschedule_submission(request, submission_pk=None):
 
         return redirect('view_submission', submission_pk=submission.pk)
 
-    return render(request, 'meetings/reschedule.html', {
+    return render(request, 'meetings/submission_meeting_form.html', {
+        'title': _('Reschedule Submission'),
+        'submit_label': _('Save and return to study'),
         'submission': submission,
         'form': form,
     })
@@ -230,7 +291,8 @@ def submission_list(request, meeting_pk=None):
 
         submission = entry.submission
         if submission:
-            submission.current_submission_form._submission_cache = submission
+            if submission.current_submission_form:
+                submission.current_submission_form._submission_cache = submission
             submission.is_accessible = submission.id in accessible_submissions
 
     active_top = meeting.active_top
@@ -328,23 +390,11 @@ def download_zipped_documents(request, meeting_pk=None, submission_pk=None):
 
     submission = get_object_or_404(meeting.submissions(manager='unfiltered'),
                                    pk=submission_pk)
-    sf = submission.current_submission_form
-
-    docs = []
-    if sf.pdf_document:
-        docs.append(sf.pdf_document)
-    docs += sf.documents.filter(doctype__identifier='patientinformation')
-    docs += Document.objects.filter(
-        content_type=ContentType.objects.get_for_model(Checklist),
-        object_id__in=submission.checklists.filter(status='review_ok'),
-    )
 
     zip_buf = io.BytesIO()
     with zipfile.ZipFile(zip_buf, 'w', compression=zipfile.ZIP_DEFLATED) as zf:
-        path = [submission.get_filename_slice()]
-        for doc in docs:
-            zf.writestr('/'.join(path + [doc.get_filename()]),
-                        doc.retrieve(request.user, 'meeting-zip').read())
+        write_submission_zip_entries(zf, submission,
+            [submission.get_filename_slice()], user=request.user)
 
     response = HttpResponse(zip_buf.getvalue(), content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename="{}_{}.zip"'.format(
@@ -756,7 +806,8 @@ def meeting_assistant_top(request, meeting_pk=None, top_pk=None):
 
     if top.submission and top.is_open:
         form_cls = SaveVoteForm if simple_save else VoteForm
-        form = form_cls(request.POST or None, instance=vote)
+        form = form_cls(request.POST or None, instance=vote,
+            submission=top.submission)
         if form.is_valid():
             vote = form.save(top)
             if autosave:
@@ -771,7 +822,8 @@ def meeting_assistant_top(request, meeting_pk=None, top_pk=None):
             return redirect('meetings.meeting_assistant_top',
                             meeting_pk=meeting.pk, top_pk=top.pk)
     elif top.submission and not top.is_open:
-        form = VoteForm(None, instance=vote, readonly=True)
+        form = VoteForm(None, instance=vote, readonly=True,
+            submission=top.submission)
     elif not top.submission and not top.is_break:
         form = ManualTimetableEntryCommentForm(request.POST or None, instance=top)
         if form.is_valid():
@@ -902,6 +954,21 @@ def send_agenda_to_board(request, meeting_pk=None):
     for top in tops_with_primary_investigator:
         sf = top.submission.current_submission_form
         for u in {sf.primary_investigator.user, sf.presenter, sf.submitter, sf.sponsor}:
+            send_system_message_template(u, subject, 'meetings/messages/primary_investigator_invitation.txt',
+                                         {'top': top}, submission=top.submission)
+
+    # The same invitation for a CTIS study, where the investigators come from
+    # the ticked trial sites of the Austrian Part II instead of from a
+    # submission form. Its recipients are the investigators and the presenter -
+    # a CTIS study has no submitter and no sponsor user.
+    ctr_tops_with_investigators = meeting.timetable_entries.filter(
+        submission__invite_primary_investigator_to_meeting=True,
+        submission__current_ctr_form__isnull=False, timetable_index__isnull=False)
+    for top in ctr_tops_with_investigators:
+        investigators = top.submission.get_ctr_investigator_users()
+        if not investigators:
+            continue
+        for u in set(investigators) | {top.submission.presenter}:
             send_system_message_template(u, subject, 'meetings/messages/primary_investigator_invitation.txt',
                                          {'top': top}, submission=top.submission)
 
@@ -1099,12 +1166,17 @@ def meeting_details(request, meeting_pk=None, active=None):
         'retrospective_thesis_submissions': submissions.for_thesis_lane(),
         'expedited_submissions': submissions.expedited(),
         'localec_submissions': submissions.localec(),
+        # One flat row for now; a finer breakdown comes later. A CTIS study
+        # runs in the board lane, so it is also counted under « board » above.
+        'ctr_submissions': submissions.ctr(),
 
         'dissertation_submissions': submissions.filter(current_submission_form__project_type_education_context=1),
         'diploma_thesis_submissions': submissions.filter(current_submission_form__project_type_education_context=2),
         'amg_multi_main_submissions': submissions.amg().filter(
             current_submission_form__submission_type=SUBMISSION_TYPE_MULTICENTRIC),
-        'billable_submissions': submissions.exclude(remission=True),
+        # CTIS studies are not billable, and have no submission form for
+        # `Price.objects.get_for_submission()` to read.
+        'billable_submissions': submissions.not_ctr().exclude(remission=True),
         'b3_examined_submissions': submissions.filter(
             pk__in=Vote.objects.filter(result='3b').values('submission_form__submission').query),
         'b3_not_examined_submissions': submissions.filter(

@@ -6,7 +6,7 @@
 
     {% url 'signature.batch_action' pdf_id=pdf_id action="retry" as retry_url %}
     <a class="btn btn-primary btn-block mb-3" href="{{ retry_url }}">
-        {% trans 'Try again' %}
+        {% trans 'Erneut versuchen' %}
     </a>
 
     <div class="alert alert-danger mt-5">

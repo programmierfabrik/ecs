@@ -23,7 +23,7 @@ from qrcode import QRCode
 from reportlab.lib import pagesizes
 from reportlab.pdfgen import canvas
 from weasyprint import HTML
-from weasyprint.urls import URLFetcher
+from weasyprint.urls import URLFetcher, URLFetcherResponse
 
 logger = logging.getLogger(__name__)
 
@@ -63,15 +63,16 @@ def pdf_barcodestamp(source, barcode, text=None):
 
 
 class _URLFetcher(URLFetcher):
-    def __call__(self, url):
+    def fetch(self, url, headers=None):
         if url.startswith('static:'):
             path = os.path.abspath(os.path.join(settings.STATIC_ROOT, url[len('static:'):]))
             if not path.startswith(settings.STATIC_ROOT):
                 raise ValueError('static: URI points outside of static directory!')
             with open(path, 'rb') as f:
                 data = f.read()
-            return {'string': data, 'mime_type': mimetypes.guess_type(path)[0]}
-        return super().__call__(url)
+            mime_type = mimetypes.guess_type(path)[0] or 'application/octet-stream'
+            return URLFetcherResponse(url, data, {'Content-Type': mime_type})
+        return super().fetch(url, headers)
 
 
 def html2pdf(html):

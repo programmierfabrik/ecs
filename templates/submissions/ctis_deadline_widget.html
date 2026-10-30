@@ -1,0 +1,32 @@
+{% load core %}
+
+<div class="dashboard_widget">
+    <div class="card mb-2">
+        <div class="card-block">
+            <h3 class="card-title mb-0">
+                Draft Assessment Reports fällig
+                <span class="badge badge-default badge-pill float-right">{{ submissions|length }}</span>
+            </h3>
+            <p class="text-muted mb-0"><small>Fällig in den nächsten 7 Tagen, noch nicht hochgeladen</small></p>
+        </div>
+
+        <ul class="list-group list-group-flush">
+            {% for submission in submissions %}
+                <li class="list-group-item d-block">
+                    <a href="{% url 'view_submission' submission_pk=submission.pk %}">
+                        {{ submission|ec_number }}
+                    </a>
+                    <span class="float-right">{{ submission.dar_days_remaining }}</span>
+                </li>
+            {% empty %}
+                <li class="list-group-item d-block text-center text-muted">
+                    <em>Keine Studien mit Deadline in den nächsten 7 Tagen.</em>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <div class="card-block text-right">
+            <a href="{% url 'core.submission.ctis_overview' %}">Zur CTIS-Übersicht</a>
+        </div>
+    </div>
+</div>

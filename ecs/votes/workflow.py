@@ -36,7 +36,9 @@ class VoteReview(Activity):
         return True
 
     def get_url(self):
-        return reverse('core.submission.vote_review', kwargs={'submission_form_pk': self.workflow.data.submission_form_id})
+        vote = self.workflow.data
+        return reverse('core.submission.vote_review',
+            kwargs=vote.submission.current_form_url_kwargs())
 
     def receive_token(self, source, trail=(), repeated=False):
         token = super().receive_token(source, trail=trail, repeated=repeated)

@@ -147,11 +147,17 @@ class MeetingManager(AuthorizationManager):
         return self.filter(ended=None)
 
     def next_schedulable_meeting(self, submission):
-        first_sf = submission.forms.order_by('created_at')[0]
+        if submission.uses_ctr_form:
+            forms = submission.ctr_forms
+            current_form = submission.current_ctr_form
+        else:
+            forms = submission.forms
+            current_form = submission.current_submission_form
+        first_sf = forms.order_by('created_at')[0]
         try:
-            accepted_sf = submission.forms.filter(is_acknowledged=True).order_by('created_at')[0]
+            accepted_sf = forms.filter(is_acknowledged=True).order_by('created_at')[0]
         except IndexError:
-            accepted_sf = submission.current_submission_form
+            accepted_sf = current_form
         is_thesis = submission.workflow_lane == SUBMISSION_LANE_RETROSPECTIVE_THESIS
 
         grace_period = getattr(settings, 'ECS_MEETING_GRACE_PERIOD', timedelta(0))

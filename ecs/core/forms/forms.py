@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import Q
+from django.http import QueryDict
 from django.utils import timezone
 
 from django_countries import countries
@@ -285,12 +286,19 @@ class PresenterChangeForm(forms.Form):
         widget=EmailUserSelectWidget()
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, submission=None, **kwargs):
         super().__init__(*args, **kwargs)
+        queryset = User.objects.filter(is_active=True)
+        queryset_name = 'users'
+        if submission is not None and submission.uses_ctr_form:
+            queryset = queryset.filter(groups__name='CTIS Importer')
+            queryset_name = 'ctis-importers'
         if get_current_user().profile.is_internal:
             self.fields['presenter'] = AutocompleteModelChoiceField(
-                'users', User.objects.filter(is_active=True),
+                queryset_name, queryset,
                 label=_('Presenter'))
+        else:
+            self.fields['presenter'].queryset = queryset
 
 
 class SusarPresenterChangeForm(forms.Form):
@@ -441,6 +449,7 @@ _labels = {
 
     'amg': _('AMG'),
     'mpg': _('MPG'),
+    'ctis': _('CTIS'),
     'other': _('Other'),
 
     'not_categorized': _('Not Categorized'),
@@ -482,6 +491,14 @@ class SubmissionFilterForm(forms.Form, metaclass=SubmissionFilterFormMetaclass):
             filter_defaults[key] = 'on'
 
         data = data or filter_defaults
+        if not isinstance(data, QueryDict):
+            # Not a submitted form but a filter stored on the user's settings,
+            # which predates any flag added since it was saved. For a POST an
+            # absent checkbox means off; here it means the user never saw the
+            # flag, so default it to on rather than silently hiding rows.
+            data = dict(data)
+            for key in keys:
+                data.setdefault(key, 'on')
         return super().__init__(data, *args, **kwargs)
 
     def _filter_by_type(self, submissions, user):
@@ -493,6 +510,10 @@ class SubmissionFilterForm(forms.Form, metaclass=SubmissionFilterFormMetaclass):
             )
         if self.cleaned_data['mpg']:
             qs.append(Q(current_submission_form__project_type_medical_device=True))
+        if self.cleaned_data['ctis']:
+            # CTR submissions carry no project_type_* classification - being
+            # imported from CTIS is what they are classified by instead.
+            qs.append(Q(current_ctr_form__isnull=False))
         if self.cleaned_data['other']:
             qs.append(
                 Q(current_submission_form__project_type_non_reg_drug=False) &
@@ -527,7 +548,11 @@ class SubmissionFilterForm(forms.Form, metaclass=SubmissionFilterFormMetaclass):
         if self.cleaned_data['b3']:
             results += ['3a', '3b']
         if self.cleaned_data['other_votes']:
-            results += ['1', '4', '5']
+            from ecs.votes.constants import CTIS_VOTE_RESULTS
+            # A CTIS study gets a « BCTIS Stellungnahme » instead of a
+            # B1-B5 vote; it has no box of its own in this row and falls
+            # under « Andere Voten » like a B1/B4/B5 result.
+            results += ['1', '4', '5'] + list(CTIS_VOTE_RESULTS)
 
         qs = []
         if results:
@@ -540,7 +565,7 @@ class SubmissionFilterForm(forms.Form, metaclass=SubmissionFilterFormMetaclass):
             q = Q(current_published_vote=None)
             if user.profile.is_internal:
                 q &= Q(current_pending_vote=None)
-            qs.append(q & Q(current_submission_form__isnull=False))
+            qs.append(q & (Q(current_submission_form__isnull=False) | Q(current_ctr_form__isnull=False)))
 
         return submissions.filter(reduce(lambda x, y: x | y, qs))
 
@@ -569,7 +594,7 @@ class SubmissionFilterForm(forms.Form, metaclass=SubmissionFilterFormMetaclass):
 
 
 FILTER_MEETINGS = ('past_meetings', 'next_meeting', 'upcoming_meetings', 'no_meeting')
-FILTER_TYPE = ('amg', 'mpg', 'other')
+FILTER_TYPE = ('amg', 'mpg', 'ctis', 'other')
 FILTER_LANE = ('board', 'thesis', 'expedited', 'local_ec', 'not_categorized')
 FILTER_VOTES = ('b2', 'b3', 'other_votes', 'no_votes')
 FILTER_ASSIGNMENT = ('mine', 'assigned', 'other_studies')
@@ -652,6 +677,8 @@ class AdvancedSettingsForm(forms.ModelForm):
             'display_biased_in_amendment_answer_pdf',
             'require_internal_vote_review', 'display_amendment_in_meeting_for_board_member', 
             'dont_delegate_specalist_tasks_from_executive',
+            'display_ctis_eu_ct_number', 'display_ctis_application_id',
+            'display_ctis_aut_id',
             'logo_file', 'print_logo_file', 'address', 'meeting_address', 'contact_email', 'contact_url',
             'member_list_url', 'signature_block',
             'vote1_extra', 'vote2_extra', 'vote3a_extra', 'vote3b_extra',
@@ -666,6 +693,9 @@ class AdvancedSettingsForm(forms.ModelForm):
             'require_internal_vote_review': _('Require internal vote review'),
             'display_amendment_in_meeting_for_board_member': 'Amendments für Board Member in der Sitzung anzeigen',
             'dont_delegate_specalist_tasks_from_executive': 'Spezialaufgaben von EC-Executive nicht delegieren',
+            'display_ctis_eu_ct_number': 'EU-CT-Nummer neben dem Studientitel anzeigen',
+            'display_ctis_application_id': 'Application ID neben dem Studientitel anzeigen',
+            'display_ctis_aut_id': 'AUT ID neben dem Studientitel anzeigen',
             'address': _('address'),
             'meeting_address': _('Meeting Address'),
             'contact_email': _('Contact Email'),

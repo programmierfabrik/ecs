@@ -27,6 +27,8 @@
 {% elif result == '5' %}
     <p>Der Antrag wurde zurückgezogen.</p>
     {% db_setting 'vote5_extra' as extra %}
+{% elif result == 'ctis' %}
+    <p>Die Ethik-Kommission gibt eine Stellungnahme ab.</p>
 {% else %}
     <em>Unknown Vote Result {{ result }}.</em>
 {% endif %}

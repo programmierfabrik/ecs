@@ -1,3 +1,4 @@
+import datetime
 import os
 import tempfile
 import re
@@ -9,11 +10,12 @@ from django.http import HttpResponse, Http404, JsonResponse, FileResponse, HttpR
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.forms.models import model_to_dict
-from django.db.models import Q, Prefetch, Min, F
+from django.db.models import Q, Prefetch, Min, F, Case, When, Value, CharField, IntegerField, Exists, OuterRef, Subquery
 from django.utils.translation import gettext as _
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.core.cache import cache
+from django.views.decorators.http import require_POST
 from django.views.decorators.cache import cache_page
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -23,9 +25,12 @@ from ecs.documents.models import Document
 from ecs.documents.views import handle_download
 from ecs.utils.viewutils import redirect_to_next_url
 from ecs.core.models import (
-    Submission, SubmissionForm, Investigator, TemporaryAuthorization,
-    MedicalCategory, EthicsCommission,
+    Submission, SubmissionForm, CTRSubmissionForm, Investigator, TemporaryAuthorization,
+    MedicalCategory, EthicsCommission, AdvancedSettings,
 )
+from ecs.core.ctis import CTISError, fetch_ctis_document
+from ecs.core.ctis_render import (
+    build_ctr_view, document_handles, external_documents)
 from ecs.core.tasks import generate_submission_preview
 from ecs.checklists.models import ChecklistBlueprint, Checklist
 from ecs.meetings.models import Meeting
@@ -38,8 +43,14 @@ from ecs.core.forms import (
     SubmissionImportForm, SubmissionFilterForm, SubmissionMinimalFilterForm,
     PresenterChangeForm, SusarPresenterChangeForm,
     AssignedSubmissionsFilterForm, AllSubmissionsFilterForm,
+    CTISNumberForm,
 )
-from ecs.core.forms.review import CategorizationForm, BiasedBoardMemberForm
+from ecs.core.forms.review import (
+    CategorizationForm, BiasedBoardMemberForm, DraftAssessmentReportDeadlineForm,
+    SubmissionDocumentForm, CTISOverviewFilterForm,
+    PartIITimelineForm, CTISPartIIOverviewFilterForm,
+    DAR_DEADLINE_NOT_ENTERED, DAR_DEADLINE_UPCOMING, DAR_DEADLINE_PASSED,
+)
 from ecs.core.forms.layout import SUBMISSION_FORM_TABS
 from ecs.votes.forms import VoteReviewForm, VotePreparationForm, B2VotePreparationForm
 from ecs.core.forms.utils import submission_form_to_dict
@@ -59,8 +70,9 @@ from ecs.votes.models import Vote
 from ecs.core.diff import diff_submission_forms
 from ecs.communication.utils import send_message_template
 from ecs.utils import forceauth
+from django.contrib.auth.decorators import user_passes_test
 from ecs.users.models import UserProfile
-from ecs.users.utils import sudo, user_flag_required, get_user
+from ecs.users.utils import sudo, user_flag_required, user_group_required, get_user
 from ecs.tasks.models import Task
 from ecs.tasks.utils import get_obj_tasks, task_required, with_task_management
 
@@ -175,17 +187,44 @@ def copy_latest_submission_form(request, submission_pk=None, **kwargs):
 
 def view_submission(request, submission_pk=None):
     submission = get_object_or_404(Submission, pk=submission_pk)
+    if submission.current_ctr_form_id:
+        return redirect('core.submission.readonly_ctr_submission_form', ctr_submission_form_pk=submission.current_ctr_form_id)
     return redirect('readonly_submission_form', submission_form_pk=submission.current_submission_form.pk)
 
 
-def readonly_submission_form(request, submission_form_pk=None, submission_form=None, extra_context=None, template='submissions/readonly_form.html', checklist_overwrite=None):
-    if not submission_form:
-        submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
-    form = SubmissionFormForm(initial=submission_form_to_dict(submission_form), readonly=True)
-    formsets = get_submission_formsets(
-        initial=get_submission_formsets_initial(submission_form),
-        readonly=True)
-    submission = submission_form.submission
+def sees_full_ctr_form(user, submission):
+    """
+    Who may see a CTIS study whole: anyone with real study-level access to
+    it - the ethics commission itself, a task, being its presenter, a
+    temporary authorization, a Spezialist doing a « Spezialistenbewertung »,
+    a « Beteiligte Partei ». A board/resident/omniscient board member with no
+    such access does not reach this page at all - only their meeting (see
+    `write_submission_zip_entries`) - so this only ever has to tell a real
+    access holder from another; there is no restricted page view to fall
+    back to.
+    """
+    return Submission.objects.filter(pk=submission.pk).exists()
+
+
+def readonly_submission_form(request, submission_form_pk=None, submission_form=None, ctr_submission_form_pk=None, ctr_submission_form=None, extra_context=None, template='submissions/readonly_form.html', checklist_overwrite=None):
+    if ctr_submission_form_pk and not ctr_submission_form:
+        ctr_submission_form = get_object_or_404(CTRSubmissionForm, pk=ctr_submission_form_pk)
+
+    if ctr_submission_form:
+        submission = ctr_submission_form.submission
+        form = None
+        formsets = {}
+    else:
+        if not submission_form:
+            submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
+        form = SubmissionFormForm(initial=submission_form_to_dict(submission_form), readonly=True)
+        formsets = get_submission_formsets(
+            initial=get_submission_formsets_initial(submission_form),
+            readonly=True)
+        submission = submission_form.submission
+
+    # unified handle used by templates regardless of submission type
+    current_form = submission_form or ctr_submission_form
 
     crumbs_key = 'submission_breadcrumbs-user_{0}'.format(request.user.pk)
     crumbs = cache.get(crumbs_key, [])
@@ -195,6 +234,14 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
     checklists_q = Q(last_edited_by=request.user)
     if request.user.profile.is_internal:
         checklists_q |= Q(status__in=['completed', 'review_ok', 'review_ok_internal'])
+    elif ctr_submission_form:
+        presenting_parties = [submission.presenter_id, submission.susar_presenter_id]
+        allowed_status = ['completed', 'review_ok']
+        external_review_allowed_status = ['review_ok']
+        if request.user.id not in presenting_parties:
+            allowed_status.append('review_ok_internal')
+            external_review_allowed_status.append('review_ok_internal')
+        checklists_q |= Q(status__in=allowed_status) & ~(Q(blueprint__slug='external_review') & ~Q(status__in=external_review_allowed_status))
     else:
         presenting_parties = [
             submission.presenter_id, submission.susar_presenter_id,
@@ -241,22 +288,36 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
             answers = checklist.answers.filter(q)
             checklist_summary.append((checklist, answers))
 
-    submission_forms = list(
-        submission.forms(manager='unfiltered').only(
-            'submission_id', 'is_acknowledged', 'presenter_id', 'created_at',
-            'is_notification_update', 'pdf_document_id',
+    if ctr_submission_form:
+        submission_forms = list(
+            submission.ctr_forms(manager='unfiltered').only(
+                'submission_id', 'is_acknowledged', 'presenter_id', 'created_at',
+                'ctis_number',
 
-            'presenter__first_name', 'presenter__last_name', 'presenter__email',
-        ).prefetch_related(
-            Prefetch('new_for_notification', queryset=
-                AmendmentNotification.objects.only('new_submission_form_id')),
-            Prefetch('presenter__profile', queryset=
-                UserProfile.objects.only('gender', 'title', 'user_id')),
-        ).order_by('-created_at')
-    )
+                'presenter__first_name', 'presenter__last_name', 'presenter__email',
+            ).prefetch_related(
+                Prefetch('presenter__profile', queryset=
+                    UserProfile.objects.only('gender', 'title', 'user_id')),
+            ).order_by('-created_at')
+        )
+        current_form_idx = [sf.id == submission.current_ctr_form_id for sf in submission_forms].index(True)
+    else:
+        submission_forms = list(
+            submission.forms(manager='unfiltered').only(
+                'submission_id', 'is_acknowledged', 'presenter_id', 'created_at',
+                'is_notification_update', 'pdf_document_id',
+
+                'presenter__first_name', 'presenter__last_name', 'presenter__email',
+            ).prefetch_related(
+                Prefetch('new_for_notification', queryset=
+                    AmendmentNotification.objects.only('new_submission_form_id')),
+                Prefetch('presenter__profile', queryset=
+                    UserProfile.objects.only('gender', 'title', 'user_id')),
+            ).order_by('-created_at')
+        )
+        current_form_idx = [sf.id == submission.current_submission_form_id for sf in submission_forms].index(True)
     for sf, prev in zip(submission_forms, submission_forms[1:]):
         sf.previous_form = prev
-    current_form_idx = [sf.id == submission.current_submission_form_id for sf in submission_forms].index(True)
 
     external_review_checklists = submission.checklists.filter(blueprint__slug='external_review')
     notifications = (submission.notifications
@@ -298,13 +359,14 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
 
     context = {
         'form': form,
-        'tabs': SUBMISSION_FORM_TABS,
-        'documents': submission_form.documents
+        'tabs': () if ctr_submission_form else SUBMISSION_FORM_TABS,
+        'documents': None if ctr_submission_form else submission_form.documents
             .select_related('doctype')
             .order_by('doctype__identifier', 'date', 'name'),
         'readonly': True,
         'submission': submission,
-        'submission_form': submission_form,
+        'is_ctr': bool(ctr_submission_form),
+        'submission_form': current_form,
         'submission_forms': submission_forms,
         'current_form_idx': current_form_idx,
         'checklist_reviews': checklist_reviews,
@@ -320,27 +382,64 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
         'temporary_auth_form': TemporaryAuthorizationForm(prefix='temp_auth'),
         'current_docstash': current_docstash,
         'tags': submission.tags.all(),
+        'sync_form': CTISNumberForm() if ctr_submission_form else None,
     }
 
-    center_close_notifications = CenterCloseNotification.objects.filter(
-        answer__published_at__isnull=False, answer__is_rejected=False,
-        investigator__submission_form__submission_id=submission.id
-    ).annotate(
-        organisation=F('investigator__organisation'),
-        ethics_commission_id=F('investigator__ethics_commission_id')
-    ).values('organisation', 'ethics_commission_id', 'close_date')
-    for form in formsets['investigator']:
-        for n in center_close_notifications:
-            if n['organisation'].strip() == form.initial['organisation'].strip() and \
-                n['ethics_commission_id'] == form.initial['ethics_commission']:
-                form.close_date = n['close_date']
-                break
+    if ctr_submission_form:
+        full_ctr_form = sees_full_ctr_form(request.user, submission)
+        context.update(build_ctr_view(
+            ctr_submission_form.application,
+            ctr_submission_form.documents,
+            restricted=not full_ctr_form,
+            hidden_ids=set(submission.ctis_hidden_documents.values_list('document_id', flat=True)),
+            can_hide=request.user.groups.filter(name='CTIS Importer').exists(),
+            download_url=lambda document_id: reverse(
+                'core.submission.download_ctr_document', kwargs={
+                    'ctr_submission_form_pk': ctr_submission_form.pk,
+                    'document_id': document_id,
+                }),
+        ))
+        # The doclist/upload widget itself is loaded asynchronously into
+        # `.upload_container` (see ctr/tabs.html), the same way the classic
+        # document upload widget loads into `submissions/form.html` - so it
+        # only needs a flag here, not the documents/form themselves.
+        context['show_ctr_uploads'] = full_ctr_form
 
-    presenting_users = submission_form.get_presenting_parties().get_users().union([submission.presenter, submission.susar_presenter])
-    if not request.user in presenting_users:
+    if not ctr_submission_form:
+        center_close_notifications = CenterCloseNotification.objects.filter(
+            answer__published_at__isnull=False, answer__is_rejected=False,
+            investigator__submission_form__submission_id=submission.id
+        ).annotate(
+            organisation=F('investigator__organisation'),
+            ethics_commission_id=F('investigator__ethics_commission_id')
+        ).values('organisation', 'ethics_commission_id', 'close_date')
+        for form in formsets['investigator']:
+            for n in center_close_notifications:
+                if n['organisation'].strip() == form.initial['organisation'].strip() and \
+                    n['ethics_commission_id'] == form.initial['ethics_commission']:
+                    form.close_date = n['close_date']
+                    break
+
+    presenting_users = current_form.get_presenting_parties().get_users().union([submission.presenter, submission.susar_presenter])
+    # A CTIS study's presenter is just the internal user who imported it, not
+    # a party to the study, so nobody is hidden these tabs on that account.
+    if ctr_submission_form or not request.user in presenting_users:
         vote = submission.current_pending_vote or submission.current_published_vote
         context['vote_review_form'] = VoteReviewForm(instance=vote, readonly=True)
         context['categorization_form'] = CategorizationForm(instance=submission, readonly=True)
+        if ctr_submission_form:
+            context['draft_assessment_report_deadline_form'] = \
+                DraftAssessmentReportDeadlineForm(instance=submission, readonly=True)
+            context['part_ii_timeline_form'] = \
+                PartIITimelineForm(instance=submission, readonly=True)
+            if request.user.groups.filter(name='CTIS Importer').exists():
+                for form, uid in (
+                    (context['draft_assessment_report_deadline_form'], 'draft_assessment_report_deadline'),
+                    (context['part_ii_timeline_form'], 'part_ii_timeline'),
+                ):
+                    task = _latest_ctis_task(submission, uid)
+                    if task and task.closed_at:
+                        form.allow_reopen = True
         if request.user.profile.is_executive and \
             submission.allows_categorization():
             task = Task.unfiltered.for_data(submission).filter(
@@ -350,8 +449,11 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
             if task and task.closed_at:
                 context['categorization_form'].allow_reopen = True
 
-    if not submission_form == submission.newest_submission_form:
-        context['unacknowledged_forms'] = submission.forms.filter(pk__gt=submission_form.pk).count()
+    if current_form != submission.newest_form:
+        if ctr_submission_form:
+            context['unacknowledged_forms'] = submission.ctr_forms.filter(pk__gt=current_form.pk).count()
+        else:
+            context['unacknowledged_forms'] = submission.forms.filter(pk__gt=current_form.pk).count()
 
     if extra_context:
         context.update(extra_context)
@@ -388,6 +490,51 @@ def view_document(request, submission_form_pk=None, document_pk=None):
     return download_document(request, submission_form_pk, document_pk, view=True)
 
 
+def download_ctr_document(request, ctr_submission_form_pk=None, document_id=None):
+    ctr_submission_form = get_object_or_404(CTRSubmissionForm, pk=ctr_submission_form_pk)
+
+    # Only keys this form actually references may be fetched - otherwise the
+    # view would be an open proxy to the whole CTIS document service.
+    # `document_handles` is what the rendered entries link to, so the route
+    # accepts a key exactly when some row on the page offers it.
+    #
+    # A viewer without real study access is narrowed further, to the
+    # documents their restricted view of the form actually lists - hiding the
+    # row without gating the route would only be cosmetic, since the handles
+    # are the same for everyone.
+    #
+    # A hidden document is gone for everyone but the CTIS Importers who
+    # manage it.
+    documents = ctr_submission_form.documents or []
+    hidden_ids = set(ctr_submission_form.submission.ctis_hidden_documents
+                     .values_list('document_id', flat=True))
+    if hidden_ids and not request.user.groups.filter(name='CTIS Importer').exists():
+        documents = [d for d in documents
+                     if str(d.get('documentId') or '') not in hidden_ids]
+    if not sees_full_ctr_form(request.user, ctr_submission_form.submission):
+        permitted = {d.id for d in external_documents(
+            ctr_submission_form.application, documents, hidden_ids)}
+        documents = [d for d in documents
+                     if str(d.get('documentId') or '') in permitted]
+
+    if document_id not in document_handles(documents):
+        raise Http404
+
+    try:
+        document = fetch_ctis_document(document_id)
+    except CTISError:
+        messages.error(request, (
+            'Das Dokument konnte nicht von CTIS abgerufen werden. Bitte '
+            'versuchen Sie es später erneut.'))
+        return redirect('view_submission',
+            submission_pk=ctr_submission_form.submission_id)
+
+    response = HttpResponse(document['content'], content_type=document['mime_type'])
+    response['Content-Disposition'] = 'attachment; filename="{}"'.format(
+        document['filename'])
+    return response
+
+
 @task_required
 @with_task_management
 def categorization(request, submission_pk=None):
@@ -411,8 +558,8 @@ def categorization(request, submission_pk=None):
             docstash.save()
 
     response = readonly_submission_form(request,
-        submission_form=submission.current_submission_form,
-        extra_context={'categorization_form': form,})
+        extra_context={'categorization_form': form,},
+        **submission.current_form_kwargs())
     response.has_errors = not form.is_valid()
     return response
 
@@ -440,6 +587,338 @@ def reopen_categorization(request, submission_pk=None):
             submission=submission, reply_receiver=request.user)
 
     return redirect(new_task.url)
+
+
+@task_required
+@with_task_management
+def set_draft_assessment_report_deadline(request, submission_pk=None):
+    submission = get_object_or_404(Submission, pk=submission_pk)
+    form = DraftAssessmentReportDeadlineForm(request.POST or None, instance=submission)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+
+    response = readonly_submission_form(request,
+        extra_context={'draft_assessment_report_deadline_form': form},
+        **submission.current_form_kwargs())
+    response.has_errors = not form.is_valid()
+    return response
+
+
+@task_required
+@with_task_management
+def set_part_ii_timeline(request, submission_pk=None):
+    submission = get_object_or_404(Submission, pk=submission_pk)
+    form = PartIITimelineForm(request.POST or None, instance=submission)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+
+    response = readonly_submission_form(request,
+        extra_context={'part_ii_timeline_form': form},
+        **submission.current_form_kwargs())
+    response.has_errors = not form.is_valid()
+    return response
+
+
+def _latest_ctis_task(submission, uid):
+    return Task.unfiltered.for_data(submission).filter(
+        task_type__workflow_node__uid=uid,
+        deleted_at=None,
+    ).order_by('-created_at').first()
+
+
+def _reopen_ctis_task(request, submission_pk, uid):
+    submission = get_object_or_404(Submission.unfiltered.select_for_update(),
+        pk=submission_pk)
+
+    task = _latest_ctis_task(submission, uid)
+    if not task or not task.closed_at:
+        raise Http404()
+
+    new_task = task.reopen(request.user)
+
+    if task.assigned_to and task.assigned_to != request.user:
+        sender = get_user('root@system.local')
+        subject = _('{task} reopened').format(task=task.task_type)
+        send_message_template(sender, task.assigned_to, subject,
+            'tasks/messages/reopen.txt', {'user': request.user, 'task': task},
+            submission=submission, reply_receiver=request.user)
+
+    return redirect(new_task.url)
+
+
+@user_group_required('CTIS Importer')
+def reopen_draft_assessment_report_deadline(request, submission_pk=None):
+    return _reopen_ctis_task(request, submission_pk, 'draft_assessment_report_deadline')
+
+
+@user_group_required('CTIS Importer')
+def reopen_part_ii_timeline(request, submission_pk=None):
+    return _reopen_ctis_task(request, submission_pk, 'part_ii_timeline')
+
+
+def ctr_documents(request, submission_pk=None):
+    """
+    The « Hochgeladene Dokumente » tab's own widget - loaded into
+    `.upload_container` via AJAX (`ctr/tabs.html`), and re-loaded the same
+    way after every upload/delete, exactly as the classic per-application
+    document upload widget works (`ecs.documents.views.upload_document`).
+    Kept out of the classic `Document.parent_object` per-application flow -
+    these attach to the `Submission` itself, generically, restricted here to
+    the two types this tab is for.
+    """
+    submission = get_object_or_404(Submission, pk=submission_pk)
+    if not sees_full_ctr_form(request.user, submission):
+        raise Http404()
+
+    content_type = ContentType.objects.get_for_model(Submission)
+    form = None
+    if request.user.groups.filter(name='CTIS Importer').exists():
+        form = SubmissionDocumentForm(request.POST or None, request.FILES or None, prefix='document')
+        if request.method == 'POST' and form.is_valid():
+            document = form.save()
+            Document.objects.filter(pk=document.pk).update(
+                content_type=content_type, object_id=submission.id, stamp_on_download=False)
+            form = SubmissionDocumentForm(prefix='document')
+
+    documents = Document.objects.filter(content_type=content_type, object_id=submission.id)
+    documents = documents.exclude(
+        pk__in=documents.exclude(replaces_document=None).values('replaces_document').query)
+
+    return render(request, 'submissions/ctr/upload_form.html', {
+        'submission': submission,
+        'form': form,
+        'documents': documents.order_by('doctype__identifier', 'date', 'name'),
+    })
+
+
+@user_group_required('CTIS Importer')
+@require_POST
+def set_ctr_document_hidden(request, submission_pk=None):
+    submission = get_object_or_404(Submission, pk=submission_pk)
+    document_id = request.POST.get('document_id', '')
+    if request.POST.get('hidden') == '1':
+        submission.ctis_hidden_documents.get_or_create(document_id=document_id)
+    else:
+        submission.ctis_hidden_documents.filter(document_id=document_id).delete()
+    return JsonResponse({'hidden': request.POST.get('hidden') == '1'})
+
+
+@user_group_required('CTIS Importer')
+@require_POST
+def delete_ctr_document(request, submission_pk=None):
+    document = get_object_or_404(Document,
+        pk=request.POST.get('document_pk'),
+        content_type=ContentType.objects.get_for_model(Submission),
+        object_id=submission_pk,
+    )
+    document.delete()
+    # Redirect rather than render directly: ctr_documents would treat this
+    # POST as an upload attempt.
+    return redirect('core.submission.ctr_documents', submission_pk=submission_pk)
+
+
+def view_ctr_upload(request, submission_pk=None, document_pk=None):
+    submission = get_object_or_404(Submission, pk=submission_pk)
+    document = get_object_or_404(Document,
+        pk=document_pk,
+        content_type=ContentType.objects.get_for_model(Submission),
+        object_id=submission_pk,
+    )
+    if not sees_full_ctr_form(request.user, submission):
+        raise Http404()
+    return handle_download(request, document, view=True)
+
+
+def download_ctr_upload(request, submission_pk=None, document_pk=None):
+    submission = get_object_or_404(Submission, pk=submission_pk)
+    document = get_object_or_404(Document,
+        pk=document_pk,
+        content_type=ContentType.objects.get_for_model(Submission),
+        object_id=submission_pk,
+    )
+    if not sees_full_ctr_form(request.user, submission):
+        raise Http404()
+    return handle_download(request, document)
+
+
+@user_passes_test(lambda u: u.profile.is_internal or
+    u.groups.filter(name='CTIS Importer').exists())
+def ctis_overview(request):
+    """
+    The one-page CTIS report: every CTIS study with its Draft Assessment
+    Report deadline status and whether the report has been uploaded, so the
+    office doesn't have to open each study to find out. Supersedes relying
+    on `all_submissions`/`AllSubmissionsFilterForm` for this, which has no
+    notion of a deadline at all.
+    """
+    if request.GET.get('part') == '2':
+        return _ctis_overview_part_ii(request)
+
+    today = timezone.localdate()
+    content_type = ContentType.objects.get_for_model(Submission)
+    uploaded_subquery = Document.objects.filter(
+        content_type=content_type,
+        object_id=OuterRef('pk'),
+        doctype__identifier='draft_assessment_report',
+    )
+
+    submissions = (Submission.objects
+        .filter(current_ctr_form__isnull=False)
+        .select_related('current_ctr_form')
+        .annotate(
+            draft_assessment_report_uploaded=Exists(uploaded_subquery),
+            deadline_status=Case(
+                When(draft_assessment_report_deadline=None, then=Value(DAR_DEADLINE_NOT_ENTERED)),
+                When(draft_assessment_report_deadline__gt=today, then=Value(DAR_DEADLINE_UPCOMING)),
+                default=Value(DAR_DEADLINE_PASSED),
+                output_field=CharField(),
+            ),
+            # A plain date sort would interleave "passed" and "upcoming" by
+            # raw value, since a passed deadline is numerically smaller than
+            # an upcoming one. Group by urgency instead: no deadline set
+            # first (nothing scheduled at all), then the soonest upcoming
+            # deadlines, then the longest-overdue passed ones.
+            deadline_sort_priority=Case(
+                When(draft_assessment_report_deadline=None, then=Value(0)),
+                When(draft_assessment_report_deadline__gt=today, then=Value(1)),
+                default=Value(2),
+                output_field=IntegerField(),
+            ),
+        )
+        .order_by('deadline_sort_priority', 'draft_assessment_report_deadline', 'ec_number'))
+
+    # Same convention as `submission_list`: POST carries a real submission,
+    # otherwise fall back to what this user filtered by last time - no query
+    # params, so the filter survives a plain reload or revisit.
+    usersettings = request.user.ecs_settings
+    # The Part II view keeps its own filter state under the `part_ii` key of
+    # the same setting, so leave it alone here.
+    saved_filter = usersettings.ctis_overview_filter
+    part_ii_filter = saved_filter.get('part_ii')
+    filter_form = CTISOverviewFilterForm(request.POST or
+        {k: v for k, v in saved_filter.items() if k != 'part_ii'})
+    if filter_form.is_valid():
+        submissions = filter_form.filter(submissions)
+        usersettings.ctis_overview_filter = dict(filter_form.cleaned_data)
+        if part_ii_filter:
+            usersettings.ctis_overview_filter['part_ii'] = part_ii_filter
+        usersettings.save()
+
+    paginator = Paginator(submissions, 50, allow_empty_first_page=True)
+    try:
+        page = paginator.page(request.GET.get('page', 1))
+    except (EmptyPage, InvalidPage):
+        page = paginator.page(1)
+
+    for submission in page.object_list:
+        deadline = submission.draft_assessment_report_deadline
+        if not deadline:
+            submission.dar_days_remaining = None
+        elif deadline >= today:
+            days = (deadline - today).days
+            submission.dar_days_remaining = (
+                'heute fällig' if days == 0
+                else 'in {} Tag{}'.format(days, 'en' if days != 1 else ''))
+        else:
+            days = (today - deadline).days
+            submission.dar_days_remaining = 'seit {} Tag{}'.format(
+                days, 'en' if days != 1 else '')
+
+    return render(request, 'submissions/ctis_overview.html', {
+        'title': 'CTIS-Übersicht',
+        'part': 1,
+        'submissions': page,
+        'filter_form': filter_form,
+    })
+
+
+def _ctis_overview_part_ii(request):
+    """
+    The Part II view of `ctis_overview`: the three timeline dates, the
+    application type and the reviewer (the owner of the study's Part II
+    task). Ordered by whichever date the filter picks, studies without that
+    date last.
+    """
+    from ecs.tasks.models import Task
+    reviewer_subquery = (Task.unfiltered
+        .filter(content_type=ContentType.objects.get_for_model(Submission),
+            data_id=OuterRef('pk'),
+            task_type__workflow_node__uid='part_ii_timeline',
+            deleted_at=None)
+        .order_by('-created_at')
+        .values('assigned_to')[:1])
+    submissions = (Submission.objects
+        .filter(current_ctr_form__isnull=False)
+        .select_related('current_ctr_form')
+        .annotate(part_ii_reviewer_id=Subquery(reviewer_subquery)))
+
+    usersettings = request.user.ecs_settings
+    saved_filter = usersettings.ctis_overview_filter
+    filter_form = CTISPartIIOverviewFilterForm(request.POST or saved_filter.get('part_ii'),
+        user=request.user)
+    if filter_form.is_valid():
+        submissions = filter_form.filter(submissions, request.user)
+        usersettings.ctis_overview_filter = dict(saved_filter,
+            part_ii=filter_form.cleaned_data)
+        usersettings.save()
+    date_field = filter_form.cleaned_data.get('date_field') or 'response_expected'
+    submissions = submissions.order_by(F(date_field).asc(nulls_last=True), 'ec_number')
+
+    paginator = Paginator(submissions, 50, allow_empty_first_page=True)
+    try:
+        page = paginator.page(request.GET.get('page', 1))
+    except (EmptyPage, InvalidPage):
+        page = paginator.page(1)
+
+    reviewers = User.objects.select_related('profile').in_bulk(
+        [s.part_ii_reviewer_id for s in page.object_list if s.part_ii_reviewer_id])
+    for submission in page.object_list:
+        submission.part_ii_reviewer = reviewers.get(submission.part_ii_reviewer_id)
+
+    return render(request, 'submissions/ctis_overview.html', {
+        'title': 'CTIS-Übersicht',
+        'part': 2,
+        'submissions': page,
+        'filter_form': filter_form,
+        'date_field': date_field,
+    })
+
+
+@user_group_required('CTIS Importer')
+def ctis_deadline_widget(request):
+    """
+    Dashboard widget for the CTIS Importer group: CTIS studies whose Draft
+    Assessment Report is still outstanding and due within the next 7 days.
+    Links through to `ctis_overview` for anything beyond that.
+    """
+    today = timezone.localdate()
+    content_type = ContentType.objects.get_for_model(Submission)
+    uploaded_subquery = Document.objects.filter(
+        content_type=content_type,
+        object_id=OuterRef('pk'),
+        doctype__identifier='draft_assessment_report',
+    )
+
+    submissions = (Submission.objects
+        .filter(
+            current_ctr_form__isnull=False,
+            draft_assessment_report_deadline__gte=today,
+            draft_assessment_report_deadline__lte=today + datetime.timedelta(days=7),
+        )
+        .select_related('current_ctr_form')
+        .annotate(draft_assessment_report_uploaded=Exists(uploaded_subquery))
+        .filter(draft_assessment_report_uploaded=False)
+        .order_by('draft_assessment_report_deadline', 'ec_number'))
+
+    for submission in submissions:
+        days = (submission.draft_assessment_report_deadline - today).days
+        submission.dar_days_remaining = (
+            'heute fällig' if days == 0
+            else 'in {} Tag{}'.format(days, 'en' if days != 1 else ''))
+
+    return render(request, 'submissions/ctis_deadline_widget.html', {
+        'submissions': submissions,
+    })
 
 
 def reopen_checklist(request, submission_pk=None, blueprint_pk=None):
@@ -472,18 +951,18 @@ def reopen_checklist(request, submission_pk=None, blueprint_pk=None):
 def categorization_review(request, submission_pk=None):
     submission = get_object_or_404(Submission, pk=submission_pk)
     return readonly_submission_form(request,
-        submission_form=submission.current_submission_form,
         extra_context={
             'categorization_review': True,
             'categorization_task': request.related_tasks[0].review_for,
-        })
+        },
+        **submission.current_form_kwargs())
 
 
 @task_required
 @with_task_management
 def initial_review(request, submission_pk=None):
     submission = get_object_or_404(Submission, pk=submission_pk)
-    return readonly_submission_form(request, submission_form=submission.current_submission_form)
+    return readonly_submission_form(request, **submission.current_form_kwargs())
 
 
 @user_flag_required('is_internal')
@@ -494,7 +973,7 @@ def paper_submission_review(request, submission_pk=None):
     if not task.assigned_to == request.user:
         task.accept(request.user)
         return redirect('core.submission.paper_submission_review', submission_pk=submission_pk)
-    return readonly_submission_form(request, submission_form=submission.current_submission_form)
+    return readonly_submission_form(request, **submission.current_form_kwargs())
 
 
 @user_flag_required('is_internal')
@@ -541,12 +1020,21 @@ def remove_biased_board_member(request, submission_pk=None, user_pk=None):
 
 
 @with_task_management
-def show_checklist_review(request, submission_form_pk=None, checklist_pk=None):
-    submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
+def show_checklist_review(request, submission_form_pk=None, ctr_submission_form_pk=None, checklist_pk=None):
+    if ctr_submission_form_pk:
+        current_form = get_object_or_404(CTRSubmissionForm, pk=ctr_submission_form_pk)
+    else:
+        current_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
     checklist = get_object_or_404(Checklist, pk=checklist_pk)
-    if not submission_form.submission == checklist.submission:
+    if not current_form.submission == checklist.submission:
         raise Http404()
-    return readonly_submission_form(request, submission_form=submission_form, extra_context={'active_checklist': checklist.pk})
+    if ctr_submission_form_pk:
+        kwargs = {'ctr_submission_form': current_form}
+    else:
+        kwargs = {'submission_form': current_form}
+    return readonly_submission_form(request,
+        extra_context={'active_checklist': checklist.pk},
+        **kwargs)
 
 
 @user_flag_required('is_internal')
@@ -563,15 +1051,21 @@ def drop_checklist_review(request, submission_form_pk=None, checklist_pk=None):
 
 @task_required
 @with_task_management
-def checklist_review(request, submission_form_pk=None, blueprint_pk=None):
-    submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
-    if request.method == 'GET' and not submission_form.is_current:
-        return redirect('', submission_form_pk=submission_form.submission.current_submission_form.pk, blueprint_pk=blueprint_pk)
+def checklist_review(request, submission_form_pk=None, ctr_submission_form_pk=None, blueprint_pk=None):
+    if ctr_submission_form_pk:
+        current_form = get_object_or_404(CTRSubmissionForm, pk=ctr_submission_form_pk)
+    else:
+        current_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
+    submission = current_form.submission
+
+    if request.method == 'GET' and not current_form.is_current:
+        return redirect('core.submission.checklist_review', blueprint_pk=blueprint_pk,
+            **submission.current_form_url_kwargs())
     blueprint = get_object_or_404(ChecklistBlueprint, pk=blueprint_pk)
 
     user = request.user if blueprint.multiple else get_user('root@system.local')
     checklist, created = Checklist.unfiltered.select_for_update().update_or_create(
-        blueprint=blueprint, submission=submission_form.submission, user=user,
+        blueprint=blueprint, submission=submission, user=user,
         defaults={'last_edited_by': request.user},
     )
     if created:
@@ -591,48 +1085,57 @@ def checklist_review(request, submission_form_pk=None, blueprint_pk=None):
         formset.save()
         checklist.save()    # XXX: trigger post_save signal
 
-    response = readonly_submission_form(request, submission_form=submission_form,
-        checklist_overwrite={checklist: formset}, extra_context=extra_context)
+    response = readonly_submission_form(request,
+        checklist_overwrite={checklist: formset}, extra_context=extra_context,
+        **submission.current_form_kwargs())
     response.has_errors = not formset.is_valid()
     return response
 
 
 @task_required
 @with_task_management
-def vote_review(request, submission_form_pk=None):
-    submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
-    vote = submission_form.submission.current_pending_vote
+def vote_review(request, submission_form_pk=None, ctr_submission_form_pk=None):
+    if ctr_submission_form_pk:
+        current_form = get_object_or_404(CTRSubmissionForm, pk=ctr_submission_form_pk)
+    else:
+        current_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
+    submission = current_form.submission
+    vote = submission.current_pending_vote
     if not vote:
         raise Http404("This SubmissionForm has no Vote yet.")
     vote_review_form = VoteReviewForm(request.POST or None, instance=vote)
     if request.method == 'POST' and vote_review_form.is_valid():
         vote_review_form.save()
 
-    response = readonly_submission_form(request, submission_form=submission_form, extra_context={
+    response = readonly_submission_form(request, extra_context={
         'vote_review_form': vote_review_form,
         'vote_version': vote.version_number,
-    })
+    }, **submission.current_form_kwargs())
     response.has_errors = not vote_review_form.is_valid()
     return response
 
 @task_required
 @with_task_management
-def vote_preparation(request, submission_form_pk=None):
-    submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
-    vote = submission_form.submission.current_pending_vote
+def vote_preparation(request, submission_form_pk=None, ctr_submission_form_pk=None):
+    if ctr_submission_form_pk:
+        current_form = get_object_or_404(CTRSubmissionForm, pk=ctr_submission_form_pk)
+    else:
+        current_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
+    submission = current_form.submission
+    vote = submission.current_pending_vote
 
     # TODO: prevent race condition where new version is submitted while the
     # vote preparation is done
-    assert submission_form.is_current
+    assert current_form.is_current
 
-    if submission_form.submission.is_expedited:
+    if submission.is_expedited:
         blueprint_slug = 'expedited_review'
-    elif submission_form.submission.is_localec:
+    elif submission.is_localec:
         blueprint_slug = 'localec_review'
     else:
         blueprint_slug = 'thesis_review'
 
-    checklists = Checklist.objects.filter(submission=submission_form.submission,
+    checklists = Checklist.objects.filter(submission=submission,
         blueprint__slug=blueprint_slug, status='completed')
 
     text = []
@@ -645,36 +1148,43 @@ def vote_preparation(request, submission_form_pk=None):
         initial = {'text': text}
     form = VotePreparationForm(request.POST or None, instance=vote, initial=initial)
     form.is_preparation = True
-    
+
     if form.is_valid():
         vote = form.save(commit=False)
-        vote.submission_form = submission_form
+        if ctr_submission_form_pk:
+            vote.ctr_submission_form = current_form
+        else:
+            vote.submission_form = current_form
         vote.save()
 
-    response = readonly_submission_form(request, submission_form=submission_form, extra_context={
+    response = readonly_submission_form(request, extra_context={
         'vote_review_form': form,
         'vote_version': vote.version_number if vote else 0,
-    })
+    }, **submission.current_form_kwargs())
     response.has_errors = not form.is_valid()
     return response
 
 
 @task_required
 @with_task_management
-def b2_vote_preparation(request, submission_form_pk=None):
-    submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
-    submission = submission_form.submission
+def b2_vote_preparation(request, submission_form_pk=None, ctr_submission_form_pk=None):
+    if ctr_submission_form_pk:
+        current_form = get_object_or_404(CTRSubmissionForm, pk=ctr_submission_form_pk)
+    else:
+        current_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
+    submission = current_form.submission
     try:
         with sudo():
             vote = submission.votes.get(is_draft=True, upgrade_for__isnull=False)
     except Vote.DoesNotExist:
         vote = submission.votes.order_by('-pk')[:1][0]
+        form_kwargs = {'ctr_submission_form': current_form} if ctr_submission_form_pk else {'submission_form': current_form}
         vote = Vote.objects.create(
-            submission_form=submission_form, 
-            result='2', 
-            is_draft=True, 
-            upgrade_for=vote, 
+            result='2',
+            is_draft=True,
+            upgrade_for=vote,
             text=vote.text,
+            **form_kwargs,
         )
 
     form = B2VotePreparationForm(request.POST or None, instance=vote)
@@ -682,13 +1192,16 @@ def b2_vote_preparation(request, submission_form_pk=None):
 
     if form.is_valid():
         vote = form.save(commit=False)
-        vote.submission_form = submission_form
+        if ctr_submission_form_pk:
+            vote.ctr_submission_form = current_form
+        else:
+            vote.submission_form = current_form
         vote.save()
-    
-    response = readonly_submission_form(request, submission_form=submission.current_submission_form, extra_context={
+
+    response = readonly_submission_form(request, extra_context={
         'vote_review_form': form,
         'vote_version': vote.version_number if vote else 0,
-    })
+    }, **submission.current_form_kwargs())
     response.has_errors = not form.is_valid()
     return response
 
@@ -892,7 +1405,7 @@ def change_submission_presenter(request, submission_pk=None):
         submission = get_object_or_404(Submission, pk=submission_pk, presenter=request.user)
 
     previous_presenter = submission.presenter
-    form = PresenterChangeForm(request.POST or None)
+    form = PresenterChangeForm(request.POST or None, submission=submission)
 
     valid = form.is_valid()
     if request.method == 'POST' and valid:
@@ -990,15 +1503,25 @@ def submission_list(request, submissions, stashed_submission_forms=None, templat
 
     filterform = filter_form(request.POST or getattr(usersettings, filtername))
 
-    submissions = (filterform.filter_submissions(submissions, request.user)
-        .exclude(current_submission_form=None)
-        .select_related('current_submission_form')
-        .only(
-            'ec_number',
+    only_fields = [
+        'ec_number',
 
-            'current_submission_form__project_title',
-            'current_submission_form__german_project_title',
-        ).prefetch_related(
+        'current_submission_form__project_title',
+        'current_submission_form__german_project_title',
+        'current_ctr_form__ctis_number',
+    ]
+    # The optional CTIS identifiers next to the title read the payload, so the
+    # column is loaded only when one of them is switched on - all three are off
+    # by default, and it is a whole JSON blob per row of the page.
+    if any(AdvancedSettings.objects.values_list(
+            'display_ctis_eu_ct_number', 'display_ctis_application_id',
+            'display_ctis_aut_id')[0]):
+        only_fields.append('current_ctr_form__application')
+
+    submissions = (filterform.filter_submissions(submissions, request.user)
+        .exclude(current_submission_form=None, current_ctr_form=None)
+        .select_related('current_submission_form', 'current_ctr_form')
+        .only(*only_fields).prefetch_related(
             Prefetch('meetings', queryset=
                 Meeting.unfiltered.only('start', 'title').order_by('start')),
         ).distinct()
@@ -1035,7 +1558,7 @@ def submission_list(request, submissions, stashed_submission_forms=None, templat
     paper_submission_tasks = tasks.filter(content_type=submission_ct, data_id__in=visible_submission_pks,
         task_type__workflow_node__uid='paper_submission_review')
     b2_resubmission_tasks = tasks.filter(content_type=vote_ct,
-        data_id__in=Vote.objects.filter(submission_form__submission__pk__in=visible_submission_pks).values('pk').query,
+        data_id__in=Vote.objects.filter(submission__pk__in=visible_submission_pks).values('pk').query,
         task_type__workflow_node__uid='b2_resubmission')
 
     for s in submissions.object_list:
@@ -1048,7 +1571,7 @@ def submission_list(request, submissions, stashed_submission_forms=None, templat
             if task.data == s:
                 s.paper_submission_task = task
         for task in b2_resubmission_tasks:
-            if task.data.submission_form.submission == s:
+            if task.data.submission == s:
                 s.b2_resubmission_task = task
 
     # save the filter in the user settings
@@ -1181,6 +1704,17 @@ def all_submissions(request):
 
             for f in ('project_title', 'german_project_title', 'sponsor_name', 'eudract_number'):
                 q |= _sf_query(f, k)
+
+            # A CTR study keeps its identifiers in the imported payload rather
+            # than on a form. The CTIS number matches partially, the way an EC
+            # number does, so « 2026-509999 » finds every revision of the
+            # trial; an application id is opaque and only ever pasted whole,
+            # so it matches exactly. Both look at all imported revisions, not
+            # just the current one - a number from an earlier import should
+            # still find the study.
+            q |= _query('ctr_forms__ctis_number', k)
+            q |= Q(ctr_forms__application__applications__contains=[
+                {'applicationId': k}])
 
             for f in ('presenter', 'susar_presenter'):
                 q |= _query('{0}__first_name'.format(f), k)

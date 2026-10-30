@@ -14,7 +14,7 @@ class InvolvedPartiesChoiceField(forms.ModelChoiceField):
         super().__init__(User.objects.none(), *args, **kwargs)
 
     def set_submission(self, submission):
-        involved_parties = submission.current_submission_form.get_involved_parties()
+        involved_parties = submission.current_form.get_involved_parties()
         self.queryset = User.objects.filter(
             is_active=True,
             pk__in=[
@@ -56,7 +56,7 @@ class SendMessageForm(forms.ModelForm):
         ]
         receiver_type_initial = 'ec'
 
-        if submission and get_current_user() not in submission.current_submission_form.get_presenting_parties():
+        if submission and get_current_user() not in submission.current_form.get_presenting_parties():
             receiver_type_choices += [
                 ('involved', _('Involved Party')),
             ]

@@ -38,6 +38,7 @@ if os.getenv('ECS_PROD', 'false').lower() == 'true':
 # Default development settings
 else:
     # PDF Signing will use fake signing if PDFAS_SERVICE is "mock:"
+    # PDFAS_SERVICE = 'https://appliancetest.programmierfabrik.eu/pdf-as-web/'
     PDFAS_SERVICE = 'mock:'
     DEBUG = True
     EMAIL_HOST = 'localhost'
@@ -228,6 +229,37 @@ INSTALLED_APPS = (
 # authenticate with email address
 AUTHENTICATION_BACKENDS = ('ecs.users.backends.EmailAuthBackend',)
 
+# Keycloak SSO (optional, for poweruser day-to-day login). Authentication
+# only - authorization stays entirely in the app (see ecs.authorization).
+ECS_KEYCLOAK_ENABLED = os.getenv('ECS_KEYCLOAK_ENABLED', '').lower() == 'true'
+
+if ECS_KEYCLOAK_ENABLED:
+    INSTALLED_APPS = INSTALLED_APPS + ('mozilla_django_oidc',)
+    AUTHENTICATION_BACKENDS = AUTHENTICATION_BACKENDS + ('ecs.users.backends.KeycloakOIDCBackend',)
+
+    KEYCLOAK_SERVER_URL = os.getenv('ECS_KEYCLOAK_SERVER_URL')
+    KEYCLOAK_REALM = os.getenv('ECS_KEYCLOAK_REALM')
+    _keycloak_base = '{0}/realms/{1}/protocol/openid-connect'.format(KEYCLOAK_SERVER_URL, KEYCLOAK_REALM)
+
+    OIDC_RP_CLIENT_ID = os.getenv('ECS_KEYCLOAK_CLIENT_ID')
+    # Public client (no client authentication) - the Keycloak client must be
+    # configured accordingly. Auth-code interception is mitigated by PKCE
+    # below instead of a shared secret; the ID token is verified against
+    # Keycloak's own signing keys (OIDC_OP_JWKS_ENDPOINT), not by revocation.
+    OIDC_RP_CLIENT_SECRET = ''
+    OIDC_USE_PKCE = True
+    OIDC_RP_SIGN_ALGO = 'RS256'
+    OIDC_OP_AUTHORIZATION_ENDPOINT = _keycloak_base + '/auth'
+    OIDC_OP_TOKEN_ENDPOINT = _keycloak_base + '/token'
+    OIDC_OP_USER_ENDPOINT = _keycloak_base + '/userinfo'
+    OIDC_OP_JWKS_ENDPOINT = _keycloak_base + '/certs'
+
+    OIDC_RP_SCOPES = 'openid email profile'
+    OIDC_CREATE_USER = False
+    OIDC_USE_NONCE = True
+    OIDC_STORE_ACCESS_TOKEN = False
+    OIDC_STORE_ID_TOKEN = False
+
 # Force Django to always use real files, not an InMemoryUploadedFile.
 # The document processing pipeline depends on the file objects having
 # a fileno().
@@ -286,6 +318,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # used by ecs.pki
 ECS_CA_ROOT = os.path.join(PROJECT_DIR, 'data', 'ca')
+
+# CTR-ECS interface (CTIS). The API is protected by Keycloak; ecs.core.ctis
+# trades these client credentials for a bearer token. Unset (the default)
+# means this instance has no CTIS connection and says so when asked to import.
+CTIS_API = os.getenv('ECS_CTIS_API', '').rstrip('/')
+CTIS_CLIENT_ID = os.getenv('ECS_CTIS_CLIENT_ID', '')
+CTIS_CLIENT_SECRET = os.getenv('ECS_CTIS_CLIENT_SECRET', '')
+CTIS_TOKEN_ENDPOINT = os.getenv('ECS_CTIS_TOKEN_ENDPOINT', '')
 
 # users in these groups receive messages even when they are not related to studies
 ECS_MEETING_AGENDA_RECEIVER_GROUPS = (

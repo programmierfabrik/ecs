@@ -227,6 +227,15 @@
         {% with localec_submissions as submissions %}{% include 'submissions/compact_list.html' %}{% endwith %}
     </p>
   </li>
+  <li class="list-group-item d-block">
+    <h5 class="list-group-item-heading">
+        CTIS
+        <span class="badge badge-default badge-pill float-right">{{ ctr_submissions|length }}</span>
+    </h5>
+    <p class="list-group-item-text">
+        {% with ctr_submissions as submissions %}{% include 'submissions/compact_list.html' %}{% endwith %}
+    </p>
+  </li>
 </ul>
 
 <ul class="list-group mb-3">

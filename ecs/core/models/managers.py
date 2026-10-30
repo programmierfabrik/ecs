@@ -20,10 +20,24 @@ class SubmissionQuerySet(models.QuerySet):
         return self.filter(current_submission_form__project_type_medical_device=True)
         
     def not_amg_and_not_mpg(self):
-        return self.exclude(current_submission_form__project_type_medical_device=True) & self.exclude(Q(current_submission_form__project_type_non_reg_drug=True)|Q(current_submission_form__project_type_reg_drug=True))
+        # A CTIS study has no `current_submission_form` for any of these
+        # lookups to match against, so excluding on them never excludes it -
+        # it would otherwise double-count here as well as under `ctr()`.
+        qs = self.not_ctr()
+        return qs.exclude(current_submission_form__project_type_medical_device=True) & qs.exclude(Q(current_submission_form__project_type_non_reg_drug=True)|Q(current_submission_form__project_type_reg_drug=True))
 
     def amg_mpg(self):
         return self.amg() & self.mpg()
+
+    def not_ctr(self):
+        # Everything that is not a CTIS study. Most of the classic queries
+        # reach through `current_submission_form` and so exclude CTIS studies
+        # by accident; this one says it on purpose.
+        return self.filter(current_ctr_form=None)
+
+    def ctr(self):
+        # The CTIS studies themselves - the counterpart of `not_ctr`.
+        return self.exclude(current_ctr_form=None)
 
     def expedited(self):
         return self.filter(workflow_lane=SUBMISSION_LANE_EXPEDITED)

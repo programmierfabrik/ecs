@@ -15,11 +15,15 @@
     {% block tab_headers %}
         <div id="tabs_submission" class="collapse">
             <ul class="nav nav-tabs flex-wrap tab_headers mb-3">
-                {% for tab in tabs %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="#tabs-{{ forloop.counter }}">{{ tab.label }}</a>
-                    </li>
-                {% endfor %}
+                {% if is_ctr %}
+                    {% include "submissions/ctr/tab_headers.html" %}
+                {% else %}
+                    {% for tab in tabs %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="#tabs-{{ forloop.counter }}">{{ tab.label }}</a>
+                        </li>
+                    {% endfor %}
+                {% endif %}
                 {% block submission_action_buttons %}
                 {% endblock %}
             </ul>
@@ -28,6 +32,9 @@
 
       <div class="form_main{% if readonly %} readonly{% endif %}">
           {% block tabs %}
+            {% if is_ctr %}
+                {% include "submissions/ctr/tabs.html" %}
+            {% else %}
             {% for tab in tabs %}
                 <div id="tabs-{{ forloop.counter }}" class="collapse {% if tab.slug != 'measures' %}container{% endif %}">
 
@@ -272,6 +279,7 @@
                     {% endfor %}
                 </div>
             {% endfor %}
+            {% endif %}
           {% endblock %}
      </div>
 {% endblock %}

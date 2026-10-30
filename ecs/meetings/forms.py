@@ -86,6 +86,29 @@ class SubmissionReschedulingForm(forms.Form):
         self.fields['to_meeting'].queryset = Meeting.objects.filter(started=None).exclude(pk__in=[m.pk for m in current_meetings]).order_by('start')
 
 
+class SubmissionSchedulingForm(forms.Form):
+    to_meeting = forms.ModelChoiceField(Meeting.objects.none(),
+        label=_('To meeting'))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['to_meeting'].queryset = Meeting.objects.filter(
+            started=None).order_by('start')
+
+
+class SubmissionUnschedulingForm(forms.Form):
+    from_meeting = forms.ModelChoiceField(Meeting.objects.none(),
+        label=_('From meeting'))
+
+    def __init__(self, *args, **kwargs):
+        submission = kwargs.pop('submission')
+        super().__init__(*args, **kwargs)
+        # a TOP that has been voted on is history, not a mistake to undo
+        self.fields['from_meeting'].queryset = Meeting.objects.filter(
+            started=None, timetable_entries__submission=submission,
+            timetable_entries__vote__isnull=True).order_by('start').distinct()
+
+
 class UserChoiceField(forms.ModelChoiceField):
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop('queryset', None)
@@ -188,10 +211,10 @@ class ExpeditedVoteForm(forms.ModelForm):
 
     def save(self, commit=True):
         if self.cleaned_data.get('accept_prepared_vote', False):
-            submission_form = self.instance.submission.current_submission_form
-            vote = submission_form.submission.current_pending_vote
+            submission = self.instance.submission
+            vote = submission.current_pending_vote
             if vote is None:
-                vote = Vote.objects.create(submission_form=submission_form, result='3a', is_draft=True)
+                vote = Vote.objects.create(result='3a', is_draft=True, **submission.current_form_kwargs())
             vote.top = self.instance
             vote.is_draft = False
             vote.save()

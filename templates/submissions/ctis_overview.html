@@ -1,0 +1,171 @@
+{% extends 'core.html' %}
+{% load i18n core userutils %}
+
+{% block htmltitle %}{{ title }} | {{ block.super }}{% endblock %}
+{% block headertitle %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+
+    <ul class="nav nav-pills mb-4">
+        <li class="nav-item"><a class="nav-link {% if part == 1 %}active{% endif %}" href="{{ request.path }}">Part I</a></li>
+        <li class="nav-item"><a class="nav-link {% if part == 2 %}active{% endif %}" href="{{ request.path }}?part=2">Part II</a></li>
+    </ul>
+
+{% if part == 2 %}
+    <form method="post" action="{{ request.path }}?part=2" class="form-inline justify-content-between align-items-center mb-5">
+        {% csrf_token %}
+        <ul class="list-unstyled mb-0 mr-5">
+            <li class="text-muted mb-2">{{ filter_form.date_field.label }}</li>
+            {% for radio in filter_form.date_field %}
+                <li class="form-check justify-content-start mb-2">
+                    <label class="form-check-label">
+                        {{ radio.tag }}
+                        {{ radio.choice_label }}
+                    </label>
+                </li>
+            {% endfor %}
+        </ul>
+        <div class="mr-5 align-self-start">
+            <div class="text-muted mb-2">{{ filter_form.reviewer.label }}</div>
+            {{ filter_form.reviewer }}
+        </div>
+        <button type="submit" class="btn btn-primary align-self-end">Filtern</button>
+    </form>
+
+    <p class="text-muted">{{ submissions.paginator.count }} Studie{{ submissions.paginator.count|pluralize:"n" }} gefunden</p>
+
+    {% include 'paginator.html' with page=submissions query_prefix='part=2&' %}
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>EC-Nummer</th>
+                    <th>CTIS-Nummer</th>
+                    <th>Titel</th>
+                    <th>Typ</th>
+                    <th {% if date_field == 'doc_cons_from' %}class="text-primary"{% endif %}>Doc Cons von</th>
+                    <th {% if date_field == 'doc_cons_to' %}class="text-primary"{% endif %}>Doc Cons bis</th>
+                    <th {% if date_field == 'response_expected' %}class="text-primary"{% endif %}>Response Expected</th>
+                    <th>Reviewer</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for submission in submissions.object_list %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'view_submission' submission_pk=submission.pk %}">
+                                {{ submission|ec_number }}
+                            </a>
+                        </td>
+                        <td>{{ submission.current_ctr_form.ctis_number }}</td>
+                        <td>{{ submission.project_title_display }}</td>
+                        <td>{{ submission.current_ctr_form.ctis_application_type_tag|default:'–' }}</td>
+                        <td>{{ submission.doc_cons_from|date:'d.m.Y'|default:'–' }}</td>
+                        <td>{{ submission.doc_cons_to|date:'d.m.Y'|default:'–' }}</td>
+                        <td>{{ submission.response_expected|date:'d.m.Y'|default:'–' }}</td>
+                        <td>{% if submission.part_ii_reviewer %}{{ submission.part_ii_reviewer|full_name }}{% else %}–{% endif %}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">Keine CTIS-Studien gefunden.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include 'paginator.html' with page=submissions query_prefix='part=2&' %}
+{% else %}
+    <form method="post" action="{{ request.path }}" class="form-inline justify-content-between align-items-center mb-5">
+        {% csrf_token %}
+        <ul class="list-unstyled mb-0 mr-5">
+            <li class="text-muted mb-2">{{ filter_form.deadline_status.label }}</li>
+            {% for checkbox in filter_form.deadline_status %}
+                <li class="form-check justify-content-start mb-2">
+                    <label class="form-check-label">
+                        {{ checkbox.tag }}
+                        {{ checkbox.choice_label }}
+                    </label>
+                </li>
+            {% endfor %}
+        </ul>
+        <ul class="list-unstyled mb-0 mr-5">
+            <li class="text-muted mb-2">{{ filter_form.uploaded.label }}</li>
+            {% for checkbox in filter_form.uploaded %}
+                <li class="form-check justify-content-start mb-2">
+                    <label class="form-check-label">
+                        {{ checkbox.tag }}
+                        {{ checkbox.choice_label }}
+                    </label>
+                </li>
+            {% endfor %}
+        </ul>
+        <ul class="list-unstyled mb-0 mr-5">
+            <li class="text-muted mb-2">{{ filter_form.days_ahead.label }}</li>
+            {% for radio in filter_form.days_ahead %}
+                <li class="form-check justify-content-start mb-2">
+                    <label class="form-check-label">
+                        {{ radio.tag }}
+                        {{ radio.choice_label }}
+                    </label>
+                </li>
+            {% endfor %}
+        </ul>
+        <button type="submit" class="btn btn-primary">Filtern</button>
+    </form>
+
+    <p class="text-muted">{{ submissions.paginator.count }} Studie{{ submissions.paginator.count|pluralize:"n" }} gefunden</p>
+
+    {% include 'paginator.html' with page=submissions %}
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>EC-Nummer</th>
+                    <th>CTIS-Nummer</th>
+                    <th>Titel</th>
+                    <th>Draft Assessment Report Deadline</th>
+                    <th>Verbleibende Tage</th>
+                    <th>Hochgeladen</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for submission in submissions.object_list %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'view_submission' submission_pk=submission.pk %}">
+                                {{ submission|ec_number }}
+                            </a>
+                        </td>
+                        <td>{{ submission.current_ctr_form.ctis_number }}</td>
+                        <td>{{ submission.project_title_display }}</td>
+                        <td>
+                            {% if submission.deadline_status == 'not_entered' %}
+                                <span class="badge badge-danger">Keine Deadline gesetzt</span>
+                            {% elif submission.deadline_status == 'upcoming' %}
+                                <span class="badge badge-warning">Anstehend bis {{ submission.draft_assessment_report_deadline|date:'d.m.Y' }}</span>
+                            {% else %}
+                                <span class="badge badge-success">Fällig seit {{ submission.draft_assessment_report_deadline|date:'d.m.Y' }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ submission.dar_days_remaining|default:'–' }}</td>
+                        <td>
+                            {% if submission.draft_assessment_report_uploaded %}Ja{% else %}Nein{% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">Keine CTIS-Studien gefunden.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include 'paginator.html' with page=submissions %}
+{% endif %}
+</div>
+{% endblock %}

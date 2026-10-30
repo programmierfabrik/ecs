@@ -1,0 +1,35 @@
+{% comment %}
+    One item of a set at a time, picked from a chip strip - the pattern the
+    classic centres tab uses for investigators (ecs.InvestigatorFormset's jump
+    list), down to the same Bootstrap classes, so switching between sponsors
+    looks like switching between centres.
+
+    Chip and pane are matched by position, as they are there. `entry` is a
+    ctis_render.Chips.
+{% endcomment %}
+<li class="ctr-chips">
+    <ul class="ctr-chip-list list-unstyled">
+        {% for group in entry.groups %}
+            <li class="btn-group mr-2 mb-2 readonly">
+                <button type="button" class="btn btn-outline-primary{% if forloop.first %} active{% endif %}">
+                    {{ group.label }}
+                </button>
+            </li>
+        {% endfor %}
+    </ul>
+    {% for group in entry.groups %}
+        <div class="ctr-chip-pane{% if forloop.first %} ctr-chip-pane-active{% endif %}">
+            {% if group.entries %}
+                <ul class="list-unstyled mb-0">
+                    {% include "submissions/ctr/entries.html" with entries=group.entries %}
+                </ul>
+            {% endif %}
+            {% for section in group.sections %}
+                {% include "submissions/ctr/section.html" %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+    {% if entry.note %}
+        <div class="text-muted">{{ entry.note }}</div>
+    {% endif %}
+</li>

@@ -2,7 +2,7 @@
 {% load core i18n %}
 
 {% block headertitle %}
-    {% trans "Reschedule Submission" %}
+    {{ title }}
 {% endblock %}
 
 {% block content %}
@@ -12,7 +12,7 @@
     {% for field in form %}
         {% include 'bootstrap/form_field.html' with inline=True %}
     {% endfor %}
-    <input class="btn btn-primary" type="submit" value="{% trans "Save and return to study" %}" />
+    <input class="btn btn-primary" type="submit" value="{{ submit_label }}" />
 </form>
 {% endblock %}
 

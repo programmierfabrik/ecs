@@ -37,6 +37,12 @@ class AdvancedSettings(models.Model):
     display_amendment_in_meeting_for_board_member = models.BooleanField(default=False)
     dont_delegate_specalist_tasks_from_executive = models.BooleanField(default=False)
 
+    # CTIS identifiers next to the study title. All off, so a release changes
+    # nothing until the office asks for one of them.
+    display_ctis_eu_ct_number = models.BooleanField(default=False)
+    display_ctis_application_id = models.BooleanField(default=False)
+    display_ctis_aut_id = models.BooleanField(default=False)
+
     # custom logos
     logo = models.BinaryField(null=True)
     logo_mimetype = models.CharField(max_length=100, null=True)

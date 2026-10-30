@@ -98,6 +98,11 @@ def has_assigned_submissions(user):
 
 
 @register.filter
+def is_ctis_importer(user):
+    return user.groups.filter(name='CTIS Importer').exists()
+
+
+@register.filter
 def is_docstash(obj):
     return isinstance(obj, DocStash)
 

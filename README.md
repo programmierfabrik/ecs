@@ -45,7 +45,11 @@ or in your Jetbrains based IDE with the `run` or (preferably) `debug` button.
 ### Download database from production
 
 Be sure that the database is empty (no migrations or data). If it is not empty
-just `docker-compose down && docker-compose up -d`.
+just drop and recreate it:
+
+```shell
+docker exec test-ecs dropdb -U test-ecs --if-exists --force test-ecs && docker exec test-ecs createdb -U test-ecs test-ecs
+```
 
 ```shell
 ssh ecs@example.com cat ./deployment/data/ecs/dump/ecs.pgdump.gz | \
@@ -61,6 +65,6 @@ docker exec test-ecs pg_dump -U test-ecs -Fc -Z0 > ./data/ecs.dump
 ```
 
 ```shell
-docker-compose down && sudo rm -rf ./data/postgres && docker-compose up -d
+docker exec test-ecs dropdb -U test-ecs --if-exists --force test-ecs && docker exec test-ecs createdb -U test-ecs test-ecs
 docker exec -i test-ecs pg_restore -U test-ecs -1 --format=custom --schema=public --no-owner --dbname=test-ecs < ./data/ecs.dump
 ```
