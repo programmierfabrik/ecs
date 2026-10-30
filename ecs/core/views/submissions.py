@@ -449,7 +449,7 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
             if task and task.closed_at:
                 context['categorization_form'].allow_reopen = True
 
-    if not current_form.is_current:
+    if current_form != submission.newest_form:
         if ctr_submission_form:
             context['unacknowledged_forms'] = submission.ctr_forms.filter(pk__gt=current_form.pk).count()
         else:
@@ -704,14 +704,17 @@ def set_ctr_document_hidden(request, submission_pk=None):
 
 
 @user_group_required('CTIS Importer')
+@require_POST
 def delete_ctr_document(request, submission_pk=None):
     document = get_object_or_404(Document,
-        pk=request.GET.get('document_pk'),
+        pk=request.POST.get('document_pk'),
         content_type=ContentType.objects.get_for_model(Submission),
         object_id=submission_pk,
     )
     document.delete()
-    return ctr_documents(request, submission_pk=submission_pk)
+    # Redirect rather than render directly: ctr_documents would treat this
+    # POST as an upload attempt.
+    return redirect('core.submission.ctr_documents', submission_pk=submission_pk)
 
 
 def view_ctr_upload(request, submission_pk=None, document_pk=None):

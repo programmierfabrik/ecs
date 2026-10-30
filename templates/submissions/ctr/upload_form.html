@@ -20,7 +20,8 @@
         <a href="{% url 'core.submission.download_ctr_upload' submission_pk=submission.pk document_pk=doc.pk %}">{% trans "Download" %}</a> |
         <a href="{% url 'core.submission.view_ctr_upload' submission_pk=submission.pk document_pk=doc.pk %}" target="_blank">{% trans "View" %}</a> |
         {% if form %}
-            <a href="{% url 'core.submission.delete_ctr_document' submission_pk=submission.pk %}?document_pk={{ doc.pk }}" class="delete_document">{% trans "Delete" %}</a> |
+            <a href="{% url 'core.submission.delete_ctr_document' submission_pk=submission.pk %}" class="delete_document"
+               data-post='{"document_pk": "{{ doc.pk }}", "csrfmiddlewaretoken": "{{ csrf_token }}"}'>{% trans "Delete" %}</a> |
             <a href="" class="replace_document" data-document-id="{{ doc.pk }}" data-document-type="{{ doc.doctype.pk }}">{% trans "Replace" %}</a> |
             <a href="" class="edit_document" data-document-id="{{ doc.pk }}" data-document-type="{{ doc.doctype.pk }}"
                data-document-name="{{ doc.name }}" data-document-version="{{ doc.version }}" data-document-date="{{ doc.date|date:'d.m.Y' }}">
