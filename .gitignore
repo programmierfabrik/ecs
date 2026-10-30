@@ -12,3 +12,4 @@ celerybeat.pid
 /data
 /volatile
 .env
+/.serena
