@@ -2,7 +2,7 @@ from copy import deepcopy
 from collections import OrderedDict
 
 from django.utils.translation import gettext_lazy as _
-from django.db.models import F, Prefetch
+from django.db.models import Prefetch
 
 from ecs.core.models import (
     Submission, Investigator, ParticipatingCenterNonSubject,
@@ -105,9 +105,9 @@ def collect_submission_stats_for_year(year):
     first_votes = Vote.objects.filter(
         submission_form__submission__in=[s.id for s in submissions],
         published_at__isnull=False,
-    ).annotate(submission_id=F('submission_form__submission_id')).order_by(
-        'submission_form__submission_id', 'published_at',
-    ).distinct('submission_form__submission_id').only('result')
+    ).order_by('submission_id', 'published_at').distinct('submission_id').only(
+        'result', 'submission',
+    )
     first_votes = {v.submission_id: v for v in first_votes}
 
     for s in submissions:
