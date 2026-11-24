@@ -330,32 +330,6 @@ class Submission(models.Model):
                 return _schedule()
         return top.meeting
 
-    def reschedule(self, from_meeting, to_meeting):
-        """Move this study's TOP from one meeting to another, keeping its
-        participants that have a task; specialist reviews of experts who are
-        not on the new meeting are dropped. Return the new TOP."""
-        old_entry = from_meeting.timetable_entries.get(submission=self)
-        assert not hasattr(old_entry, 'vote')
-        visible = (old_entry.timetable_index is not None)
-        new_entry = to_meeting.add_entry(submission=self,
-            duration=old_entry.duration, title=old_entry.title, visible=visible)
-        old_entry.participations.exclude(task=None).update(entry=new_entry)
-        old_entry.participations.all().delete()
-        old_entry.delete()
-
-        def experts(meeting):
-            return set(meeting.medical_categories
-                .exclude(specialist=None)
-                .filter(category__in=self.medical_categories.values('pk'))
-                .values_list('specialist_id', flat=True))
-
-        with sudo():
-            Task.objects.for_data(self).filter(
-                task_type__workflow_node__uid='specialist_review',
-                assigned_to__in=(experts(from_meeting) - experts(to_meeting))
-            ).open().mark_deleted()
-        return new_entry
-
     @property
     def is_reschedulable(self):
         return self.meetings.filter(started=None).exists()

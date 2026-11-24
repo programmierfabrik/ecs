@@ -95,10 +95,12 @@ class Command(BaseCommand):
                 stop = STAGES.index('ended')
             else:
                 stop = STAGES.index(until)
-            # the first meeting is ours; after that the study goes wherever the
-            # previous vote sent it (a recessed vote reschedules it on publication)
-            meeting = factories.create_meeting() if i == 0 else None
-            top = factories.schedule(submission, meeting, participants=participants, **categorization)
+            # a new meeting for the first vote, which categorization schedules the
+            # study onto; after that the study goes wherever the previous vote
+            # sent it (a recessed vote reschedules it on publication)
+            if i == 0:
+                factories.create_meeting()
+            top = factories.schedule(submission, participants=participants, **categorization)
             meeting = top.meeting
             meeting.board_members.add(*board_members)
             line = f'meeting={meeting.pk} top={top.pk}'

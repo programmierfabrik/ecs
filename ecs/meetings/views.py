@@ -147,7 +147,33 @@ def reschedule_submission(request, submission_pk=None):
     submission = get_object_or_404(Submission, pk=submission_pk)
     form = SubmissionReschedulingForm(request.POST or None, submission=submission)
     if form.is_valid():
-        submission.reschedule(form.cleaned_data['from_meeting'], form.cleaned_data['to_meeting'])
+        from_meeting = form.cleaned_data['from_meeting']
+        to_meeting = form.cleaned_data['to_meeting']
+
+        old_entry = from_meeting.timetable_entries.get(submission=submission)
+        assert not hasattr(old_entry, 'vote')
+        visible = (not old_entry.timetable_index is None)
+        new_entry = to_meeting.add_entry(submission=submission,
+                                         duration=old_entry.duration, title=old_entry.title, visible=visible)
+        old_entry.participations.exclude(task=None).update(entry=new_entry)
+        old_entry.participations.all().delete()
+        old_entry.delete()
+
+        old_experts = set(from_meeting.medical_categories
+                          .exclude(specialist=None)
+                          .filter(category__in=submission.medical_categories.values('pk'))
+                          .values_list('specialist_id', flat=True))
+        new_experts = set(to_meeting.medical_categories
+                          .exclude(specialist=None)
+                          .filter(category__in=submission.medical_categories.values('pk'))
+                          .values_list('specialist_id', flat=True))
+
+        with sudo():
+            Task.objects.for_data(submission).filter(
+                task_type__workflow_node__uid='specialist_review',
+                assigned_to__in=(old_experts - new_experts)
+            ).open().mark_deleted()
+
         return redirect('view_submission', submission_pk=submission.pk)
 
     return render(request, 'meetings/submission_meeting_form.html', {

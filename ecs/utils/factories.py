@@ -11,26 +11,38 @@ Callers name only the fields their scenario is about; every other required
 column gets a placeholder (see ``fill_required``).
 """
 import os
+import re
 import uuid
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.messages.middleware import MessageMiddleware
+from django.contrib.sessions.middleware import SessionMiddleware
 from django.contrib.postgres.fields import ArrayField
-from django.core.exceptions import ValidationError
 from django.db import models
+from django.test import RequestFactory
+from django.urls import resolve, reverse
 from django.utils import timezone
+from django.utils.html import strip_tags
 
-from ecs.checklists.forms import ChecklistTaskCreationForm, ChecklistTaskCreationStage2Form
+from ecs.checklists.forms import ChecklistTaskCreationForm
 from ecs.checklists.models import Checklist
-from ecs.checklists.utils import create_dynamic_task
+from ecs.checklists.workflow import ExternalReview
+from ecs.core.forms import SubmissionFormForm
 from ecs.core.forms.review import CategorizationForm
+from ecs.core.forms.utils import submission_form_to_dict
 from ecs.core.models import EthicsCommission, Investigator, MedicalCategory, Submission, SubmissionForm
 from ecs.core.models.constants import SUBMISSION_LANE_BOARD
-from ecs.core.workflow import Categorization, ChecklistReview, VotePreparation
+from ecs.core.signals import on_study_submit
+from ecs.core.workflow import (
+    B2ResubmissionReview, Categorization, ChecklistReview, Resubmission, VotePreparation,
+)
 from ecs.documents.models import Document, DocumentType
 from ecs.meetings.models import Meeting
 from ecs.meetings.signals import on_meeting_end, on_meeting_start
 from ecs.signature.views import _receive_document
+from ecs.tasks.middleware import RelatedTasksMiddleware
 from ecs.tasks.models import Task
 from ecs.users.utils import get_or_create_user, get_user, sudo
 from ecs.votes.forms import VoteForm, VotePreparationForm, VoteReviewForm
@@ -107,6 +119,9 @@ def create_submission_form(ec_number=None, presenter=None, *, render_pdf=True, *
     presenter = presenter or get_or_create_user('test_presenter@example.com')[0]
     # Empty means "not a thesis"; a placeholder would make every study one.
     fields.setdefault('project_type_education_context', None)
+    # The model leaves these open, the submission form requires them.
+    fields.setdefault('subject_minage', 18)
+    fields.setdefault('subject_maxage', 65)
     submission = Submission.objects.create(ec_number=ec_number, presenter=presenter, susar_presenter=presenter)
     sf = SubmissionForm.objects.create(**fill_required(
         SubmissionForm, {'submission': submission, 'presenter': presenter, **fields}))
@@ -118,6 +133,49 @@ def create_submission_form(ec_number=None, presenter=None, *, render_pdf=True, *
         'submission_form': sf, 'main': True, 'ethics_commission': ec, 'subject_count': 1}))
     if render_pdf:
         sf.render_pdf_document()
+    return sf
+
+
+def resubmit(submission, presenter=None, **fields):
+    """Submit a new version of the study's form, as the presenter does with
+    « new submission »: the latest form copied, ``fields`` changed, validated
+    by the submission form and submitted (which completes a resubmission task).
+    """
+    presenter = presenter or submission.presenter
+    source = submission.submission_form_to_copy
+    if not submission.current_submission_form.allows_resubmission(presenter):
+        raise ValueError(f'submission {submission.pk} cannot be resubmitted now')
+    form = SubmissionFormForm({**submission_form_to_dict(source), **fields})
+    if not form.is_valid():
+        raise ValueError(f'invalid submission form: {form.errors.as_json()}')
+    with sudo(presenter):
+        sf = form.save(commit=False)
+        sf.submission = submission
+        sf.save()
+        form.save_m2m()
+
+        documents = list(source.documents.all())
+        for doc in documents:
+            doc.parent_object = sf
+            doc.save()
+        sf.documents.set(documents)
+
+        # the formsets, filled from the copied form
+        for investigator in source.investigators.prefetch_related('employees').order_by('pk'):
+            employees = list(investigator.employees.all())
+            investigator.pk, investigator.submission_form = None, sf
+            investigator.save()
+            for employee in employees:
+                employee.pk, employee.investigator = None, investigator
+                employee.save()
+        for related in (source.measures, source.nontesteduseddrug_set,
+                        source.participatingcenternonsubject_set, source.foreignparticipatingcenter_set):
+            for obj in related.order_by('pk'):
+                obj.pk, obj.submission_form = None, sf
+                obj.save()
+
+        on_study_submit.send(Submission, submission=submission, form=sf, user=presenter,
+                             investigator_count=sf.investigators.count())
     return sf
 
 
@@ -141,13 +199,13 @@ def create_meeting(start=None, board_members=(), **fields):
     return meeting
 
 
-def schedule(submission, meeting=None, participants=(), **categorization):
+def schedule(submission, participants=(), **categorization):
     """Bring the study onto a meeting and return its TOP.
 
     A new study gets there the way it does in the office: initial review and
     categorization (``categorization`` are the categorization form's fields,
-    board lane by default), which puts it on the next schedulable meeting.
-    If ``meeting`` is another one, the study is rescheduled onto it.
+    board lane by default), which puts it on the next schedulable meeting
+    (the earliest unstarted one whose deadline it made; see ``create_meeting``).
     ``participants`` are specialists: each gets a specialist review task,
     which makes them take part in the TOP.
     """
@@ -159,8 +217,6 @@ def schedule(submission, meeting=None, participants=(), **categorization):
     if top.meeting.started:
         raise ValueError(f'submission {submission.pk} is not due for another meeting '
                          f'(only a recessed vote sends it on)')
-    if meeting is not None and top.meeting != meeting:
-        top = submission.reschedule(top.meeting, meeting)
     for user in participants:
         create_task(submission, 'specialist_review', assign_to=user)
     return top
@@ -169,7 +225,8 @@ def schedule(submission, meeting=None, participants=(), **categorization):
 def create_task(submission, node_uid, assign_to=None, created_by=None,
                 send_message_on_close=False, reminder_days=None):
     """Add a task by hand, as the office does with « create task » on a study
-    (``specialist_review``, ``statistical_review``, ``external_review`` ...).
+    (``specialist_review``, ``statistical_review``, ``external_review`` ...),
+    by posting that page (``checklists.views.create_task``).
 
     ``assign_to`` defaults to the group for tasks that can be delegated, else
     to the first active member of the task's group who is not biased;
@@ -182,28 +239,47 @@ def create_task(submission, node_uid, assign_to=None, created_by=None,
     if task_type is None:
         raise ValueError(f'{node_uid} is not a task the office can add; one of: '
                          f'{sorted(task_types.values_list("workflow_node__uid", flat=True))}')
-    form = ChecklistTaskCreationForm({
-        'task_type': task_type.pk,
-        'send_message_on_close': send_message_on_close,
-        'reminder_message_timeout': reminder_days or '',
-    })
     if assign_to is None and not task_type.is_delegatable:
         assign_to = task_type.group.user_set.filter(is_active=True).exclude(
             pk__in=submission.biased_board_members.values('pk')).order_by('pk').first()
-    stage2 = ChecklistTaskCreationStage2Form(
-        submission, task_type, {'assign_to': assign_to.pk if assign_to else ''})
-    if not (form.is_valid() and stage2.is_valid()):
-        raise ValueError(f'invalid task: {form.errors.as_json()} {stage2.errors.as_json()}')
     created_by = created_by or User.objects.filter(
         groups__name='EC-Office', is_active=True).order_by('pk').first()
-    with sudo(created_by):
-        try:
-            return create_dynamic_task(
-                submission, task_type, stage2.cleaned_data['assign_to'], created_by,
-                send_message_on_close=form.cleaned_data['send_message_on_close'],
-                reminder_message_timeout=form.cleaned_data['reminder_message_timeout'])
-        except ValidationError as e:
-            raise ValueError(f'{node_uid}: {" ".join(e.messages)}') from None
+    data = {
+        'checklist_task-task_type': task_type.pk,
+        'checklist_task-assign_to': assign_to.pk if assign_to else '',
+        'checklist_task-reminder_message_timeout': reminder_days or '',
+    }
+    if send_message_on_close:
+        data['checklist_task-send_message_on_close'] = 'on'
+    response = _call_view(created_by, 'checklists.create_task', data, submission_pk=submission.pk)
+    errors = _page_errors(response)
+    if errors:
+        raise ValueError(f'{node_uid} not created: {errors}')
+    return Task.unfiltered.for_submission(submission).open().filter(
+        task_type=task_type, created_by=created_by).latest('pk')
+
+
+def _call_view(user, url_name, data=None, **url_kwargs):
+    """Request a page as ``user``: GET, or POST ``data``. The middleware that
+    sets up the request (session, messages, the user's open tasks for the page)
+    runs as for a browser request."""
+    path = reverse(url_name, kwargs=url_kwargs)
+    factory = RequestFactory(SERVER_NAME=settings.DOMAIN)
+    request = factory.get(path) if data is None else factory.post(path, data)
+    request.user = user
+    with sudo(user):
+        for middleware in (SessionMiddleware, MessageMiddleware, RelatedTasksMiddleware):
+            middleware(lambda r: None).process_request(request)
+        return resolve(path).func(request, **url_kwargs)
+
+
+def _page_errors(response):
+    """The form errors a rendered page shows, as text; a redirect (no access) is one too."""
+    if response.status_code != 200:
+        return f'HTTP {response.status_code} {response.get("Location", "")}'
+    html = response.content.decode()
+    errors = re.findall(r'<(ul|div) class="(?:errorlist|form-control-feedback)[^"]*">(.*?)</\1>', html, re.S)
+    return '; '.join(' '.join(strip_tags(e).split()) for _tag, e in errors)
 
 
 def start_meeting(meeting):
@@ -290,6 +366,15 @@ def _save_checklist(task, user, fields):
     if created:
         for question in blueprint.questions.order_by('text'):
             checklist.answers.get_or_create(question=question)
+    _answer_checklist(checklist)
+
+
+def _save_external_review(task, user, fields):
+    """The external reviewer's checklist, answered like a checklist review."""
+    _answer_checklist(task.data)
+
+
+def _answer_checklist(checklist):
     for answer in checklist.answers.select_related('question'):
         answer.answer = not answer.question.is_inverted
         answer.comment = LOREM
@@ -337,9 +422,32 @@ def _sign_vote(task, user, fields):
     }, None, vote.render_pdf())
 
 
+def _prepare_b2_vote(task, user, fields):
+    """The B2 resubmission review page (``core.views.submissions.b2_vote_preparation``):
+    opening it creates the draft vote that may upgrade the B2 vote; its form is
+    then posted, upgraded to 1 unless named, with the draft's text."""
+    submission = task.data
+    url_kwargs = submission.newest_form_url_kwargs()
+    _call_view(user, 'core.submission.b2_vote_preparation', **url_kwargs)
+    with sudo():
+        vote = submission.votes.get(is_draft=True, upgrade_for__isnull=False)
+    response = _call_view(user, 'core.submission.b2_vote_preparation',
+                          {'result': '1', 'text': vote.text or LOREM, **fields}, **url_kwargs)
+    if response.has_errors:
+        raise ValueError(f'invalid B2 vote preparation: {_page_errors(response) or fields}')
+
+
+def _resubmit(task, user, fields):
+    """A resubmission task is done by submitting a new form version."""
+    resubmit(task.data, user, **fields)
+
+
 TASK_FORMS = (
     (Categorization, _save_categorization),
     (ChecklistReview, _save_checklist),
+    (ExternalReview, _save_external_review),
+    (Resubmission, _resubmit),
+    (B2ResubmissionReview, _prepare_b2_vote),
     (VotePreparation, _prepare_vote),
     (VoteReview, _save_vote_review),
     (VoteSigning, _sign_vote),
@@ -392,9 +500,13 @@ def do_task(data, node_uid=None, choice=DEFAULT, user=None, **fields):
     if fields and save is None:
         raise ValueError(f'task {task.task_type.workflow_node.uid} has no form for {sorted(fields)}')
     with sudo(user):
+        if not (task.accepted and task.assigned_to_id == user.pk):
+            task.accept(user)                       # « accept » in the task list
         if save:
             save(task, user, fields)
         task = Task.unfiltered.get(pk=task.pk)     # refetch: saving the form may unlock it
+        if task.closed_at:                          # ... or complete it (resubmission)
+            return task
         if task.is_locked:
             raise ValueError(f'task {task.pk} ({task.task_type.workflow_node.uid}) is locked')
         if choice is DEFAULT:
@@ -411,7 +523,7 @@ def run_workflow(data, until=None, fields=None, max_steps=50):
     ``{'categorization': {'workflow_lane': 2}}``. Returns the open tasks.
     """
     fields = fields or {}
-    for _ in range(max_steps):
+    for _step in range(max_steps):
         tasks = list(_open_tasks(data))
         if until in _node_uids(tasks):
             return tasks
@@ -425,9 +537,9 @@ def run_workflow(data, until=None, fields=None, max_steps=50):
     raise ValueError(f'{data!r} still has tasks after {max_steps} steps')
 
 
-def vote_in_meeting(submission, result, meeting=None, participants=()):
+def vote_in_meeting(submission, result, participants=()):
     """The common path in one call: schedule, start, vote, end, publish."""
-    top = schedule(submission, meeting, participants=participants)
+    top = schedule(submission, participants=participants)
     start_meeting(top.meeting)
     vote = record_vote(top, result)
     end_meeting(top.meeting)
