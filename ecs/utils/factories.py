@@ -15,6 +15,7 @@ import re
 import uuid
 from datetime import timedelta
 
+from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.messages.middleware import MessageMiddleware
@@ -26,7 +27,7 @@ from django.urls import resolve, reverse
 from django.utils import timezone
 from django.utils.html import strip_tags
 
-from ecs.checklists.forms import ChecklistTaskCreationForm
+from ecs.checklists.forms import ChecklistAnswerFormSet, ChecklistTaskCreationForm
 from ecs.checklists.models import Checklist
 from ecs.checklists.workflow import ExternalReview
 from ecs.core.forms import SubmissionFormForm
@@ -44,8 +45,8 @@ from ecs.meetings.signals import on_meeting_end, on_meeting_start
 from ecs.signature.views import _receive_document
 from ecs.tasks.middleware import RelatedTasksMiddleware
 from ecs.tasks.models import Task
-from ecs.users.utils import get_or_create_user, get_user, sudo
-from ecs.votes.forms import VoteForm, VotePreparationForm, VoteReviewForm
+from ecs.users.utils import get_or_create_user, sudo
+from ecs.votes.forms import B2VotePreparationForm, VoteForm, VotePreparationForm, VoteReviewForm
 from ecs.votes.views import sign_success
 from ecs.votes.workflow import VoteReview, VoteSigning
 
@@ -185,15 +186,18 @@ def create_meeting(start=None, board_members=(), **fields):
 
     By default it is a week ahead, but before any meeting that has not been
     held yet: meetings are held in order of their start, which scheduling
-    relies on (``Submission.schedule_to_meeting``).
+    relies on (``Submission.schedule_to_meeting``). Its deadlines are still
+    ahead, so a study submitted now makes them.
     """
+    now = timezone.now()
     if start is None:
-        start = timezone.now() + timedelta(days=7)
+        start = now + timedelta(days=7)
         first_unheld = Meeting.objects.filter(started=None).order_by('start').values_list('start', flat=True).first()
         if first_unheld is not None:
             start = min(start, first_unheld - timedelta(hours=1))
-    fields.setdefault('deadline', start - timedelta(days=3))
-    fields.setdefault('deadline_diplomathesis', start - timedelta(days=10))
+    lead = max(start - now, timedelta(0)) / 2
+    fields.setdefault('deadline', start - min(timedelta(days=3), lead))
+    fields.setdefault('deadline_diplomathesis', start - min(timedelta(days=10), lead))
     meeting = Meeting.objects.create(**fill_required(Meeting, {'start': start, **fields}))
     meeting.board_members.set(board_members)
     return meeting
@@ -251,7 +255,7 @@ def create_task(submission, node_uid, assign_to=None, created_by=None,
     }
     if send_message_on_close:
         data['checklist_task-send_message_on_close'] = 'on'
-    response = _call_view(created_by, 'checklists.create_task', data, submission_pk=submission.pk)
+    response = _call_view(created_by, reverse('checklists.create_task', kwargs={'submission_pk': submission.pk}), data)
     errors = _page_errors(response)
     if errors:
         raise ValueError(f'{node_uid} not created: {errors}')
@@ -259,18 +263,50 @@ def create_task(submission, node_uid, assign_to=None, created_by=None,
         task_type=task_type, created_by=created_by).latest('pk')
 
 
-def _call_view(user, url_name, data=None, **url_kwargs):
-    """Request a page as ``user``: GET, or POST ``data``. The middleware that
-    sets up the request (session, messages, the user's open tasks for the page)
-    runs as for a browser request."""
-    path = reverse(url_name, kwargs=url_kwargs)
+def _call_view(user, path, data=None):
+    """Request the page at ``path`` as ``user``: GET, or POST ``data``. The
+    middleware that sets up the request (session, messages, the user's open
+    tasks for the page) runs as for a browser request."""
     factory = RequestFactory(SERVER_NAME=settings.DOMAIN)
     request = factory.get(path) if data is None else factory.post(path, data)
     request.user = user
+    match = resolve(path)
     with sudo(user):
         for middleware in (SessionMiddleware, MessageMiddleware, RelatedTasksMiddleware):
             middleware(lambda r: None).process_request(request)
-        return resolve(path).func(request, **url_kwargs)
+        return match.func(request, *match.args, **match.kwargs)
+
+
+def _post_task_page(task, user, data):
+    """Post the page of ``task`` (the one the task list opens) and refuse what it refuses."""
+    response = _call_view(user, task.url, data)
+    if response.status_code != 200 or getattr(response, 'has_errors', False):
+        raise ValueError(f'{task.task_type.workflow_node.uid}: page refused '
+                         f'{_page_errors(response) or data}')
+    return response
+
+
+def _post_data(form, values=None):
+    """What a browser posts for ``form`` as rendered, with ``values`` (by field
+    name) changed."""
+    values = dict(values or {})
+    unknown = set(values) - set(form.fields)
+    if unknown:
+        raise ValueError(f'{type(form).__name__} has no field {sorted(unknown)}; '
+                         f'fields: {sorted(form.fields)}')
+    data = {}
+    for field in form:
+        value = values.get(field.name, field.value())
+        if isinstance(field.field, forms.NullBooleanField):
+            data[field.html_name] = {True: 'true', False: 'false'}.get(value, 'unknown')
+        elif isinstance(field.field, forms.BooleanField):
+            if value:
+                data[field.html_name] = 'on'
+        elif isinstance(value, (list, tuple, models.QuerySet)):
+            data[field.html_name] = [str(getattr(v, 'pk', v)) for v in value]
+        elif value is not None:
+            data[field.html_name] = str(getattr(value, 'pk', value))
+    return data
 
 
 def _page_errors(response):
@@ -341,70 +377,47 @@ DEFAULT = object()
 
 
 def _save_categorization(task, user, fields):
-    """The categorization form; board lane and the first medical category
+    """The categorization page; board lane and the first medical category
     unless ``fields`` name others."""
     submission = task.data
-    data = {
+    defaults = {
         'workflow_lane': submission.workflow_lane or SUBMISSION_LANE_BOARD,
         'medical_categories': list(submission.medical_categories.values_list('pk', flat=True)) or [
             MedicalCategory.objects.filter(is_disabled=False).order_by('name').values_list('pk', flat=True).first()],
-        **fields,
     }
-    form = CategorizationForm(data, instance=submission)
-    if not form.is_valid():
-        raise ValueError(f'invalid categorization: {form.errors.as_json()}')
-    form.save()
+    _post_task_page(task, user, _post_data(CategorizationForm(instance=submission), {**defaults, **fields}))
 
 
 def _save_checklist(task, user, fields):
-    """The checklist of a checklist review, every question answered positively
-    with a lorem comment (``core.views.submissions.checklist_review``)."""
-    blueprint = task.node_controller.node.data
-    owner = user if blueprint.multiple else get_user('root@system.local')
-    checklist, created = Checklist.unfiltered.update_or_create(
-        blueprint=blueprint, submission=task.data, user=owner, defaults={'last_edited_by': user})
-    if created:
-        for question in blueprint.questions.order_by('text'):
-            checklist.answers.get_or_create(question=question)
-    _answer_checklist(checklist)
-
-
-def _save_external_review(task, user, fields):
-    """The external reviewer's checklist, answered like a checklist review."""
-    _answer_checklist(task.data)
-
-
-def _answer_checklist(checklist):
-    for answer in checklist.answers.select_related('question'):
-        answer.answer = not answer.question.is_inverted
-        answer.comment = LOREM
-        answer.save()
-    checklist.save()    # unlocks the review task
+    """The checklist review page (also the external reviewer's): opening it
+    creates the checklist; every question is then answered positively with a
+    lorem comment."""
+    _call_view(user, task.url)
+    blueprint_pk = resolve(task.url).kwargs['blueprint_pk']
+    checklist = Checklist.unfiltered.filter(
+        blueprint_id=blueprint_pk, submission=task.data.get_submission(),
+        last_edited_by=user).latest('pk')
+    formset = ChecklistAnswerFormSet(prefix=f'checklist{checklist.pk}',
+                                     queryset=checklist.answers.order_by('question__index'))
+    data = _post_data(formset.management_form)
+    for form in formset:
+        data.update(_post_data(form, {
+            'answer': not form.instance.question.is_inverted, 'comment': LOREM}))
+    _post_task_page(task, user, data)
 
 
 def _prepare_vote(task, user, fields):
-    """The vote preparation form: a draft vote (result 1 unless named) on the
-    current form (``core.views.submissions.vote_preparation``)."""
-    submission = task.data
-    vote = submission.current_pending_vote
-    data = {'result': vote.result if vote else '1', 'text': vote.text if vote else LOREM, **fields}
-    form = VotePreparationForm(data, instance=vote)
-    if not form.is_valid():
-        raise ValueError(f'invalid vote preparation: {form.errors.as_json()}')
-    vote = form.save(commit=False)
-    vote.submission_form = submission.current_submission_form
-    vote.save()
+    """The vote preparation page: a draft vote, result 1 unless named."""
+    vote = task.data.current_pending_vote
+    defaults = {'result': vote.result if vote else '1', 'text': vote.text if vote else LOREM}
+    _post_task_page(task, user, _post_data(VotePreparationForm(instance=vote), {**defaults, **fields}))
 
 
 def _save_vote_review(task, user, fields):
-    """The vote review form, marked proofread and valid (executives also see
+    """The vote review page, marked proofread and valid (executives also see
     the result, posted unchanged)."""
-    vote = task.data
-    data = {'result': vote.result, 'text': vote.text, 'is_final_version': True, **fields}
-    form = VoteReviewForm(data, instance=vote)
-    if not form.is_valid():
-        raise ValueError(f'invalid vote review: {form.errors.as_json()}')
-    form.save()
+    _post_task_page(task, user, _post_data(VoteReviewForm(instance=task.data),
+                                           {'is_final_version': True, **fields}))
 
 
 def _sign_vote(task, user, fields):
@@ -423,18 +436,13 @@ def _sign_vote(task, user, fields):
 
 
 def _prepare_b2_vote(task, user, fields):
-    """The B2 resubmission review page (``core.views.submissions.b2_vote_preparation``):
-    opening it creates the draft vote that may upgrade the B2 vote; its form is
-    then posted, upgraded to 1 unless named, with the draft's text."""
-    submission = task.data
-    url_kwargs = submission.newest_form_url_kwargs()
-    _call_view(user, 'core.submission.b2_vote_preparation', **url_kwargs)
+    """The B2 resubmission review page: opening it creates the draft vote that
+    may upgrade the B2 vote; its form is then posted, upgraded to 1 unless named."""
+    _call_view(user, task.url)
     with sudo():
-        vote = submission.votes.get(is_draft=True, upgrade_for__isnull=False)
-    response = _call_view(user, 'core.submission.b2_vote_preparation',
-                          {'result': '1', 'text': vote.text or LOREM, **fields}, **url_kwargs)
-    if response.has_errors:
-        raise ValueError(f'invalid B2 vote preparation: {_page_errors(response) or fields}')
+        vote = task.data.votes.get(is_draft=True, upgrade_for__isnull=False)
+    _post_task_page(task, user, _post_data(B2VotePreparationForm(instance=vote),
+                                           {'result': '1', 'text': vote.text or LOREM, **fields}))
 
 
 def _resubmit(task, user, fields):
@@ -445,7 +453,7 @@ def _resubmit(task, user, fields):
 TASK_FORMS = (
     (Categorization, _save_categorization),
     (ChecklistReview, _save_checklist),
-    (ExternalReview, _save_external_review),
+    (ExternalReview, _save_checklist),
     (Resubmission, _resubmit),
     (B2ResubmissionReview, _prepare_b2_vote),
     (VotePreparation, _prepare_vote),
