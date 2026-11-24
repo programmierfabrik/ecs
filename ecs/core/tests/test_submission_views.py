@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Group
 
 from ecs.utils.testcases import LoginTestCase
-from ecs.core.tests.test_submissions import create_submission_form
+from ecs.utils.factories import create_submission_form
 from ecs.core import bootstrap
 from ecs.checklists import bootstrap as checklists_bootstrap
 from ecs.core.models import SubmissionForm

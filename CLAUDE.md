@@ -11,3 +11,8 @@ Use `tools/pyx` (stdlib only, no install) before grep or line-range reads:
 - Ruff is configured in `[tool.ruff]` in `pyproject.toml`; run it with `uvx ruff check <path>`. Do not use black, flake8, isort or pylint.
 - A hook runs ruff on every edited `.py` file. Fix violations your edit introduced; leave pre-existing ones alone.
 - No `# noqa` without a rule code. Do not run `ruff format`: the codebase is not formatted with it.
+
+# Test data and verification
+
+- Create domain objects with `ecs/utils/factories.py`, which follows the real lifecycle: `create_submission_form(**fields)` (study type is just fields), `create_meeting`, `schedule`, `start_meeting`, `record_vote`, `end_meeting`, `finish_vote_workflow` (or `vote_in_meeting` for all of it). Pass only the fields the scenario is about; placeholders fill the rest. Never create a Vote directly. For a ready local scenario: `manage.py seed_scenario study [--set FIELD=VALUE] [--votes 3b 1] [--until scheduled|started|voted|ended|published] [--protocol]` (DEBUG only). The django MCP caches modules, so run a just-edited command from the shell.
+- Verify mails in Mailpit (`curl -s localhost:8025/api/v1/messages`), never by mocking `deliver`: a mock proves the recipients, not that anything was sent.

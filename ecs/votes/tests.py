@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 from ecs.communication.testcases import CommunicationTestCase
-from ecs.core.tests.test_submissions import create_submission_form
+from ecs.utils.factories import create_submission_form
 from ecs.votes.tasks import send_reminder_messages
 from ecs.votes.models import Vote
 from ecs.core.models import AdvancedSettings

@@ -11,7 +11,7 @@ from ecs.utils.testcases import LoginTestCase
 from ecs.documents.models import DocumentType
 from ecs.notifications.models import NotificationType, Notification, ProgressReportNotification
 from ecs.votes.models import Vote
-from ecs.core.tests.test_submissions import create_submission_form
+from ecs.utils.factories import create_submission_form
 
 class NotificationFormTest(LoginTestCase):
     '''Tests for the Notification and NotificationType module
