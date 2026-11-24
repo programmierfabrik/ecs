@@ -1,4 +1,4 @@
-import random
+import secrets
 from functools import wraps
 from datetime import timedelta
 import urllib.request
@@ -19,11 +19,17 @@ class SigningData(dict):
         self.id = None
 
     def _gen_id(self):
-        return '%s' % random.randint(1, int(1e17) - 1)
+        return str(secrets.randbelow(10**17 - 1) + 1)
+
+    @staticmethod
+    def _cache_key(id):
+        # Ids arrive from the request (?pdf-id=); the prefix keeps them from
+        # addressing any other cache entry.
+        return f'signing-data:{id}'
 
     @classmethod
     def retrieve(cls, id):
-        data = cache.get(id)
+        data = cache.get(cls._cache_key(id))
         if data is not None:
             data = cls(data)
             data.id = id
@@ -35,11 +41,11 @@ class SigningData(dict):
         timeout = None
         if kwargs:
             timeout = int(_total_seconds(timedelta(**kwargs)))
-        cache.set(self.id, dict(self), timeout)
+        cache.set(self._cache_key(self.id), dict(self), timeout)
 
     def delete(self):
         if self.id:
-            cache.delete(self.id)
+            cache.delete(self._cache_key(self.id))
 
     def pop_listitem(self, key, index):
         item = self[key].pop(index)
