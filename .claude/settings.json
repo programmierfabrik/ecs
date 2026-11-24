@@ -1,0 +1,19 @@
+{
+  "enabledPlugins": {
+    "astral@astral-sh": true
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/ruff-after-edit.py\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "mcpServers": {
+    "django": {
+      "command": ".venv/bin/python",
+      "args": [
+        "-m",
+        "mcp_django"
+      ],
+      "env": {
+        "DJANGO_SETTINGS_MODULE": "ecs.settings"
+      }
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@toolbox-sdk/server@1.18.0",
+        "--prebuilt",
+        "postgres",
+        "--stdio"
+      ],
+      "env": {
+        "POSTGRES_HOST": "localhost",
+        "POSTGRES_PORT": "5432",
+        "POSTGRES_DATABASE": "test-ecs",
+        "POSTGRES_USER": "test-ecs",
+        "POSTGRES_PASSWORD": "test-ecs"
+      }
+    }
+  }
+}
