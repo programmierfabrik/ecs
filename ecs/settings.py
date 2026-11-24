@@ -6,6 +6,8 @@ import logging
 from datetime import timedelta
 from urllib.parse import urlparse
 
+from django.core.exceptions import ImproperlyConfigured
+
 from sentry_sdk.integrations.logging import LoggingIntegration
 
 # root dir of project
@@ -64,6 +66,12 @@ if os.getenv('ECS_PASSWORD_RESET_SECRET'):
     PASSWORD_RESET_SECRET = os.getenv('ECS_PASSWORD_RESET_SECRET')
 else:
     PASSWORD_RESET_SECRET = 'j2obdvrb-hm$$x949k*f5gk_2$1x%2etxhd!$+*^qs8$4ra3=a'
+
+# The defaults above are public; production must bring its own.
+if not DEBUG:
+    _missing_secrets = [name for name in ('ECS_SECRET_KEY', 'ECS_REGISTRATION_SECRET', 'ECS_PASSWORD_RESET_SECRET') if not os.getenv(name)]
+    if _missing_secrets:
+        raise ImproperlyConfigured('ECS_PROD requires {}'.format(', '.join(_missing_secrets)))
 
 ECS_CHANGED = os.getenv('BUILD_TIME', 'unknown')
 ECS_DISABLE_REGISTER = os.getenv('ECS_DISABLE_REGISTER', '').lower() == 'true'
