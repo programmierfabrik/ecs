@@ -38,11 +38,15 @@ def xls_export(user_id=None, filters=None):
 
     # Use same filters as selected in the HTML view.
     filterform = AllSubmissionsFilterForm(filters)
-    submissions = filterform.filter_submissions(Submission.objects.all(), user)
+    # Same as the HTML list: a submission without any form has nothing to show.
+    submissions = filterform.filter_submissions(
+        Submission.objects.exclude(
+            current_submission_form=None, current_ctr_form=None), user)
 
     submissions = submissions.select_related(
         'current_submission_form',
         'current_submission_form__primary_investigator',
+        'current_ctr_form',
         'current_published_vote',
         'presenter', 'presenter__profile',
     ).prefetch_related(
@@ -157,6 +161,24 @@ def xls_export(user_id=None, filters=None):
     for i, submission in enumerate(submissions, 3):
         sf = submission.current_submission_form
         vote = submission.current_published_vote
+
+        if sf is None:
+            # CTIS-only submission: it has no submission form, so only the
+            # columns the submission and its CTR form can answer are filled.
+            sheet.write(i, 0, submission.get_ec_number_display())
+            sheet.write(i, 1, submission.project_title_display())
+            sheet.write(i, 9, submission.get_workflow_lane_display())
+            sheet.write(i, 10, _b(submission.remission))
+            sheet.write(i, 11, ', '.join(sorted(
+                m.name for m in submission.medical_categories.all())))
+            sheet.write(i, 12, submission.lifecycle_phase)
+            sheet.write(i, 13, vote.result if vote else None)
+            sheet.write(i, 14, _d(vote.valid_until) if vote else None)
+            sheet.write(i, 16, submission.presenter.profile.organisation)
+            sheet.write(i, 17, str(submission.presenter))
+            sheet.write(i, 18, submission.presenter.email)
+            continue
+
         pi = sf.primary_investigator
 
         multicentric = (
