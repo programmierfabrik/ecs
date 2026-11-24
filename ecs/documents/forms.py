@@ -109,7 +109,7 @@ class DocumentForm(forms.ModelForm):
         if self.cleaned_data.get('update_id') is not None:
             raise ValidationError(_('illegal file'))
 
-        pdf = self.cleaned_data['file']
+        pdf = self.cleaned_data.get('file')
         if not pdf:
             raise ValidationError(_('no file'))
 
