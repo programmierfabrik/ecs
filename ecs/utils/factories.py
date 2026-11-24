@@ -16,16 +16,19 @@ from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
+from ecs.checklists.forms import ChecklistTaskCreationForm, ChecklistTaskCreationStage2Form
 from ecs.checklists.models import Checklist
+from ecs.checklists.utils import create_dynamic_task
 from ecs.core.forms.review import CategorizationForm
 from ecs.core.models import EthicsCommission, Investigator, MedicalCategory, Submission, SubmissionForm
 from ecs.core.models.constants import SUBMISSION_LANE_BOARD
 from ecs.core.workflow import Categorization, ChecklistReview, VotePreparation
 from ecs.documents.models import Document, DocumentType
-from ecs.meetings.models import Meeting, Participation
+from ecs.meetings.models import Meeting
 from ecs.meetings.signals import on_meeting_end, on_meeting_start
 from ecs.signature.views import _receive_document
 from ecs.tasks.models import Task
@@ -120,8 +123,17 @@ def create_submission_form(ec_number=None, presenter=None, *, render_pdf=True, *
 
 def create_meeting(start=None, board_members=(), **fields):
     """An upcoming meeting. ``board_members`` are the members selected on the
-    "EK-Mitglieder" tab."""
-    start = start or timezone.now() + timedelta(days=7)
+    "EK-Mitglieder" tab.
+
+    By default it is a week ahead, but before any meeting that has not been
+    held yet: meetings are held in order of their start, which scheduling
+    relies on (``Submission.schedule_to_meeting``).
+    """
+    if start is None:
+        start = timezone.now() + timedelta(days=7)
+        first_unheld = Meeting.objects.filter(started=None).order_by('start').values_list('start', flat=True).first()
+        if first_unheld is not None:
+            start = min(start, first_unheld - timedelta(hours=1))
     fields.setdefault('deadline', start - timedelta(days=3))
     fields.setdefault('deadline_diplomathesis', start - timedelta(days=10))
     meeting = Meeting.objects.create(**fill_required(Meeting, {'start': start, **fields}))
@@ -136,7 +148,8 @@ def schedule(submission, meeting=None, participants=(), **categorization):
     categorization (``categorization`` are the categorization form's fields,
     board lane by default), which puts it on the next schedulable meeting.
     If ``meeting`` is another one, the study is rescheduled onto it.
-    ``participants`` take part in the TOP.
+    ``participants`` are specialists: each gets a specialist review task,
+    which makes them take part in the TOP.
     """
     run_workflow(submission, fields={'categorization': categorization})
     top = submission.timetable_entries.order_by('-meeting__start', '-pk').first()
@@ -149,8 +162,48 @@ def schedule(submission, meeting=None, participants=(), **categorization):
     if meeting is not None and top.meeting != meeting:
         top = submission.reschedule(top.meeting, meeting)
     for user in participants:
-        Participation.objects.get_or_create(entry=top, user=user)
+        create_task(submission, 'specialist_review', assign_to=user)
     return top
+
+
+def create_task(submission, node_uid, assign_to=None, created_by=None,
+                send_message_on_close=False, reminder_days=None):
+    """Add a task by hand, as the office does with « create task » on a study
+    (``specialist_review``, ``statistical_review``, ``external_review`` ...).
+
+    ``assign_to`` defaults to the group for tasks that can be delegated, else
+    to the first active member of the task's group who is not biased;
+    ``created_by`` to the first office user.
+    """
+    if not submission.allows_dynamic_task_creation():
+        raise ValueError(f'submission {submission.pk} allows no new tasks')
+    task_types = ChecklistTaskCreationForm.base_fields['task_type'].queryset
+    task_type = task_types.filter(workflow_node__uid=node_uid).first()
+    if task_type is None:
+        raise ValueError(f'{node_uid} is not a task the office can add; one of: '
+                         f'{sorted(task_types.values_list("workflow_node__uid", flat=True))}')
+    form = ChecklistTaskCreationForm({
+        'task_type': task_type.pk,
+        'send_message_on_close': send_message_on_close,
+        'reminder_message_timeout': reminder_days or '',
+    })
+    if assign_to is None and not task_type.is_delegatable:
+        assign_to = task_type.group.user_set.filter(is_active=True).exclude(
+            pk__in=submission.biased_board_members.values('pk')).order_by('pk').first()
+    stage2 = ChecklistTaskCreationStage2Form(
+        submission, task_type, {'assign_to': assign_to.pk if assign_to else ''})
+    if not (form.is_valid() and stage2.is_valid()):
+        raise ValueError(f'invalid task: {form.errors.as_json()} {stage2.errors.as_json()}')
+    created_by = created_by or User.objects.filter(
+        groups__name='EC-Office', is_active=True).order_by('pk').first()
+    with sudo(created_by):
+        try:
+            return create_dynamic_task(
+                submission, task_type, stage2.cleaned_data['assign_to'], created_by,
+                send_message_on_close=form.cleaned_data['send_message_on_close'],
+                reminder_message_timeout=form.cleaned_data['reminder_message_timeout'])
+        except ValidationError as e:
+            raise ValueError(f'{node_uid}: {" ".join(e.messages)}') from None
 
 
 def start_meeting(meeting):

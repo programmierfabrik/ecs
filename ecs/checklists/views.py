@@ -1,11 +1,12 @@
+from django.core.exceptions import ValidationError
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render
-from django.utils.translation import gettext as _
 
-from ecs.checklists.models import Checklist, ChecklistBlueprint
+from ecs.checklists.models import Checklist
 from ecs.checklists.forms import (
     ChecklistTaskCreationForm, ChecklistTaskCreationStage2Form,
 )
+from ecs.checklists.utils import create_dynamic_task
 from ecs.core.models import Submission
 from ecs.documents.views import handle_download
 from ecs.tasks.models import Task, TaskType
@@ -52,67 +53,15 @@ def create_task(request, submission_pk=None):
     created = False
 
     if request.method == 'POST' and form.is_valid() and form_stage2.is_valid():
-        task_type = form.cleaned_data['task_type']
-        assign_to = form_stage2.cleaned_data.get('assign_to')
-
-        tasks = Task.unfiltered.for_submission(submission).open().filter(
-            task_type__name=task_type.name)
-        if not task_type.is_delegatable:
-            tasks = tasks.filter(assigned_to=assign_to)
-
-        if tasks.exists():
-            form.add_error('task_type', _('This task does already exist'))
+        try:
+            create_dynamic_task(
+                submission, form.cleaned_data['task_type'],
+                form_stage2.cleaned_data.get('assign_to'), request.user,
+                send_message_on_close=form.cleaned_data['send_message_on_close'],
+                reminder_message_timeout=form.cleaned_data['reminder_message_timeout'])
+        except ValidationError as e:
+            form.add_error('task_type', e)
         else:
-            if task_type.workflow_node.uid == 'external_review':
-                blueprint = ChecklistBlueprint.objects.get(slug='external_review')
-                checklist, checklist_created = Checklist.objects.get_or_create(
-                    blueprint=blueprint, submission=submission, user=assign_to,
-                    defaults={'last_edited_by': assign_to})
-
-                if checklist_created:
-                    for question in blueprint.questions.order_by('text'):
-                        checklist.answers.get_or_create(question=question)
-
-                    task = Task.unfiltered.for_data(checklist).open().filter(
-                        task_type=task_type).get()
-                else:
-                    review_task = Task.unfiltered.for_data(checklist).filter(
-                        task_type__workflow_node__uid='external_review_review'
-                    ).open().first()
-                    if review_task:
-                        form.add_error('task_type',
-                            _('There is an external review review in progress'))
-                        return render(request, 'checklists/create_task.html', {
-                            'form': form,
-                            'form_stage2': form_stage2,
-                            'created': False,
-                        })
-
-                    checklist.status = 'new'
-                    checklist.save()
-
-                    task = Task.unfiltered.for_data(checklist).filter(
-                        task_type__workflow_node__uid='external_review'
-                    ).first().reopen()
-                    task.accepted = False
-
-            else:
-                token = task_type.workflow_node.bind(
-                    submission.workflow.workflows[0]).receive_token(None)
-                token.task.assign(user=assign_to)
-                task = token.task
-
-                if task_type.workflow_node.uid == 'specialist_review':
-                    entry = submission.timetable_entries.filter(
-                        meeting__started=None).first()
-                    if entry:
-                        entry.participations.create(user=assign_to, task=task)
-
-            task.created_by = request.user
-            task.send_message_on_close = form.cleaned_data['send_message_on_close']
-            task.reminder_message_timeout = form.cleaned_data['reminder_message_timeout']
-            task.save()
-
             form = ChecklistTaskCreationForm(None, prefix='checklist_task')
             form_stage2 = None
             created = True
