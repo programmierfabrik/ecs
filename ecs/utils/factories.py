@@ -11,6 +11,7 @@ Callers name only the fields their scenario is about; every other required
 column gets a placeholder (see ``fill_required``).
 """
 import os
+import uuid
 from datetime import timedelta
 
 from django.contrib.auth.models import User
@@ -18,13 +19,20 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils import timezone
 
-from ecs.core.models import EthicsCommission, Investigator, Submission, SubmissionForm
+from ecs.checklists.models import Checklist
+from ecs.core.forms.review import CategorizationForm
+from ecs.core.models import EthicsCommission, Investigator, MedicalCategory, Submission, SubmissionForm
+from ecs.core.models.constants import SUBMISSION_LANE_BOARD
+from ecs.core.workflow import Categorization, ChecklistReview, VotePreparation
 from ecs.documents.models import Document, DocumentType
 from ecs.meetings.models import Meeting, Participation
 from ecs.meetings.signals import on_meeting_end, on_meeting_start
+from ecs.signature.views import _receive_document
 from ecs.tasks.models import Task
-from ecs.users.utils import get_or_create_user
-from ecs.votes.forms import VoteForm
+from ecs.users.utils import get_or_create_user, get_user, sudo
+from ecs.votes.forms import VoteForm, VotePreparationForm, VoteReviewForm
+from ecs.votes.views import sign_success
+from ecs.votes.workflow import VoteReview, VoteSigning
 
 LOREM = 'Lorem ipsum dolor sit amet'
 TEST_PDF = os.path.join(os.path.dirname(os.path.dirname(__file__)),
@@ -94,6 +102,8 @@ def create_submission_form(ec_number=None, presenter=None, *, render_pdf=True, *
     for an MPG study or ``project_type_non_reg_drug=True`` for an AMG one.
     """
     presenter = presenter or get_or_create_user('test_presenter@example.com')[0]
+    # Empty means "not a thesis"; a placeholder would make every study one.
+    fields.setdefault('project_type_education_context', None)
     submission = Submission.objects.create(ec_number=ec_number, presenter=presenter, susar_presenter=presenter)
     sf = SubmissionForm.objects.create(**fill_required(
         SubmissionForm, {'submission': submission, 'presenter': presenter, **fields}))
@@ -119,15 +129,25 @@ def create_meeting(start=None, board_members=(), **fields):
     return meeting
 
 
-def schedule(submission, meeting=None, participants=()):
-    """Put the study on ``meeting`` (default: the next schedulable one) and
-    return its TOP. ``participants`` take part in that TOP."""
-    requested = meeting
-    meeting = submission.schedule_to_meeting(meeting)
-    if requested is None and meeting.started:
+def schedule(submission, meeting=None, participants=(), **categorization):
+    """Bring the study onto a meeting and return its TOP.
+
+    A new study gets there the way it does in the office: initial review and
+    categorization (``categorization`` are the categorization form's fields,
+    board lane by default), which puts it on the next schedulable meeting.
+    If ``meeting`` is another one, the study is rescheduled onto it.
+    ``participants`` take part in the TOP.
+    """
+    run_workflow(submission, fields={'categorization': categorization})
+    top = submission.timetable_entries.order_by('-meeting__start', '-pk').first()
+    if top is None:
+        raise ValueError(f'submission {submission.pk} is on no meeting; open tasks: '
+                         f'{_node_uids(_open_tasks(submission))}')
+    if top.meeting.started:
         raise ValueError(f'submission {submission.pk} is not due for another meeting '
                          f'(only a recessed vote sends it on)')
-    top = submission.timetable_entries.filter(meeting=meeting).latest('pk')
+    if meeting is not None and top.meeting != meeting:
+        top = submission.reschedule(top.meeting, meeting)
     for user in participants:
         Participation.objects.get_or_create(entry=top, user=user)
     return top
@@ -172,33 +192,184 @@ def end_meeting(meeting):
     return meeting
 
 
-def finish_vote_workflow(vote, max_steps=10):
-    """Do the vote's open tasks (finalization, reviews, signing) until it is published.
+def finish_vote_workflow(vote):
+    """Do the vote's tasks (finalization, reviews, signing) until it is published."""
+    run_workflow(vote)
+    vote.refresh_from_db()
+    if not vote.published_at:
+        raise ValueError(f'vote {vote.pk} is unpublished; open tasks: '
+                         f'{_node_uids(_open_tasks(vote))}')
+    return vote
 
-    Reviews are done with the vote marked final; signing stores the signed PDF
-    the way the signing callback does (``votes.views.sign_success``).
+
+# --- Tasks ----------------------------------------------------------------
+#
+# A task is done the way its page does it: the page's form is saved, then the
+# task is completed with a choice (``ecs.tasks.utils.TaskManagementData``).
+# Most pages save nothing; those that do have a ``_save_*`` below.
+
+DEFAULT = object()
+
+
+def _save_categorization(task, user, fields):
+    """The categorization form; board lane and the first medical category
+    unless ``fields`` name others."""
+    submission = task.data
+    data = {
+        'workflow_lane': submission.workflow_lane or SUBMISSION_LANE_BOARD,
+        'medical_categories': list(submission.medical_categories.values_list('pk', flat=True)) or [
+            MedicalCategory.objects.filter(is_disabled=False).order_by('name').values_list('pk', flat=True).first()],
+        **fields,
+    }
+    form = CategorizationForm(data, instance=submission)
+    if not form.is_valid():
+        raise ValueError(f'invalid categorization: {form.errors.as_json()}')
+    form.save()
+
+
+def _save_checklist(task, user, fields):
+    """The checklist of a checklist review, every question answered positively
+    with a lorem comment (``core.views.submissions.checklist_review``)."""
+    blueprint = task.node_controller.node.data
+    owner = user if blueprint.multiple else get_user('root@system.local')
+    checklist, created = Checklist.unfiltered.update_or_create(
+        blueprint=blueprint, submission=task.data, user=owner, defaults={'last_edited_by': user})
+    if created:
+        for question in blueprint.questions.order_by('text'):
+            checklist.answers.get_or_create(question=question)
+    for answer in checklist.answers.select_related('question'):
+        answer.answer = not answer.question.is_inverted
+        answer.comment = LOREM
+        answer.save()
+    checklist.save()    # unlocks the review task
+
+
+def _prepare_vote(task, user, fields):
+    """The vote preparation form: a draft vote (result 1 unless named) on the
+    current form (``core.views.submissions.vote_preparation``)."""
+    submission = task.data
+    vote = submission.current_pending_vote
+    data = {'result': vote.result if vote else '1', 'text': vote.text if vote else LOREM, **fields}
+    form = VotePreparationForm(data, instance=vote)
+    if not form.is_valid():
+        raise ValueError(f'invalid vote preparation: {form.errors.as_json()}')
+    vote = form.save(commit=False)
+    vote.submission_form = submission.current_submission_form
+    vote.save()
+
+
+def _save_vote_review(task, user, fields):
+    """The vote review form, marked proofread and valid (executives also see
+    the result, posted unchanged)."""
+    vote = task.data
+    data = {'result': vote.result, 'text': vote.text, 'is_final_version': True, **fields}
+    form = VoteReviewForm(data, instance=vote)
+    if not form.is_valid():
+        raise ValueError(f'invalid vote review: {form.errors.as_json()}')
+    form.save()
+
+
+def _sign_vote(task, user, fields):
+    """Store the signed vote PDF the way the PDF-AS callback does (``mock:``
+    signing); completing the task then publishes the vote."""
+    vote = task.data
+    _receive_document(None, {
+        'success_func': sign_success,
+        'parent_pk': vote.pk,
+        'parent_type': type(vote),
+        'document_uuid': uuid.uuid4().hex,
+        'document_type': 'votes',
+        'document_version': 'signed-at',
+        'document_filename': vote.pdf_filename,
+    }, None, vote.render_pdf())
+
+
+TASK_FORMS = (
+    (Categorization, _save_categorization),
+    (ChecklistReview, _save_checklist),
+    (VotePreparation, _prepare_vote),
+    (VoteReview, _save_vote_review),
+    (VoteSigning, _sign_vote),
+)
+
+
+def _task_form(task):
+    controller = task.node_controller
+    return next((save for activity, save in TASK_FORMS if isinstance(controller, activity)), None)
+
+
+def _open_tasks(data):
+    return Task.objects.for_data(data).open().order_by('pk').select_related('task_type__workflow_node')
+
+
+def _node_uids(tasks):
+    return [t.task_type.workflow_node.uid for t in tasks]
+
+
+def _doable(task):
+    return _task_form(task) is not None or not task.is_locked
+
+
+def _task_user(task):
+    """Whoever the task is assigned to, else the first active member of its group."""
+    user = task.assigned_to or User.objects.filter(
+        groups=task.task_type.group, is_active=True).order_by('pk').first()
+    if user is None:
+        raise ValueError(f'nobody can do task {task.pk} ({task.task_type.workflow_node.uid})')
+    return user
+
+
+def do_task(data, node_uid=None, choice=DEFAULT, user=None, **fields):
+    """Do one open task of ``data`` (a submission, vote, checklist ...) and return it.
+
+    ``node_uid`` picks the task (default: the oldest one that can be done),
+    ``choice`` defaults to the first one the page offers (the success path),
+    ``user`` to the assignee or the first active member of the task's group.
+    ``fields`` go into the page's form, e.g. ``workflow_lane=2`` for categorization.
     """
+    tasks = _open_tasks(data)
+    if node_uid:
+        task = tasks.filter(task_type__workflow_node__uid=node_uid).first()
+    else:
+        task = next((t for t in tasks if _doable(t)), None)
+    if task is None:
+        raise ValueError(f'no {node_uid or "doable"} task on {data!r}; open: {_node_uids(tasks)}')
+    user = user or _task_user(task)
+    save = _task_form(task)
+    if fields and save is None:
+        raise ValueError(f'task {task.task_type.workflow_node.uid} has no form for {sorted(fields)}')
+    with sudo(user):
+        if save:
+            save(task, user, fields)
+        task = Task.unfiltered.get(pk=task.pk)     # refetch: saving the form may unlock it
+        if task.is_locked:
+            raise ValueError(f'task {task.pk} ({task.task_type.workflow_node.uid}) is locked')
+        if choice is DEFAULT:
+            choice = task.choices[0][0] if task.choices else None
+        task.done(choice=choice, user=user)
+    return task
+
+
+def run_workflow(data, until=None, fields=None, max_steps=50):
+    """Do the open tasks of ``data``, oldest first, until a task at node
+    ``until`` is open, or (without ``until``) until none is left to do.
+
+    ``fields`` maps a node uid to the fields of its form, e.g.
+    ``{'categorization': {'workflow_lane': 2}}``. Returns the open tasks.
+    """
+    fields = fields or {}
     for _ in range(max_steps):
-        vote.refresh_from_db()
-        if vote.published_at:
-            return vote
-        task = Task.objects.for_data(vote).open().order_by('pk').first()
+        tasks = list(_open_tasks(data))
+        if until in _node_uids(tasks):
+            return tasks
+        task = next((t for t in tasks if _doable(t)), None)
         if task is None:
-            raise ValueError(f'vote {vote.pk} is unpublished but has no open task')
-        user = task.assigned_to or User.objects.filter(
-            groups=task.task_type.group, is_active=True).order_by('pk').first()
-        if task.task_type.workflow_node.uid == 'vote_signing':
-            Document.objects.create_from_buffer(
-                vote.render_pdf(), doctype='votes', parent_object=vote,
-                original_file_name=vote.pdf_filename, name=str(vote))
-            vote.signed_at = timezone.now()
-            vote.save()
-            task.done(choice=True, user=user)
-        else:
-            vote.is_final_version = True
-            vote.save(update_fields=('is_final_version',))
-            task.done(user=user)
-    raise ValueError(f'vote {vote.pk} not published after {max_steps} tasks')
+            if until:
+                raise ValueError(f'{until} not reached on {data!r}; open: {_node_uids(tasks)}')
+            return tasks
+        uid = task.task_type.workflow_node.uid
+        do_task(data, uid, **fields.get(uid, {}))
+    raise ValueError(f'{data!r} still has tasks after {max_steps} steps')
 
 
 def vote_in_meeting(submission, result, meeting=None, participants=()):
