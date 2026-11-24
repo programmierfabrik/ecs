@@ -1,0 +1,162 @@
+#!/usr/bin/env python3
+"""Read Sentry issues and full event payloads (stack frames with local variables).
+
+    tools/sentry issues [--days 30] [--project SLUG]
+                                        unresolved issues per project, most frequent first
+    tools/sentry projects               project slugs the token can see
+    tools/sentry show ISSUE_ID [-n 5]   latest event(s): trace, locals, request, breadcrumbs
+    tools/sentry show ISSUE_ID --json   raw event payload
+    tools/sentry resolve ID [ID...] [--status resolved|ignored|unresolved]
+                                        change issue status (token needs event:admin)
+
+Reads SENTRY_AUTH_TOKEN (scopes: event:read, project:read, org:read), SENTRY_ORG and
+SENTRY_PROJECT (comma-separated slugs, one per environment) from the environment or .env; SENTRY_HOST defaults to https://sentry.io
+(use https://de.sentry.io etc. for other regions). Stdlib only.
+"""
+import argparse
+import json
+import os
+import shlex
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+
+def load_env():
+    env_file = Path(__file__).resolve().parent.parent / '.env'
+    if env_file.exists():
+        for line in env_file.read_text().splitlines():
+            words = shlex.split(line, comments=True)
+            if words and words[0] == 'export':
+                words = words[1:]
+            if words and '=' in words[0]:
+                key, _, value = words[0].partition('=')
+                os.environ.setdefault(key, value)
+
+
+def get(path, method='GET', body=None):
+    host = os.environ.get('SENTRY_HOST', 'https://sentry.io').rstrip('/')
+    headers = {'Authorization': f'Bearer {os.environ["SENTRY_AUTH_TOKEN"]}'}
+    if body is not None:
+        headers['Content-Type'] = 'application/json'
+    req = urllib.request.Request(
+        f'{host}/api/0/{urllib.parse.quote(path, safe="/?=&:%")}',
+        data=json.dumps(body).encode() if body is not None else None,
+        headers=headers,
+        method=method,
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.load(resp)
+    except urllib.error.HTTPError as e:
+        sys.exit(f'Sentry API {e.code} for {path}: {e.read().decode()[:300]}')
+
+
+def cmd_issues(args):
+    org = os.environ['SENTRY_ORG']
+    projects = [p.strip() for p in os.environ['SENTRY_PROJECT'].split(',') if p.strip()]
+    if args.project:
+        projects = [p for p in projects if p == args.project] or sys.exit(f'{args.project} not in SENTRY_PROJECT')
+    for project in projects:
+        since = f'lastSeen:>={args.since}' if args.since else f'lastSeen:-{args.days}d'
+        status = '' if args.all else 'is:unresolved '
+        issues = get(f'projects/{org}/{project}/issues/?query={status}{since}&sort=freq&limit=100')
+        for i in issues:
+            print(
+                f"{i['id']:>12}  {project:<14} {i['status']:<10} {i['count']:>5}x "
+                f"{i['firstSeen'][:10]}..{i['lastSeen'][:10]}  {i['title'][:100]}"
+            )
+
+
+def cmd_projects(args):
+    for p in get(f'organizations/{os.environ["SENTRY_ORG"]}/projects/'):
+        print(f"{p['slug']:<30} {p['name']}")
+
+
+def print_frames(frames):
+    for f in frames:
+        if not f.get('inApp'):
+            continue
+        print(f"  {f.get('filename')}:{f.get('lineNumber')} in {f.get('function')}")
+        if f.get('context'):
+            for lineno, code in f['context']:
+                marker = '>' if lineno == f.get('lineNumber') else ' '
+                print(f'    {marker} {lineno}: {code}')
+        for name, value in (f.get('vars') or {}).items():
+            print(f'      {name} = {json.dumps(value, default=str)[:200]}')
+
+
+def cmd_show(args):
+    org = os.environ['SENTRY_ORG']
+    if args.n > 1:
+        events = get(f'organizations/{org}/issues/{args.issue_id}/events/?full=true&limit={args.n}')[: args.n]
+    else:
+        events = [get(f'organizations/{org}/issues/{args.issue_id}/events/latest/')]
+    if args.json:
+        print(json.dumps(events if args.n > 1 else events[0], indent=2))
+        return
+    for number, event in enumerate(events, 1):
+        print(f'\n===== event {number}/{len(events)} =====')
+        print_event(event)
+
+
+def cmd_resolve(args):
+    org = os.environ['SENTRY_ORG']
+    for issue_id in args.issue_ids:
+        get(f'organizations/{org}/issues/{issue_id}/', method='PUT', body={'status': args.status})
+        print(f'{issue_id} -> {args.status}')
+
+
+def print_event(event):
+    print(f"{event['title']}  ({event['dateCreated']}, release {event.get('release') and event['release'].get('version')})")
+    tags = {t['key']: t['value'] for t in event.get('tags', [])}
+    print('tags:', {k: tags[k] for k in ('environment', 'url', 'user', 'transaction') if k in tags})
+    for entry in event.get('entries', []):
+        if entry['type'] == 'exception':
+            for exc in entry['data']['values']:
+                print(f"\n{exc['type']}: {exc['value']}")
+                print_frames((exc.get('stacktrace') or {}).get('frames', []))
+        elif entry['type'] == 'request':
+            data = entry['data']
+            print(f"\nrequest: {data.get('method')} {data.get('url')}")
+            if data.get('data'):
+                print('  body:', json.dumps(data['data'], default=str)[:500])
+        elif entry['type'] == 'breadcrumbs':
+            print('\nlast breadcrumbs:')
+            for b in entry['data']['values'][-10:]:
+                print(f"  {b.get('timestamp', '')[11:19]} {b.get('category')}: {b.get('message') or b.get('data')}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = parser.add_subparsers(dest='cmd', required=True)
+    p = sub.add_parser('issues')
+    p.add_argument('--days', type=int, default=30)
+    p.add_argument('--project', help='only this project slug')
+    p.add_argument('--since', help='YYYY-MM-DD: issues seen on/after this date (overrides --days)')
+    p.add_argument('--all', action='store_true', help='include resolved/ignored issues')
+    p.set_defaults(func=cmd_issues)
+    p = sub.add_parser('projects')
+    p.set_defaults(func=cmd_projects)
+    p = sub.add_parser('show')
+    p.add_argument('issue_id')
+    p.add_argument('-n', type=int, default=1, help='number of most recent events to print')
+    p.add_argument('--json', action='store_true')
+    p.set_defaults(func=cmd_show)
+    p = sub.add_parser('resolve')
+    p.add_argument('issue_ids', nargs='+')
+    p.add_argument('--status', choices=['resolved', 'ignored', 'unresolved'], default='resolved')
+    p.set_defaults(func=cmd_resolve)
+    args = parser.parse_args()
+    load_env()
+    required = ('SENTRY_AUTH_TOKEN', 'SENTRY_ORG') + (('SENTRY_PROJECT',) if args.cmd == 'issues' else ())
+    for key in required:
+        if not os.environ.get(key):
+            sys.exit(f'{key} missing: set it in .env or the environment')
+    args.func(args)
+
+
+if __name__ == '__main__':
+    main()
