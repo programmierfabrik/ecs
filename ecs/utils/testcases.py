@@ -33,7 +33,7 @@ class EcsTestCase(TestCase):
 
         core_bootstrap.auth_groups()
         core_bootstrap.medical_categories()
-        core_bootstrap.auth_user_testusers()
+        core_bootstrap.create_testusers()
         core_bootstrap.advanced_settings()
         core_bootstrap.ethics_commissions()
 

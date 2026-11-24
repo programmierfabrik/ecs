@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from django.contrib.sites.models import Site
 from django.utils.translation import gettext_noop as _
 
@@ -269,6 +269,11 @@ def auth_user_developers():
 ))
 def auth_user_testusers():
     ''' Test User Creation, target to userswitcher'''
+    if settings.DEBUG or settings.ECS_USERSWITCHER_ENABLED:
+        create_testusers()
+
+
+def create_testusers():
     testusers = (
         ('presenter', None),
         ('sponsor', None),
@@ -350,5 +355,6 @@ def ethics_commissions():
 
 @bootstrap.register(depends_on=('ecs.core.bootstrap.auth_user_testusers',))
 def advanced_settings():
-    default_contact = get_user('office1@example.org')
+    # Without test users (production), root stands in until the office picks one.
+    default_contact = User.objects.filter(email='office1@example.org').first() or get_user('root@system.local')
     AdvancedSettings.objects.get_or_create(pk=1, defaults={'default_contact': default_contact})
