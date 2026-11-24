@@ -458,6 +458,8 @@ if os.getenv('ECS_SENTRY_DSN', '') != '':
 
     sentry_sdk.init(
         dsn=os.getenv('ECS_SENTRY_DSN'),
+        # a double click submits the same form twice; the loser of the race raises this
+        ignore_errors=['ecs.docstash.models.DocStash.ConcurrentModification'],
         integrations=[DjangoIntegration(), LoggingIntegration(
             level=logging.FATAL,        # Capture info and above as breadcrumbs
             event_level=logging.FATAL   # Send records as events
