@@ -18,7 +18,7 @@ from django_countries import countries
 from ecs.core.models import (
     Investigator, InvestigatorEmployee, SubmissionForm, Measure,
     ParticipatingCenterNonSubject, ForeignParticipatingCenter,
-    NonTestedUsedDrug, Submission, TemporaryAuthorization, AdvancedSettings,
+    NonTestedUsedDrug, TemporaryAuthorization, AdvancedSettings,
     EthicsCommission,
 )
 from ecs.core.models.constants import SUBMISSION_AGE_UNIT_YEARS
@@ -175,7 +175,7 @@ class SubmissionFormForm(ReadonlyFormMixin, forms.ModelForm):
         else:
             require_fields(self, ('study_plan_dataprotection_anonalgoritm',))
 
-        if cleaned_data.get('substance_preexisting_clinical_tries') == True:
+        if cleaned_data.get('substance_preexisting_clinical_tries'):
             require_fields(self, ('substance_p_c_t_phase', 'substance_p_c_t_period', 'substance_p_c_t_application_type', 'substance_p_c_t_gcp_rules', 'substance_p_c_t_final_report',))
 
         require_fields(self, ('subject_males', 'subject_divers',))

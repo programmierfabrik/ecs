@@ -435,7 +435,7 @@ def decline_task_full(request, task_pk=None):
 def do_task(request, task_pk=None):
     task = get_object_or_404(Task, assigned_to=request.user, pk=task_pk)
     url = task.url
-    if not task.closed_at is None:
+    if task.closed_at is not None:
         url = task.afterlife_url
         if url is None:
             raise Http404()

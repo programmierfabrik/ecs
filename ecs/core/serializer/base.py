@@ -1,5 +1,7 @@
 import json
-import zipfile, os, datetime
+import zipfile
+import os
+import datetime
 from tempfile import TemporaryFile
 from uuid import uuid4
 from collections import OrderedDict
@@ -367,7 +369,7 @@ class DocumentTypeSerializer(object):
         try:
             return DocumentType.objects.get(name=data)
         except DocumentType.DoesNotExist:
-            raise ValueError("no such doctype: {1}".format(data))
+            raise ValueError(f"no such doctype: {data}")
             
     def docs(self):
         return FieldDocs(choices=[

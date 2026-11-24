@@ -7,7 +7,6 @@ import xlwt
 from celery.schedules import crontab
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.db import transaction
 from django.db.models import Min
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -150,8 +149,10 @@ def xls_export(user_id=None, filters=None):
     sheet.write_merge(1, 2, 65, 65, label('project_type_non_interventional_study_mpg'), header)
 
     # format helpers
-    _b = lambda x: _('Yes') if x else _('No')
-    _d = lambda x: timezone.localtime(x).strftime('%d.%m.%Y') if x else None
+    def _b(x):
+        return _('Yes') if x else _('No')
+    def _d(x):
+        return timezone.localtime(x).strftime('%d.%m.%Y') if x else None
 
     for i, submission in enumerate(submissions, 3):
         sf = submission.current_submission_form

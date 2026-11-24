@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
-from django.http import FileResponse, Http404, HttpResponseNotFound
+from django.http import FileResponse, HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone

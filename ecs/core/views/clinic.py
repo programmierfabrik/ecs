@@ -38,7 +38,7 @@ def administration(request):
     paginator = Paginator(clinics.order_by("-is_favorite", "-pk"), limit, allow_empty_first_page=True)
     try:
         clinics = paginator.page(page)
-    except:
+    except Exception:
         clinics = paginator.page(1)
 
     return render(request, 'clinic/administration.html', {

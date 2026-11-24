@@ -21,7 +21,7 @@ from django.utils.translation import gettext as _
 from ecs.checklists.models import Checklist, ChecklistBlueprint
 from ecs.communication.mailutils import deliver, generate_ics_file
 from ecs.communication.utils import send_system_message_template
-from ecs.core.models import Submission, SubmissionForm, MedicalCategory, AdvancedSettings, Clinic
+from ecs.core.models import Submission, SubmissionForm, MedicalCategory, AdvancedSettings
 from ecs.core.models.constants import SUBMISSION_TYPE_MULTICENTRIC
 from ecs.documents.models import Document
 from ecs.documents.views import handle_download
@@ -152,7 +152,7 @@ def reschedule_submission(request, submission_pk=None):
 
         old_entry = from_meeting.timetable_entries.get(submission=submission)
         assert not hasattr(old_entry, 'vote')
-        visible = (not old_entry.timetable_index is None)
+        visible = (old_entry.timetable_index is not None)
         new_entry = to_meeting.add_entry(submission=submission,
                                          duration=old_entry.duration, title=old_entry.title, visible=visible)
         old_entry.participations.exclude(task=None).update(entry=new_entry)
@@ -488,7 +488,7 @@ def timetable_editor(request, meeting_pk=None):
     return render(request, 'meetings/timetable/editor.html', {
         'meeting': meeting,
         'running_optimization': bool(meeting.optimization_task_id),
-        'readonly': bool(meeting.optimization_task_id) or not meeting.started is None,
+        'readonly': bool(meeting.optimization_task_id) or meeting.started is not None,
         'score': _eval_timetable(meeting.metrics),
         'recommendations_not_done': recommendations_not_done,
     })
@@ -759,7 +759,7 @@ def meeting_assistant_other_tops(request, meeting_pk=None):
 
 @user_group_required('EC-Office')
 def edit_notification_text(request, meeting_pk=None, notification_pk=None):
-    meeting = get_object_or_404(Meeting, pk=meeting_pk, started__isnull=False)
+    get_object_or_404(Meeting, pk=meeting_pk, started__isnull=False)
     notification = get_object_or_404(NotificationAnswer, pk=notification_pk)
     if request.POST:
         notification.text = request.POST.get('new-text')
@@ -771,7 +771,7 @@ def edit_notification_text(request, meeting_pk=None, notification_pk=None):
 
 @user_group_required('EC-Office')
 def edit_vote_text(request, meeting_pk=None, vote_pk=None):
-    meeting = get_object_or_404(Meeting, pk=meeting_pk, started__isnull=False)
+    get_object_or_404(Meeting, pk=meeting_pk, started__isnull=False)
     vote = get_object_or_404(Vote, pk=vote_pk)
     if request.POST:
         vote.text = request.POST.get('new-text')
@@ -862,7 +862,7 @@ def meeting_assistant_top(request, meeting_pk=None, top_pk=None):
                     checklist = top.submission.checklists.exclude(status='dropped').filter(**lookup_kwargs)[0]
                 except IndexError:
                     checklist = None
-                if not checklist in [x[1] for x in checklists]:
+                if checklist not in [x[1] for x in checklists]:
                     checklists.append((task, checklist))
             checklists.reverse()
             checklist_review_states[blueprint] = checklists
@@ -1345,7 +1345,7 @@ def render_submission_protocol(request, meeting_pk=None, submission_pk=None):
         submission = get_object_or_404(meeting.submissions, id=submission_pk)
         render_protocol_pdf_for_submission(meeting, submission)
         return redirect(reverse('meetings.meeting_details', kwargs={'meeting_pk': meeting.id}) + '#clinic_tab')
-    except:
+    except Exception:
         raise Http404('')
 
 

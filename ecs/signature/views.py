@@ -1,5 +1,9 @@
-import urllib.request, urllib.parse, urllib.error
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
+import urllib.parse
+import urllib.error
+import urllib.request
+import urllib.error
+import urllib.parse
 import traceback
 import logging
 import sys
@@ -207,7 +211,7 @@ def bulk_sign(request):
         error_msg = str(e)
         try:
             error_msg += f" - Response: {e.response.text}"
-        except:
+        except Exception:
             pass
         return HttpResponse(_("Bulk signing failed: {error}").format(error=error_msg), status=500)
     except Exception as e:
@@ -233,7 +237,7 @@ def bulk_receive(request):
         try:
             data = json.loads(request.body)
             token = data.get('token')
-        except:
+        except Exception:
             pass
 
     if not token and 'pdfurl' in request.GET:
@@ -338,7 +342,7 @@ def bulk_receive(request):
         error_msg = str(e)
         try:
             error_msg += f" - Response: {e.response.text}"
-        except:
+        except Exception:
             pass
         return HttpResponse(_("Bulk receive failed: {error}").format(error=error_msg), status=500)
     except Exception as e:

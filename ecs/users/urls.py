@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.urls import include, path, re_path
+from django.urls import path, re_path
 from mozilla_django_oidc.views import OIDCAuthenticationRequestView
 
 from ecs.users import oidc_views, views

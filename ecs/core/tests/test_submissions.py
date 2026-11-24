@@ -190,7 +190,7 @@ class SubmissionAttachUserTest(EcsTestCase):
         self.sf.submitter_email = self.email
 
         self.user.save()
-        self.sender.save();
+        self.sender.save()
         self.sf.save()
 
     def test_submission_attach_user(self):

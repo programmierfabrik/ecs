@@ -24,7 +24,7 @@ VALID_SUBMISSION_FORM_DATA = {
     'study_plan_misc': [''], 'german_preclinical_results': ['bla bla bla'], 'study_plan_biometric_planning': ['Mag. rer.soc.oec. Jane Doe/ Statistikerin'], 
     'investigatoremployee-0-title': [''], 'nontesteduseddrug-INITIAL_FORMS': ['0'], 'submitter_contact_last_name': ['Doe'], 
     'investigatoremployee-0-sex': [''], 'study_plan_stratification': [''], 'german_recruitment_info': ['bla bla bla'], 
-    'investigator-1-phone': [''], 'submitter_email': [''], 'invoice_uid': [''], 'nontesteduseddrug-0-preparation_form': [''], 
+    'investigator-1-phone': [''], 'invoice_uid': [''], 'nontesteduseddrug-0-preparation_form': [''], 
     'investigator-1-contact_first_name': ['John'], 'investigator-1-email': ['rofl@copter.com'], 'german_concurrent_study_info': ['bla bla bla'], 
     'study_plan_planned_statalgorithm': ['log rank test'], 'document-date': [''], 'medtech_reference_substance': [''], 'measure-MAX_NUM_FORMS': [''], 
     'study_plan_statalgorithm': ['none'], 'foreignparticipatingcenter-TOTAL_FORMS': ['1'], 'routinemeasure-MAX_NUM_FORMS': [''], 
@@ -249,7 +249,8 @@ class SubmissionViewsTestCase(LoginTestCase):
         self.client.login(email=self.office_user.email, password='password')
 
         task = Task.objects.for_data(submission_form.submission).get(task_type__workflow_node__uid='initial_review')
-        refetch = lambda: Task.objects.get(pk=task.pk)
+        def refetch():
+            return Task.objects.get(pk=task.pk)
 
         # accept initial review task
         response = self.client.post(reverse('tasks.accept_task', kwargs={'task_pk': task.pk}))
@@ -263,7 +264,7 @@ class SubmissionViewsTestCase(LoginTestCase):
         self.assertEqual(response.status_code, 200)
 
         # delegate the task back to the pool
-        reponse = self.client.post(url, {'task_management-action': 'delegate', 'task_management-assign_to': '', 'task_management-submit': 'submit'})
+        self.client.post(url, {'task_management-action': 'delegate', 'task_management-assign_to': '', 'task_management-submit': 'submit'})
         task = refetch()
         self.assertEqual(None, task.assigned_to)
 
@@ -274,7 +275,7 @@ class SubmissionViewsTestCase(LoginTestCase):
         self.assertEqual(self.office_user, task.assigned_to)
 
         # complete the task
-        reponse = self.client.post(url, {'task_management-action': 'complete_0', 'task_management-submit': 'submit'})
+        self.client.post(url, {'task_management-action': 'complete_0', 'task_management-submit': 'submit'})
         task = refetch()
         self.assertTrue(task.closed_at is not None)
 

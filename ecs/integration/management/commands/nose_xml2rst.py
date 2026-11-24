@@ -1,4 +1,5 @@
-import sys, datetime
+import sys
+import datetime
 import importlib
 from xml.dom.minidom import parse
 
@@ -111,13 +112,11 @@ class Command(BaseCommand):
         #get all docstring via importing
         for pclassname, casedict in cases.items():
             tests = casedict['tests'] 
-            module_doc = ""
             impname = pclassname[:pclassname.rindex('.')]
             classname = pclassname[pclassname.rindex('.')+1:]
             
             try:
                 m=importlib.import_module(impname)
-                module_doc = m.__doc__
                 
                 try:
                     c=getattr(m, classname)
@@ -252,7 +251,7 @@ class RstTable():
     def table_header(self, line):
         self.out.append("%s%s%s" % ("+","-"*(self.maxwidth-2),"+"))
         nline = "| %s" % line
-        nline2 = " "*(maxwidth-len(nline)-1)
+        nline2 = " "*(self.maxwidth-len(nline)-1)
         self.out.append("%s%s|"  % (nline,nline2))
         self.out.append("%s%s%s" % ("+","="*(self.maxwidth-2),"+"))
     
@@ -263,7 +262,6 @@ class RstTable():
         self.out.append("")
     
     def table_line(self, line):
-        lines = []
         if len(line)+4 > self.maxwidth:
             for extraline in wrap(line, self.maxwidth-4):
                 nline = "| %s" % extraline

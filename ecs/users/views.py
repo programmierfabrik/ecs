@@ -16,7 +16,6 @@ from django.core import signing
 from django.utils import timezone
 from django.contrib.sessions.models import Session
 from django.contrib import messages
-from django.contrib.staticfiles.storage import staticfiles_storage
 
 from ecs.utils import forceauth, is_ajax
 from ecs.utils.viewutils import render_html
@@ -173,7 +172,7 @@ def request_password_reset(request):
         email = form.cleaned_data['email']
         if email != 'root@system.local':
             try:
-                user = get_user(email)
+                get_user(email)
             except User.DoesNotExist:
                 register_url = request.build_absolute_uri(reverse('users.register'))
                 htmlmail = str(render_html(request, 'users/password_reset/register_email.html', {

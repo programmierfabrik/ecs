@@ -66,28 +66,28 @@ def on_meeting_date_changed(sender, **kwargs):
 @receiver(signals.on_meeting_top_jump)
 def on_meeting_top_jump(sender, **kwargs):
     meeting = kwargs["meeting"]
-    timetable_entry = kwargs["timetable_entry"]
+    kwargs["timetable_entry"]
     _flush_cache(meeting)
 
 
 @receiver(signals.on_meeting_top_add)
 def on_meeting_top_add(sender, **kwargs):
     meeting = kwargs["meeting"]
-    timetable_entry = kwargs["timetable_entry"]
+    kwargs["timetable_entry"]
     _flush_cache(meeting)
 
 
 @receiver(signals.on_meeting_top_delete)
 def on_meeting_top_delete(sender, **kwargs):
     meeting = kwargs["meeting"]
-    timetable_entry = kwargs["timetable_entry"]
+    kwargs["timetable_entry"]
     _flush_cache(meeting)
 
 
 @receiver(signals.on_meeting_top_index_change)
 def on_meeting_top_index_change(sender, **kwargs):
     meeting = kwargs["meeting"]
-    timetable_entry = kwargs["timetable_entry"]
+    kwargs["timetable_entry"]
     _flush_cache(meeting)
 
 

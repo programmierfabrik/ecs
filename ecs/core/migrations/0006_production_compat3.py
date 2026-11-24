@@ -1,4 +1,4 @@
-from django.db import models, migrations
+from django.db import migrations
 
 
 def upgrade_celery_tables(apps, schema_editor):

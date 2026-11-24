@@ -1,4 +1,6 @@
-import random, math, time
+import random
+import math
+import time
 
 def order_crossover(perm_a, perm_b): # OX
     n = len(perm_a)
@@ -8,7 +10,7 @@ def order_crossover(perm_a, perm_b): # OX
     if i == j:
         return perm_a, perm_b
     a_slice, b_slice = perm_a[i:j], perm_b[i:j]
-    a_compl, b_compl = tuple(x for x in perm_b if not x in a_slice), tuple(x for x in perm_a if not x in b_slice)
+    a_compl, b_compl = tuple(x for x in perm_b if x not in a_slice), tuple(x for x in perm_a if x not in b_slice)
     return a_compl[:i] + a_slice + a_compl[i:], b_compl[:i] + b_slice + b_compl[i:]
 
 def swap_mutation(perm):

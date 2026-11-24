@@ -1,4 +1,7 @@
-import datetime, timeit, csv, os
+import datetime
+import timeit
+import csv
+import os
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -11,7 +14,6 @@ from ecs.utils.genetic_sort import GeneticSorter, inversion_mutation, swap_mutat
 class Command(BaseCommand):
     @transaction.atomic
     def handle(self, **options):
-        submission_data = {}
 
         meeting = Meeting.objects.create(start=datetime.datetime(2010, 4, 13, 10), title="Test")
         entries_by_title = {}

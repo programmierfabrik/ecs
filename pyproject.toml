@@ -46,3 +46,7 @@ extend-exclude = ["static", "locale"]
 [tool.ruff.lint]
 # Baseline ruleset; tighten rule by rule (see the /ruff-adopt skill).
 select = ["E4", "E7", "E9", "F"]
+
+[tool.ruff.lint.per-file-ignores]
+# Package __init__ modules re-export their public names.
+"__init__.py" = ["F401"]

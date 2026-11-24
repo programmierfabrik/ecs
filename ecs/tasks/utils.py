@@ -60,7 +60,7 @@ class TaskManagementData(object):
         self.save = self.POST.get('task_management-save')
 
         task = self.task
-        if not task is None:
+        if task is not None:
             self.supporting_documents = SupportingDocument.objects.filter(tasks__name=task.task_type.name).order_by('-pk')
             
             if request.method == 'POST' and (self.submit or self.save):
@@ -82,7 +82,7 @@ class TaskManagementData(object):
                 self._task_pk = None
 
         task = None
-        if not self._task_pk is None:
+        if self._task_pk is not None:
             # refetch
             task = Task.objects.get(pk=self._task_pk)
         return task

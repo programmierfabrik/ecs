@@ -138,7 +138,7 @@ def categorization_tasks(request, submission_pk=None):
 
     if 'start' in request.GET:
         uid = request.GET['start']
-        if not uid in uids:
+        if uid not in uids:
             raise Http404()
 
         task_type = TaskType.objects.get(workflow_node__uid=uid,

@@ -263,7 +263,6 @@ class CTISPartIIOverviewFilterForm(forms.Form):
 
     @staticmethod
     def reviewers():
-        from ecs.tasks.models import Task
         return (User.objects
             .filter(tasks__task_type__workflow_node__uid='part_ii_timeline',
                 tasks__deleted_at=None)

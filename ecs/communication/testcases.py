@@ -17,10 +17,10 @@ class MailTestCase(EcsTestCase):
     @staticmethod
     def get_mimeparts(msg, maintype="*", subtype="*"):
         ''' Takes a email.Message Object and returns a list of matching maintype, subtype message parts as list [[mimetype, rawdata]*] '''
-        l = []
+        parts = []
         for part in typed_subpart_iterator(msg, maintype, subtype):
-            l.append([part.get_content_type(), part.get_payload(decode=True)])
-        return l
+            parts.append([part.get_content_type(), part.get_payload(decode=True)])
+        return parts
 
     def queue_get(self, idx):
         return getattr(mail, 'outbox', [])[idx].message()

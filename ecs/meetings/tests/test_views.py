@@ -129,7 +129,7 @@ class ViewTestCase(EcsTestCase):
         
         meeting = Meeting.objects.create(start=self.start, started=self.start)
         e0 = meeting.add_entry(duration=timedelta(seconds=42))
-        e1 = meeting.add_entry(duration=timedelta(seconds=42*42))
+        meeting.add_entry(duration=timedelta(seconds=42*42))
         
         quickjump_url = reverse('meetings.meeting_assistant_quickjump', kwargs={'meeting_pk': meeting.pk})
         response = self.client.get(quickjump_url + '?q=')

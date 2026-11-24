@@ -33,7 +33,7 @@ class DocumentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        instance = getattr(self, 'instance', None)
+        getattr(self, 'instance', None)
         if self.data:
             prefix_update_id = "%s-%s" % (self.prefix, 'update_id') if self.prefix else 'update_id'
             if prefix_update_id in self.data and self.data[prefix_update_id]:
@@ -121,7 +121,7 @@ class DocumentForm(forms.ModelForm):
         # sanitization
         try:
             f = decrypt_pdf(pdf)
-        except:
+        except Exception:
             raise ValidationError(
                 _('The PDF-File seems to broken. For more Information click on the question mark in the sidebar.'))
 

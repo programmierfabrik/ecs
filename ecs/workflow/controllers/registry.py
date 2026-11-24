@@ -33,6 +33,7 @@ class ControllerRegistry(object):
         return cls(node, workflow)
                 
     def bind_edge(self, edge, workflow):
+        from ecs.workflow.controllers.edges import EdgeController  # edges imports this module
         return EdgeController(edge, workflow)
         
     def bind_guard(self, edge, workflow):

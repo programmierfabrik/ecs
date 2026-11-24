@@ -29,7 +29,7 @@ class Command(BaseCommand):
         bootstrap_funcs = {}
         for app in settings.INSTALLED_APPS:
             try:
-                app_path = import_module(app).__path__
+                import_module(app).__path__
             except AttributeError:
                 continue
             if find_spec("%s.bootstrap" % app) is None:

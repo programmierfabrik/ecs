@@ -8,7 +8,7 @@ from django.utils.translation import gettext as _
 
 from ecs.utils.viewutils import redirect_to_next_url
 from ecs.core.models import Submission
-from ecs.communication.models import Thread, Message
+from ecs.communication.models import Thread
 from ecs.communication.forms import SendMessageForm, ReplyDelegateForm
 from ecs.communication.forms import ThreadListFilterForm
 from ecs.communication.utils import send_message

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import migrations, models
+from django.db import migrations
 from django.http import QueryDict
 
 
 def commit_categorizations(apps, schema_editor):
     Checklist= apps.get_model('checklists', 'Checklist')
-    ChecklistBlueprint = apps.get_model('checklists', 'ChecklistBlueprint')
+    apps.get_model('checklists', 'ChecklistBlueprint')
     DocStash = apps.get_model('docstash', 'DocStash')
     Task = apps.get_model('tasks', 'Task')
 

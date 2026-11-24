@@ -1,7 +1,5 @@
-from django.conf import settings
 # from celery import task
 
-from ecs.utils.testcases import EcsTestCase
 
 # @task()
 # def basic_test():

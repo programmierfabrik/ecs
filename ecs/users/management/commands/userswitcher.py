@@ -42,7 +42,7 @@ class Command(BaseCommand):
             (group.user_set.add if activate else group.user_set.remove)(user)
 
         def _toggle_set(name, users, activate):
-            if not activate is None:
+            if activate is not None:
                 if verbosity >= 1:
                     print(('+' if activate else '-') + name)
                 for user in users:

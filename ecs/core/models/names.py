@@ -51,7 +51,7 @@ class NameField(object):
         )
 
         for fname, fcls, fkwargs in flist:
-            fkwargs['blank'] = not fname in self.required
+            fkwargs['blank'] = fname not in self.required
             fcls(**fkwargs).contribute_to_class(cls, '{0}_{1}'.format(name, fname))
 
         setattr(cls, name, self)

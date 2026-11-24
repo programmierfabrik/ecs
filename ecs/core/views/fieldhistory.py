@@ -54,7 +54,7 @@ def field_history(request, model_name=None, pk=None):
         # Skip duplicate entries.
         if (last_change and
             last_change.revision.user == change.revision.user and
-            all(len(d) == 1 and d[0][0] == 0 for l,d in diffs)):
+            all(len(d) == 1 and d[0][0] == 0 for _l, d in diffs)):
             continue
 
         html_diffs = []

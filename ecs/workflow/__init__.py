@@ -43,8 +43,8 @@ def _post_save(sender, **kwargs):
 
 
 # HACK
-import warnings
-from contextlib import contextmanager
+import warnings  # noqa: E402
+from contextlib import contextmanager  # noqa: E402
 
 @contextmanager
 def autostart_disabled():

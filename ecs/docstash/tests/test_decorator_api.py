@@ -23,7 +23,7 @@ class DecoratorApiTest(LoginTestCase):
         self.assertEqual(response.status_code, 302)
         key_url = response['Location']
         self.assertTrue(base_url in key_url)
-        key = key_url.rsplit('/', 2)[-2]
+        key_url.rsplit('/', 2)[-2]
 
         # post test data
         response = self.client.post(key_url, test_post_data)

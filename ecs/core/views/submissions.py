@@ -39,7 +39,7 @@ from ecs.core.forms import (
     SubmissionFormForm, MeasureFormSet, RoutineMeasureFormSet,
     NonTestedUsedDrugFormSet, ParticipatingCenterNonSubjectFormSet,
     ForeignParticipatingCenterFormSet, InvestigatorFormSet,
-    InvestigatorEmployeeFormSet, TemporaryAuthorizationForm,
+    TemporaryAuthorizationForm,
     SubmissionImportForm, SubmissionFilterForm, SubmissionMinimalFilterForm,
     PresenterChangeForm, SusarPresenterChangeForm,
     AssignedSubmissionsFilterForm, AllSubmissionsFilterForm,
@@ -423,7 +423,7 @@ def readonly_submission_form(request, submission_form_pk=None, submission_form=N
     presenting_users = current_form.get_presenting_parties().get_users().union([submission.presenter, submission.susar_presenter])
     # A CTIS study's presenter is just the internal user who imported it, not
     # a party to the study, so nobody is hidden these tabs on that account.
-    if ctr_submission_form or not request.user in presenting_users:
+    if ctr_submission_form or request.user not in presenting_users:
         vote = submission.current_pending_vote or submission.current_published_vote
         context['vote_review_form'] = VoteReviewForm(instance=vote, readonly=True)
         context['categorization_form'] = CategorizationForm(instance=submission, readonly=True)
@@ -1039,7 +1039,7 @@ def show_checklist_review(request, submission_form_pk=None, ctr_submission_form_
 
 @user_flag_required('is_internal')
 def drop_checklist_review(request, submission_form_pk=None, checklist_pk=None):
-    submission_form = get_object_or_404(SubmissionForm, pk=submission_form_pk)
+    get_object_or_404(SubmissionForm, pk=submission_form_pk)
     checklist = get_object_or_404(Checklist, pk=checklist_pk, status__in=('new', 'review_fail'))
 
     checklist.status = 'dropped'
@@ -1229,7 +1229,7 @@ def submission_preview_download(request, shasum=None):
 
     try:
         file = open(cache_file, 'rb')
-    except Exception as e:
+    except Exception:
         return HttpResponseServerError()
 
     response = FileResponse(file, content_type='application/pdf')
@@ -1252,7 +1252,7 @@ def create_submission_form(request):
     protocol_uploaded = documents.filter(doctype__identifier='protocol').exists()
 
     if request.method == 'GET' and not request.docstash.POST and \
-        not 'initial' in request.docstash:
+        'initial' not in request.docstash:
 
         protocol_uploaded = True    # don't show error on completely new
                                     # submission
@@ -1319,7 +1319,7 @@ def create_submission_form(request):
         investigator_formset = formsets.get('investigator')
         investigators_valid = investigator_formset.is_valid()
 
-        valid = form.is_valid() and formsets_valid and investigators_valid and protocol_uploaded and not 'upload' in request.POST
+        valid = form.is_valid() and formsets_valid and investigators_valid and protocol_uploaded and 'upload' not in request.POST
         if valid and submission and not notification_type and \
             not submission.current_submission_form.allows_resubmission(request.user):
 

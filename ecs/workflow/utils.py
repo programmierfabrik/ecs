@@ -2,7 +2,6 @@ from ecs.workflow.models import NODE_TYPE_CATEGORY_SUBGRAPH, NODE_TYPE_CATEGORY_
 from ecs.tasks.models import TaskType
 
 def make_dot(g, prefix='', embed_subgraphs=True, subgraph_id=''):
-    common_edge_attrs = {'fontname': 'Helvetica', 'style': 'bold'}
     common_node_attrs = {'fontname': 'Helvetica'}
     
     statements = [

@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import migrations, models
+from django.db import migrations
 
 
 def combine_initial_review(apps, schema_editor):
     Group = apps.get_model('auth', 'Group')
     NodeType = apps.get_model('workflow', 'NodeType')
     Node = apps.get_model('workflow', 'Node')
-    TaskType = apps.get_model('tasks', 'TaskType')
+    apps.get_model('tasks', 'TaskType')
 
     try:
         thesis_review_group = Group.objects.get(name='EC-Thesis Review Group')

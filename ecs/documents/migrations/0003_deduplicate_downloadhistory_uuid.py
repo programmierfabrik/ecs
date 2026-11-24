@@ -1,5 +1,4 @@
 from django.db import migrations, models
-from django.db.models.expressions import RawSQL
 import uuid
 
 

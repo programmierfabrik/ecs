@@ -30,7 +30,7 @@ def download_vote(request, vote_pk=None):
 @user_group_required("EC-Signing")
 @task_required
 def vote_sign(request, vote_pk=None):
-    vote = get_object_or_404(Vote, pk=vote_pk)
+    get_object_or_404(Vote, pk=vote_pk)
     return init_batch_sign(request, request.related_tasks[0], get_vote_sign_data)
 
 def get_vote_sign_data(request, task):
@@ -78,7 +78,7 @@ def vote_pdf_english_debug(request, vote_pk=None):
 
 @user_flag_required('is_internal')
 def request_english_vote(request, vote_pk=None):
-    vote = get_object_or_404(Vote, pk=vote_pk)
+    get_object_or_404(Vote, pk=vote_pk)
     generate_preview_vote.delay(vote_pk, request.user.id)
     
     return HttpResponse(status=204)
@@ -98,7 +98,7 @@ def download_english_vote(request, shasum=None):
 
     try:
         file = open(cache_file, 'rb')
-    except Exception as e:
+    except Exception:
         return HttpResponseServerError()
 
     response = FileResponse(file, content_type='application/pdf')

@@ -218,7 +218,7 @@ class UserDetailsForm(forms.ModelForm):
         groups = self.cleaned_data.get('groups', [])
         if self.instance.pk is not None:
             amcs = self.instance.assigned_medical_categories.filter(meeting__ended=None)
-            if amcs.exists() and not 'Specialist' in [g.name for g in groups]:
+            if amcs.exists() and 'Specialist' not in [g.name for g in groups]:
                 raise forms.ValidationError(
                     _('{} is a specialist in following meetings: {}').format(
                         self.instance, ', '.join(amc.meeting.title for amc in amcs))
@@ -267,7 +267,7 @@ class InvitationForm(UserDetailsForm):
     def clean_email(self):
         email = self.cleaned_data['email']
         try:
-            user = get_user(email)
+            get_user(email)
             raise forms.ValidationError(_('There is already a user with this email address.'))
         except User.DoesNotExist:
             pass

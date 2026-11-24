@@ -15,7 +15,7 @@ def administration(request):
     paginator = Paginator(medical_category_list, limit, allow_empty_first_page=True)
     try:
         medical_category = paginator.page(page)
-    except:
+    except Exception:
         medical_category = paginator.page(1)
 
     return render(request, 'medical_category/base.html', {

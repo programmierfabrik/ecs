@@ -368,7 +368,7 @@ class FlowTest(WorkflowTestCase):
         '''Tests if disabling the workflow autostart behaves as expected.'''
         
         g = Graph.objects.create(name='TestGraph', content_type=self.foo_ct, auto_start=True)
-        n_a = g.create_node(decl.A, start=True)
+        g.create_node(decl.A, start=True)
         
         obj = Foo.objects.create()
         self.assertActivitiesEqual(obj, [decl.A])

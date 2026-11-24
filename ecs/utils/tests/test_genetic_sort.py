@@ -15,7 +15,8 @@ class GeneticSorterTest(TestCase):
         
         N = 20
         data = random.sample(range(N), N)
-        f = lambda p: sum(1.0 / (abs(i-x) + 1) for i, x in enumerate(p))
+        def f(p):
+            return sum(1.0 / (abs(i-x) + 1) for i, x in enumerate(p))
         sorter = GeneticSorter(data, evaluation_func=f, population_size=50, mutations={swap_mutation: 0.02})
         # This is fragile: if we don't find a solution in 10^6 generations this test will fail.
         for i in range(1000):

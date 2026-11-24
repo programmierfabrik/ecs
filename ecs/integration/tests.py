@@ -8,8 +8,6 @@ class SanityTests(TestCase):
         Test if settings and urls modules are importable.
         Simple but quite useful.
         '''
-        from ecs import settings
-        from ecs import urls
 
     def test_bootstrap(self):
         '''

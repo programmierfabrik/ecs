@@ -676,7 +676,7 @@ class SubmissionForm(models.Model):
     def __str__(self):
         try:
             return "%s: %s" % (self.submission.get_ec_number_display(), self.german_project_title or self.project_title)
-        except:
+        except Exception:
             return super().__str__()
     
     def get_filename_slice(self):

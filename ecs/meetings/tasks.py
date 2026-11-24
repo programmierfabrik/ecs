@@ -1,4 +1,6 @@
-import random, itertools, math
+import random
+import itertools
+import math
 import io
 import zipfile
 

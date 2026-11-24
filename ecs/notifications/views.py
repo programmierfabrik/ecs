@@ -289,7 +289,7 @@ def notification_answer_pdf_debug(request, notification_pk=None):
 @user_group_required("EC-Signing")
 @task_required
 def notification_answer_sign(request, notification_pk=None):
-    answer = get_object_or_404(NotificationAnswer, notification__pk=notification_pk)
+    get_object_or_404(NotificationAnswer, notification__pk=notification_pk)
     return init_batch_sign(request, request.related_tasks[0], get_notification_answer_sign_data)
 
 def get_notification_answer_sign_data(request, task):

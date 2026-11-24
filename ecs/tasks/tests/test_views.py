@@ -16,7 +16,8 @@ class ViewTestCase(LoginTestCase, WorkflowTestCase):
         
         task_type = TaskType.objects.create(name="TestTask")
         task = Task.objects.create(task_type=task_type)
-        refetch = lambda: Task.objects.get(pk=task.pk)
+        def refetch():
+            return Task.objects.get(pk=task.pk)
 
         # show the task list
         response = self.client.get(reverse('tasks.my_tasks'))

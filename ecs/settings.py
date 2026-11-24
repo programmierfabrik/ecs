@@ -1,6 +1,8 @@
 # Django settings for ecs project.
 
-import os, sys, platform, logging
+import os
+import sys
+import logging
 from datetime import timedelta
 from urllib.parse import urlparse
 
@@ -106,7 +108,8 @@ USE_I18N = True
 
 # workaround: we can not use the django gettext function in the settings
 # because it depends on the settings.
-gettext = lambda s: s
+def gettext(s):
+    return s
 
 # path where django searches for *.mo files
 LOCALE_PATHS = (os.path.join(PROJECT_DIR, "locale"),)
@@ -428,7 +431,7 @@ COMPRESS_ENABLED = True
 
 # overwrite settings from local_settings.py if it exists
 try:
-    from ecs.local_settings import *
+    from ecs.local_settings import *  # noqa: F403
 except ImportError:
     pass
 
@@ -470,7 +473,7 @@ if not ECS_USERSWITCHER_ENABLED:
     MIDDLEWARE = tuple(item for item in MIDDLEWARE if item != 'ecs.userswitcher.middleware.UserSwitcherMiddleware')
 
 # django rosetta activation
-if 'ECS_WORDING' in locals() and ECS_WORDING:
+if 'ECS_WORDING' in locals() and ECS_WORDING:  # noqa: F405
     INSTALLED_APPS +=('rosetta',) # anywhere
 
 # hack some settings for test and runserver

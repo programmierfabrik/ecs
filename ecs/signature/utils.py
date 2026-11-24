@@ -1,7 +1,9 @@
 import random
 from functools import wraps
 from datetime import timedelta
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.parse
+import urllib.error
 
 from django.conf import settings
 from django.core.cache import cache
@@ -22,7 +24,7 @@ class SigningData(dict):
     @classmethod
     def retrieve(cls, id):
         data = cache.get(id)
-        if not data is None:
+        if data is not None:
             data = cls(data)
             data.id = id
         return data

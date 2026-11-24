@@ -1,4 +1,5 @@
-import logging, traceback
+import logging
+import traceback
 
 import httpagentparser
 from django.conf import settings
@@ -89,10 +90,10 @@ class UA(object):
         for rule_fn in BROWSER_FILTER_RULES:
             try:
                 support = rule_fn(ua_str)
-                if not support is None:
+                if support is not None:
                     self.support = support
                     break
-            except Exception as e:
+            except Exception:
                 logger.info('UA string parsing threw an exception\nUA string: %s\n%s', ua_str, traceback.format_exc())
 
     is_supported = property(lambda self: self.support == BROWSER_SUPPORT_OK)

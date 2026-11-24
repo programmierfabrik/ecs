@@ -40,7 +40,7 @@ def administration(request):
     page = filterform.cleaned_data['page']
     try:
         supporting_documents = paginator.page(page)
-    except:
+    except Exception:
         supporting_documents = paginator.page(1)
 
     return render(request, 'supporting_documents/administration.html', {

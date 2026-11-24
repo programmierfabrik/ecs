@@ -122,7 +122,7 @@ class ModelDiffNode(DiffNode):
             if self.identity:
                 result = '<span class="title">%s</span>\n%s' % (self.identity, result)
             return result
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
 
 
@@ -264,7 +264,6 @@ class CountryListDiffNode(DiffNode):
 
 class InlineDocumentDiffNode(DiffNode):
     def html(self, plain=False):
-        result = []
         new = self.new
         if isinstance(new, collections.abc.Callable):
             new = new(plainhtml=plain)

@@ -19,8 +19,8 @@ class NodeControllerOptions(object):
         if update_lock:
             lock_signal, lock_kwarg = update_lock
             def _unlock(sender, **kwargs):
-                kwargs[unlock_kwarg].workflow.unlock()
-            unlock_signal.connect(_unlock, sender=self.model)
+                kwargs[lock_kwarg].workflow.unlock()
+            lock_signal.connect(_unlock, sender=self.model)
 
     def copy(self, meta, cls):
         new = NodeControllerOptions(None, cls)

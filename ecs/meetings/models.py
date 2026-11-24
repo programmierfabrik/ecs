@@ -594,7 +594,7 @@ class Meeting(models.Model):
     @active_top.setter
     def active_top(self, top):
         key = 'meetings:{}:assistant:top_pk'.format(self.pk)
-        old_val = cache.get(key)
+        cache.get(key)
         cache.set(key, top.pk, 60*60*24*2)
 
     @property
@@ -696,7 +696,7 @@ class TimetableEntry(models.Model):
 
     @property
     def agenda_index(self):
-        if not self.timetable_index is None:
+        if self.timetable_index is not None:
             return self.timetable_index
         else:
             index = self.meeting.timetable_entries.aggregate(models.Max('timetable_index'))['timetable_index__max']
@@ -831,13 +831,13 @@ class TimetableEntry(models.Model):
 
     @property
     def visible(self):
-        return not self.timetable_index is None
+        return self.timetable_index is not None
 
     def refresh(self, **kwargs):
         visible = kwargs.pop('visible', True)
         previous_index = self.timetable_index
         to_visible = visible and previous_index is None
-        from_visible = not visible and not previous_index is None
+        from_visible = not visible and previous_index is not None
         if to_visible:
             last_index = self.meeting.timetable_entries.aggregate(models.Max('timetable_index'))['timetable_index__max']
             if last_index is None:
@@ -862,7 +862,7 @@ class TimetableEntry(models.Model):
 @receiver(post_delete, sender=TimetableEntry)
 def _timetable_entry_post_delete(sender, **kwargs):
     entry = kwargs['instance']
-    if not entry.timetable_index is None:
+    if entry.timetable_index is not None:
         changed = entry.meeting.timetable_entries.filter(
             timetable_index__gt=entry.index)
         changed.update(timetable_index=F('timetable_index') - 1)

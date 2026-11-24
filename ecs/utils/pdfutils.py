@@ -9,7 +9,6 @@ pdfutils
 - creation (from html)
 
 '''
-import datetime
 import io
 import logging
 import mimetypes

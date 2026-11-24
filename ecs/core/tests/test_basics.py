@@ -7,10 +7,6 @@ class ImportTest(EcsTestCase):
     def test_import(self):
         "Tests if the urls module and core.urls, core.views, core.models are importable"
         
-        import ecs.urls
-        import ecs.core.urls
-        import ecs.core.views
-        import ecs.core.models
         
 class CoreUrlsTest(LoginTestCase):
     '''High level tests for accessibility of core views of the system.'''

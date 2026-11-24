@@ -159,7 +159,7 @@ SUBMISSION_FORM_TABS = (
 def get_all_used_submission_form_fields():
     all_fields = []
     for tab in SUBMISSION_FORM_TABS:
-        for _, fields in tab.fieldsets:
+        for _label, fields in tab.fieldsets:
             all_fields += fields
     return all_fields
 

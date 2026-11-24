@@ -1,4 +1,4 @@
-from django.db import models, migrations
+from django.db import migrations
 
 
 def set_timetable_unique_index_deferrable(apps, schema_editor):
