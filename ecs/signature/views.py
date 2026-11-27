@@ -35,6 +35,8 @@ from ecs.signature.utils import SigningData, with_sign_data, get_pdfas_url
 
 logger = logging.getLogger(__name__)
 
+MAX_BULK_SIGN = 10
+
 
 def _get_tasks(user):
     return Task.objects.for_user(user).filter(closed_at=None, assigned_to=user)
@@ -100,6 +102,8 @@ def batch_sign(request, index=0):
         'has_prev': index > 0,
         'has_next': index < len(tasks) - 1,
         'selected_count': len(selected_tasks),
+        'max_selected': MAX_BULK_SIGN,
+        'selection_full': len(selected_tasks) >= MAX_BULK_SIGN,
     })
 
 
@@ -130,7 +134,8 @@ def batch_action(request, action=None):
         return redirect('dashboard')
     elif action == 'select':
         task_pk = tasks[index]
-        if task_pk not in request.sign_session.get('selected_tasks', []):
+        selected = request.sign_session.get('selected_tasks', [])
+        if task_pk not in selected and len(selected) < MAX_BULK_SIGN:
             request.sign_session.setdefault('selected_tasks', []).append(task_pk)
             request.sign_session.store()
     elif action == 'deselect':
@@ -154,7 +159,7 @@ def batch_action(request, action=None):
 @with_sign_data(data=False, session=True)
 def bulk_sign(request):
     selected_tasks = request.sign_session.get('selected_tasks', [])
-    if not selected_tasks:
+    if not selected_tasks or len(selected_tasks) > MAX_BULK_SIGN:
         return redirect('signature.batch_sign', sign_session_id=request.sign_session.id)
 
     if request.user.email.startswith('signing_mock') or settings.PDFAS_SERVICE == 'mock:':

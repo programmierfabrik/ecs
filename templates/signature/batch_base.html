@@ -38,6 +38,12 @@
             <hr>
 
             <div class="mb-3">
+                {% if selection_full and not is_selected %}
+                    <button class="btn btn-outline-success btn-block mb-2" disabled>
+                        <i class="fa fa-square-o"></i> {% trans "Auswählen" %}
+                    </button>
+                    <p class="text-muted small">{% blocktrans %}Es können höchstens {{ max_selected }} Unterlagen gleichzeitig signiert werden.{% endblocktrans %}</p>
+                {% else %}
                 <a class="btn btn-block mb-2 {% if is_selected %}btn-success{% else %}btn-outline-success{% endif %}" href="{% url 'signature.batch_action' pdf_id=pdf_id action=is_selected|yesno:"deselect,select" %}?index={{ index }}">
                     {% if is_selected %}
                         <i class="fa fa-check-square-o"></i> {% trans "Ausgewählt" %}
@@ -45,6 +51,7 @@
                         <i class="fa fa-square-o"></i> {% trans "Auswählen" %}
                     {% endif %}
                 </a>
+                {% endif %}
 
                 {% if is_selected %}
                     <button class="btn btn-secondary btn-block mb-2" disabled>
@@ -66,7 +73,7 @@
             <hr>
 
             <a class="btn btn-primary btn-block mb-3 {% if selected_count == 0 %}disabled{% endif %}" href="{% url 'signature.bulk_sign' sign_session_id=request.sign_session.id %}">
-                {% trans 'Ausgewählte signieren' %} ({{ selected_count }})
+                {% trans 'Ausgewählte signieren' %} ({{ selected_count }}/{{ max_selected }})
             </a>
 
             {% url 'signature.batch_action' pdf_id=pdf_id action="cancel" as cancel_url %}
